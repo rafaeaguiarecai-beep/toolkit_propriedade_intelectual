@@ -1,43 +1,33 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PI Thinking — Toolkit de Propriedade Intelectual</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="bg-visuals" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-</div>
-
+<!-- ============ HEADER / NAVEGAÇÃO ============ -->
 <header class="header" id="header">
     <div class="header__container">
         <a href="index.html" class="header__logo">
-            <span class="header__logo-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-            </span>
+            <span class="header__logo-icon">💡</span>
             <div>
                 <strong class="header__logo-title">PI Thinking</strong>
-                <span class="header__logo-sub">Toolkit de Inovação</span>
+                <span class="header__logo-sub">Toolkit de Propriedade Intelectual</span>
             </div>
         </a>
-        
         <nav class="nav" id="nav">
             <ul class="nav__list">
                 <li><a href="#home" class="nav__link nav__link--active">Início</a></li>
                 <li><a href="#sobre" class="nav__link">Sobre</a></li>
-                <li><a href="#guia" class="nav__link">Guia</a></li>
+                <li><a href="#guia" class="nav__link">Guia do Facilitador</a></li>
                 <li class="nav__dropdown">
                     <a href="#fases" class="nav__link nav__link--dropdown">Fases ▾</a>
-                    <ul class="nav__dropdown-menu glass-card">
+                    <ul class="nav__dropdown-menu">
                         <li><a href="#fase1" class="dropdown__link dropdown__link--fase1">① Descobrir</a></li>
                         <li><a href="#fase2" class="dropdown__link dropdown__link--fase2">② Diagnosticar</a></li>
                         <li><a href="#fase3" class="dropdown__link dropdown__link--fase3">③ Estrategar</a></li>
@@ -45,37 +35,31 @@
                         <li><a href="#fase5" class="dropdown__link dropdown__link--fase5">⑤ Evoluir</a></li>
                     </ul>
                 </li>
-                <li><a href="#ferramentas" class="nav__link">Ferramentas</a></li>
+                <li><a href="#ferramentas" class="nav__link">Ferramentas Digitais</a></li>
                 <li><a href="#downloads" class="nav__link">Downloads</a></li>
                 <li><a href="#referencias" class="nav__link">Referências</a></li>
             </ul>
         </nav>
-
-        <div class="header__actions">
-            <button id="themeToggle" class="theme-btn" aria-label="Alternar tema">
-                <span class="sun-icon">☀️</span>
-                <span class="moon-icon">🌙</span>
-            </button>
-            <button class="header__toggle" id="navToggle" aria-label="Abrir menu">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
+        <button class="header__toggle" id="navToggle" aria-label="Abrir menu">
+            <span></span><span></span><span></span>
+        </button>
     </div>
 </header>
 
+<!-- ============ HERO ============ -->
 <section class="hero" id="home">
     <div class="hero__container">
         <div class="hero__content">
             <span class="hero__badge">PROFNIT • UFRR • INOVARR</span>
             <h1 class="hero__title">PI <span class="hero__title--accent">Thinking</span></h1>
             <p class="hero__subtitle">Propriedade Intelectual com Mindset Ágil e Experimental</p>
-            <p class="hero__desc">Um toolkit completo para facilitar oficinas sobre PI. Combine Design Thinking e Lean Inception para transformar conhecimento em experiência prática.</p>
+            <p class="hero__desc">Um toolkit completo para facilitar oficinas, cursos e capacitações sobre Propriedade Intelectual. Combine Design Thinking e Lean Inception para transformar PI em experiência prática, colaborativa e envolvente.</p>
             <div class="hero__buttons">
                 <a href="#fases" class="btn btn--primary">Explorar Ferramentas</a>
                 <a href="#guia" class="btn btn--outline">Guia do Facilitador</a>
             </div>
         </div>
-        <div class="hero__logos glass-card">
+        <div class="hero__logos">
             <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="UFRR" class="hero__logo-img" loading="lazy">
             <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="INOVARR" class="hero__logo-img hero__logo-img--wide" loading="lazy">
             <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="PROFNIT" class="hero__logo-img" loading="lazy">
@@ -83,118 +67,129 @@
     </div>
 </section>
 
+<!-- ============ SOBRE ============ -->
 <section class="section" id="sobre">
     <div class="container">
         <span class="section__overline">Sobre o Toolkit</span>
         <h2 class="section__title">O que é o PI Thinking?</h2>
         <div class="about__grid">
             <div class="about__text">
-                <p>O <strong>PI Thinking</strong> é um toolkit educacional que reúne ferramentas de <strong>Design Thinking</strong>, <strong>Lean Inception</strong> e <strong>gamificação</strong> aplicadas à <strong>Propriedade Intelectual</strong>.</p>
-                <p>Desenvolvido no PROFNIT/UFRR, o toolkit está alinhado à <strong>Estratégia Nacional de PI (ENPI 2021-2030)</strong> e às práticas internacionais da OMPI.</p>
-                <p>Destinado a facilitadores, permite conduzir oficinas de PI de forma autônoma com materiais prontos: canvas, cartas e ferramentas digitais.</p>
+                <p>O <strong>PI Thinking</strong> é um toolkit educacional que reúne ferramentas de <strong>Design Thinking</strong>, <strong>Lean Inception</strong> e <strong>gamificação</strong> aplicadas ao universo da <strong>Propriedade Intelectual</strong>. Foi desenvolvido no âmbito do Mestrado Profissional em Propriedade Intelectual e Transferência de Tecnologia para a Inovação (<strong>PROFNIT</strong>), ponto focal da Universidade Federal de Roraima (<strong>UFRR</strong>).</p>
+                <p>O toolkit está alinhado ao <strong>Eixo 2 da Estratégia Nacional de Propriedade Intelectual (ENPI 2021-2030)</strong> — Disseminação, Formação e Capacitação em PI — e às melhores práticas internacionais da OMPI (IP4Youth&Teachers, INCIPE).</p>
+                <p>Destinado a <strong>professores, técnicos, pesquisadores e estudantes</strong>, o PI Thinking permite que qualquer facilitador conduza oficinas de PI de forma autônoma, utilizando materiais prontos para uso (canvas, cartas, jogos e ferramentas digitais interativas).</p>
             </div>
             <div class="about__cards">
-                <div class="stat-card glass-card">
+                <div class="stat-card">
                     <span class="stat-card__number">16</span>
                     <span class="stat-card__label">Ferramentas</span>
                 </div>
-                <div class="stat-card glass-card">
+                <div class="stat-card">
                     <span class="stat-card__number">5</span>
                     <span class="stat-card__label">Fases</span>
                 </div>
-                <div class="stat-card glass-card">
+                <div class="stat-card">
                     <span class="stat-card__number">4h</span>
-                    <span class="stat-card__label">Oficina</span>
+                    <span class="stat-card__label">Oficina Completa</span>
                 </div>
-                <div class="stat-card glass-card">
+                <div class="stat-card">
                     <span class="stat-card__number">4</span>
-                    <span class="stat-card__label">App Digitais</span>
+                    <span class="stat-card__label">Ferramentas Digitais</span>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ============ GUIA DO FACILITADOR ============ -->
 <section class="section section--alt" id="guia">
     <div class="container">
         <span class="section__overline">Roteiro da Oficina</span>
         <h2 class="section__title">Guia do Facilitador — Oficina de 4 horas</h2>
-        <p class="section__intro">Roteiro para condução autônoma. Cada bloco indica a ferramenta e o tempo estimado.</p>
+        <p class="section__intro">Este roteiro permite que qualquer facilitador conduza a oficina de Propriedade Intelectual de forma autônoma. Cada bloco indica a ferramenta utilizada, o tempo estimado e os materiais necessários.</p>
 
         <div class="timeline">
             <div class="timeline__item timeline__item--fase1">
                 <div class="timeline__time">0:00 — 0:15</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Abertura e Quiz Diagnóstico</h3>
-                    <p><strong>Ferramenta:</strong> Quiz Diagnóstico (Kahoot/Google Forms) — Mapeamento de conhecimento prévio.</p>
+                    <p><strong>Ferramenta:</strong> Quiz Diagnóstico (Kahoot/Google Forms) — 10 perguntas sobre PI para mapear o conhecimento prévio dos participantes. O facilitador projeta as perguntas e os participantes respondem pelo celular.</p>
+                    <p><strong>Materiais:</strong> Projetor, celulares dos participantes, link do quiz.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--fase1">
                 <div class="timeline__time">0:15 — 0:45</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Imersão: Personas + Canvas de Diagnóstico</h3>
-                    <p><strong>Ferramenta:</strong> Cartas Personas + Canvas de Diagnóstico. Análise de perfis e contextos reais.</p>
+                    <p><strong>Ferramenta:</strong> Cartas Personas da PI + Canvas de Diagnóstico de PI. Cada equipe recebe uma persona (ex.: "O Pesquisador que Publica Antes de Patentear") e preenche o Canvas de Diagnóstico com base nesse perfil.</p>
+                    <p><strong>Materiais:</strong> Cartas Personas impressas, Canvas A2 impresso, post-its, canetas.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--fase2">
                 <div class="timeline__time">0:45 — 1:15</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Descoberta: Árvore de Decisão + Linha do Tempo</h3>
-                    <p><strong>Ferramenta:</strong> Árvore de Decisão Interativa + Pôster da Linha do Tempo. Classificação e marcos legais.</p>
+                    <p><strong>Ferramenta:</strong> Árvore de Decisão Interativa (projetada ou acessada pelo celular) + Pôster da Linha do Tempo da PI no Brasil. As equipes usam a Árvore para classificar a criação da persona e localizam o marco legal na Linha do Tempo.</p>
+                    <p><strong>Materiais:</strong> Projetor ou celulares, pôster da Linha do Tempo.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--intervalo">
                 <div class="timeline__time">1:15 — 1:30</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>☕ Intervalo</h3>
-                    <p>Coffee break e networking.</p>
+                    <p>Coffee break. Aproveite para expor a Linha do Tempo e os Canvas preenchidos na parede.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--fase3">
                 <div class="timeline__time">1:30 — 2:00</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Desmistificação: É/Não É + Baralho de Dilemas</h3>
-                    <p><strong>Ferramenta:</strong> Canvas "É / Não É" + Baralho de Dilemas. Debate sobre mitos e situações éticas.</p>
+                    <p><strong>Ferramenta:</strong> Canvas "É / Não É / Faz / Não Faz" da PI + Baralho de Dilemas. Cada equipe preenche o canvas para o tipo de proteção identificado e depois sorteia 3 cartas do Baralho de Dilemas, debatendo as situações.</p>
+                    <p><strong>Materiais:</strong> Canvas A2, Baralho de Dilemas (40 cartas), post-its.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--fase3">
                 <div class="timeline__time">2:00 — 2:45</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Estratégia: Canvas MVP de PI + Dados da Inovação</h3>
-                    <p><strong>Ferramenta:</strong> Canvas MVP + Dados da Inovação. Definição do plano de proteção e provocações.</p>
+                    <p><strong>Ferramenta:</strong> Canvas MVP de PI + Dados da Inovação. As equipes preenchem o Canvas MVP definindo visão, personas, jornada, tipo de proteção, custos e métricas. Os Dados da Inovação são lançados para gerar provocações aleatórias.</p>
+                    <p><strong>Materiais:</strong> Canvas MVP A2, Dados da Inovação (2 dados customizados), post-its, canetas.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--fase4">
                 <div class="timeline__time">2:45 — 3:15</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Jogo: PI Quest (versão 30 min)</h3>
-                    <p><strong>Ferramenta:</strong> Jogo de tabuleiro PI Quest. Desafios narrativos e gamificados.</p>
+                    <p><strong>Ferramenta:</strong> Jogo de tabuleiro PI Quest — versão rápida. As equipes avançam pelo tabuleiro respondendo perguntas sobre PI, enfrentando desafios e usando cartas especiais (Coringa, Dado da Inovação).</p>
+                    <p><strong>Materiais:</strong> Tabuleiro PI Quest, cartas de desafio, dados, peões.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--fase5">
                 <div class="timeline__time">3:15 — 3:45</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Pitch: Apresentação do Plano de PI</h3>
-                    <p><strong>Ferramenta:</strong> Pitch de PI. Apresentação das equipes e feedback coletivo.</p>
+                    <p><strong>Ferramenta:</strong> Pitch de PI. Cada equipe apresenta seu plano de proteção em 5 minutos, utilizando o Canvas MVP como apoio visual. As demais equipes avaliam com post-its de feedback.</p>
+                    <p><strong>Materiais:</strong> Canvas MVP preenchido, timer, post-its coloridos para feedback.</p>
                 </div>
             </div>
             <div class="timeline__item timeline__item--fase5">
                 <div class="timeline__time">3:45 — 4:00</div>
-                <div class="timeline__content glass-card">
+                <div class="timeline__content">
                     <h3>Encerramento: Quiz Final + Certificados</h3>
-                    <p><strong>Ferramenta:</strong> Quiz Final. Comparação de evolução e entrega de certificados.</p>
+                    <p><strong>Ferramenta:</strong> Quiz Final (Kahoot/Google Forms) — 10 perguntas para medir evolução. Comparação com resultado do Quiz Diagnóstico. Entrega de certificados digitais via QR Code.</p>
+                    <p><strong>Materiais:</strong> Projetor, celulares, QR Code dos certificados.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ============ BARRA DE FASES ============ -->
 <section class="section" id="fases">
     <div class="container">
         <span class="section__overline">Metodologia</span>
         <h2 class="section__title">As 5 Fases do PI Thinking</h2>
-        <p class="section__intro">Clique em uma fase para explorar as ferramentas específicas.</p>
-        <div class="phases-bar glass-card">
+        <p class="section__intro">Cada fase possui ferramentas específicas para conduzir o participante da curiosidade inicial até a ação concreta de proteção. Clique em uma fase para explorar suas ferramentas.</p>
+        <div class="phases-bar">
             <a href="#fase1" class="phase-pill phase-pill--1">① Descobrir</a>
             <a href="#fase2" class="phase-pill phase-pill--2">② Diagnosticar</a>
             <a href="#fase3" class="phase-pill phase-pill--3">③ Estrategar</a>
@@ -204,6 +199,7 @@
     </div>
 </section>
 
+<!-- ============ FASE 1 — DESCOBRIR ============ -->
 <section class="section section--fase section--fase1" id="fase1">
     <div class="container">
         <div class="fase-header fase-header--1">
@@ -212,275 +208,559 @@
             <p class="fase-header__question">"O que os participantes já sabem sobre PI?"</p>
         </div>
         <div class="tools-grid">
-            <article class="tool-card glass-card" id="tool-quiz-diagnostico">
+
+            <!-- FERRAMENTA 1.1 — Quiz Diagnóstico -->
+            <article class="tool-card" id="tool-quiz-diagnostico">
                 <div class="tool-card__phase-tag tool-card__phase-tag--1">Fase 1 • Descobrir</div>
                 <h3 class="tool-card__title">📋 Quiz Diagnóstico</h3>
-                <div class="tool-card__meta"><span>⏱ 15 min</span><span>👥 Ilimitado</span><span>📱 Digital</span></div>
+                <div class="tool-card__meta">
+                    <span>⏱ 15 min</span>
+                    <span>👥 Ilimitado</span>
+                    <span>📱 Digital</span>
+                </div>
                 <div class="tool-card__body">
                     <h4>Objetivo</h4>
-                    <p>Mapear conhecimento prévio e identificar lacunas. Serve como baseline para o Quiz Final.</p>
+                    <p>Mapear o conhecimento prévio dos participantes sobre Propriedade Intelectual, identificando lacunas e concepções equivocadas que serão trabalhadas ao longo da oficina. O resultado serve como baseline para comparação com o Quiz Final.</p>
+
+                    <h4>Quando usar</h4>
+                    <p>Sempre como primeira atividade da oficina ou do curso. Pode ser reaplicado em versões diferentes a cada módulo do curso de 20h.</p>
+
+                    <h4>Materiais</h4>
+                    <p>Projetor, celulares dos participantes (ou computadores), link do quiz (Kahoot, Google Forms ou Quizizz). Opcional: impressão em papel para locais sem internet.</p>
+
                     <h4>Passo a passo</h4>
                     <ol>
-                        <li>Projete o link/QR Code.</li>
-                        <li>Os participantes respondem individualmente.</li>
-                        <li>Exiba ranking e explicações breves.</li>
+                        <li>Projete o QR Code ou link do quiz na tela.</li>
+                        <li>Os participantes acessam pelo celular e respondem individualmente as 10 questões de múltipla escolha.</li>
+                        <li>Ao final, exiba o ranking e as respostas corretas com breves explicações.</li>
+                        <li>Registre a pontuação média da turma para comparação posterior.</li>
                     </ol>
+
+                    <h4>Pontos de atenção</h4>
+                    <p>Evite perguntas demasiadamente técnicas neste momento — o objetivo é engajar, não intimidar. Use linguagem acessível e inclua situações do cotidiano (ex.: "Quando você posta uma foto no Instagram, ela tem proteção autoral?").</p>
                 </div>
             </article>
 
-            <article class="tool-card glass-card" id="tool-cartas-personas">
+            <!-- FERRAMENTA 1.2 — Cartas Personas da PI -->
+            <article class="tool-card" id="tool-cartas-personas">
                 <div class="tool-card__phase-tag tool-card__phase-tag--1">Fase 1 • Descobrir</div>
                 <h3 class="tool-card__title">🃏 Cartas Personas da PI</h3>
-                <div class="tool-card__meta"><span>⏱ 30 min</span><span>👥 3-6 / grupo</span><span>🖨 Impresso</span></div>
+                <div class="tool-card__meta">
+                    <span>⏱ 30 min</span>
+                    <span>👥 3-6 por grupo</span>
+                    <span>🖨 Impresso</span>
+                </div>
                 <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Apresentar perfis típicos do ecossistema de PI de forma lúdica e empática, permitindo que os participantes se identifiquem com situações reais e discutam caminhos de proteção adequados a cada contexto.</p>
+
+                    <h4>Quando usar</h4>
+                    <p>Logo após o Quiz Diagnóstico, como atividade de imersão. Cada grupo recebe uma persona diferente que será seu "caso de estudo" durante toda a oficina.</p>
+
                     <h4>As 10 Personas</h4>
                     <ol>
-                        <li><strong>Dr. Apressado</strong> (Pesquisador), <strong>Ana Inventora</strong> (Estudante), <strong>Chef Raízes</strong> (Culinária), <strong>Kayla Maker</strong> (Designer), <strong>Prof. Código</strong> (Software).</li>
-                        <li><strong>Dona Floresta</strong> (Agro), <strong>Startup Roraima</strong> (App), <strong>Mestre Pajé</strong> (Tradicional), <strong>Lia Artista</strong> (Artes), <strong>Tec Industrial</strong> (Design).</li>
+                        <li><strong>Dr. Apressado</strong> — O pesquisador que publica artigo antes de depositar a patente.</li>
+                        <li><strong>Ana Inventora</strong> — Estudante de engenharia que criou um dispositivo com aplicação industrial.</li>
+                        <li><strong>Chef Raízes</strong> — Cozinheiro que desenvolve receitas com ingredientes amazônicos e quer proteger a marca.</li>
+                        <li><strong>Kayla Maker</strong> — Designer que cria joias inspiradas em grafismos indígenas.</li>
+                        <li><strong>Prof. Código</strong> — Docente que desenvolveu um software educacional na universidade.</li>
+                        <li><strong>Dona Floresta</strong> — Agricultora familiar que cultiva variedade adaptada ao lavrado roraimense.</li>
+                        <li><strong>Startup Roraima</strong> — Equipe de 3 jovens que criou um app de turismo ecológico.</li>
+                        <li><strong>Mestre Pajé</strong> — Líder comunitário indígena com conhecimento tradicional sobre plantas medicinais.</li>
+                        <li><strong>Lia Artista</strong> — Ilustradora que publica seus trabalhos em redes sociais.</li>
+                        <li><strong>Tec Industrial</strong> — Técnico que redesenhou a embalagem de um produto regional.</li>
                     </ol>
+
+                    <h4>Materiais</h4>
+                    <p>10 cartas impressas em papel triplex 300g (tamanho A5), cada uma com ilustração, nome da persona, história resumida, tipo de criação e pergunta-provocação.</p>
+
+                    <h4>Passo a passo</h4>
+                    <ol>
+                        <li>Distribua uma carta por grupo (3 a 6 pessoas).</li>
+                        <li>O grupo lê a história da persona e discute: "Que tipo de proteção essa pessoa precisa?"</li>
+                        <li>Sem dar a resposta, o facilitador orienta os grupos a levarem essa pergunta para as próximas atividades.</li>
+                    </ol>
+
+                    <h4>Pontos de atenção</h4>
+                    <p>As personas foram contextualizadas para a realidade amazônica e roraimense. Se a oficina for aplicada em outra região, adapte os nomes e contextos mantendo a diversidade de tipos de PI.</p>
                 </div>
             </article>
 
-            <article class="tool-card glass-card" id="tool-mapa-empatia">
+            <!-- FERRAMENTA 1.3 — Mapa de Empatia do Inventor -->
+            <article class="tool-card" id="tool-mapa-empatia">
                 <div class="tool-card__phase-tag tool-card__phase-tag--1">Fase 1 • Descobrir</div>
-                <h3 class="tool-card__title">🗺️ Mapa de Empatia</h3>
-                <div class="tool-card__meta"><span>⏱ 20 min</span><span>👥 3-6 / grupo</span><span>🖨 A2</span></div>
+                <h3 class="tool-card__title">🗺️ Mapa de Empatia do Inventor</h3>
+                <div class="tool-card__meta">
+                    <span>⏱ 20 min</span>
+                    <span>👥 3-6 por grupo</span>
+                    <span>🖨 Impresso (A2)</span>
+                </div>
                 <div class="tool-card__body">
                     <h4>Objetivo</h4>
-                    <p>Entender o que o inventor sente, vê e ouve sobre a proteção da sua criação.</p>
+                    <p>Aprofundar a compreensão sobre a persona recebida, mapeando o que ela pensa, sente, vê, ouve, fala e faz em relação à proteção de sua criação. Gera empatia e prepara o grupo para diagnosticar a necessidade de PI.</p>
+
+                    <h4>Quando usar</h4>
+                    <p>Complemento das Cartas Personas. Pode ser usada como atividade independente em turmas que já conhecem o conceito de PI e precisam aprofundar a análise de um caso específico.</p>
+
+                    <h4>Campos do Canvas (adaptado para PI)</h4>
+                    <p>O canvas é dividido em 7 áreas: "O que pensa e sente sobre sua criação?"; "O que vê no ambiente (concorrentes, mercado, universidade)?"; "O que ouve (colegas, mídia, orientador)?"; "O que fala e faz em relação à proteção?"; "Quais suas dores (medo de cópia, burocracia, custo)?"; "Quais seus ganhos esperados (reconhecimento, royalties, impacto social)?"; e ao centro, o nome e a imagem da persona.</p>
+
+                    <h4>Materiais</h4>
+                    <p>Canvas A2 impresso ou desenhado em flip-chart, post-its coloridos, canetas.</p>
+
+                    <h4>Passo a passo</h4>
+                    <ol>
+                        <li>Cole o canvas na parede ou na mesa do grupo.</li>
+                        <li>Cada participante escreve em post-its suas percepções para cada área, baseando-se na persona recebida.</li>
+                        <li>O grupo discute, agrupa os post-its por afinidade e elege os 3 principais insights.</li>
+                        <li>Cada grupo apresenta seu mapa em 2 minutos para a turma.</li>
+                    </ol>
+
+                    <h4>Pontos de atenção</h4>
+                    <p>Incentive os participantes a saírem do óbvio. A pergunta "O que essa persona ouve de seus colegas sobre PI?" costuma gerar respostas reveladoras sobre mitos e desinformação.</p>
                 </div>
             </article>
+
         </div>
     </div>
 </section>
 
+<!-- ============ FASE 2 — DIAGNOSTICAR ============ -->
 <section class="section section--fase section--fase2" id="fase2">
     <div class="container">
         <div class="fase-header fase-header--2">
             <span class="fase-header__number">FASE 2</span>
             <h2 class="fase-header__title">Diagnosticar</h2>
-            <p class="fase-header__question">"Qual tipo de proteção se aplica?"</p>
+            <p class="fase-header__question">"Qual tipo de proteção se aplica a cada criação?"</p>
         </div>
         <div class="tools-grid">
-            <article class="tool-card glass-card" id="tool-canvas-diagnostico">
+
+            <!-- FERRAMENTA 2.1 — Canvas de Diagnóstico de PI -->
+            <article class="tool-card" id="tool-canvas-diagnostico">
                 <div class="tool-card__phase-tag tool-card__phase-tag--2">Fase 2 • Diagnosticar</div>
-                <h3 class="tool-card__title">📐 Canvas de Diagnóstico</h3>
-                <div class="tool-card__meta"><span>⏱ 25 min</span><span>👥 3-6 / grupo</span><span>🖨 A2</span></div>
+                <h3 class="tool-card__title">📐 Canvas de Diagnóstico de PI</h3>
+                <div class="tool-card__meta">
+                    <span>⏱ 25 min</span>
+                    <span>👥 3-6 por grupo</span>
+                    <span>🖨 Impresso (A2)</span>
+                </div>
                 <div class="tool-card__body">
-                    <h4>Campos</h4>
-                    <p>Descrição, Problema, Publicação, Maturidade (TRL) e Tipo de Proteção Sugerido.</p>
+                    <h4>Objetivo</h4>
+                    <p>Sistematizar as informações sobre a criação da persona para identificar o tipo de proteção de PI mais adequado. Funciona como uma "ficha médica" da inovação.</p>
+
+                    <h4>Campos do Canvas</h4>
+                    <p>8 campos: ① Descrição da Criação; ② Problema que Resolve; ③ Já foi publicada/divulgada?; ④ Quem participou da criação?; ⑤ Fonte de financiamento; ⑥ Nível de Maturidade Tecnológica (TRL 1-9); ⑦ Tipo de Proteção Sugerido; ⑧ Próximos Passos.</p>
+
+                    <h4>Materiais</h4>
+                    <p>Canvas A2 impresso, post-its, canetas, Carta Persona da atividade anterior.</p>
+
+                    <h4>Passo a passo</h4>
+                    <ol>
+                        <li>Distribua o canvas e relembre a persona do grupo.</li>
+                        <li>O grupo preenche os campos ① a ⑥ com base nas informações da persona.</li>
+                        <li>O campo ⑦ (Tipo de Proteção) é preenchido após usar a Árvore de Decisão (próxima ferramenta).</li>
+                        <li>O campo ⑧ (Próximos Passos) é preenchido na Fase 3, com o Canvas MVP.</li>
+                    </ol>
+
+                    <h4>Pontos de atenção</h4>
+                    <p>O campo "Já foi publicada?" é crítico — muitos pesquisadores perdem a novidade ao publicar antes de depositar. Use o caso do "Dr. Apressado" como exemplo didático.</p>
                 </div>
             </article>
 
-            <article class="tool-card glass-card" id="tool-linha-tempo">
+            <!-- FERRAMENTA 2.2 — Linha do Tempo da PI -->
+            <article class="tool-card" id="tool-linha-tempo">
                 <div class="tool-card__phase-tag tool-card__phase-tag--2">Fase 2 • Diagnosticar</div>
-                <h3 class="tool-card__title">📅 Linha do Tempo</h3>
-                <div class="tool-card__meta"><span>⏱ 15 min</span><span>👥 Turma</span><span>🖨 Banner</span></div>
+                <h3 class="tool-card__title">📅 Linha do Tempo da PI no Brasil</h3>
+                <div class="tool-card__meta">
+                    <span>⏱ 15 min</span>
+                    <span>👥 Toda a turma</span>
+                    <span>🖨 Pôster (banner)</span>
+                </div>
                 <div class="tool-card__body">
-                    <h4>Marcos</h4>
-                    <p>De Paris (1883) ao Marco Legal de CT&I e ENPI (2021). Contextualização histórica do sistema brasileiro.</p>
+                    <h4>Objetivo</h4>
+                    <p>Contextualizar historicamente o sistema de PI brasileiro, mostrando que a proteção da criatividade é uma construção coletiva que evolui ao longo do tempo. O banner funciona como material de consulta permanente durante toda a oficina.</p>
+
+                    <h4>Marcos da Linha do Tempo</h4>
+                    <ol>
+                        <li><strong>1883</strong> — Convenção de Paris (primeiro tratado internacional de PI; Brasil é signatário original).</li>
+                        <li><strong>1886</strong> — Convenção de Berna (proteção de obras literárias e artísticas).</li>
+                        <li><strong>1970</strong> — Criação do INPI (Instituto Nacional da Propriedade Industrial).</li>
+                        <li><strong>1994</strong> — Acordo TRIPS (OMC) — padronização global dos direitos de PI.</li>
+                        <li><strong>1996</strong> — Lei 9.279 (Lei de Propriedade Industrial — patentes, marcas, DI, IG).</li>
+                        <li><strong>1997</strong> — Lei 9.456 (Proteção de Cultivares).</li>
+                        <li><strong>1998</strong> — Lei 9.609 (Proteção de Software) e Lei 9.610 (Direitos Autorais).</li>
+                        <li><strong>2004</strong> — Lei 10.973 (Lei de Inovação — cria obrigatoriedade dos NITs).</li>
+                        <li><strong>2015</strong> — Lei 13.123 (Marco da Biodiversidade — patrimônio genético e CTA).</li>
+                        <li><strong>2016</strong> — Lei 13.243 (Marco Legal de CT&I — moderniza relação ICT-empresa).</li>
+                        <li><strong>2021</strong> — Decreto 10.886 (ENPI 2021-2030 — Estratégia Nacional de PI).</li>
+                        <li><strong>2021</strong> — STF declara inconstitucional o § único do art. 40 da Lei 9.279 (ADI 5529).</li>
+                    </ol>
+
+                    <h4>Materiais</h4>
+                    <p>Banner impresso (3m × 0,9m) ou projeção digital. QR Codes ao lado de cada marco para link direto à legislação completa.</p>
+
+                    <h4>Passo a passo</h4>
+                    <ol>
+                        <li>Exponha o banner na parede da sala antes do início da oficina.</li>
+                        <li>O facilitador faz uma "caminhada guiada" de 10 minutos, destacando os marcos mais relevantes.</li>
+                        <li>Cada grupo identifica qual legislação se aplica à persona do seu caso.</li>
+                        <li>O banner permanece exposto como referência durante toda a oficina.</li>
+                    </ol>
                 </div>
             </article>
 
-            <article class="tool-card glass-card" id="tool-arvore-decisao">
+            <!-- FERRAMENTA 2.3 — Árvore de Decisão -->
+            <article class="tool-card" id="tool-arvore-decisao">
                 <div class="tool-card__phase-tag tool-card__phase-tag--2">Fase 2 • Diagnosticar</div>
-                <h3 class="tool-card__title">🌳 Árvore de Decisão</h3>
-                <div class="tool-card__meta"><span>⏱ 10 min</span><span>👥 Individual</span><span>💻 Digital</span></div>
+                <h3 class="tool-card__title">🌳 Árvore de Decisão Interativa</h3>
+                <div class="tool-card__meta">
+                    <span>⏱ 10 min</span>
+                    <span>👥 Individual ou grupo</span>
+                    <span>💻 Digital (JS)</span>
+                </div>
                 <div class="tool-card__body">
-                    <h4>Wizard Interativo</h4>
-                    <p>Sequência de perguntas para identificar automaticamente se é Patente, Marca, Software ou Direito Autoral.</p>
+                    <h4>Objetivo</h4>
+                    <p>Guiar o participante por uma sequência de 6 perguntas simples (sim/não) que identificam automaticamente o tipo de proteção de PI mais adequado para sua criação. É a ferramenta-chave para desmistificar a complexidade do sistema de PI.</p>
+
+                    <h4>Fluxo de Perguntas</h4>
+                    <ol>
+                        <li>Sua criação é uma invenção ou um produto/processo com aplicação industrial? → Se SIM: vá para 2. Se NÃO: vá para 4.</li>
+                        <li>A criação é nova e envolve atividade inventiva (não óbvia)? → Se SIM: <strong>Patente de Invenção</strong>. Se NÃO: vá para 3.</li>
+                        <li>A criação é uma melhoria funcional de objeto de uso prático? → Se SIM: <strong>Modelo de Utilidade</strong>. Se NÃO: reavalie em 4.</li>
+                        <li>A criação é uma obra artística, literária, musical ou científica? → Se SIM: <strong>Direito Autoral</strong>. Se NÃO: vá para 5.</li>
+                        <li>A criação é um programa de computador? → Se SIM: <strong>Registro de Software</strong>. Se NÃO: vá para 6.</li>
+                        <li>Ramificações finais: Marca (sinal distintivo), Desenho Industrial (forma ornamental), Indicação Geográfica (origem territorial), Cultivar (variedade vegetal), Topografia de CI (circuito integrado), ou Patrimônio Genético/CTA (conhecimento tradicional).</li>
+                    </ol>
+
+                    <h4>Resultado</h4>
+                    <p>Para cada tipo de proteção, a ferramenta exibe: definição, legislação aplicável, vigência, órgão responsável, link para mais informações e próximos passos.</p>
+
+                    <h4>Acesso</h4>
+                    <p>Disponível na seção <a href="#ferramentas">Ferramentas Digitais</a> deste site. Funciona em qualquer navegador, sem necessidade de instalação.</p>
                 </div>
             </article>
+
         </div>
     </div>
 </section>
 
+<!-- ============ FASE 3 — ESTRATEGAR ============ -->
 <section class="section section--fase section--fase3" id="fase3">
     <div class="container">
         <div class="fase-header fase-header--3">
             <span class="fase-header__number">FASE 3</span>
             <h2 class="fase-header__title">Estrategar</h2>
-            <p class="fase-header__question">"Como planejar a proteção estrategicamente?"</p>
+            <p class="fase-header__question">"Como planejar a proteção de forma estratégica?"</p>
         </div>
         <div class="tools-grid">
-            <article class="tool-card glass-card" id="tool-e-nao-e">
+
+            <article class="tool-card" id="tool-e-nao-e">
                 <div class="tool-card__phase-tag tool-card__phase-tag--3">Fase 3 • Estrategar</div>
-                <h3 class="tool-card__title">⚖️ Canvas É / Não É</h3>
-                <div class="tool-card__meta"><span>⏱ 20 min</span><span>👥 3-6 / grupo</span><span>🖨 A2</span></div>
+                <h3 class="tool-card__title">⚖️ Canvas É / Não É / Faz / Não Faz</h3>
+                <div class="tool-card__meta">
+                    <span>⏱ 20 min</span>
+                    <span>👥 3-6 por grupo</span>
+                    <span>🖨 Impresso (A2)</span>
+                </div>
                 <div class="tool-card__body">
-                    <p>Clarifica limites: O que a proteção faz e o que ela NÃO cobre.</p>
+                    <h4>Objetivo</h4>
+                    <p>Clarificar os limites e características de cada tipo de proteção de PI, eliminando mitos e confusões comuns. Adaptado da atividade de Lean Inception de Paulo Caroli.</p>
+
+                    <h4>Como funciona</h4>
+                    <p>O canvas é dividido em 4 quadrantes. Para o tipo de proteção identificado na Árvore de Decisão, o grupo preenche: "É..." (características reais), "Não É..." (o que as pessoas confundem), "Faz..." (o que a proteção garante), "Não Faz..." (o que ela não cobre). Exemplo para Patente de Invenção: É — exclusividade temporária de exploração. Não É — garantia de sucesso comercial. Faz — impede terceiros de fabricar sem autorização. Não Faz — proteger a ideia abstrata (protege a solução técnica concreta).</p>
+
+                    <h4>Materiais</h4>
+                    <p>Canvas A2 com os 4 quadrantes, post-its, canetas.</p>
                 </div>
             </article>
 
-            <article class="tool-card glass-card" id="tool-baralho-dilemas">
+            <article class="tool-card" id="tool-baralho-dilemas">
                 <div class="tool-card__phase-tag tool-card__phase-tag--3">Fase 3 • Estrategar</div>
-                <h3 class="tool-card__title">🎴 Baralho de Dilemas</h3>
-                <div class="tool-card__meta"><span>⏱ 25 min</span><span>👥 3-6 / grupo</span><span>🖨 Cartas</span></div>
+                <h3 class="tool-card__title">🎴 Baralho de Dilemas de PI</h3>
+                <div class="tool-card__meta">
+                    <span>⏱ 25 min</span>
+                    <span>👥 3-6 por grupo</span>
+                    <span>🖨 Impresso (40 cartas)</span>
+                </div>
                 <div class="tool-card__body">
-                    <p>40 cartas com situações éticas e jurídicas reais para debate crítico.</p>
+                    <h4>Objetivo</h4>
+                    <p>Provocar discussões sobre situações éticas, estratégicas e jurídicas reais envolvendo PI. Desenvolve o pensamento crítico e a capacidade de tomada de decisão em cenários ambíguos.</p>
+
+                    <h4>Estrutura de cada carta</h4>
+                    <p>Frente: situação-problema em 3 linhas + ícone do tipo de PI. Verso: fundamentação legal resumida + desfecho real (quando aplicável).</p>
+
+                    <h4>Exemplos de dilemas</h4>
+                    <p>Carta 1: "Um professor orientou um aluno que desenvolveu uma invenção. O professor é cotitular da patente?" · Carta 2: "Uma pesquisadora publicou artigo descrevendo seu invento em um congresso. Ela ainda pode patenteá-lo?" · Carta 3: "Uma startup de Roraima quer registrar uma marca similar a outra já existente em São Paulo, mas em classe diferente. Pode?" · Carta 4: "Um chef registrou receita como direito autoral. Outro chef pode fazer uma receita parecida?"</p>
+
+                    <h4>Materiais</h4>
+                    <p>40 cartas em papel triplex 300g (tamanho 9×6 cm), caixa de armazenamento.</p>
                 </div>
             </article>
 
-            <article class="tool-card glass-card" id="tool-canvas-mvp">
+            <article class="tool-card" id="tool-canvas-mvp">
                 <div class="tool-card__phase-tag tool-card__phase-tag--3">Fase 3 • Estrategar</div>
                 <h3 class="tool-card__title">🚀 Canvas MVP de PI</h3>
-                <div class="tool-card__meta"><span>⏱ 30 min</span><span>👥 3-6 / grupo</span><span>🖨 A2</span></div>
+                <div class="tool-card__meta">
+                    <span>⏱ 30 min</span>
+                    <span>👥 3-6 por grupo</span>
+                    <span>🖨 Impresso (A2)</span>
+                </div>
                 <div class="tool-card__body">
-                    <p>Mínimo Viável de Proteção: Visão, Custos, Métricas e Resultado Esperado.</p>
+                    <h4>Objetivo</h4>
+                    <p>Definir o Mínimo Viável de Proteção — as ações essenciais e imediatas que o criador deve tomar para proteger sua inovação. Inspirado no MVP Canvas de Paulo Caroli, adaptado ao contexto de PI.</p>
+
+                    <h4>Campos do Canvas</h4>
+                    <p>7 campos: ① Visão (o que queremos proteger e por quê); ② Personas (quem se beneficia); ③ Jornada (etapas até a proteção); ④ Tipo de Proteção (patente, marca, etc.); ⑤ Custos Estimados (taxas INPI, honorários); ⑥ Métricas de Sucesso (depósito realizado, certificado obtido); ⑦ Resultado Esperado (impacto para a universidade/comunidade).</p>
+
+                    <h4>Materiais</h4>
+                    <p>Canvas A2 impresso, post-its, canetas, Calculadora de Vigência (seção Ferramentas Digitais) para estimar prazos.</p>
                 </div>
             </article>
+
         </div>
     </div>
 </section>
 
+<!-- ============ FASE 4 — PROTOTIPAR ============ -->
 <section class="section section--fase section--fase4" id="fase4">
     <div class="container">
         <div class="fase-header fase-header--4">
             <span class="fase-header__number">FASE 4</span>
             <h2 class="fase-header__title">Prototipar</h2>
-            <p class="fase-header__question">"Como testar e validar o plano?"</p>
+            <p class="fase-header__question">"Como testar e validar o plano de proteção?"</p>
         </div>
         <div class="tools-grid">
-            <article class="tool-card glass-card">
+
+            <article class="tool-card" id="tool-crazy8s">
+                <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
                 <h3 class="tool-card__title">⚡ Crazy 8s de PI</h3>
-                <div class="tool-card__body"><p>Geração rápida de 8 estratégias de proteção em 8 minutos.</p></div>
+                <div class="tool-card__meta"><span>⏱ 15 min</span><span>👥 Individual</span><span>🖨 Papel A4</span></div>
+                <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Gerar rapidamente 8 ideias diferentes de estratégias de proteção ou formas de agregar valor ao ativo de PI. Cada participante dobra uma folha A4 em 8 partes e tem 1 minuto por quadrante para escrever/desenhar uma ideia.</p>
+                </div>
             </article>
-            <article class="tool-card glass-card">
+
+            <article class="tool-card" id="tool-escape-room">
+                <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
                 <h3 class="tool-card__title">🔐 Escape Room da PI</h3>
-                <div class="tool-card__body"><p>5 desafios encadeados para "escapar" no tempo limite aplicando PI.</p></div>
+                <div class="tool-card__meta"><span>⏱ 45 min</span><span>👥 4-6 por grupo</span><span>🖨 Kit impresso</span></div>
+                <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Atividade gamificada em que as equipes precisam resolver 5 desafios encadeados sobre PI para "escapar" no tempo limite. Cada desafio exige aplicação prática de conhecimentos adquiridos nas fases anteriores: busca de anterioridade, classificação de proteção, cálculo de vigência, análise de marca e montagem de fluxo de depósito.</p>
+                </div>
             </article>
-            <article class="tool-card glass-card">
-                <h3 class="tool-card__title">🎲 PI Quest — Jogo</h3>
-                <div class="tool-card__body"><p>Tabuleiro narrativo: "Jornada do Inventor Amazônico".</p></div>
+
+            <article class="tool-card" id="tool-storyboard">
+                <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
+                <h3 class="tool-card__title">🎬 Storyboard de Proteção</h3>
+                <div class="tool-card__meta"><span>⏱ 20 min</span><span>👥 3-6 por grupo</span><span>🖨 Papel A3</span></div>
+                <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Visualizar em 6 quadros a jornada completa da persona desde a criação até a obtenção do registro/certificado, identificando os pontos de decisão críticos e os atores envolvidos (criador, NIT, INPI, escritório de patentes).</p>
+                </div>
             </article>
+
+            <article class="tool-card" id="tool-pi-quest">
+                <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
+                <h3 class="tool-card__title">🎲 PI Quest — O Jogo</h3>
+                <div class="tool-card__meta"><span>⏱ 30 min</span><span>👥 4-6 por grupo</span><span>🖨 Tabuleiro + Cartas</span></div>
+                <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Jogo de tabuleiro narrativo em que as equipes percorrem a "Jornada do Inventor Amazônico", enfrentando desafios de PI, respondendo perguntas e tomando decisões estratégicas. Inclui cartas de desafio, Carta Coringa e Dados da Inovação com provocações aleatórias.</p>
+                </div>
+            </article>
+
         </div>
     </div>
 </section>
 
+<!-- ============ FASE 5 — EVOLUIR ============ -->
 <section class="section section--fase section--fase5" id="fase5">
     <div class="container">
         <div class="fase-header fase-header--5">
             <span class="fase-header__number">FASE 5</span>
             <h2 class="fase-header__title">Evoluir</h2>
-            <p class="fase-header__question">"Como ampliar a proteção?"</p>
+            <p class="fase-header__question">"Como manter e ampliar a proteção ao longo do tempo?"</p>
         </div>
         <div class="tools-grid">
-            <article class="tool-card glass-card">
+
+            <article class="tool-card" id="tool-sequenciador">
+                <div class="tool-card__phase-tag tool-card__phase-tag--5">Fase 5 • Evoluir</div>
                 <h3 class="tool-card__title">📊 Canvas Sequenciador</h3>
-                <div class="tool-card__body"><p>Priorização de ondas: curto, médio e longo prazo.</p></div>
+                <div class="tool-card__meta"><span>⏱ 20 min</span><span>👥 3-6 por grupo</span><span>🖨 Impresso (A2)</span></div>
+                <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Priorizar e sequenciar as ações de proteção de PI definidas no Canvas MVP, organizando-as em ondas de implementação (curto, médio e longo prazo). Baseado no Sequenciador de Paulo Caroli (Lean Inception).</p>
+                </div>
             </article>
-            <article class="tool-card glass-card">
+
+            <article class="tool-card" id="tool-pitch">
+                <div class="tool-card__phase-tag tool-card__phase-tag--5">Fase 5 • Evoluir</div>
                 <h3 class="tool-card__title">🎤 Pitch de PI</h3>
-                <div class="tool-card__body"><p>Apresentação do plano completo e feedback (Verde/Amarelo/Vermelho).</p></div>
+                <div class="tool-card__meta"><span>⏱ 5 min/grupo</span><span>👥 Toda a turma</span><span>📱 Apresentação oral</span></div>
+                <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Cada equipe apresenta em 5 minutos o plano de proteção completo construído ao longo da oficina: persona, diagnóstico, tipo de proteção, estratégia e cronograma de ação. As demais equipes avaliam com post-its de feedback (verde = ponto forte, amarelo = sugestão, vermelho = risco).</p>
+                </div>
             </article>
-            <article class="tool-card glass-card">
+
+            <article class="tool-card" id="tool-quiz-final">
+                <div class="tool-card__phase-tag tool-card__phase-tag--5">Fase 5 • Evoluir</div>
                 <h3 class="tool-card__title">🏆 Quiz Final</h3>
-                <div class="tool-card__body"><p>Medição da evolução comparada ao início da oficina.</p></div>
+                <div class="tool-card__meta"><span>⏱ 15 min</span><span>👥 Ilimitado</span><span>📱 Digital</span></div>
+                <div class="tool-card__body">
+                    <h4>Objetivo</h4>
+                    <p>Medir a evolução do conhecimento comparando com o Quiz Diagnóstico inicial. As mesmas 10 perguntas (ou versão equivalente) são reaplicadas. O facilitador exibe a comparação: pontuação média antes × depois, identificando os temas que mais evoluíram e os que precisam de reforço.</p>
+                </div>
             </article>
+
         </div>
     </div>
 </section>
 
+<!-- ============ FERRAMENTAS DIGITAIS ============ -->
 <section class="section section--dark" id="ferramentas">
     <div class="container">
         <span class="section__overline section__overline--light">Interatividade</span>
         <h2 class="section__title section__title--light">Ferramentas Digitais</h2>
-        <p class="section__intro section__intro--light">Apps JavaScript que funcionam no navegador.</p>
+        <p class="section__intro section__intro--light">Quatro ferramentas em JavaScript que funcionam diretamente no navegador, sem instalação. Use durante a oficina (projetadas ou no celular) ou como recurso de consulta permanente.</p>
 
         <div class="digital-tools-grid">
-            <div class="digital-tool-card glass-card">
+            <div class="digital-tool-card">
                 <span class="digital-tool-card__icon">🌳</span>
                 <h3>Árvore de Decisão</h3>
-                <p>Wizard de 6 perguntas para identificação de proteção.</p>
+                <p>Wizard de 6 perguntas que identifica automaticamente o tipo de proteção mais adequado para cada criação.</p>
                 <a href="arvore.html" class="btn btn--small">Usar Agora</a>
             </div>
-            <div class="digital-tool-card glass-card">
+            <div class="digital-tool-card">
                 <span class="digital-tool-card__icon">📅</span>
                 <h3>Calculadora de Vigência</h3>
-                <p>Cálculos automáticos de queda em domínio público.</p>
-                <a href="calculadora.html" class="btn btn--small">Calcular</a>
+                <p>Insira o tipo de proteção e a data de depósito — a ferramenta calcula quando cai em domínio público, com alertas visuais.</p>
+                <a href="calculadora.html" class="btn btn--small">Usar Agora</a>
             </div>
-            <div class="digital-tool-card glass-card">
+            <div class="digital-tool-card">
                 <span class="digital-tool-card__icon">📖</span>
                 <h3>Glossário Dinâmico</h3>
-                <p>30+ termos essenciais com definições interativas.</p>
+                <p>30+ termos essenciais de PI com definições que aparecem ao passar o mouse. Integrado a todas as páginas do toolkit.</p>
                 <a href="glossario.html" class="btn btn--small">Consultar</a>
             </div>
-            <div class="digital-tool-card glass-card">
+            <div class="digital-tool-card">
                 <span class="digital-tool-card__icon">🔍</span>
-                <h3>Painel de Busca</h3>
-                <p>Links diretos e tutoriais para busca no INPI e OMPI.</p>
+                <h3>Painel de Busca Guiada</h3>
+                <p>Links diretos + mini-tutoriais para buscar no INPI (patentes, marcas, DI), PatentScope (OMPI) e SNPC (cultivares).</p>
                 <a href="busca.html" class="btn btn--small">Acessar</a>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ============ DOWNLOADS ============ -->
 <section class="section" id="downloads">
     <div class="container">
         <span class="section__overline">Materiais para Impressão</span>
         <h2 class="section__title">Downloads</h2>
+        <p class="section__intro">Todos os materiais do toolkit em PDF, prontos para impressão. Use na oficina presencial ou distribua digitalmente aos participantes.</p>
         <div class="downloads-grid">
-            <div class="download-card glass-card">
+            <div class="download-card">
                 <span class="download-card__icon">📘</span>
                 <h4>Guia do Facilitador</h4>
-                <p>Roteiro completo da oficina de 4h (PDF)</p>
+                <p>Roteiro completo da oficina de 4h (20 páginas, A5)</p>
                 <span class="download-card__status">Em breve</span>
             </div>
-            <div class="download-card glass-card">
-                <span class="download-card__icon">📐</span>
-                <h4>Canvas A2 (Kit)</h4>
-                <p>Diagnóstico, MVP, É/Não É, Sequenciador</p>
-                <span class="download-card__status">Em breve</span>
-            </div>
-            <div class="download-card glass-card">
+            <div class="download-card">
                 <span class="download-card__icon">🃏</span>
-                <h4>Cartas e Baralho</h4>
-                <p>Personas e Dilemas de PI</p>
+                <h4>Cartas Personas (10)</h4>
+                <p>10 cartas A5 com perfis do ecossistema de PI</p>
+                <span class="download-card__status">Em breve</span>
+            </div>
+            <div class="download-card">
+                <span class="download-card__icon">📐</span>
+                <h4>Canvas A2 (6 modelos)</h4>
+                <p>Diagnóstico, Empatia, É/Não É, MVP, Sequenciador, Storyboard</p>
+                <span class="download-card__status">Em breve</span>
+            </div>
+            <div class="download-card">
+                <span class="download-card__icon">🎴</span>
+                <h4>Baralho de Dilemas (40)</h4>
+                <p>40 cartas de situações-problema sobre PI</p>
+                <span class="download-card__status">Em breve</span>
+            </div>
+            <div class="download-card">
+                <span class="download-card__icon">🎲</span>
+                <h4>PI Quest — Jogo</h4>
+                <p>Tabuleiro + cartas de desafio + regras</p>
+                <span class="download-card__status">Em breve</span>
+            </div>
+            <div class="download-card">
+                <span class="download-card__icon">📅</span>
+                <h4>Pôster Linha do Tempo</h4>
+                <p>Banner 3m × 0,9m com marcos da PI no Brasil</p>
                 <span class="download-card__status">Em breve</span>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ============ REFERÊNCIAS ============ -->
 <section class="section section--alt" id="referencias">
     <div class="container">
         <span class="section__overline">Fundamentação</span>
         <h2 class="section__title">Referências e Legislação</h2>
         <div class="ref-grid">
-            <div class="ref-card glass-card">
-                <h4>Legislação</h4>
+            <div class="ref-card">
+                <h4>Legislação Brasileira</h4>
                 <ul>
-                    <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">LPI 9.279/1996</a></li>
-                    <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">Direitos Autorais 9.610/1998</a></li>
-                    <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10886.htm" target="_blank">ENPI 2021-2030</a></li>
+                    <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/1996 — Propriedade Industrial</a></li>
+                    <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank">Lei 9.456/1997 — Proteção de Cultivares</a></li>
+                    <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank">Lei 9.609/1998 — Proteção de Software</a></li>
+                    <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">Lei 9.610/1998 — Direitos Autorais</a></li>
+                    <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">Lei 13.123/2015 — Marco da Biodiversidade</a></li>
+                    <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2016/lei/l13243.htm" target="_blank">Lei 13.243/2016 — Marco Legal de CT&I</a></li>
+                    <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10886.htm" target="_blank">Decreto 10.886/2021 — ENPI 2021-2030</a></li>
                 </ul>
             </div>
-            <div class="ref-card glass-card">
-                <h4>Institucional</h4>
+            <div class="ref-card">
+                <h4>Referências Acadêmicas e Institucionais</h4>
                 <ul>
-                    <li><a href="https://www.gov.br/inpi/pt-br" target="_blank">INPI</a></li>
-                    <li><a href="https://ufrr.br/profnit/" target="_blank">PROFNIT / UFRR</a></li>
+                    <li><a href="https://www.gov.br/propriedade-intelectual/pt-br/assuntos/estrategia-nacional-de-propriedade-intelectual" target="_blank">ENPI — Estratégia Nacional de PI (Portal Gov.br)</a></li>
+                    <li><a href="https://www.gov.br/inpi/pt-br" target="_blank">INPI — Instituto Nacional da Propriedade Industrial</a></li>
+                    <li><a href="https://welc.wipo.int/ipedu" target="_blank">OMPI — IP4Youth & Teachers</a></li>
+                    <li><a href="https://www.wipo.int/en/web/wipo-academy/programs/ip-for-youth-and-teachers" target="_blank">OMPI — Programa INCIPE</a></li>
+                    <li><a href="https://ufrr.br/nit/" target="_blank">NIT / INOVARR — UFRR</a></li>
+                    <li><a href="https://ufrr.br/profnit/" target="_blank">PROFNIT — Ponto Focal UFRR</a></li>
+                    <li>CAROLI, Paulo. <em>Lean Inception: como alinhar pessoas e construir o produto certo.</em> Caroli.org, 2018.</li>
+                    <li><a href="https://sites.tcu.gov.br/design_thinking/" target="_blank">TCU — Toolkit de Design Thinking para Serviços Públicos</a></li>
                 </ul>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ============ FOOTER ============ -->
 <footer class="footer">
     <div class="container">
         <div class="footer__grid">
             <div class="footer__about">
                 <strong class="footer__title">PI Thinking</strong>
-                <p>Produto do PROFNIT — UFRR. Design Ágil para Propriedade Intelectual.</p>
+                <p>Toolkit de Propriedade Intelectual com Mindset Ágil e Experimental. Produto do Mestrado Profissional PROFNIT — Ponto Focal UFRR.</p>
             </div>
-            <div class="footer__logos glass-card">
-                <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="UFRR" class="footer__logo">
-                <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="PROFNIT" class="footer__logo">
+            <div class="footer__logos">
+                <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="UFRR" class="footer__logo" loading="lazy">
+                <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="INOVARR" class="footer__logo footer__logo--wide" loading="lazy">
+                <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="PROFNIT" class="footer__logo" loading="lazy">
+            </div>
+            <div class="footer__links">
+                <strong class="footer__title">Links Rápidos</strong>
+                <a href="#sobre">Sobre</a>
+                <a href="#guia">Guia do Facilitador</a>
+                <a href="#fases">Fases</a>
+                <a href="#ferramentas">Ferramentas Digitais</a>
+                <a href="#downloads">Downloads</a>
             </div>
         </div>
         <div class="footer__bottom">
-            <p>© 2025 PI Thinking — PROFNIT / UFRR. Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.</p>
+            <p>© 2025 PI Thinking — PROFNIT / UFRR. Conteúdo licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a>.</p>
         </div>
     </div>
 </footer>
