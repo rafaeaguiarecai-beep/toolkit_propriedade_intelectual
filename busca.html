@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Busca Guiada — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tool-page { padding-top: 120px; padding-bottom: var(--spacing-2xl); min-height: 100vh; }
+        .tool-page__header { text-align: center; margin-bottom: var(--spacing-xl); }
+        .tool-page__header h1 { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary-dark); margin-bottom: var(--spacing-sm); }
+        .tool-page__header p { color: var(--text-medium); max-width: 600px; margin: 0 auto; }
+
+        .search-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--spacing-lg); max-width: 1000px; margin: 0 auto; }
+        .search-panel {
+            background: var(--bg-white); border: 2px solid var(--border-color); border-radius: var(--radius-xl);
+            padding: var(--spacing-xl); transition: var(--transition); position: relative; overflow: hidden;
+        }
+        .search-panel:hover { transform: translateY(-6px); box-shadow: var(--shadow-xl); border-color: transparent; }
+        .search-panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; }
+        .search-panel--inpi::before { background: linear-gradient(90deg, var(--fase-1), var(--fase-2)); }
+        .search-panel--ompi::before { background: linear-gradient(90deg, var(--fase-3), var(--fase-4)); }
+        .search-panel--snpc::before { background: linear-gradient(90deg, var(--fase-5), var(--fase-1)); }
+        .search-panel--receita::before { background: linear-gradient(90deg, var(--fase-4), var(--fase-3)); }
+
+        .search-panel__icon { font-size: 3rem; margin-bottom: var(--spacing-sm); }
+        .search-panel h2 { font-family: var(--font-heading); font-size: 1.4rem; color: var(--primary-dark); margin-bottom: var(--spacing-xs); }
+        .search-panel__desc { color: var(--text-medium); font-size: 0.95rem; margin-bottom: var(--spacing-md); line-height: 1.6; }
+
+        .search-panel__links { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--spacing-md); }
+        .search-panel__link {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            background: var(--bg-alt); border-radius: var(--radius-md); color: var(--text-dark);
+            font-size: 0.9rem; font-weight: 500; transition: var(--transition); border: 1px solid transparent;
+        }
+        .search-panel__link:hover { background: var(--bg-white); border-color: var(--border-color); transform: translateX(4px); color: var(--primary-light); }
+        .search-panel__link svg { flex-shrink: 0; color: var(--text-light); }
+
+        .mini-tutorial {
+            background: linear-gradient(135deg, rgba(67,97,238,0.05), rgba(247,37,133,0.05));
+            border-radius: var(--radius-md); padding: var(--spacing-md);
+            border-left: 3px solid var(--fase-1);
+        }
+        .mini-tutorial h4 { font-size: 0.85rem; color: var(--primary-dark); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .mini-tutorial ol { padding-left: 18px; }
+        .mini-tutorial li { font-size: 0.85rem; color: var(--text-medium); margin-bottom: 6px; line-height: 1.5; }
+
+        .tip-box {
+            max-width: 800px; margin: var(--spacing-xl) auto 0; background: var(--bg-alt);
+            border-radius: var(--radius-xl); padding: var(--spacing-lg); display: flex; gap: var(--spacing-md); align-items: flex-start;
+        }
+        .tip-box__icon { font-size: 2rem; flex-shrink: 0; }
+        .tip-box__content h3 { font-family: var(--font-heading); color: var(--primary-dark); margin-bottom: 6px; font-size: 1.1rem; }
+        .tip-box__content p { color: var(--text-medium); font-size: 0.95rem; line-height: 1.6; margin-bottom: var(--spacing-sm); }
+        .tip-box__content ul { padding-left: 18px; }
+        .tip-box__content li { color: var(--text-medium); font-size: 0.9rem; margin-bottom: 4px; }
+
+        @media (max-width: 768px) {
+            .tool-page__header h1 { font-size: 1.8rem; }
+            .tip-box { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">💡</span>
+                <div>
+                    <strong class="header__logo-title">PI Thinking</strong>
+                    <span class="header__logo-sub">Painel de Busca Guiada</span>
+                </div>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
+                </ul>
+            </nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="tool-page">
+        <div class="container">
+            <div class="tool-page__header">
+                <h1>🔍 Painel de Busca Guiada</h1>
+                <p>Acesse diretamente as principais bases de dados de PI e siga os mini-tutoriais para realizar buscas eficientes de anterioridade.</p>
+            </div>
+
+            <div class="search-panels">
+                <div class="search-panel search-panel--inpi">
+                    <div class="search-panel__icon">🇧🇷</div>
+                    <h2>INPI — Brasil</h2>
+                    <p class="search-panel__desc">Busque patentes, marcas, desenhos industriais e softwares depositados no Instituto Nacional da Propriedade Industrial.</p>
+                    <div class="search-panel__links">
+                        <a href="https://busca.inpi.gov.br/pePI/servlet/LoginController?action=login" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            BuscaWeb — Patentes e Marcas
+                        </a>
+                        <a href="https://www.gov.br/inpi/pt-br/servicos/desenhos-industriais/busca" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Desenhos Industriais
+                        </a>
+                        <a href="https://www.gov.br/inpi/pt-br/servicos/software/busca" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Registro de Software
+                        </a>
+                    </div>
+                    <div class="mini-tutorial">
+                        <h4>📋 Como buscar no INPI</h4>
+                        <ol>
+                            <li>Acesse o BuscaWeb e clique em "Busca" (não precisa login).</li>
+                            <li>Escolha o tipo de busca: por número do pedido, depositante ou palavra-chave.</li>
+                            <li>Para patentes, use a Classificação IPC para refinar resultados.</li>
+                            <li>Salve o relatório em PDF para análise posterior.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="search-panel search-panel--ompi">
+                    <div class="search-panel__icon">🌍</div>
+                    <h2>OMPI / PatentScope</h2>
+                    <p class="search-panel__desc">Acesse patentes internacionais (PCT) e de mais de 100 países. Ideal para busca de anterioridade global.</p>
+                    <div class="search-panel__links">
+                        <a href="https://www.wipo.int/patentscope/" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            PatentScope — Busca Global
+                        </a>
+                        <a href="https://www3.wipo.int/branddb/" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Global Brand Database
+                        </a>
+                        <a href="https://www.wipo.int/reference/en/countries/br/" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Perfil do Brasil na OMPI
+                        </a>
+                    </div>
+                    <div class="mini-tutorial">
+                        <h4>📋 Como buscar no PatentScope</h4>
+                        <ol>
+                            <li>Use a busca simples para termos gerais ou a avançada para campos específicos.</li>
+                            <li>Utilize operadores booleanos: AND, OR, NOT (ex: "biotecnologia AND vacina").</li>
+                            <li>Filtre por país, data, classificação IPC e idioma.</li>
+                            <li>Ative tradução automática para ler documentos em outros idiomas.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="search-panel search-panel--snpc">
+                    <div class="search-panel__icon">🌱</div>
+                    <h2>SNPC — Cultivares</h2>
+                    <p class="search-panel__desc">Consulte variedades vegetais protegidas no Serviço Nacional de Proteção de Cultivares do MAPA.</p>
+                    <div class="search-panel__links">
+                        <a href="https://www.gov.br/agricultura/pt-br/assuntos/insumos-agropecuarios/assuntos-sementes-e-mudas/protecao-de-cultivares" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Portal SNPC — MAPA
+                        </a>
+                        <a href="https://www.cultivares.gov.br/" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Busca de Cultivares
+                        </a>
+                    </div>
+                    <div class="mini-tutorial">
+                        <h4>📋 Como buscar cultivares</h4>
+                        <ol>
+                            <li>Acesse o portal e clique em "Consulta Pública".</li>
+                            <li>Busque por nome da espécie, cultivar ou titular.</li>
+                            <li>Verifique o status: em exame, protegida ou expirada.</li>
+                            <li>Consulte o prazo de validade da proteção.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="search-panel search-panel--receita">
+                    <div class="search-panel__icon">📚</div>
+                    <h2>Biblioteca Nacional</h2>
+                    <p class="search-panel__desc">Registro de obras literárias, artísticas e softwares no sistema de direitos autorais brasileiro.</p>
+                    <div class="search-panel__links">
+                        <a href="https://www.bn.gov.br/servicos/direitos-autorais" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Direitos Autorais — BN
+                        </a>
+                        <a href="https://sistemas.bn.gov.br/Sofia/" target="_blank" rel="noopener" class="search-panel__link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                            Sistema Sofia — Busca
+                        </a>
+                    </div>
+                    <div class="mini-tutorial">
+                        <h4>📋 Como registrar/buscar obras</h4>
+                        <ol>
+                            <li>O registro de direito autoral é opcional mas fortalece a prova.</li>
+                            <li>Acesse o Sofia para consultar obras já registradas.</li>
+                            <li>Para registro, prepare a obra em formato digital (PDF).</li>
+                            <li>Pague a GRU e acompanhe o status pelo sistema.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <div class="tip-box__icon">💡</div>
+                <div class="tip-box__content">
+                    <h3>Dicas para uma busca eficiente</h3>
+                    <p>A busca de anterioridade é etapa crucial antes de qualquer depósito. Uma busca mal feita pode resultar em:</p>
+                    <ul>
+                        <li>Perda de tempo e recursos com pedidos que serão indeferidos</li>
+                        <li>Risco de infringir direitos de terceiros sem saber</li>
+                        <li>Perda da novidade (se você divulgar antes de buscar)</li>
+                    </ul>
+                    <p><strong>Recomendação:</strong> Sempre consulte o NIT da sua instituição antes de depositar. Na UFRR, contate o <a href="https://ufrr.br/nit/" target="_blank">NIT/INOVARR</a>.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom" style="border:none; padding:0;">
+                <p>© 2025 PI Thinking — PROFNIT / UFRR</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Vigência — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tool-page { padding-top: 120px; padding-bottom: var(--spacing-2xl); min-height: 100vh; }
+        .tool-page__header { text-align: center; margin-bottom: var(--spacing-xl); }
+        .tool-page__header h1 { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary-dark); margin-bottom: var(--spacing-sm); }
+        .tool-page__header p { color: var(--text-medium); max-width: 600px; margin: 0 auto; }
+
+        .calc-container { max-width: 600px; margin: 0 auto; }
+        .calc-form { background: var(--bg-white); border: 2px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--spacing-xl); margin-bottom: var(--spacing-lg); }
+        .calc-form__group { margin-bottom: var(--spacing-md); }
+        .calc-form__group label { display: block; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; font-size: 0.95rem; }
+        .calc-form__group select,
+        .calc-form__group input {
+            width: 100%; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md);
+            font-family: var(--font-primary); font-size: 1rem; color: var(--text-dark); background: var(--bg-white);
+            transition: var(--transition);
+        }
+        .calc-form__group select:focus,
+        .calc-form__group input:focus { border-color: var(--accent); outline: none; }
+        .calc-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--fase-3), var(--fase-1)); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+        .calc-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+        .result-display { background: var(--bg-white); border: 2px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--spacing-xl); text-align: center; display: none; animation: slideUp 0.5s ease; }
+        .result-display.visible { display: block; }
+        .result-display__icon { font-size: 3rem; margin-bottom: var(--spacing-sm); }
+        .result-display__title { font-family: var(--font-heading); font-size: 1.5rem; color: var(--primary-dark); margin-bottom: var(--spacing-xs); }
+        .result-display__date { font-size: 2rem; font-weight: 800; color: var(--fase-3); margin-bottom: var(--spacing-sm); }
+        .result-display__info { color: var(--text-medium); font-size: 0.95rem; line-height: 1.6; }
+        .result-display__alert { margin-top: var(--spacing-md); padding: var(--spacing-sm); border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; }
+        .result-display__alert--safe { background: rgba(6,214,160,0.1); color: var(--fase-5); border: 1px solid var(--fase-5); }
+        .result-display__alert--warning { background: rgba(255,109,0,0.1); color: var(--fase-4); border: 1px solid var(--fase-4); }
+        .result-display__alert--danger { background: rgba(247,37,133,0.1); color: var(--fase-3); border: 1px solid var(--fase-3); }
+
+        .timeline-preview { margin-top: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm); }
+        .timeline-preview__bar { flex: 1; height: 8px; background: var(--bg-alt); border-radius: var(--radius-full); overflow: hidden; }
+        .timeline-preview__fill { height: 100%; background: linear-gradient(90deg, var(--fase-5), var(--fase-4), var(--fase-3)); border-radius: var(--radius-full); width: 0%; transition: width 1s ease; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .tool-page__header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">💡</span>
+                <div>
+                    <strong class="header__logo-title">PI Thinking</strong>
+                    <span class="header__logo-sub">Calculadora de Vigência</span>
+                </div>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
+                </ul>
+            </nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="tool-page">
+        <div class="container">
+            <div class="tool-page__header">
+                <h1>📅 Calculadora de Vigência</h1>
+                <p>Calcule quando sua proteção de Propriedade Intelectual expira e visualize o tempo restante até o domínio público.</p>
+            </div>
+
+            <div class="calc-container">
+                <div class="calc-form">
+                    <div class="calc-form__group">
+                        <label for="tipoProtecao">Tipo de Proteção</label>
+                        <select id="tipoProtecao">
+                            <option value="">Selecione...</option>
+                            <option value="patente">Patente de Invenção</option>
+                            <option value="modelo">Modelo de Utilidade</option>
+                            <option value="marca">Marca</option>
+                            <option value="di">Desenho Industrial</option>
+                            <option value="software">Software</option>
+                            <option value="autoral">Direito Autoral</option>
+                            <option value="cultivar">Cultivar</option>
+                            <option value="ig">Indicação Geográfica</option>
+                        </select>
+                    </div>
+                    <div class="calc-form__group">
+                        <label for="dataDeposito">Data de Depósito ou Criação</label>
+                        <input type="date" id="dataDeposito">
+                    </div>
+                    <button class="calc-btn" onclick="calcularVigencia()">Calcular Vigência</button>
+                </div>
+
+                <div class="result-display" id="resultDisplay">
+                    <div class="result-display__icon" id="resultIcon">📊</div>
+                    <div class="result-display__title" id="resultTitle">Resultado</div>
+                    <div class="result-display__date" id="resultDate">--/--/----</div>
+                    <div class="result-display__info" id="resultInfo"></div>
+                    <div class="timeline-preview">
+                        <span style="font-size:0.8rem; color:var(--text-light)">Depósito</span>
+                        <div class="timeline-preview__bar">
+                            <div class="timeline-preview__fill" id="timelineFill"></div>
+                        </div>
+                        <span style="font-size:0.8rem; color:var(--text-light)">Expiração</span>
+                    </div>
+                    <div class="result-display__alert" id="resultAlert"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom" style="border:none; padding:0;">
+                <p>© 2025 PI Thinking — PROFNIT / UFRR</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    function calcularVigencia() {
+        const tipo = document.getElementById('tipoProtecao').value;
+        const dataInput = document.getElementById('dataDeposito').value;
+        const resultDisplay = document.getElementById('resultDisplay');
+
+        if (!tipo || !dataInput) {
+            alert('Por favor, preencha todos os campos.');
+            return;
+        }
+
+        const data = new Date(dataInput);
+        const hoje = new Date();
+        let anos = 0;
+        let icon = '📊';
+        let title = '';
+        let info = '';
+
+        switch(tipo) {
+            case 'patente': anos = 20; icon = '🔬'; title = 'Patente de Invenção'; info = 'Vigência de 20 anos a contar da data de depósito. Não prorrogável.'; break;
+            case 'modelo': anos = 15; icon = '🔧'; title = 'Modelo de Utilidade'; info = 'Vigência de 15 anos a contar da data de depósito. Não prorrogável.'; break;
+            case 'marca': anos = 10; icon = '™️'; title = 'Marca'; info = 'Vigência de 10 anos, prorrogável indefinidamente a cada período.'; break;
+            case 'di': anos = 10; icon = '🎨'; title = 'Desenho Industrial'; info = 'Vigência inicial de 10 anos, prorrogável por até 3 períodos de 5 anos (total máximo: 25 anos).'; break;
+            case 'software': anos = 50; icon = '💻'; title = 'Software'; info = 'Vigência de 50 anos a contar de 1º de janeiro do ano seguinte à publicação ou criação.'; break;
+            case 'autoral': anos = 70; icon = '©️'; title = 'Direito Autoral'; info = 'Vigência de vida do autor + 70 anos. Para obras anônimas ou de pseudônimo: 70 anos da publicação.'; break;
+            case 'cultivar': anos = 15; icon = '🌱'; title = 'Cultivar'; info = 'Vigência de 15 anos (arbóreas e videiras: 18 anos).'; break;
+            case 'ig': anos = 10; icon = '🗺️'; title = 'Indicação Geográfica'; info = 'Vigência de 10 anos, prorrogável por períodos sucessivos de 10 anos.'; break;
+        }
+
+        const dataExpiracao = new Date(data);
+        dataExpiracao.setFullYear(dataExpiracao.getFullYear() + anos);
+
+        const diffTime = dataExpiracao - hoje;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffYears = (diffDays / 365.25).toFixed(1);
+
+        const percentual = Math.max(0, Math.min(100, ((hoje - data) / (dataExpiracao - data)) * 100));
+
+        document.getElementById('resultIcon').textContent = icon;
+        document.getElementById('resultTitle').textContent = title;
+        document.getElementById('resultDate').textContent = dataExpiracao.toLocaleDateString('pt-BR');
+        document.getElementById('resultInfo').textContent = info;
+        document.getElementById('timelineFill').style.width = percentual + '%';
+
+        const alertDiv = document.getElementById('resultAlert');
+        if (diffDays < 0) {
+            alertDiv.className = 'result-display__alert result-display__alert--danger';
+            alertDiv.textContent = '⚠️ Proteção expirada! A obra/cração já está em domínio público.';
+        } else if (diffDays < 365) {
+            alertDiv.className = 'result-display__alert result-display__alert--warning';
+            alertDiv.textContent = `⏰ Atenção: restam menos de 1 ano (${diffDays} dias). Considere renovar ou reavaliar sua estratégia.`;
+        } else {
+            alertDiv.className = 'result-display__alert result-display__alert--safe';
+            alertDiv.textContent = `✅ Proteção ativa. Tempo restante: aproximadamente ${diffYears} anos.`;
+        }
+
+        resultDisplay.classList.add('visible');
+        resultDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    </script>
+</body>
+</html>

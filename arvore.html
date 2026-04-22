@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árvore de Decisão — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tool-page { padding-top: 120px; padding-bottom: var(--spacing-2xl); min-height: 100vh; }
+        .tool-page__header { text-align: center; margin-bottom: var(--spacing-xl); }
+        .tool-page__header h1 { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary-dark); margin-bottom: var(--spacing-sm); }
+        .tool-page__header p { color: var(--text-medium); max-width: 600px; margin: 0 auto; }
+
+        .decision-tree { max-width: 700px; margin: 0 auto; }
+        .decision-step { background: var(--bg-white); border: 2px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--spacing-xl); margin-bottom: var(--spacing-lg); text-align: center; transition: var(--transition); animation: slideUp 0.5s ease; }
+        .decision-step:hover { box-shadow: var(--shadow-lg); }
+        .decision-step__num { display: inline-block; width: 36px; height: 36px; background: linear-gradient(135deg, var(--fase-1), var(--fase-2)); color: white; border-radius: 50%; font-family: var(--font-heading); font-weight: 700; line-height: 36px; margin-bottom: var(--spacing-sm); }
+        .decision-step__question { font-size: 1.3rem; font-weight: 600; color: var(--primary-dark); margin-bottom: var(--spacing-md); }
+        .decision-step__buttons { display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; }
+        .decision-btn { padding: 14px 32px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; border: 2px solid var(--border-color); background: var(--bg-white); color: var(--text-dark); transition: var(--transition); min-width: 120px; }
+        .decision-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .decision-btn--yes { border-color: var(--fase-5); color: var(--fase-5); }
+        .decision-btn--yes:hover { background: var(--fase-5); color: white; }
+        .decision-btn--no { border-color: var(--fase-4); color: var(--fase-4); }
+        .decision-btn--no:hover { background: var(--fase-4); color: white; }
+
+        .result-card { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; border-radius: var(--radius-xl); padding: var(--spacing-xl); text-align: center; animation: slideUp 0.6s ease; }
+        .result-card__icon { font-size: 4rem; margin-bottom: var(--spacing-sm); }
+        .result-card h2 { font-family: var(--font-heading); font-size: 2rem; margin-bottom: var(--spacing-sm); }
+        .result-card p { opacity: 0.9; margin-bottom: var(--spacing-md); line-height: 1.6; }
+        .result-card__details { background: rgba(255,255,255,0.1); border-radius: var(--radius-lg); padding: var(--spacing-md); margin-top: var(--spacing-md); text-align: left; }
+        .result-card__details li { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; }
+        .result-card__details li:last-child { border-bottom: none; }
+        .result-card__details strong { color: var(--accent); }
+
+        .restart-btn { margin-top: var(--spacing-md); background: white; color: var(--primary-dark); border: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; transition: var(--transition); }
+        .restart-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+        .breadcrumbs { display: flex; justify-content: center; gap: 8px; margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+        .breadcrumb { padding: 4px 12px; background: var(--bg-alt); border-radius: 50px; font-size: 0.8rem; color: var(--text-light); }
+        .breadcrumb--active { background: var(--fase-1); color: white; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .tool-page__header h1 { font-size: 1.8rem; }
+            .decision-step__question { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">💡</span>
+                <div>
+                    <strong class="header__logo-title">PI Thinking</strong>
+                    <span class="header__logo-sub">Árvore de Decisão</span>
+                </div>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
+                </ul>
+            </nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="tool-page">
+        <div class="container">
+            <div class="tool-page__header">
+                <h1>🌳 Árvore de Decisão</h1>
+                <p>Responda às perguntas abaixo e descubra automaticamente qual tipo de proteção de Propriedade Intelectual se aplica à sua criação.</p>
+            </div>
+
+            <div class="breadcrumbs" id="breadcrumbs"></div>
+            <div class="decision-tree" id="decisionTree"></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom" style="border:none; padding:0;">
+                <p>© 2025 PI Thinking — PROFNIT / UFRR</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    (function() {
+        const tree = {
+            start: {
+                q: "Sua criação é uma invenção ou produto/processo com aplicação industrial?",
+                yes: "q2",
+                no: "q4"
+            },
+            q2: {
+                q: "A criação é nova e envolve atividade inventiva (não óbvia)?",
+                yes: "patente",
+                no: "q3"
+            },
+            q3: {
+                q: "A criação é uma melhoria funcional de objeto de uso prático?",
+                yes: "modelo",
+                no: "q4"
+            },
+            q4: {
+                q: "A criação é uma obra artística, literária, musical ou científica?",
+                yes: "autoral",
+                no: "q5"
+            },
+            q5: {
+                q: "A criação é um programa de computador?",
+                yes: "software",
+                no: "q6"
+            },
+            q6: {
+                q: "A criação é um sinal distintivo (nome, logo, slogan) para produtos/serviços?",
+                yes: "marca",
+                no: "q7"
+            },
+            q7: {
+                q: "A criação se refere à forma ornamental de um objeto?",
+                yes: "di",
+                no: "q8"
+            },
+            q8: {
+                q: "A criação está ligada à origem geográfica de um produto?",
+                yes: "ig",
+                no: "q9"
+            },
+            q9: {
+                q: "A criação é uma nova variedade vegetal?",
+                yes: "cultivar",
+                no: "q10"
+            },
+            q10: {
+                q: "A criação é uma topografia de circuito integrado?",
+                yes: "ci",
+                no: "outro"
+            }
+        };
+
+        const results = {
+            patente: {
+                title: "Patente de Invenção",
+                icon: "🔬",
+                desc: "Protege invenções que apresentem novidade, atividade inventiva e aplicação industrial. Garante exclusividade de exploração por 20 anos.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.279/1996, Art. 8º a 24",
+                    "<strong>Vigência:</strong> 20 anos a contar da data de depósito",
+                    "<strong>Órgão:</strong> INPI — Instituto Nacional da Propriedade Industrial",
+                    "<strong>Custo estimado:</strong> A partir de R$ 175 (microempresa/individual)",
+                    "<strong>Requisito crucial:</strong> Novidade absoluta — não pode ter sido divulgada anteriormente"
+                ]
+            },
+            modelo: {
+                title: "Modelo de Utilidade",
+                icon: "🔧",
+                desc: "Protege melhorias funcionais em objetos de uso prático. Exige menor grau de inventividade que a patente.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.279/1996, Art. 9º",
+                    "<strong>Vigência:</strong> 15 anos a contar da data de depósito",
+                    "<strong>Órgão:</strong> INPI",
+                    "<strong>Vantagem:</strong> Concessão mais rápida que patente de invenção",
+                    "<strong>Ideal para:</strong> Melhorias em ferramentas, dispositivos, embalagens"
+                ]
+            },
+            autoral: {
+                title: "Direito Autoral",
+                icon: "©️",
+                desc: "Protege obras literárias, artísticas e científicas. Nasce automaticamente com a criação, sem necessidade de registro para existência.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.610/1998",
+                    "<strong>Vigência:</strong> Vida do autor + 70 anos",
+                    "<strong>Órgão:</strong> Biblioteca Nacional (registro opcional but recomendado)",
+                    "<strong>Observação:</strong> Protege a expressão, não a ideia",
+                    "<strong>Dica:</strong> Registro fortalece prova de anterioridade em litígios"
+                ]
+            },
+            software: {
+                title: "Registro de Software",
+                icon: "💻",
+                desc: "Protege programas de computador. O registro no INPI é opcional mas fortalece a proteção jurídica.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.609/1998",
+                    "<strong>Vigência:</strong> 50 anos a contar de 1º de janeiro do ano seguinte à publicação ou criação",
+                    "<strong>Órgão:</strong> INPI",
+                    "<strong>Vantagem:</strong> Registro eletrônico simplificado",
+                    "<strong>Importante:</strong> Contratos de licenciamento devem ser registrados no INPI para opor-se a terceiros"
+                ]
+            },
+            marca: {
+                title: "Marca",
+                icon: "™️",
+                desc: "Protege sinais distintivos visuais (nomes, logotipos, etiquetas) que identificam produtos e serviços no comércio.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.279/1996, Art. 122 a 188",
+                    "<strong>Vigência:</strong> 10 anos, prorrogáveis indefinidamente",
+                    "<strong>Órgão:</strong> INPI",
+                    "<strong>Dica:</strong> Faça busca de anterioridade antes do depósito",
+                    "<strong>Classes:</strong> Escolha a classe Nice correspondente aos seus produtos/serviços"
+                ]
+            },
+            di: {
+                title: "Desenho Industrial",
+                icon: "🎨",
+                desc: "Protege a forma ornamental de um objeto, conferindo-lhe aspecto peculiar e original.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.279/1996, Art. 95 a 121",
+                    "<strong>Vigência:</strong> 10 anos (prorrogável por até 3 períodos sucessivos de 5 anos)",
+                    "<strong>Órgão:</strong> INPI",
+                    "<strong>Aplicável:</strong> Embalagens, móveis, veículos, joias, equipamentos",
+                    "<strong>Requisito:</strong> Novidade e originalidade visual"
+                ]
+            },
+            ig: {
+                title: "Indicação Geográfica",
+                icon: "🗺️",
+                desc: "Protege produtos cujas qualidades ou características se devem exclusivamente ao lugar de origem.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.279/1996, Art. 177 a 182",
+                    "<strong>Tipos:</strong> Indicação de Procedência (IP) e Denominação de Origem (DO)",
+                    "<strong>Órgão:</strong> INPI",
+                    "<strong>Exemplos:</strong> Café de Arábica do Cerrado (DO), Cachaça de Paraty (IP)",
+                    "<strong>Requisito:</strong> Vínculo entre qualidade/reputação e origem geográfica"
+                ]
+            },
+            cultivar: {
+                title: "Cultivar",
+                icon: "🌱",
+                desc: "Proteção de novas variedades vegetais que sejam distintas, uniformes e estáveis.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.456/1997",
+                    "<strong>Vigência:</strong> 15 anos (arbóreas e videiras: 18 anos)",
+                    "<strong>Órgão:</strong> SNPC — Serviço Nacional de Proteção de Cultivares (MAPA)",
+                    "<strong>Requisitos DHE:</strong> Distintividade, Homogeneidade, Estabilidade",
+                    "<strong>Direitos:</strong> Produção, comercialização, importação e exportação da variedade"
+                ]
+            },
+            ci: {
+                title: "Topografia de Circuito Integrado",
+                icon: "⚡",
+                desc: "Protege a disposição tridimensional das camadas que compõem um circuito integrado.",
+                details: [
+                    "<strong>Legislação:</strong> Lei 9.279/1996, Art. 190 a 196",
+                    "<strong>Vigência:</strong> 10 anos",
+                    "<strong>Órgão:</strong> INPI",
+                    "<strong>Observação:</strong> Protege a topografia, não o circuito em si",
+                    "<strong>Aplicável:</strong> Indústria de semicondutores e microeletrônica"
+                ]
+            },
+            outro: {
+                title: "Análise Personalizada Necessária",
+                icon: "🤔",
+                desc: "Sua criação pode não se enquadrar nos tipos tradicionais de PI ou pode necessitar de proteção combinada (ex: marca + patente).",
+                details: [
+                    "<strong>Sugestão:</strong> Consulte o NIT da sua instituição",
+                    "<strong>UFRR:</strong> NIT / INOVARR — nit@ufrr.br",
+                    "<strong>INPI:</strong> Atendimento virtual e presencial disponível",
+                    "<strong>Considerar:</strong> Segredo industrial, know-how, contratos de confidencialidade",
+                    "<strong>Próximo passo:</strong> Preencha o Canvas de Diagnóstico de PI do toolkit"
+                ]
+            }
+        };
+
+        let history = [];
+        const container = document.getElementById('decisionTree');
+        const breadcrumbs = document.getElementById('breadcrumbs');
+
+        function renderStep(stepId) {
+            const step = tree[stepId];
+            if (!step) return renderResult(stepId);
+
+            history.push({ id: stepId, text: step.q });
+            updateBreadcrumbs();
+
+            container.innerHTML = `
+                <div class="decision-step">
+                    <div class="decision-step__num">${history.length}</div>
+                    <div class="decision-step__question">${step.q}</div>
+                    <div class="decision-step__buttons">
+                        <button class="decision-btn decision-btn--yes" onclick="window.nextStep('${step.yes}')">✅ Sim</button>
+                        <button class="decision-btn decision-btn--no" onclick="window.nextStep('${step.no}')">❌ Não</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateBreadcrumbs() {
+            breadcrumbs.innerHTML = history.map((h, i) => 
+                `<span class="breadcrumb ${i === history.length - 1 ? 'breadcrumb--active' : ''}">Passo ${i+1}</span>`
+            ).join('');
+        }
+
+        function renderResult(resultId) {
+            const r = results[resultId];
+            if (!r) return;
+
+            history.push({ id: resultId, text: r.title });
+            updateBreadcrumbs();
+
+            container.innerHTML = `
+                <div class="result-card">
+                    <div class="result-card__icon">${r.icon}</div>
+                    <h2>${r.title}</h2>
+                    <p>${r.desc}</p>
+                    <ul class="result-card__details">
+                        ${r.details.map(d => `<li>${d}</li>`).join('')}
+                    </ul>
+                    <button class="restart-btn" onclick="window.restartTree()">🔄 Refazer Árvore de Decisão</button>
+                </div>
+            `;
+        }
+
+        window.nextStep = function(stepId) {
+            renderStep(stepId);
+        };
+
+        window.restartTree = function() {
+            history = [];
+            renderStep('start');
+        };
+
+        renderStep('start');
+    })();
+    </script>
+</body>
+</html>

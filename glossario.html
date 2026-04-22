@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glossário Dinâmico — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tool-page { padding-top: 120px; padding-bottom: var(--spacing-2xl); min-height: 100vh; }
+        .tool-page__header { text-align: center; margin-bottom: var(--spacing-xl); }
+        .tool-page__header h1 { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary-dark); margin-bottom: var(--spacing-sm); }
+        .tool-page__header p { color: var(--text-medium); max-width: 600px; margin: 0 auto; }
+
+        .glossary-search { max-width: 600px; margin: 0 auto var(--spacing-xl); position: relative; }
+        .glossary-search input {
+            width: 100%; padding: 16px 24px 16px 48px; border: 2px solid var(--border-color); border-radius: var(--radius-full);
+            font-family: var(--font-primary); font-size: 1rem; color: var(--text-dark); background: var(--bg-white);
+            transition: var(--transition);
+        }
+        .glossary-search input:focus { border-color: var(--accent); outline: none; box-shadow: var(--shadow-glow); }
+        .glossary-search__icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-light); }
+
+        .glossary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-md); }
+        .glossary-card {
+            background: var(--bg-white); border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+            padding: var(--spacing-md); transition: var(--transition); cursor: pointer;
+        }
+        .glossary-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+        .glossary-card.hidden { display: none; }
+        .glossary-card__term { font-family: var(--font-heading); font-weight: 700; color: var(--primary-dark); font-size: 1.1rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .glossary-card__category { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 50px; font-weight: 600; width: fit-content; margin-bottom: 8px; }
+        .glossary-card__category--patente { background: rgba(67,97,238,0.1); color: var(--fase-1); }
+        .glossary-card__category--marca { background: rgba(114,9,183,0.1); color: var(--fase-2); }
+        .glossary-card__category--autoral { background: rgba(247,37,133,0.1); color: var(--fase-3); }
+        .glossary-card__category--geral { background: rgba(255,109,0,0.1); color: var(--fase-4); }
+        .glossary-card__def { font-size: 0.9rem; color: var(--text-medium); line-height: 1.6; }
+        .glossary-card__def strong { color: var(--primary-dark); }
+
+        .glossary-tags { display: flex; justify-content: center; gap: 8px; margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+        .glossary-tag { padding: 6px 14px; border-radius: 50px; font-size: 0.85rem; font-weight: 500; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-white); color: var(--text-medium); transition: var(--transition); }
+        .glossary-tag:hover, .glossary-tag.active { background: var(--primary-dark); color: white; border-color: var(--primary-dark); }
+
+        .no-results { text-align: center; padding: var(--spacing-xl); color: var(--text-light); font-size: 1.1rem; display: none; }
+        .no-results.visible { display: block; }
+
+        @media (max-width: 768px) {
+            .tool-page__header h1 { font-size: 1.8rem; }
+            .glossary-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">💡</span>
+                <div>
+                    <strong class="header__logo-title">PI Thinking</strong>
+                    <span class="header__logo-sub">Glossário Dinâmico</span>
+                </div>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
+                </ul>
+            </nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="tool-page">
+        <div class="container">
+            <div class="tool-page__header">
+                <h1>📖 Glossário Dinâmico</h1>
+                <p>Busque termos essenciais de Propriedade Intelectual. Clique nas categorias para filtrar ou digite para pesquisar.</p>
+            </div>
+
+            <div class="glossary-search">
+                <span class="glossary-search__icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Buscar termo... (ex: patente, marca, TRL)" oninput="filterGlossary()">
+            </div>
+
+            <div class="glossary-tags">
+                <button class="glossary-tag active" onclick="filterCategory('all')">Todos</button>
+                <button class="glossary-tag" onclick="filterCategory('patente')">Patentes</button>
+                <button class="glossary-tag" onclick="filterCategory('marca')">Marcas</button>
+                <button class="glossary-tag" onclick="filterCategory('autoral')">Direito Autoral</button>
+                <button class="glossary-tag" onclick="filterCategory('geral')">Geral</button>
+            </div>
+
+            <div class="glossary-grid" id="glossaryGrid"></div>
+            <div class="no-results" id="noResults">Nenhum termo encontrado. Tente outra busca.</div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom" style="border:none; padding:0;">
+                <p>© 2025 PI Thinking — PROFNIT / UFRR</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    const terms = [
+        { term: "Patente de Invenção", category: "patente", def: "Título de propriedade industrial que confere ao inventor o direito de impedir terceiros de fabricar, usar, vender ou importar o objeto da patente sem autorização. <strong>Vigência:</strong> 20 anos." },
+        { term: "Modelo de Utilidade", category: "patente", def: "Proteção para melhorias funcionais em objetos de uso prático. Exige menor grau de inventividade que a patente. <strong>Vigência:</strong> 15 anos." },
+        { term: "Novidade", category: "patente", def: "Requisito fundamental para patenteabilidade. A invenção não pode ter sido divulgada publicamente antes do depósito. A divulgação em congressos ou publicações científicas pode destruir a novidade." },
+        { term: "Atividade Inventiva", category: "patente", def: "Requisito que significa que a invenção não deve ser óbvia ou evidente para um técnico especializado na área. Também chamada de 'passo inventivo'." },
+        { term: "Aplicação Industrial", category: "patente", def: "Requisito que exige que a invenção possa ser fabricada ou utilizada em qualquer tipo de indústria, incluindo agricultura, extrativismo, etc." },
+        { term: "Marca", category: "marca", def: "Sinal visual distintivo usado para identificar produtos ou serviços no comércio. Pode ser nominativa (nome), figurativa (logo), mista ou tridimensional." },
+        { term: "Classe Nice", category: "marca", def: "Sistema de classificação internacional de produtos e serviços para registro de marcas. O Brasil utiliza a 11ª edição. Existem 45 classes (1-34 produtos, 35-45 serviços)." },
+        { term: "Desenho Industrial", category: "geral", def: "Proteção da forma ornamental de um objeto, conferindo-lhe aspecto peculiar. Não protege a função, apenas a aparência." },
+        { term: "Direito Autoral", category: "autoral", def: "Proteção das obras literárias, artísticas e científicas. Nasce automaticamente com a criação, sem necessidade de registro para existência, mas o registro fortalece a prova." },
+        { term: "Software", category: "autoral", def: "Programa de computador protegido como obra literária pela Lei 9.609/98. O registro no INPI é opcional mas recomendado para fins probatórios." },
+        { term: "Cultivar", category: "geral", def: "Variedade vegetal protegida que deve ser distinta, uniforme e estável (critérios DHE). Protegida pelo SNPC/MAPA." },
+        { term: "Indicação Geográfica", category: "geral", def: "Proteção de produtos cujas qualidades se devem ao lugar de origem. Pode ser Indicação de Procedência (IP) ou Denominação de Origem (DO)." },
+        { term: "NIT", category: "geral", def: "Núcleo de Inovação Tecnológica. Unidade institucional responsável por gerenciar a propriedade intelectual e a transferência de tecnologia em universidades e ICTs." },
+        { term: "TRL", category: "geral", def: "Technology Readiness Level (Nível de Maturidade Tecnológica). Escala de 1 a 9 que mede o grau de desenvolvimento de uma tecnologia, desde o princípio básico até operação comprovada." },
+        { term: "Transferência de Tecnologia", category: "geral", def: "Processo de compartilhamento de conhecimento, tecnologias, métodos e know-how entre instituições ou para o mercado. Pode ocorrer via licenciamento, spin-off, etc." },
+        { term: "Licenciamento", category: "geral", def: "Autorização concedida pelo titular de PI para que terceiro utilize a tecnologia, geralmente mediante pagamento de royalties ou taxa única." },
+        { term: "Royalties", category: "geral", def: "Remuneração paga ao titular de uma PI pelo uso de sua tecnologia ou marca, geralmente calculada como percentual sobre a receita ou lucro do licenciado." },
+        { term: "Spin-off", category: "geral", def: "Empresa criada a partir de uma instituição de pesquisa para explorar comercialmente uma tecnologia desenvolvida internamente." },
+        { term: "Start-up", category: "geral", def: "Empresa emergente de base tecnológica, geralmente com modelo de negócio escalável e alto potencial de crescimento." },
+        { term: "Know-how", category: "geral", def: "Conhecimento técnico prático, não patenteado, acumulado por experiência. Protegido por contratos de confidencialidade e segredo industrial." },
+        { term: "Segredo Industrial", category: "geral", def: "Informação técnica ou comercial de valor econômico que é mantida em sigelo. Não requer registro, mas exige medidas de proteção ativas." },
+        { term: "Busca de Anterioridade", category: "patente", def: "Pesquisa em bases de dados de PI para verificar se uma invenção ou marca já foi depositada ou registrada anteriormente. Etapa crucial antes do depósito." },
+        { term: "Depósito", category: "geral", def: "Ato de apresentar o pedido de proteção de PI ao órgão competente (INPI, SNPC, etc.). A data do depósito é crucial para definir a prioridade." },
+        { term: "Exame Técnico", category: "patente", def: "Análise realizada pelo INPI para verificar se o pedido de patente atende aos requisitos legais. No Brasil, o exame é requerido pelo depositante em até 36 meses." },
+        { term: "Carta Patente", category: "patente", def: "Documento oficial emitido pelo INPI que confere o direito de patente ao inventor. Sua concessão só ocorre após o exame técnico favorável." },
+        { term: "Domínio Público", category: "geral", def: "Situação em que a proteção de PI expirou ou não existia, permitindo que qualquer pessoa utilize a tecnologia ou obra livremente." },
+        { term: "ENPI", category: "geral", def: "Estratégia Nacional de Propriedade Intelectual 2021-2030. Documento governamental com 5 eixos: geração, disseminação, gestão, infraestrutura e cooperação internacional." },
+        { term: "OMPI", category: "geral", def: "Organização Mundial da Propriedade Intelectual. Agência especializada da ONU que promove a proteção da PI em escala global. Sede em Genebra, Suíça." },
+        { term: "PatentScope", category: "patente", def: "Base de dados da OMPI que permite buscar patentes internacionais (PCT) e de diversos países. Acesso gratuito em patentscope.wipo.int." },
+        { term: "PCT", category: "patente", def: "Patent Cooperation Treaty (Tratado de Cooperação em Matéria de Patentes). Permite buscar proteção internacional em até 157 países com um único depósito inicial." }
+    ];
+
+    let currentCategory = 'all';
+
+    function renderTerms(filterText = '') {
+        const grid = document.getElementById('glossaryGrid');
+        const noResults = document.getElementById('noResults');
+        grid.innerHTML = '';
+
+        const filtered = terms.filter(t => {
+            const matchesCategory = currentCategory === 'all' || t.category === currentCategory;
+            const matchesText = !filterText || t.term.toLowerCase().includes(filterText.toLowerCase()) || t.def.toLowerCase().includes(filterText.toLowerCase());
+            return matchesCategory && matchesText;
+        });
+
+        if (filtered.length === 0) {
+            noResults.classList.add('visible');
+        } else {
+            noResults.classList.remove('visible');
+            filtered.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'glossary-card';
+                card.innerHTML = `
+                    <div class="glossary-card__term">${t.term}</div>
+                    <div class="glossary-card__category glossary-card__category--${t.category}">${t.category}</div>
+                    <div class="glossary-card__def">${t.def}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+    }
+
+    function filterCategory(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.glossary-tag').forEach(tag => tag.classList.remove('active'));
+        event.target.classList.add('active');
+        renderTerms(document.getElementById('searchInput').value);
+    }
+
+    function filterGlossary() {
+        renderTerms(document.getElementById('searchInput').value);
+    }
+
+    renderTerms();
+    </script>
+</body>
+</html>

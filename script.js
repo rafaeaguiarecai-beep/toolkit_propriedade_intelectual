@@ -1,144 +1,200 @@
-/* ============================================
-   PI THINKING — JavaScript
-   ============================================ */
+// PI THINKING v2.0 - INTERATIVIDADE
 
 document.addEventListener('DOMContentLoaded', () => {
+    initPreloader();
+    initMobileMenu();
+    initScrollReveal();
+    initCounters();
+    initBackToTop();
+    initReadingProgress();
+    initThemeToggle();
+    initHeaderScroll();
+    initTimelineAnimation();
+    initFaqAccordion();
+    initSmoothScroll();
+    initPhasesInteraction();
+});
 
-    // === HEADER SCROLL EFFECT ===
-    const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-        header.classList.toggle('header--scrolled', window.scrollY > 10);
+function initPreloader() {
+    const preloader = document.getElementById('preloader');
+    if (!preloader) return;
+    window.addEventListener('load', () => {
+        setTimeout(() => preloader.classList.add('hidden'), 800);
     });
+}
 
-    // === MOBILE MENU ===
-    const navToggle = document.getElementById('navToggle');
+function initMobileMenu() {
+    const toggle = document.getElementById('navToggle');
     const nav = document.getElementById('nav');
+    if (!toggle || !nav) return;
 
-    navToggle.addEventListener('click', () => {
-        nav.classList.toggle('nav--open');
-        navToggle.classList.toggle('active');
+    toggle.addEventListener('click', () => {
+        const isOpen = nav.classList.toggle('nav--active');
+        toggle.classList.toggle('active', isOpen);
+        toggle.setAttribute('aria-expanded', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
     });
 
-    // Close menu when clicking a link
-    document.querySelectorAll('.nav__link, .dropdown__link').forEach(link => {
+    nav.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-            nav.classList.remove('nav--open');
-            navToggle.classList.remove('active');
+            nav.classList.remove('nav--active');
+            toggle.classList.remove('active');
+            toggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
         });
     });
 
-    // === MOBILE DROPDOWN ===
-    const dropdowns = document.querySelectorAll('.nav__dropdown');
-    dropdowns.forEach(dropdown => {
-        const trigger = dropdown.querySelector('.nav__link--dropdown');
-        trigger.addEventListener('click', (e) => {
+    const dropdowns = nav.querySelectorAll('.nav__dropdown');
+    dropdowns.forEach(drop => {
+        const link = drop.querySelector('.nav__link--dropdown');
+        link.addEventListener('click', (e) => {
             if (window.innerWidth <= 768) {
                 e.preventDefault();
-                dropdown.classList.toggle('open');
+                drop.classList.toggle('nav__dropdown--active');
+                link.setAttribute('aria-expanded', drop.classList.contains('nav__dropdown--active'));
             }
         });
     });
 
-    // === ACTIVE NAV LINK ON SCROLL ===
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav__link');
+    document.addEventListener('click', (e) => {
+        if (!nav.contains(e.target) && !toggle.contains(e.target) && nav.classList.contains('nav--active')) {
+            nav.classList.remove('nav--active');
+            toggle.classList.remove('active');
+            toggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+    });
+}
 
-    const observerOptions = {
-        root: null,
-        rootMargin: '-20% 0px -80% 0px',
-        threshold: 0
-    };
-
+function initScrollReveal() {
+    const reveals = document.querySelectorAll('[data-reveal]');
+    if (!reveals.length) return;
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const id = entry.target.getAttribute('id');
-                navLinks.forEach(link => {
-                    link.classList.remove('nav__link--active');
-                    if (link.getAttribute('href') === `#${id}`) {
-                        link.classList.add('nav__link--active');
-                    }
-                });
+                const delay = entry.target.dataset.revealDelay || 0;
+                setTimeout(() => entry.target.classList.add('revealed'), delay);
+                observer.unobserve(entry.target);
             }
         });
-    }, observerOptions);
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    reveals.forEach(el => observer.observe(el));
+}
 
-    sections.forEach(section => observer.observe(section));
-
-    // === TOOL CARDS — EXPAND/COLLAPSE ===
-    const toolCards = document.querySelectorAll('.tool-card');
-    toolCards.forEach(card => {
-        const body = card.querySelector('.tool-card__body');
-        const title = card.querySelector('.tool-card__title');
-
-        // Initially collapse cards with lots of content
-        if (body && body.scrollHeight > 250) {
-            body.style.maxHeight = '200px';
-            body.style.overflow = 'hidden';
-            body.style.position = 'relative';
-
-            // Create "read more" button
-            const expandBtn = document.createElement('button');
-            expandBtn.textContent = '▼ Ver ferramenta completa';
-            expandBtn.style.cssText = `
-                display: block; width: 100%; padding: 10px; margin-top: 8px;
-                background: linear-gradient(to bottom, transparent, white 30%);
-                border: none; color: var(--primary, #1565C0); font-weight: 600;
-                cursor: pointer; font-size: 0.85rem; position: absolute;
-                bottom: 0; left: 0; padding-top: 40px;
-            `;
-
-            body.appendChild(expandBtn);
-
-            expandBtn.addEventListener('click', () => {
-                if (body.style.maxHeight === '200px') {
-                    body.style.maxHeight = 'none';
-                    body.style.overflow = 'visible';
-                    expandBtn.textContent = '▲ Recolher';
-                    expandBtn.style.position = 'static';
-                    expandBtn.style.background = 'none';
-                    expandBtn.style.paddingTop = '10px';
-                } else {
-                    body.style.maxHeight = '200px';
-                    body.style.overflow = 'hidden';
-                    expandBtn.textContent = '▼ Ver ferramenta completa';
-                    expandBtn.style.position = 'absolute';
-                    expandBtn.style.background = 'linear-gradient(to bottom, transparent, white 30%)';
-                    expandBtn.style.paddingTop = '40px';
-                }
-            });
-        }
-    });
-
-    // === SMOOTH SCROLL FOR PHASE PILLS ===
-    document.querySelectorAll('.phase-pill').forEach(pill => {
-        pill.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.querySelector(pill.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
-
-    // === ANIMATION ON SCROLL (simple fade-in) ===
-    const animateElements = document.querySelectorAll('.tool-card, .stat-card, .digital-tool-card, .download-card, .timeline__item');
-
-    const fadeObserver = new IntersectionObserver((entries) => {
+function initCounters() {
+    const counters = document.querySelectorAll('[data-count]');
+    if (!counters.length) return;
+    const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-                fadeObserver.unobserve(entry.target);
+                animateCounter(entry.target);
+                observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.5 });
+    counters.forEach(counter => observer.observe(counter));
+}
 
-    animateElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        fadeObserver.observe(el);
+function animateCounter(el) {
+    const target = parseInt(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const duration = 2000;
+    const start = performance.now();
+    function update(currentTime) {
+        const elapsed = currentTime - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(easeOut * target) + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target + suffix;
+    }
+    requestAnimationFrame(update);
+}
+
+function initBackToTop() {
+    const btn = document.getElementById('backToTop');
+    if (!btn) return;
+    window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 500));
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+function initReadingProgress() {
+    const progress = document.getElementById('readingProgress');
+    if (!progress) return;
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.width = (scrollTop / docHeight) * 100 + '%';
     });
+}
 
-});
+function initThemeToggle() {
+    const toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+    const savedTheme = localStorage.getItem('pi-thinking-theme');
+    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    toggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('pi-thinking-theme', next);
+    });
+}
+
+function initHeaderScroll() {
+    const header = document.getElementById('header');
+    if (!header) return;
+    window.addEventListener('scroll', () => header.classList.toggle('header--scrolled', window.scrollY > 50));
+}
+
+function initTimelineAnimation() {
+    const items = document.querySelectorAll('[data-timeline]');
+    if (!items.length) return;
+    const progress = document.getElementById('timelineProgress');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                if (progress) {
+                    const visible = document.querySelectorAll('.timeline__item.visible');
+                    progress.style.height = (visible.length / items.length) * 100 + '%';
+                }
+            }
+        });
+    }, { threshold: 0.3 });
+    items.forEach(item => observer.observe(item));
+}
+
+function initFaqAccordion() {
+    const questions = document.querySelectorAll('.faq-item__question');
+    if (!questions.length) return;
+    questions.forEach(q => {
+        q.addEventListener('click', () => {
+            const isExpanded = q.getAttribute('aria-expanded') === 'true';
+            questions.forEach(other => other.setAttribute('aria-expanded', 'false'));
+            if (!isExpanded) q.setAttribute('aria-expanded', 'true');
+        });
+    });
+}
+
+function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#') return;
+            const target = document.querySelector(href);
+            if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        });
+    });
+}
+
+function initPhasesInteraction() {
+    const pills = document.querySelectorAll('.phase-pill');
+    const steps = document.querySelectorAll('.phases-visual__step');
+    pills.forEach(pill => {
+        pill.addEventListener('mouseenter', () => {
+            const phase = pill.dataset.phase;
+            steps.forEach(step => step.classList.toggle('phases-visual__step--active', step.dataset.step === phase));
+        });
+    });
+}
