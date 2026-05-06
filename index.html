@@ -294,16 +294,31 @@ footer .bar a{color:rgba(255,255,255,.6)}
   .split{grid-template-columns:1fr}
   .split-vis{min-height:35vh}
   .split.flip .split-vis{order:0}
-  .tools-row{grid-template-columns:1fr}
   .digi-grid{grid-template-columns:1fr 1fr}
   .ref-grid{grid-template-columns:1fr}
   footer .inner{grid-template-columns:1fr}
 }
+
+/* Tablet breakpoint for tool cards */
+@media(min-width:481px) and (max-width:900px){
+  .tools-row{grid-template-columns:repeat(2,1fr)}
+}
+
 @media(max-width:480px){
   .hero-text{padding:2rem 1.2rem}
+  .tools-row{grid-template-columns:1fr}
   .digi-grid{grid-template-columns:1fr}
   .dl-grid{grid-template-columns:1fr}
 }
+
+/* Orbit fix for small screens */
+@media(max-width:600px){
+  .hero-visual .orbit{width:180px;height:180px}
+  .orbit-center{width:60px;height:60px;font-size:1rem}
+  .orbit-item{font-size:1.2rem}
+  @keyframes spin{0%{transform:rotate(0deg) translateX(70px) rotate(0deg)}100%{transform:rotate(360deg) translateX(70px) rotate(-360deg)}}
+}
+
 @media print{
   .topbar,.btt,footer{display:none}
   .hero{min-height:auto;grid-template-columns:1fr}
@@ -319,10 +334,11 @@ footer .bar a{color:rgba(255,255,255,.6)}
 <!-- ═══════════ TOPBAR ═══════════ -->
 <header class="topbar" id="topbar">
   <a href="#" class="brand">
-    <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="Brasão UFRR" >
+    <!-- IMPORTANTE: colocar logos locais na pasta img/ -->
+    <img src="img/ufrr.png" alt="Brasão UFRR">
     <div class="brand-name">PI Thinking <small>PROFNIT · UFRR · INOVARR</small></div>
   </a>
-  <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  <button class="burger" id="burger" aria-label="Abrir menu de navegação"><span></span><span></span><span></span></button>
   <nav id="nav">
     <a href="#sobre">Sobre</a>
     <a href="#guia">Guia</a>
@@ -344,9 +360,10 @@ footer .bar a{color:rgba(255,255,255,.6)}
       <a href="guia-facilitador.html" class="btn btn-o">Guia do Facilitador</a>
     </div>
     <div class="hero-logos rv rv-d4">
-      <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="UFRR">
-      <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="INOVARR">
-      <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="PROFNIT">
+      <!-- IMPORTANTE: colocar logos locais na pasta img/ -->
+      <img src="img/ufrr.png" alt="UFRR">
+      <img src="img/inovarr.png" alt="INOVARR">
+      <img src="img/profnit.png" alt="PROFNIT">
     </div>
   </div>
   <div class="hero-visual">
@@ -419,7 +436,7 @@ footer .bar a{color:rgba(255,255,255,.6)}
       <div class="tl-item i5">
         <div class="tl-time">3:45 — 4:00</div>
         <h4>Quiz Final + Encerramento</h4>
-        <p>Quiz Final para medir evolução (comparação D-X vs F-X). Certificados e próximos passos.</p>
+        <p><a href="quiz-final.html">Quiz Final</a> para medir evolução (comparação D-X vs F-X). Certificados e próximos passos.</p>
       </div>
     </div>
   </div>
@@ -581,20 +598,20 @@ footer .bar a{color:rgba(255,255,255,.6)}
       <span class="meta-item">📈 Pitch + Avaliação</span>
     </div>
     <div class="tools-row">
-      <a href="#" class="tcard">
-        <div class="ico">📊</div>
-        <h4>Canvas Sequenciador</h4>
-        <p>Priorização · Ondas de ação</p>
+      <a href="pi-quest.html" class="tcard">
+        <div class="ico">🎲</div>
+        <h4>PI Quest</h4>
+        <p>Tabuleiro · 30 perguntas</p>
       </a>
-      <a href="#" class="tcard">
-        <div class="ico">🎤</div>
-        <h4>Pitch de PI</h4>
-        <p>5 min/grupo · Avaliação</p>
-      </a>
-      <a href="#" class="tcard">
+      <a href="quiz-final.html" class="tcard">
         <div class="ico">🏆</div>
         <h4>Quiz Final</h4>
         <p>Evolução D-X → F-X</p>
+      </a>
+      <a href="canvas-avaliacao.html" class="tcard">
+        <div class="ico">📊</div>
+        <h4>Canvas de Avaliação</h4>
+        <p>GAF · NPS · Estrelas</p>
       </a>
     </div>
   </div>
@@ -661,8 +678,8 @@ footer .bar a{color:rgba(255,255,255,.6)}
         <div class="ico">📘</div>
         <div>
           <h4>Guia do Facilitador (PDF)</h4>
-          <p>Roteiro completo da oficina de 4h — 20 páginas, A5</p>
-          <a href="download/Escape-Room-completo.pdf" class="link" download>Baixar PDF →</a>
+          <p>Roteiro completo da oficina de 4h — versão para impressão</p>
+          <span class="badge-soon">Em breve</span>
         </div>
       </div>
 
@@ -690,6 +707,12 @@ footer .bar a{color:rgba(255,255,255,.6)}
 
       <div class="dl-card rv"><div class="ico">🃏</div><div><h4>Baralho de Dilemas</h4><p>12 dilemas éticos — saúde, biodiversidade, academia, tech, agro, cultura</p><a href="baralho-dilemas.html" class="link">Acessar →</a></div></div>
 
+      <div class="dl-card rv"><div class="ico">🎲</div><div><h4>PI Quest — Jogo de Tabuleiro</h4><p>30 casas · 30 perguntas · 2–4 jogadores</p><a href="pi-quest.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🏆</div><div><h4>Quiz Final</h4><p>10 questões avançadas — comparação D-X vs F-X</p><a href="quiz-final.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📊</div><div><h4>Canvas de Avaliação</h4><p>GAF + NPS + Estrelas — feedback estruturado da oficina</p><a href="canvas-avaliacao.html" class="link">Acessar →</a></div></div>
+
       <div class="dl-card rv"><div class="ico">📅</div><div><h4>Calculadora de Vigência</h4><p>Calcule quando a proteção expira com alertas e calendário</p><a href="calculadora.html" class="link">Acessar →</a></div></div>
 
       <div class="dl-card rv"><div class="ico">📖</div><div><h4>Glossário Dinâmico</h4><p>30+ termos de PI com busca instantânea</p><a href="glossario.html" class="link">Acessar →</a></div></div>
@@ -697,8 +720,6 @@ footer .bar a{color:rgba(255,255,255,.6)}
       <div class="dl-card rv"><div class="ico">🔍</div><div><h4>Painel de Busca Guiada</h4><p>Links + tutoriais para INPI, PatentScope e SNPC</p><a href="busca.html" class="link">Acessar →</a></div></div>
 
       <div class="dl-card rv"><div class="ico">📐</div><div><h4>Canvas A2 (6 modelos)</h4><p>Diagnóstico, Empatia, É/Não É, MVP, Sequenciador, Storyboard</p><span class="badge-soon">Em breve</span></div></div>
-
-      <div class="dl-card rv"><div class="ico">🎲</div><div><h4>PI Quest — Jogo de Tabuleiro</h4><p>Tabuleiro + cartas de desafio + regras</p><span class="badge-soon">Em breve</span></div></div>
 
       <div class="dl-card rv"><div class="ico">📅</div><div><h4>Pôster Linha do Tempo</h4><p>Banner 3m × 0,9m com marcos da PI no Brasil</p><span class="badge-soon">Em breve</span></div></div>
 
@@ -715,26 +736,26 @@ footer .bar a{color:rgba(255,255,255,.6)}
       <div class="ref-card">
         <h4>Legislação Brasileira</h4>
         <ul>
-          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/1996 — Propriedade Industrial</a></li>
-          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank">Lei 9.456/1997 — Proteção de Cultivares</a></li>
-          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank">Lei 9.609/1998 — Proteção de Software</a></li>
-          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">Lei 9.610/1998 — Direitos Autorais</a></li>
-          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">Lei 13.123/2015 — Marco da Biodiversidade</a></li>
-          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2016/lei/l13243.htm" target="_blank">Lei 13.243/2016 — Marco Legal de CT&I</a></li>
-          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10886.htm" target="_blank">Decreto 10.886/2021 — ENPI 2021-2030</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener noreferrer">Lei 9.279/1996 — Propriedade Industrial</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank" rel="noopener noreferrer">Lei 9.456/1997 — Proteção de Cultivares</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank" rel="noopener noreferrer">Lei 9.609/1998 — Proteção de Software</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank" rel="noopener noreferrer">Lei 9.610/1998 — Direitos Autorais</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank" rel="noopener noreferrer">Lei 13.123/2015 — Marco da Biodiversidade</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2016/lei/l13243.htm" target="_blank" rel="noopener noreferrer">Lei 13.243/2016 — Marco Legal de CT&I</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10886.htm" target="_blank" rel="noopener noreferrer">Decreto 10.886/2021 — ENPI 2021-2030</a></li>
         </ul>
       </div>
       <div class="ref-card">
         <h4>Referências Institucionais</h4>
         <ul>
-          <li><a href="https://www.gov.br/propriedade-intelectual/pt-br/assuntos/estrategia-nacional-de-propriedade-intelectual" target="_blank">ENPI — Estratégia Nacional de PI</a></li>
-          <li><a href="https://www.gov.br/inpi/pt-br" target="_blank">INPI — Instituto Nacional da Propriedade Industrial</a></li>
-          <li><a href="https://welc.wipo.int/ipedu" target="_blank">OMPI — IP4Youth & Teachers</a></li>
-          <li><a href="https://ufrr.br/nit/" target="_blank">NIT / INOVARR — UFRR</a></li>
-          <li><a href="https://ufrr.br/profnit/" target="_blank">PROFNIT — Ponto Focal UFRR</a></li>
+          <li><a href="https://www.gov.br/propriedade-intelectual/pt-br/assuntos/estrategia-nacional-de-propriedade-intelectual" target="_blank" rel="noopener noreferrer">ENPI — Estratégia Nacional de PI</a></li>
+          <li><a href="https://www.gov.br/inpi/pt-br" target="_blank" rel="noopener noreferrer">INPI — Instituto Nacional da Propriedade Industrial</a></li>
+          <li><a href="https://welc.wipo.int/ipedu" target="_blank" rel="noopener noreferrer">OMPI — IP4Youth & Teachers</a></li>
+          <li><a href="https://ufrr.br/nit/" target="_blank" rel="noopener noreferrer">NIT / INOVARR — UFRR</a></li>
+          <li><a href="https://ufrr.br/profnit/" target="_blank" rel="noopener noreferrer">PROFNIT — Ponto Focal UFRR</a></li>
           <li>CAROLI, Paulo. <em>Lean Inception.</em> 2018.</li>
-          <li><a href="https://sites.tcu.gov.br/design_thinking/" target="_blank">TCU — Toolkit de Design Thinking</a></li>
-          <li><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0 — Licença de uso</a></li>
+          <li><a href="https://sites.tcu.gov.br/design_thinking/" target="_blank" rel="noopener noreferrer">TCU — Toolkit de Design Thinking</a></li>
+          <li><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0 — Licença de uso</a></li>
         </ul>
       </div>
     </div>
@@ -747,29 +768,29 @@ footer .bar a{color:rgba(255,255,255,.6)}
     <span class="overline rv">Dúvidas Comuns</span>
     <h2 class="sec-title rv rv-d1">Perguntas Frequentes</h2>
     <div class="faq-list rv rv-d2">
-      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <button class="faq-q" aria-label="Preciso de conhecimento prévio em PI para usar o toolkit?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
         <span>Preciso de conhecimento prévio em PI para usar o toolkit?</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><p>Não. O PI Thinking foi projetado para ser autônomo. O Guia do Facilitador contém todas as instruções, e as ferramentas digitais possuem explicações integradas.</p></div>
 
-      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <button class="faq-q" aria-label="Posso adaptar as personas para outra região do Brasil?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
         <span>Posso adaptar as personas para outra região do Brasil?</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><p>Sim! As personas foram contextualizadas para a realidade amazônica, mas você pode adaptar nomes e contextos mantendo a diversidade de tipos de PI.</p></div>
 
-      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <button class="faq-q" aria-label="As ferramentas digitais funcionam offline?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
         <span>As ferramentas digitais funcionam offline?</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><p>Sim. Após carregar a página uma vez, as ferramentas funcionam no navegador sem necessidade de conexão contínua com a internet.</p></div>
 
-      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <button class="faq-q" aria-label="Qual a licença de uso dos materiais?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
         <span>Qual a licença de uso dos materiais?</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="faq-a"><p>Todo o conteúdo é licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a>. Você pode usar, adaptar e compartilhar para fins não comerciais, desde que atribua os créditos.</p></div>
+      <div class="faq-a"><p>Todo o conteúdo é licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>. Você pode usar, adaptar e compartilhar para fins não comerciais, desde que atribua os créditos.</p></div>
     </div>
   </div>
 </section>
@@ -781,9 +802,10 @@ footer .bar a{color:rgba(255,255,255,.6)}
       <h5>PI Thinking</h5>
       <p>Toolkit de Propriedade Intelectual com Mindset Ágil e Experimental. Produto do Mestrado Profissional PROFNIT — Ponto Focal UFRR.</p>
       <div class="f-logos">
-        <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="UFRR">
-        <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="INOVARR">
-        <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="PROFNIT">
+        <!-- IMPORTANTE: colocar logos locais na pasta img/ -->
+        <img src="img/ufrr.png" alt="UFRR">
+        <img src="img/inovarr.png" alt="INOVARR">
+        <img src="img/profnit.png" alt="PROFNIT">
       </div>
     </div>
     <div class="f-links">
@@ -796,13 +818,13 @@ footer .bar a{color:rgba(255,255,255,.6)}
     </div>
     <div class="f-links">
       <h5>Institucional</h5>
-      <a href="https://ufrr.br" target="_blank">ufrr.br</a>
-      <a href="https://ufrr.br/profnit/" target="_blank">PROFNIT UFRR</a>
-      <a href="https://ufrr.br/nit/" target="_blank">NIT INOVARR</a>
+      <a href="https://ufrr.br" target="_blank" rel="noopener noreferrer">ufrr.br</a>
+      <a href="https://ufrr.br/profnit/" target="_blank" rel="noopener noreferrer">PROFNIT UFRR</a>
+      <a href="https://ufrr.br/nit/" target="_blank" rel="noopener noreferrer">NIT INOVARR</a>
       <a href="#faq">FAQ</a>
     </div>
     <div class="bar">
-      <p>© 2025 PI Thinking — PROFNIT / UFRR. Conteúdo licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a>.</p>
+      <p>© 2025 PI Thinking — PROFNIT / UFRR. Conteúdo licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>.</p>
     </div>
   </div>
 </footer>
