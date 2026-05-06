@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Depósito — PI Thinking</title>
+  <meta name="description" content="Simule o processo completo de depósito de patente ou marca no INPI. Exercício prático com feedback em tempo real.">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --sd-bg:#E8F5E9;--sd-surface:#FFFFFF;--sd-accent:#4CAF50;--sd-accent-dark:#2E7D32;
+      --sd-text:#212121;--sd-text-light:#757575;--sd-border:#C8E6C9;--sd-radius:16px;
+      --sd-shadow:0 2px 12px rgba(76,175,80,.12);--sd-error:#EF5350;--sd-warn:#FF9800;
+      --sd-info:#2196F3;
+    }
+    @media(prefers-color-scheme:dark){
+      :root{--sd-bg:#0e1a0e;--sd-surface:#1a2a1a;--sd-text:#f0f5f0;--sd-text-light:#a0b8a0;--sd-border:#1e3a1e;--sd-shadow:0 2px 12px rgba(0,0,0,.4);}
+    }
+    body.sd-page{font-family:'Inter',sans-serif;background:var(--sd-bg);color:var(--sd-text);margin:0;padding:0;line-height:1.7;}
+
+    /* COVER */
+    .sd-cover{background:linear-gradient(135deg,#66BB6A 0%,#4CAF50 50%,#2E7D32 100%);color:#fff;padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;}
+    .sd-cover::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E");}
+    .sd-cover__overline{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;opacity:.9;}
+    .sd-cover__title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.2rem);margin:.5rem 0;}
+    .sd-cover__sub{font-size:1.1rem;opacity:.92;max-width:640px;margin:.5rem auto 0;}
+    .sd-cover__meta{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;font-size:.9rem;}
+    .sd-cover__meta span{background:rgba(255,255,255,.2);padding:.35rem .8rem;border-radius:20px;}
+
+    .sd-container{max-width:900px;margin:0 auto;padding:2rem 1.5rem;}
+
+    /* TABS */
+    .sd-tabs{display:flex;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap;justify-content:center;}
+    .sd-tab{font-family:'Poppins',sans-serif;font-weight:600;font-size:.9rem;padding:.6rem 1.5rem;border:2px solid var(--sd-border);border-radius:30px;background:var(--sd-surface);color:var(--sd-text-light);cursor:pointer;transition:all .2s;}
+    .sd-tab:hover{border-color:var(--sd-accent);}
+    .sd-tab.active{background:var(--sd-accent);color:#fff;border-color:var(--sd-accent);}
+
+    /* PROGRESS BAR */
+    .sd-progress{background:var(--sd-border);height:8px;border-radius:4px;margin-bottom:2rem;overflow:hidden;}
+    .sd-progress__fill{background:linear-gradient(90deg,var(--sd-accent),var(--sd-accent-dark));height:100%;border-radius:4px;transition:width .5s;}
+
+    .sd-step-label{text-align:center;font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;color:var(--sd-accent-dark);margin-bottom:1.5rem;}
+
+    /* STEP CARD */
+    .sd-step{background:var(--sd-surface);border:2px solid var(--sd-border);border-radius:var(--sd-radius);padding:2rem;box-shadow:var(--sd-shadow);margin-bottom:1.5rem;display:none;}
+    .sd-step.active{display:block;animation:fadeIn .4s;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .sd-step h3{font-family:'Poppins',sans-serif;color:var(--sd-accent-dark);margin-top:0;display:flex;align-items:center;gap:.5rem;}
+    .sd-step p{margin:.5rem 0;}
+    .sd-step .sd-legal-note{background:rgba(76,175,80,.06);border-left:3px solid var(--sd-accent);padding:.6rem 1rem;border-radius:0 8px 8px 0;font-size:.85rem;margin:.8rem 0;}
+    .sd-step .sd-legal-note strong{color:var(--sd-accent-dark);}
+
+    .sd-step label{display:block;font-weight:600;font-size:.88rem;margin:.8rem 0 .3rem;}
+    .sd-step input[type="text"],.sd-step textarea,.sd-step select{width:100%;font-family:'Inter',sans-serif;font-size:.92rem;border:2px solid var(--sd-border);border-radius:8px;padding:.6rem;background:var(--sd-bg);color:var(--sd-text);box-sizing:border-box;transition:border-color .2s;}
+    .sd-step input:focus,.sd-step textarea:focus,.sd-step select:focus{border-color:var(--sd-accent);outline:none;}
+    .sd-step textarea{min-height:100px;resize:vertical;}
+
+    .sd-step .sd-field-group{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    @media(max-width:600px){.sd-step .sd-field-group{grid-template-columns:1fr;}}
+
+    .sd-step .sd-checklist{margin:.8rem 0;}
+    .sd-step .sd-checklist label{display:flex;align-items:center;gap:.5rem;font-weight:400;cursor:pointer;padding:.3rem 0;}
+    .sd-step .sd-checklist input[type="checkbox"]{width:18px;height:18px;accent-color:var(--sd-accent);}
+
+    .sd-tip{background:rgba(33,150,243,.08);border:1px solid rgba(33,150,243,.2);border-radius:8px;padding:.8rem 1rem;font-size:.85rem;margin:.8rem 0;}
+    .sd-tip strong{color:var(--sd-info);}
+
+    .sd-cost-badge{display:inline-flex;align-items:center;gap:.3rem;background:var(--sd-accent);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:.9rem;padding:.4rem 1rem;border-radius:20px;margin:.5rem 0;}
+
+    /* VALIDATION */
+    .sd-validation{background:var(--sd-error);color:#fff;padding:.5rem 1rem;border-radius:8px;font-size:.85rem;margin:.5rem 0;display:none;}
+    .sd-validation.show{display:block;animation:fadeIn .3s;}
+
+    /* NAV BUTTONS */
+    .sd-nav{display:flex;justify-content:space-between;margin-top:1.5rem;flex-wrap:wrap;gap:.8rem;}
+    .sd-btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;padding:.7rem 1.5rem;border:none;border-radius:30px;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
+    .sd-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.12);}
+    .sd-btn--primary{background:var(--sd-accent);color:#fff;}
+    .sd-btn--outline{background:transparent;border:2px solid var(--sd-accent);color:var(--sd-accent-dark);}
+    .sd-btn--danger{background:var(--sd-error);color:#fff;}
+    .sd-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+    /* RESULT */
+    .sd-result{background:var(--sd-surface);border:3px solid var(--sd-accent);border-radius:var(--sd-radius);padding:2rem;text-align:center;display:none;}
+    .sd-result.active{display:block;animation:fadeIn .5s;}
+    .sd-result h2{font-family:'Playfair Display',serif;color:var(--sd-accent-dark);}
+    .sd-result__score{font-family:'Poppins',sans-serif;font-size:3rem;font-weight:800;color:var(--sd-accent);}
+    .sd-result__summary{text-align:left;margin:1.5rem 0;}
+    .sd-result__summary .sd-item{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--sd-border);font-size:.9rem;}
+    .sd-result__summary .sd-item-label{font-weight:600;}
+    .sd-result__summary .sd-item-status.ok{color:var(--sd-accent);}
+    .sd-result__summary .sd-item-status.warn{color:var(--sd-warn);}
+    .sd-result__summary .sd-item-status.error{color:var(--sd-error);}
+
+    .sd-footer{text-align:center;padding:2rem;font-size:.82rem;color:var(--sd-text-light);border-top:1px solid var(--sd-border);margin-top:2rem;}
+    .sd-footer a{color:var(--sd-accent-dark);}
+
+    @media print{
+      .sd-cover{padding:1.5rem;}
+      .sd-step{display:block !important;break-inside:avoid;border:1px solid #ccc;}
+      .sd-nav,.sd-tabs,.sd-progress{display:none!important;}
+      @page{size:A4 portrait;margin:1.5cm;}
+    }
+  </style>
+</head>
+<body class="sd-page">
+
+  <header class="sd-cover">
+    <div class="sd-cover__overline">Fase 4 — Prototipar</div>
+    <h1 class="sd-cover__title">Simulador de Depósito</h1>
+    <p class="sd-cover__sub">Simule o processo completo de depósito de patente ou marca no INPI, passo a passo, com feedback em tempo real.</p>
+    <div class="sd-cover__meta">
+      <span>📝 7 etapas</span>
+      <span>⏱ 30–40 min</span>
+      <span>👥 Individual / Dupla</span>
+      <span>💻 Digital interativo</span>
+    </div>
+  </header>
+
+  <main class="sd-container">
+
+    <!-- TYPE TABS -->
+    <div class="sd-tabs">
+      <button class="sd-tab active" onclick="setType('patente')" id="tab-patente">🔬 Patente de Invenção</button>
+      <button class="sd-tab" onclick="setType('modelo')" id="tab-modelo">🔧 Modelo de Utilidade</button>
+      <button class="sd-tab" onclick="setType('marca')" id="tab-marca">®️ Marca</button>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="sd-progress"><div class="sd-progress__fill" id="progressFill" style="width:14%"></div></div>
+    <div class="sd-step-label" id="stepLabel">Etapa 1 de 7 — Busca de Anterioridade</div>
+
+    <!-- ==================== STEP 1: BUSCA ==================== -->
+    <div class="sd-step active" id="step-1">
+      <h3>🔍 Etapa 1 — Busca de Anterioridade</h3>
+      <p>Antes de depositar, é <strong>essencial</strong> verificar se sua criação já existe. A busca de anterioridade evita gastos desnecessários e fortalece seu pedido.</p>
+      <div class="sd-legal-note">
+        <strong>⚖️ Art. 11, LPI (Lei 9.279/96):</strong> "A invenção e o modelo de utilidade são considerados novos quando não compreendidos no estado da técnica." A busca verifica exatamente isso.
+      </div>
+
+      <label>Termos de busca utilizados (palavras-chave):</label>
+      <input type="text" id="f-search-terms" placeholder="Ex.: filtro cerâmico portátil purificação água">
+
+      <label>Bases consultadas:</label>
+      <div class="sd-checklist" id="f-search-bases">
+        <label><input type="checkbox" value="inpi"> Base INPI (pePI)</label>
+        <label><input type="checkbox" value="patentscope"> Patentscope (WIPO)</label>
+        <label><input type="checkbox" value="google-patents"> Google Patents</label>
+        <label><input type="checkbox" value="espacenet"> Espacenet (EPO)</label>
+        <label><input type="checkbox" value="lens"> The Lens</label>
+      </div>
+
+      <label>Resultados encontrados (resuma os mais relevantes):</label>
+      <textarea id="f-search-results" placeholder="Ex.: Encontrei 3 patentes de filtros cerâmicos (BR102019..., WO2018...), porém nenhuma utiliza a técnica de cerâmica macuxi com poros de 0,5 micron. Minha invenção é distinta."></textarea>
+
+      <label>Conclusão da busca:</label>
+      <select id="f-search-conclusion">
+        <option value="">Selecione...</option>
+        <option value="nova">A criação é NOVA — não há anterioridade impeditiva</option>
+        <option value="parcial">Há anterioridade parcial — preciso diferenciar</option>
+        <option value="existe">Já existe algo muito similar — risco alto</option>
+      </select>
+
+      <div class="sd-tip">
+        <strong>💡 Dica:</strong> Combine palavras-chave em português E inglês. Use a classificação IPC (ex.: C02F = tratamento de água) para refinar. Consulte o <a href="https://www.gov.br/inpi/pt-br/assuntos/arquivos-cepit/TUTORIALDEBUSCASMdulo4_BasePatentscope_verso27072018.pdf" target="_blank">Guia de Buscas do INPI</a>.
+      </div>
+
+      <div class="sd-validation" id="val-1"></div>
+    </div>
+
+    <!-- ==================== STEP 2: CLASSIFICAÇÃO ==================== -->
+    <div class="sd-step" id="step-2">
+      <h3>🏷️ Etapa 2 — Classificação</h3>
+      <p>Classifique sua criação de acordo com o sistema internacional (IPC para patentes, Nice para marcas).</p>
+      <div class="sd-legal-note">
+        <strong>⚖️ Classificação IPC:</strong> Acordo de Estrasburgo (1971). 8 seções (A–H), subdivididas em classes, subclasses e grupos. Obrigatória para patentes. <a href="https://www.gov.br/inpi/pt-br/servicos/patentes/classificacao" target="_blank">Guia IPC INPI</a>.
+      </div>
+
+      <div id="classification-patente">
+        <label>Seção IPC principal:</label>
+        <select id="f-ipc-section">
+          <option value="">Selecione a seção...</option>
+          <option value="A">A — Necessidades humanas</option>
+          <option value="B">B — Operações de processamento; transporte</option>
+          <option value="C">C — Química; metalurgia</option>
+          <option value="D">D — Têxteis; papel</option>
+          <option value="E">E — Construções fixas</option>
+          <option value="F">F — Engenharia mecânica; iluminação; aquecimento</option>
+          <option value="G">G — Física</option>
+          <option value="H">H — Eletricidade</option>
+        </select>
+        <label>Código IPC completo (se souber):</label>
+        <input type="text" id="f-ipc-full" placeholder="Ex.: C02F 1/28 (tratamento de água por adsorção)">
+      </div>
+
+      <div id="classification-marca" style="display:none;">
+        <label>Classe Nice (NCL):</label>
+        <select id="f-nice-class">
+          <option value="">Selecione...</option>
+          <option value="5">Classe 5 — Produtos farmacêuticos</option>
+          <option value="9">Classe 9 — Aparelhos científicos, software</option>
+          <option value="25">Classe 25 — Vestuário</option>
+          <option value="29">Classe 29 — Alimentos (carnes, conservas)</option>
+          <option value="30">Classe 30 — Alimentos (café, farinhas, molhos)</option>
+          <option value="32">Classe 32 — Bebidas</option>
+          <option value="35">Classe 35 — Publicidade, gestão de negócios</option>
+          <option value="41">Classe 41 — Educação, entretenimento</option>
+          <option value="42">Classe 42 — Serviços científicos/tecnológicos</option>
+          <option value="43">Classe 43 — Serviços de alimentação</option>
+          <option value="other">Outra classe</option>
+        </select>
+        <label>Especificação de produtos/serviços:</label>
+        <textarea id="f-nice-spec" placeholder="Ex.: Café torrado e moído; café em cápsulas; café solúvel."></textarea>
+      </div>
+
+      <div class="sd-tip">
+        <strong>💡 Dica:</strong> Para patentes, use o <a href="https://ipc.inpi.gov.br/" target="_blank">buscador IPC do INPI</a>. Para marcas, consulte a <a href="https://www.gov.br/inpi/pt-br/servicos/marcas/classificacao" target="_blank">Classificação Nice</a>.
+      </div>
+      <div class="sd-validation" id="val-2"></div>
+    </div>
+
+    <!-- ==================== STEP 3: DOCUMENTAÇÃO ==================== -->
+    <div class="sd-step" id="step-3">
+      <h3>📄 Etapa 3 — Documentação Técnica</h3>
+      <div id="doc-patente">
+        <p>Redija os elementos essenciais do pedido de patente conforme o <strong>art. 19 da LPI</strong>.</p>
+        <div class="sd-legal-note">
+          <strong>⚖️ Art. 19, LPI:</strong> O pedido deverá conter: relatório descritivo, reivindicações, desenhos (se for o caso), resumo e comprovante de pagamento da retribuição.
+        </div>
+
+        <label>1. Título da Invenção:</label>
+        <input type="text" id="f-titulo" placeholder="Ex.: Filtro de água portátil à base de cerâmica microporosa">
+
+        <label>2. Campo da Invenção (setor técnico):</label>
+        <textarea id="f-campo" rows="2" placeholder="Ex.: A presente invenção refere-se ao campo de tratamento de água potável, mais especificamente a filtros portáteis de baixo custo para uso em comunidades rurais."></textarea>
+
+        <label>3. Estado da Técnica (o que já existe):</label>
+        <textarea id="f-estado-tecnica" rows="3" placeholder="Descreva as soluções existentes e suas limitações. Ex.: Filtros de cerâmica convencionais apresentam baixa vazão (0,5L/h) e vida útil reduzida (6 meses). Sistemas de osmose reversa são eficazes mas requerem energia elétrica, inviáveis para áreas remotas."></textarea>
+
+        <label>4. Descrição da Invenção (como funciona):</label>
+        <textarea id="f-descricao" rows="4" placeholder="Descreva sua invenção em detalhes suficientes para que um técnico possa reproduzi-la. Inclua materiais, proporções, processos e resultados."></textarea>
+
+        <label>5. Reivindicação Principal (independente):</label>
+        <textarea id="f-reivindicacao" rows="3" placeholder="Ex.: Filtro de água portátil CARACTERIZADO POR compreender um corpo cilíndrico de cerâmica microporosa obtida a partir de argila caulinítica com granulometria entre 0,3 e 0,8 microns, capaz de reter 99,9% de bactérias com vazão mínima de 5L/h."></textarea>
+
+        <label>6. Resumo (50–200 palavras):</label>
+        <textarea id="f-resumo" rows="3" placeholder="Resumo conciso da invenção: problema, solução e principal vantagem."></textarea>
+        <div style="font-size:.8rem;color:var(--sd-text-light);text-align:right;" id="resumo-count">0 / 200 palavras</div>
+      </div>
+
+      <div id="doc-marca" style="display:none;">
+        <p>Prepare o pedido de registro de marca conforme o <strong>art. 155 da LPI</strong>.</p>
+        <div class="sd-legal-note">
+          <strong>⚖️ Art. 155, LPI:</strong> O pedido deverá referir-se a um único sinal distintivo e indicar a classe e especificação dos produtos ou serviços.
+        </div>
+
+        <label>1. Nome/Sinal da Marca:</label>
+        <input type="text" id="f-marca-nome" placeholder="Ex.: Monte Roraima Coffee™">
+
+        <label>2. Forma de Apresentação:</label>
+        <select id="f-marca-forma">
+          <option value="">Selecione...</option>
+          <option value="nominativa">Nominativa (apenas palavras)</option>
+          <option value="figurativa">Figurativa (apenas imagem/logotipo)</option>
+          <option value="mista">Mista (palavras + imagem)</option>
+          <option value="tridimensional">Tridimensional (forma do produto)</option>
+        </select>
+
+        <label>3. Justificativa de Distintividade:</label>
+        <textarea id="f-marca-justificativa" rows="3" placeholder="Ex.: O nome 'Monte Roraima Coffee' combina referência geográfica com o produto. Embora contenha termo geográfico, é marca mista com elemento figurativo distintivo (logo do tepui estilizado), conferindo caráter original."></textarea>
+
+        <label>4. Busca de Disponibilidade:</label>
+        <select id="f-marca-busca">
+          <option value="">Selecione o resultado...</option>
+          <option value="disponivel">Nome disponível — sem conflitos encontrados</option>
+          <option value="similar">Nome similar encontrado em classe diferente</option>
+          <option value="conflito">Conflito identificado — mesma classe</option>
+        </select>
+      </div>
+      <div class="sd-validation" id="val-3"></div>
+    </div>
+
+    <!-- ==================== STEP 4: INVENTORES / TITULAR ==================== -->
+    <div class="sd-step" id="step-4">
+      <h3>👥 Etapa 4 — Inventores e Titular</h3>
+      <p>Defina quem é inventor/autor e quem será titular do direito.</p>
+      <div class="sd-legal-note">
+        <strong>⚖️ Art. 6º, LPI:</strong> Ao autor de invenção será assegurado o direito de obter a patente que lhe garanta a propriedade. <strong>Lei 10.973/2004, art. 11:</strong> Em ICTs públicas, a titularidade pertence à instituição, cabendo ao inventor participação nos ganhos econômicos.
+      </div>
+
+      <label>Inventor(a) 1 (principal):</label>
+      <div class="sd-field-group">
+        <input type="text" id="f-inventor1-nome" placeholder="Nome completo">
+        <input type="text" id="f-inventor1-vinculo" placeholder="Vínculo (ex.: UFRR, autônomo, MEI)">
+      </div>
+
+      <label>Inventor(a) 2 (se houver coinvenção):</label>
+      <div class="sd-field-group">
+        <input type="text" id="f-inventor2-nome" placeholder="Nome completo (opcional)">
+        <input type="text" id="f-inventor2-vinculo" placeholder="Vínculo">
+      </div>
+
+      <label>Titular (pessoa física ou jurídica dona do direito):</label>
+      <div class="sd-field-group">
+        <input type="text" id="f-titular-nome" placeholder="Ex.: Universidade Federal de Roraima (UFRR)">
+        <select id="f-titular-tipo">
+          <option value="">Tipo...</option>
+          <option value="ict">ICT pública (desconto 50% INPI)</option>
+          <option value="pf">Pessoa física (desconto 50% INPI)</option>
+          <option value="mei">MEI (desconto 50% INPI)</option>
+          <option value="me-epp">ME/EPP (desconto 50% INPI)</option>
+          <option value="pj">Pessoa jurídica (valor integral)</option>
+        </select>
+      </div>
+
+      <div class="sd-tip">
+        <strong>💡 Dica:</strong> Se a criação nasceu na universidade (ICT), a titularidade é institucional (Lei 10.973/2004). O inventor tem direito a participação nos ganhos (mínimo 5%, máximo 33% — art. 13). A universidade obtém desconto de 50% em todas as taxas do INPI.
+      </div>
+      <div class="sd-validation" id="val-4"></div>
+    </div>
+
+    <!-- ==================== STEP 5: CUSTOS E GRU ==================== -->
+    <div class="sd-step" id="step-5">
+      <h3>💰 Etapa 5 — Custos e Pagamento (GRU)</h3>
+      <p>Calcule os custos com base na Portaria GM/MDIC nº 110/2025.</p>
+
+      <div id="costs-display"></div>
+
+      <label>Seu perfil de desconto:</label>
+      <select id="f-desconto" onchange="recalcCosts()">
+        <option value="integral">Sem desconto (PJ padrão)</option>
+        <option value="desconto">Com desconto 50% (ICT / PF / MEI / ME-EPP)</option>
+      </select>
+
+      <div id="costs-table-area"></div>
+
+      <div class="sd-legal-note">
+        <strong>⚖️ Portaria GM/MDIC nº 110/2025 + Portaria INPI/PR nº 10/2025:</strong> Define valores e descontos. Pagamento via GRU (Guia de Recolhimento da União) no portal e-INPI antes do depósito.
+      </div>
+
+      <div class="sd-checklist">
+        <label><input type="checkbox" id="f-gru-gerada"> Simulei a geração da GRU no portal do INPI</label>
+        <label><input type="checkbox" id="f-gru-paga"> Simulei o pagamento da GRU</label>
+      </div>
+      <div class="sd-validation" id="val-5"></div>
+    </div>
+
+    <!-- ==================== STEP 6: DEPÓSITO ==================== -->
+    <div class="sd-step" id="step-6">
+      <h3>📤 Etapa 6 — Depósito Eletrônico</h3>
+      <p>Simule o envio do pedido pelo sistema eletrônico do INPI.</p>
+      <div class="sd-legal-note" id="deposit-legal-note">
+        <strong>⚖️ Depósito via e-Patentes:</strong> Arts. 19–22, LPI. O pedido deve conter: formulário, relatório descritivo, reivindicações, resumo, desenhos e comprovante de pagamento (GRU). <a href="https://www.gov.br/inpi/pt-br/servicos/patentes/tutorial-de-deposito" target="_blank">Tutorial INPI</a>.
+      </div>
+
+      <label>Checklist de documentos para envio:</label>
+      <div class="sd-checklist" id="deposit-checklist">
+        <!-- Filled by JS based on type -->
+      </div>
+
+      <label>Data simulada de depósito:</label>
+      <input type="text" id="f-data-deposito" placeholder="Ex.: 02/05/2026" value="">
+
+      <label>Número de protocolo simulado:</label>
+      <div style="background:var(--sd-bg);border:2px dashed var(--sd-accent);border-radius:8px;padding:1rem;text-align:center;margin:.5rem 0;">
+        <span style="font-family:'Poppins',sans-serif;font-size:1.3rem;font-weight:700;color:var(--sd-accent-dark);" id="protocolo-num">BR 10 2026 XXXXXX-X</span>
+        <br><span style="font-size:.8rem;color:var(--sd-text-light);">(número simulado para fins didáticos)</span>
+      </div>
+
+      <button class="sd-btn sd-btn--primary" onclick="generateProtocol()" style="margin:.5rem 0;">🎲 Gerar Número de Protocolo</button>
+      <div class="sd-validation" id="val-6"></div>
+    </div>
+
+    <!-- ==================== STEP 7: ACOMPANHAMENTO ==================== -->
+    <div class="sd-step" id="step-7">
+      <h3>📊 Etapa 7 — Acompanhamento Pós-Depósito</h3>
+      <p>Após o depósito, o que acontece? Simule as próximas etapas do processo no INPI.</p>
+
+      <div id="postdeposit-timeline"></div>
+
+      <div class="sd-legal-note">
+        <strong>⚖️ Prazos importantes:</strong> Publicação do pedido na RPI em até 18 meses (art. 30, LPI) ou antecipada (art. 31). Pedido de exame em até 36 meses (art. 33). Anuidades a partir do 3º ano do depósito (art. 84).
+      </div>
+
+      <label>Anote os próximos 3 passos reais que você faria:</label>
+      <textarea id="f-proximos-passos" rows="3" placeholder="1. Acompanhar a RPI semanalmente&#10;2. Solicitar exame técnico em até 36 meses&#10;3. Pagar anuidade do 3º ano"></textarea>
+    </div>
+
+    <!-- RESULT -->
+    <div class="sd-result" id="result-screen">
+      <h2>🎓 Simulação Concluída!</h2>
+      <div class="sd-result__score" id="result-score"></div>
+      <p id="result-message"></p>
+      <div class="sd-result__summary" id="result-summary"></div>
+      <div style="margin-top:1.5rem;">
+        <button class="sd-btn sd-btn--primary" onclick="window.print()">🖨️ Imprimir Relatório</button>
+        <button class="sd-btn sd-btn--outline" onclick="resetSimulator()">↺ Reiniciar</button>
+        <a href="canvas-estrategia.html" class="sd-btn sd-btn--outline">📐 Canvas de Estratégia</a>
+        <a href="index.html" class="sd-btn sd-btn--outline">🏠 Toolkit</a>
+      </div>
+    </div>
+
+    <!-- NAV BUTTONS (outside steps for fixed position) -->
+    <div class="sd-nav" id="nav-buttons">
+      <button class="sd-btn sd-btn--outline" onclick="prevStep()" id="btn-prev" disabled>← Anterior</button>
+      <button class="sd-btn sd-btn--primary" onclick="nextStep()" id="btn-next">Próxima →</button>
+    </div>
+
+  </main>
+
+  <footer class="sd-footer">
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+    <p>Fonte de custos: Portaria GM/MDIC nº 110/2025 · Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96</a> · <a href="https://www.gov.br/inpi/pt-br/servicos/patentes/tutorial-de-deposito" target="_blank">Tutorial INPI</a></p>
+  </footer>
+
+  <script>
+    // ============================================================
+    //  STATE
+    // ============================================================
+    let currentStep = 1;
+    const totalSteps = 7;
+    let currentType = 'patente'; // 'patente', 'modelo', 'marca'
+
+    const stepTitles = {
+      1:'Busca de Anterioridade',2:'Classificação',3:'Documentação Técnica',
+      4:'Inventores e Titular',5:'Custos e GRU',6:'Depósito Eletrônico',7:'Acompanhamento'
+    };
+
+    const costData = {
+      patente: {
+        items:[
+          {label:'Depósito eletrônico (cód. 200)',normal:260,desc:90},
+          {label:'Pedido de exame — até 10 reiv. (cód. 203)',normal:870,desc:435},
+          {label:'Carta-patente (cód. 212)',normal:240,desc:120},
+        ],
+        total:{normal:1370,desc:645}
+      },
+      modelo: {
+        items:[
+          {label:'Depósito eletrônico (cód. 202)',normal:260,desc:90},
+          {label:'Pedido de exame (cód. 204)',normal:560,desc:280},
+          {label:'Carta-patente (cód. 212)',normal:240,desc:120},
+        ],
+        total:{normal:1060,desc:490}
+      },
+      marca: {
+        items:[
+          {label:'Pedido — espec. pré-aprovada (cód. 389)',normal:360,desc:180},
+          {label:'1º decênio + certificado (cód. 372)',normal:750,desc:375},
+        ],
+        total:{normal:1110,desc:555}
+      }
+    };
+
+    const depositChecklist = {
+      patente:[
+        'Formulário de depósito (e-Patentes)',
+        'Relatório descritivo (PDF)',
+        'Quadro reivindicatório (PDF)',
+        'Desenhos técnicos — se aplicável (PDF)',
+        'Resumo — 50 a 200 palavras (PDF)',
+        'Comprovante de pagamento da GRU',
+        'Procuração — se representado (PDF)',
+        'Declaração de inventor(es)'
+      ],
+      modelo:[
+        'Formulário de depósito (e-Patentes)',
+        'Relatório descritivo (PDF)',
+        'Quadro reivindicatório (PDF)',
+        'Desenhos técnicos — obrigatórios para MU (PDF)',
+        'Resumo — 50 a 200 palavras (PDF)',
+        'Comprovante de pagamento da GRU',
+        'Declaração de inventor(es)'
+      ],
+      marca:[
+        'Formulário de depósito (e-Marcas)',
+        'Imagem da marca (JPEG, 945×945 px) — se figurativa ou mista',
+        'Comprovante de pagamento da GRU',
+        'Procuração — se representado',
+        'Declaração de atividade (para marcas de serviço)'
+      ]
+    };
+
+    const postDepositTimeline = {
+      patente:[
+        {time:'Imediato',event:'Recebimento do nº de protocolo e data de depósito.',icon:'📋'},
+        {time:'1–4 semanas',event:'Exame formal — verificação de documentação. Possível exigência formal (90 dias para cumprir).',icon:'📝'},
+        {time:'18 meses',event:'Publicação na RPI (Revista da Propriedade Industrial). Pode solicitar antecipação (art. 31).',icon:'📰'},
+        {time:'Até 36 meses',event:'Solicitar exame técnico (GRU cód. 203). Se não solicitar, o pedido é arquivado.',icon:'🔬'},
+        {time:'36–60 meses',event:'Exame de mérito pelo examinador. Possíveis exigências técnicas e pareceres.',icon:'⚙️'},
+        {time:'Após deferimento',event:'Pagar taxa de expedição de carta-patente (GRU cód. 212). Patente concedida!',icon:'🏆'},
+        {time:'Anual (a partir do 3º ano)',event:'Pagar anuidade para manter o pedido/patente em vigor.',icon:'💰'}
+      ],
+      modelo:[
+        {time:'Imediato',event:'Recebimento do nº de protocolo.',icon:'📋'},
+        {time:'1–4 semanas',event:'Exame formal. Desenhos são obrigatórios para MU.',icon:'📝'},
+        {time:'18 meses',event:'Publicação na RPI.',icon:'📰'},
+        {time:'Até 36 meses',event:'Solicitar exame técnico (GRU cód. 204).',icon:'🔬'},
+        {time:'24–48 meses',event:'Exame de mérito. Verificação de ato inventivo e melhoria funcional.',icon:'⚙️'},
+        {time:'Após deferimento',event:'Carta-patente concedida — vigência 15 anos.',icon:'🏆'},
+        {time:'Anual',event:'Anuidades obrigatórias.',icon:'💰'}
+      ],
+      marca:[
+        {time:'Imediato',event:'Recebimento do nº de processo e data de depósito.',icon:'📋'},
+        {time:'1–2 semanas',event:'Exame formal — verificação de documentação e enquadramento.',icon:'📝'},
+        {time:'Publicação na RPI',event:'Abertura de prazo de oposição: 60 dias para terceiros se manifestarem.',icon:'📰'},
+        {time:'Após oposição',event:'Exame de mérito — análise de distintividade, impedimentos legais.',icon:'⚙️'},
+        {time:'6–12 meses',event:'Decisão: deferimento ou indeferimento. Se deferido → pagar 1º decênio.',icon:'🏆'},
+        {time:'A cada 10 anos',event:'Prorrogação do registro (último ano de vigência).',icon:'💰'}
+      ]
+    };
+
+    // ============================================================
+    //  FUNCTIONS
+    // ============================================================
+    function setType(type) {
+      currentType = type;
+      document.querySelectorAll('.sd-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-'+type).classList.add('active');
+
+      // Toggle visibility of type-specific sections
+      const isPatente = type === 'patente' || type === 'modelo';
+      document.getElementById('classification-patente').style.display = isPatente ? 'block' : 'none';
+      document.getElementById('classification-marca').style.display = isPatente ? 'none' : 'block';
+      document.getElementById('doc-patente').style.display = isPatente ? 'block' : 'none';
+      document.getElementById('doc-marca').style.display = isPatente ? 'none' : 'block';
+
+      // Update deposit legal note
+      if (type === 'marca') {
+        document.getElementById('deposit-legal-note').innerHTML = '<strong>⚖️ Depósito via e-Marcas:</strong> Art. 155, LPI. O pedido deverá referir-se a um único sinal distintivo. <a href="https://www.gov.br/inpi/pt-br/servicos/marcas/guia-basico" target="_blank">Guia Básico INPI</a>.';
+      } else {
+        document.getElementById('deposit-legal-note').innerHTML = '<strong>⚖️ Depósito via e-Patentes:</strong> Arts. 19–22, LPI. <a href="https://www.gov.br/inpi/pt-br/servicos/patentes/tutorial-de-deposito" target="_blank">Tutorial INPI</a>.';
+      }
+
+      recalcCosts();
+      renderDepositChecklist();
+      renderPostDeposit();
+      goToStep(1);
+    }
+
+    function recalcCosts() {
+      const discount = document.getElementById('f-desconto').value === 'desconto';
+      const data = costData[currentType];
+      let html = '<table class="ce-cost-table" style="width:100%;border-collapse:collapse;font-size:.88rem;margin:.8rem 0;">';
+      html += '<thead><tr><th style="background:var(--sd-accent);color:#fff;padding:.5rem;text-align:left;">Etapa</th><th style="background:var(--sd-accent);color:#fff;padding:.5rem;text-align:right;">Valor (R$)</th></tr></thead><tbody>';
+      data.items.forEach(item => {
+        const val = discount ? item.desc : item.normal;
+        html += `<tr><td style="padding:.5rem;border-bottom:1px solid var(--sd-border);">${item.label}</td><td style="padding:.5rem;text-align:right;border-bottom:1px solid var(--sd-border);">${val.toFixed(2)}</td></tr>`;
+      });
+      const total = discount ? data.total.desc : data.total.normal;
+      html += `<tr style="background:rgba(76,175,80,.1);font-weight:700;"><td style="padding:.5rem;">TOTAL ESTIMADO</td><td style="padding:.5rem;text-align:right;">R$ ${total.toFixed(2)}</td></tr>`;
+      html += '</tbody></table>';
+      if (discount) html += '<p style="font-size:.8rem;color:var(--sd-accent-dark);">* Desconto de 50% aplicado (ICT, PF, MEI, ME/EPP — Portaria INPI/PR nº 10/2025)</p>';
+      document.getElementById('costs-table-area').innerHTML = html;
+    }
+
+    function renderDepositChecklist() {
+      const items = depositChecklist[currentType] || depositChecklist.patente;
+      let html = '';
+      items.forEach((item, i) => {
+        html += `<label><input type="checkbox" id="dep-check-${i}"> ${item}</label>`;
+      });
+      document.getElementById('deposit-checklist').innerHTML = html;
+    }
+
+    function renderPostDeposit() {
+      const timeline = postDepositTimeline[currentType] || postDepositTimeline.patente;
+      let html = '<div style="margin:1rem 0;">';
+      timeline.forEach(item => {
+        html += `<div style="display:flex;gap:1rem;margin-bottom:1rem;align-items:flex-start;">
+          <span style="font-size:1.5rem;">${item.icon}</span>
+          <div>
+            <strong style="font-family:Poppins,sans-serif;font-size:.85rem;color:var(--sd-accent-dark);">${item.time}</strong>
+            <p style="margin:.2rem 0;font-size:.9rem;">${item.event}</p>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+      document.getElementById('postdeposit-timeline').innerHTML = html;
+    }
+
+    function generateProtocol() {
+      const prefix = currentType === 'marca' ? 'BR 40 2026' : 'BR 10 2026';
+      const num = String(Math.floor(Math.random()*999999)).padStart(6,'0');
+      const digit = Math.floor(Math.random()*10);
+      document.getElementById('protocolo-num').textContent = `${prefix} ${num}-${digit}`;
+    }
+
+    function goToStep(n) {
+      document.querySelectorAll('.sd-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-'+n).classList.add('active');
+      currentStep = n;
+
+      // Progress
+      const pct = Math.round((n / totalSteps) * 100);
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('stepLabel').textContent = `Etapa ${n} de ${totalSteps} — ${stepTitles[n]}`;
+
+      // Nav buttons
+      document.getElementById('btn-prev').disabled = n === 1;
+      document.getElementById('btn-next').textContent = n === totalSteps ? '✅ Concluir Simulação' : 'Próxima →';
+
+      // Hide result
+      document.getElementById('result-screen').classList.remove('active');
+      document.getElementById('nav-buttons').style.display = 'flex';
+
+      window.scrollTo({top: document.querySelector('.sd-progress').offsetTop - 20, behavior:'smooth'});
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps) {
+        goToStep(currentStep + 1);
+      } else {
+        showResult();
+      }
+    }
+    function prevStep() {
+      if (currentStep > 1) goToStep(currentStep - 1);
+    }
+
+    function showResult() {
+      document.querySelectorAll('.sd-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('nav-buttons').style.display = 'none';
+      const result = document.getElementById('result-screen');
+      result.classList.add('active');
+
+      // Score calculation
+      let score = 0; let checks = [];
+      // Step 1
+      const terms = document.getElementById('f-search-terms').value.trim();
+      const bases = document.querySelectorAll('#f-search-bases input:checked').length;
+      const conclusion = document.getElementById('f-search-conclusion').value;
+      if (terms) { score += 10; checks.push({label:'Termos de busca',status:'ok',text:'✓ Preenchido'}); }
+      else checks.push({label:'Termos de busca',status:'error',text:'✗ Faltou'});
+      if (bases >= 2) { score += 15; checks.push({label:'Bases consultadas ('+bases+')',status:'ok',text:'✓ '+bases+' bases'}); }
+      else { score += bases * 5; checks.push({label:'Bases consultadas',status:'warn',text:'⚠ Apenas '+bases}); }
+      if (conclusion) { score += 10; checks.push({label:'Conclusão da busca',status:'ok',text:'✓ '+conclusion}); }
+      else checks.push({label:'Conclusão da busca',status:'error',text:'✗ Faltou'});
+
+      // Step 2
+      if (currentType !== 'marca') {
+        if (document.getElementById('f-ipc-section').value) { score += 10; checks.push({label:'Seção IPC',status:'ok',text:'✓ Seção '+document.getElementById('f-ipc-section').value}); }
+        else checks.push({label:'Seção IPC',status:'error',text:'✗ Faltou'});
+      } else {
+        if (document.getElementById('f-nice-class').value) { score += 10; checks.push({label:'Classe Nice',status:'ok',text:'✓ Classe '+document.getElementById('f-nice-class').value}); }
+        else checks.push({label:'Classe Nice',status:'error',text:'✗ Faltou'});
+      }
+
+      // Step 3
+      if (currentType !== 'marca') {
+        const fields3 = ['f-titulo','f-campo','f-estado-tecnica','f-descricao','f-reivindicacao','f-resumo'];
+        let filled3 = 0;
+        fields3.forEach(id => { if (document.getElementById(id).value.trim()) filled3++; });
+        const pct3 = Math.round((filled3/fields3.length)*25);
+        score += pct3;
+        checks.push({label:'Documentação técnica ('+filled3+'/'+fields3.length+')',status: filled3===fields3.length?'ok':filled3>=4?'warn':'error', text: filled3+'/'+fields3.length+' campos'});
+      } else {
+        const fields3m = ['f-marca-nome','f-marca-forma','f-marca-justificativa','f-marca-busca'];
+        let filled3m = 0;
+        fields3m.forEach(id => { const el = document.getElementById(id); if (el && el.value.trim()) filled3m++; });
+        const pct3m = Math.round((filled3m/fields3m.length)*25);
+        score += pct3m;
+        checks.push({label:'Documentação de marca ('+filled3m+'/'+fields3m.length+')',status:filled3m===fields3m.length?'ok':'warn',text:filled3m+'/'+fields3m.length});
+      }
+
+      // Step 4
+      if (document.getElementById('f-inventor1-nome').value.trim() || document.getElementById('f-titular-nome').value.trim()) { score += 10; checks.push({label:'Inventores/Titular',status:'ok',text:'✓ Definidos'}); }
+      else checks.push({label:'Inventores/Titular',status:'error',text:'✗ Faltou'});
+
+      // Step 5
+      const gru1 = document.getElementById('f-gru-gerada').checked;
+      const gru2 = document.getElementById('f-gru-paga').checked;
+      if (gru1 && gru2) { score += 10; checks.push({label:'GRU simulada',status:'ok',text:'✓ Gerada e paga'}); }
+      else if (gru1) { score += 5; checks.push({label:'GRU simulada',status:'warn',text:'⚠ Gerada mas não paga'}); }
+      else checks.push({label:'GRU simulada',status:'error',text:'✗ Não simulada'});
+
+      // Step 6
+      const depChecks = document.querySelectorAll('#deposit-checklist input:checked').length;
+      const depTotal = document.querySelectorAll('#deposit-checklist input').length;
+      const depPct = Math.round((depChecks/depTotal)*10);
+      score += depPct;
+      checks.push({label:'Checklist de depósito ('+depChecks+'/'+depTotal+')',status:depChecks===depTotal?'ok':depChecks>depTotal/2?'warn':'error',text:depChecks+'/'+depTotal});
+
+      // Cap at 100
+      score = Math.min(score, 100);
+
+      document.getElementById('result-score').textContent = score + '/100';
+      let msg = '';
+      if (score >= 90) msg = '🏆 Excelente! Você está preparado(a) para um depósito real no INPI.';
+      else if (score >= 70) msg = '👍 Bom trabalho! Revise os pontos com ⚠ para um pedido mais robusto.';
+      else if (score >= 50) msg = '📝 Razoável. Há lacunas importantes — revise os itens marcados com ✗.';
+      else msg = '🔄 Precisa de mais prática. Refaça a simulação com mais atenção a cada etapa.';
+      document.getElementById('result-message').textContent = msg;
+
+      let summaryHtml = '';
+      checks.forEach(c => {
+        summaryHtml += `<div class="sd-item"><span class="sd-item-label">${c.label}</span><span class="sd-item-status ${c.status}">${c.text}</span></div>`;
+      });
+      document.getElementById('result-summary').innerHTML = summaryHtml;
+
+      result.scrollIntoView({behavior:'smooth'});
+    }
+
+    function resetSimulator() {
+      document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+      document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+      document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+      document.getElementById('protocolo-num').textContent = 'BR 10 2026 XXXXXX-X';
+      document.getElementById('result-screen').classList.remove('active');
+      setType('patente');
+    }
+
+    // Word count for resumo
+    document.getElementById('f-resumo')?.addEventListener('input', function(){
+      const words = this.value.trim().split(/\s+/).filter(w=>w).length;
+      const counter = document.getElementById('resumo-count');
+      counter.textContent = words + ' / 200 palavras';
+      counter.style.color = words > 200 ? 'var(--sd-error)' : words >= 50 ? 'var(--sd-accent)' : 'var(--sd-text-light)';
+    });
+
+    // Today's date
+    document.getElementById('f-data-deposito').value = new Date().toLocaleDateString('pt-BR');
+
+    // Init
+    recalcCosts();
+    renderDepositChecklist();
+    renderPostDeposit();
+  </script>
+</body>
+</html>

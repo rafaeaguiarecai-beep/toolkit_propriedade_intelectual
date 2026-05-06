@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linha do Tempo da PI no Brasil — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+    :root {
+        --t-bg: #FAFAF7;
+        --t-surface: #FFFFFF;
+        --t-text: #1A1A1A;
+        --t-text-secondary: #5A5A5A;
+        --t-text-muted: #8A8A8A;
+        --t-border: #E8E5E0;
+        --t-accent: #7209B7;
+        --t-font-serif: 'Playfair Display', Georgia, serif;
+        --t-font-sans: 'Inter', -apple-system, sans-serif;
+        --t-font-heading: 'Poppins', sans-serif;
+        --t-max-width: 900px;
+        --t-transition: all 0.3s ease;
+    }
+    [data-theme="dark"] {
+        --t-bg:#111; --t-surface:#1A1A1A; --t-text:#EAEAEA;
+        --t-text-secondary:#AAA; --t-text-muted:#666; --t-border:#2A2A2A;
+    }
+
+    .t-page { background:var(--t-bg); min-height:100vh; padding-top:100px; padding-bottom:80px; }
+    .t-container { max-width:var(--t-max-width); margin:0 auto; padding:0 24px; }
+
+    /* Cover */
+    .t-cover { position:relative; background:var(--t-text); color:white; padding:60px 40px; margin-bottom:48px; overflow:hidden; }
+    .t-cover::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 15% 85%, rgba(114,9,183,0.2) 0%, transparent 55%), radial-gradient(ellipse at 85% 15%, rgba(67,97,238,0.12) 0%, transparent 55%); pointer-events:none; }
+    .t-cover__overline { font-family:var(--t-font-sans); font-size:0.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--t-accent); margin-bottom:16px; position:relative; z-index:1; }
+    .t-cover__title { font-family:var(--t-font-serif); font-size:clamp(2rem,4.5vw,3rem); font-weight:800; line-height:1.15; margin-bottom:12px; position:relative; z-index:1; }
+    .t-cover__title em { font-style:italic; font-weight:600; color:var(--t-accent); }
+    .t-cover__subtitle { font-family:var(--t-font-sans); font-size:1.05rem; font-weight:300; line-height:1.7; max-width:560px; opacity:0.85; position:relative; z-index:1; }
+
+    /* Filter */
+    .t-filter { display:flex; gap:8px; margin-bottom:40px; flex-wrap:wrap; justify-content:center; }
+    .t-filter__btn { padding:6px 16px; font-family:var(--t-font-sans); font-size:0.8rem; font-weight:600; border:1px solid var(--t-border); background:var(--t-surface); color:var(--t-text-muted); cursor:pointer; transition:var(--t-transition); }
+    .t-filter__btn:hover { border-color:var(--t-text-muted); color:var(--t-text); }
+    .t-filter__btn.active { background:var(--t-text); color:var(--t-surface); border-color:var(--t-text); }
+
+    /* Timeline */
+    .t-timeline { position:relative; padding-left:60px; }
+    .t-timeline::before { content:''; position:absolute; left:28px; top:0; bottom:0; width:2px; background:linear-gradient(to bottom, var(--t-accent), #4361EE, #06D6A0, #FF6D00, #F72585); }
+
+    .t-event { position:relative; margin-bottom:40px; animation:tFadeIn 0.4s ease; }
+    .t-event.hidden { display:none; }
+
+    .t-event__dot {
+        position:absolute; left:-42px; top:8px;
+        width:22px; height:22px; border-radius:50%;
+        background:var(--t-surface); border:3px solid var(--t-accent);
+        z-index:2; display:flex; align-items:center; justify-content:center;
+        font-size:0.6rem; transition:var(--t-transition);
+    }
+
+    .t-event:hover .t-event__dot { transform:scale(1.3); box-shadow:0 0 0 4px rgba(114,9,183,0.15); }
+
+    .t-event__card {
+        background:var(--t-surface); border:1px solid var(--t-border);
+        padding:24px 28px; transition:var(--t-transition);
+        cursor:pointer; position:relative; overflow:hidden;
+    }
+
+    .t-event__card::before {
+        content:''; position:absolute; top:0; left:0; width:4px; height:100%;
+        background:var(--t-accent); transition:width 0.3s ease;
+    }
+
+    .t-event__card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); transform:translateX(4px); }
+    .t-event__card:hover::before { width:6px; }
+
+    .t-event__year {
+        font-family:var(--t-font-heading); font-size:0.7rem; font-weight:700;
+        letter-spacing:2px; text-transform:uppercase; color:var(--t-accent);
+        margin-bottom:6px;
+    }
+
+    .t-event__title {
+        font-family:var(--t-font-serif); font-size:1.2rem; font-weight:700;
+        color:var(--t-text); margin-bottom:8px; line-height:1.3;
+    }
+
+    .t-event__text {
+        font-size:0.9rem; color:var(--t-text-secondary); line-height:1.7;
+        display:none;
+    }
+
+    .t-event__card.expanded .t-event__text { display:block; animation:tFadeIn 0.3s ease; }
+
+    .t-event__tags { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+    .t-event__tag {
+        padding:2px 10px; font-size:0.65rem; font-weight:600;
+        letter-spacing:0.5px; text-transform:uppercase;
+        background:var(--t-bg); border:1px solid var(--t-border);
+        color:var(--t-text-muted);
+    }
+
+    .t-event__expand {
+        font-size:0.75rem; color:var(--t-text-muted); margin-top:8px;
+        font-weight:600; display:flex; align-items:center; gap:4px;
+    }
+
+    .t-event__card.expanded .t-event__expand span { display:none; }
+
+    /* Color variations */
+    .t-event--nacional .t-event__dot { border-color:#4361EE; }
+    .t-event--nacional .t-event__card::before { background:#4361EE; }
+    .t-event--nacional .t-event__year { color:#4361EE; }
+
+    .t-event--internacional .t-event__dot { border-color:#7209B7; }
+    .t-event--internacional .t-event__card::before { background:#7209B7; }
+    .t-event--internacional .t-event__year { color:#7209B7; }
+
+    .t-event--lei .t-event__dot { border-color:#06D6A0; }
+    .t-event--lei .t-event__card::before { background:#06D6A0; }
+    .t-event--lei .t-event__year { color:#06D6A0; }
+
+    .t-event--institucional .t-event__dot { border-color:#FF6D00; }
+    .t-event--institucional .t-event__card::before { background:#FF6D00; }
+    .t-event--institucional .t-event__year { color:#FF6D00; }
+
+    .t-event--judicial .t-event__dot { border-color:#F72585; }
+    .t-event--judicial .t-event__card::before { background:#F72585; }
+    .t-event--judicial .t-event__year { color:#F72585; }
+
+    /* Print */
+    @media print {
+        .header,.footer,.reading-progress,.theme-toggle,.t-print-hide { display:none!important; }
+        .t-page { padding-top:0; }
+        .t-event__text { display:block!important; }
+        .t-event__expand { display:none; }
+        .t-event { break-inside:avoid; }
+        @page { size:A3 portrait; margin:1.5cm; }
+        body { background:white; }
+    }
+
+    @keyframes tFadeIn {
+        from { opacity:0; transform:translateY(8px); }
+        to { opacity:1; transform:translateY(0); }
+    }
+
+    @media (max-width:768px) {
+        .t-cover { padding:40px 24px; }
+        .t-timeline { padding-left:40px; }
+        .t-timeline::before { left:14px; }
+        .t-event__dot { left:-32px; width:18px; height:18px; }
+    }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo"><span class="header__logo-icon">💡</span><div><strong class="header__logo-title">PI Thinking</strong><span class="header__logo-sub">Linha do Tempo</span></div></a>
+            <nav class="nav" id="nav"><ul class="nav__list"><li><a href="index.html" class="nav__link">← Voltar ao Início</a></li></ul></nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="t-page">
+        <div class="t-container">
+            <div class="t-cover">
+                <div class="t-cover__overline">Fase 2 — Diagnosticar</div>
+                <h1 class="t-cover__title">Linha do Tempo da <em>PI no Brasil</em></h1>
+                <p class="t-cover__subtitle">Dos primeiros privilégios de D. João VI em 1809 à Estratégia Nacional de 2021. Mais de 200 anos de evolução da Propriedade Intelectual brasileira em marcos históricos.</p>
+            </div>
+
+            <div class="t-filter t-print-hide" id="filterBar">
+                <button class="t-filter__btn active" onclick="filterEvents('all')">Todos</button>
+                <button class="t-filter__btn" onclick="filterEvents('internacional')">🌍 Internacional</button>
+                <button class="t-filter__btn" onclick="filterEvents('nacional')">🇧🇷 Nacional</button>
+                <button class="t-filter__btn" onclick="filterEvents('lei')">📜 Legislação</button>
+                <button class="t-filter__btn" onclick="filterEvents('institucional')">🏛️ Institucional</button>
+                <button class="t-filter__btn" onclick="filterEvents('judicial')">⚖️ Judicial</button>
+            </div>
+
+            <div class="t-timeline" id="timeline"></div>
+
+            <div style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:40px;" class="t-print-hide">
+                <button class="t-filter__btn" onclick="expandAll()">📖 Expandir todos</button>
+                <button class="t-filter__btn" onclick="window.print()">🖨️ Imprimir pôster</button>
+                <a href="index.html" class="t-filter__btn">← Voltar ao Toolkit</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer"><div class="container"><div class="footer__bottom" style="border:none;padding:0;"><p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p></div></div></footer>
+
+    <script src="script.js"></script>
+    <script>
+    const events = [
+        { year: "1809", title: "Alvará de Privilégios de D. João VI", category: "nacional", tags: ["Brasil Colônia", "Patentes"],
+          text: "O Alvará de 28 de abril de 1809, assinado pelo Príncipe Regente D. João, concedeu privilégios exclusivos aos inventores e introdutores de novas máquinas e invenções no Brasil. É considerado o marco fundador da propriedade industrial brasileira — e um dos primeiros do mundo, anterior ao sistema de patentes de muitos países europeus." },
+        { year: "1883", title: "Convenção de Paris", category: "internacional", tags: ["Tratado", "Propriedade Industrial"],
+          text: "A Convenção da União de Paris para Proteção da Propriedade Industrial, assinada em 20 de março de 1883, é o primeiro grande tratado internacional de PI. O Brasil foi um dos 11 países signatários originais. Estabeleceu princípios fundamentais como tratamento nacional, direito de prioridade (12 meses para patentes, 6 para marcas) e independência das patentes." },
+        { year: "1886", title: "Convenção de Berna", category: "internacional", tags: ["Tratado", "Direito Autoral"],
+          text: "A Convenção de Berna para a Proteção das Obras Literárias e Artísticas estabeleceu a proteção automática do direito autoral (sem necessidade de registro), o tratamento nacional e padrões mínimos de proteção. O Brasil aderiu em 1922." },
+        { year: "1970", title: "Criação do INPI", category: "institucional", tags: ["INPI", "Autarquia Federal"],
+          text: "A Lei 5.648/1970 criou o Instituto Nacional da Propriedade Industrial (INPI), autarquia federal vinculada ao então Ministério da Indústria e Comércio. O INPI substituiu o antigo DNPI e assumiu a responsabilidade por registro de marcas, concessão de patentes, averbação de contratos de transferência de tecnologia e demais serviços de propriedade industrial." },
+        { year: "1994", title: "Acordo TRIPS / OMC", category: "internacional", tags: ["OMC", "Comércio", "Padrões Globais"],
+          text: "O Acordo sobre Aspectos dos Direitos de Propriedade Intelectual Relacionados ao Comércio (TRIPS) foi assinado na Rodada Uruguai do GATT, criando a OMC. Estabeleceu padrões mínimos de proteção de PI para todos os membros, incluindo patentes de 20 anos, proteção de software e mecanismos de enforcement. Obrigou o Brasil a reformar sua legislação, resultando na Lei 9.279/96." },
+        { year: "1996", title: "Lei 9.279 — Lei da Propriedade Industrial (LPI)", category: "lei", tags: ["Patentes", "Marcas", "DI", "LPI"],
+          text: "A Lei de Propriedade Industrial regulou patentes de invenção, modelos de utilidade, desenhos industriais, marcas, indicações geográficas, concorrência desleal e crimes contra a PI. Substituiu o Código de Propriedade Industrial de 1971. Introduziu patentes de 20 anos (PI) e 15 anos (MU), marcas de 10 anos renováveis, e o período de graça de 12 meses." },
+        { year: "1997", title: "Lei 9.456 — Proteção de Cultivares", category: "lei", tags: ["Cultivares", "Agricultura", "SNPC"],
+          text: "Instituiu a proteção de novas variedades vegetais no Brasil, criando o SNPC (Serviço Nacional de Proteção de Cultivares) vinculado ao MAPA. Proteção de 15 anos (18 para arbóreas e videiras). Requisitos: variedade distinta, homogênea e estável (DHE). Alinhada à Convenção UPOV." },
+        { year: "1998", title: "Lei 9.609 — Proteção de Software", category: "lei", tags: ["Software", "Direito Autoral"],
+          text: "Dispôs sobre a proteção intelectual de programas de computador, equiparando-os a obras literárias sob o regime de direito autoral. Vigência de 50 anos. O registro no INPI é facultativo. Regulamentou contratos de licença, garantias ao usuário e penalidades por violação." },
+        { year: "1998", title: "Lei 9.610 — Direitos Autorais", category: "lei", tags: ["Direito Autoral", "Obras", "Cultura"],
+          text: "Atualizou e consolidou a legislação de direitos autorais brasileira. Estabeleceu proteção automática (sem necessidade de registro), vigência de vida do autor + 70 anos, direitos morais (inalienáveis) e patrimoniais (transferíveis). Abrange obras literárias, artísticas, científicas, musicais, audiovisuais e programas de computador." },
+        { year: "2004", title: "Lei 10.973 — Lei de Inovação", category: "lei", tags: ["Inovação", "ICTs", "NITs"],
+          text: "Marco regulatório da inovação tecnológica no Brasil. Obrigou toda ICT (Instituição de Ciência e Tecnologia) pública a criar um NIT (Núcleo de Inovação Tecnológica) para gerir sua política de PI. Regulamentou a relação universidade-empresa, licenciamento de tecnologias e participação dos pesquisadores nos ganhos econômicos." },
+        { year: "2015", title: "Lei 13.123 — Marco Legal da Biodiversidade", category: "lei", tags: ["Biodiversidade", "CTA", "Patrimônio Genético"],
+          text: "Regulamentou o acesso ao patrimônio genético e ao conhecimento tradicional associado (CTA), e a repartição de benefícios decorrentes do uso comercial. Criou o SisGen (Sistema Nacional de Gestão do Patrimônio Genético). Fundamental para a Amazônia: protege o conhecimento de comunidades indígenas e tradicionais contra biopirataria." },
+        { year: "2016", title: "Lei 13.243 — Novo Marco Legal de CT&I", category: "lei", tags: ["CT&I", "Inovação", "Universidades"],
+          text: "Reformou a Lei de Inovação, facilitando a interação universidade-empresa. Permitiu que pesquisadores de ICTs públicas participem de empresas de base tecnológica. Flexibilizou regras de compartilhamento de laboratórios, uso de recursos públicos e titularidade de PI em projetos colaborativos." },
+        { year: "2019", title: "Protocolo de Madri entra em vigor no Brasil", category: "internacional", tags: ["Marcas", "Registro Internacional"],
+          text: "O Brasil aderiu ao Protocolo de Madri, sistema internacional de registro de marcas administrado pela OMPI. Permite que titulares brasileiros protejam suas marcas em mais de 120 países com um único depósito e uma única taxa, simplificando a internacionalização de marcas nacionais." },
+        { year: "2021", title: "Decreto 10.886 — ENPI 2021–2030", category: "institucional", tags: ["ENPI", "Estratégia", "Política Pública"],
+          text: "Instituiu a Estratégia Nacional de Propriedade Intelectual (ENPI) com vigência até 2030. Estruturada em 7 eixos estratégicos com 210 ações: (1) PI como ferramenta de desenvolvimento; (2) Disseminação, formação e capacitação; (3) Uso estratégico da PI; (4) Governança e gestão; (5) Marcos legais e regulatórios; (6) Observância e enforcement; (7) Inserção internacional. O Toolkit PI Thinking está alinhado ao Eixo 2." },
+        { year: "2021", title: "STF — ADI 5529 (Patentes Pipeline)", category: "judicial", tags: ["STF", "Constitucionalidade", "Patentes"],
+          text: "O Supremo Tribunal Federal declarou inconstitucional o parágrafo único do Art. 40 da LPI, que permitia extensão automática do prazo de patentes quando o INPI demorava para analisar o pedido. A decisão (9×2) teve impacto direto na indústria farmacêutica e no acesso a medicamentos. Marco jurisprudencial para a PI no Brasil." },
+        { year: "2023", title: "INPI — Combate ao Backlog", category: "institucional", tags: ["INPI", "Eficiência", "Modernização"],
+          text: "O INPI consolidou a redução drástica do backlog de patentes: de mais de 200 mil pedidos pendentes em 2019 para menos de 40 mil em 2023. O tempo médio de análise de patentes caiu de 10+ anos para menos de 4 anos. Avanço na digitalização de serviços com o e-INPI e simplificação de procedimentos." },
+    ];
+
+    function renderTimeline(filter) {
+        const container = document.getElementById('timeline');
+        container.innerHTML = events
+            .filter(e => filter === 'all' || e.category === filter)
+            .map(e => `
+                <div class="t-event t-event--${e.category}">
+                    <div class="t-event__dot"></div>
+                    <div class="t-event__card" onclick="this.classList.toggle('expanded')">
+                        <div class="t-event__year">${e.year}</div>
+                        <div class="t-event__title">${e.title}</div>
+                        <div class="t-event__text">${e.text}</div>
+                        <div class="t-event__tags">
+                            ${e.tags.map(t => `<span class="t-event__tag">${t}</span>`).join('')}
+                        </div>
+                        <div class="t-event__expand"><span>Clique para expandir ↓</span></div>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    function filterEvents(cat) {
+        document.querySelectorAll('.t-filter__btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        renderTimeline(cat);
+    }
+
+    function expandAll() {
+        document.querySelectorAll('.t-event__card').forEach(c => c.classList.add('expanded'));
+    }
+
+    renderTimeline('all');
+    </script>
+</body>
+</html>

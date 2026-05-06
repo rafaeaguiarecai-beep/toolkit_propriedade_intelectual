@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartas Personas — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+    :root {
+        --p-bg: #FAFAF7;
+        --p-surface: #FFFFFF;
+        --p-text: #1A1A1A;
+        --p-text-secondary: #5A5A5A;
+        --p-text-muted: #8A8A8A;
+        --p-border: #E8E5E0;
+        --p-accent: #4361EE;
+        --p-accent-light: rgba(67,97,238,0.08);
+        --p-font-serif: 'Playfair Display', Georgia, serif;
+        --p-font-sans: 'Inter', -apple-system, sans-serif;
+        --p-font-heading: 'Poppins', sans-serif;
+        --p-max-width: 1080px;
+        --p-transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] {
+        --p-bg: #111111;
+        --p-surface: #1A1A1A;
+        --p-text: #EAEAEA;
+        --p-text-secondary: #AAAAAA;
+        --p-text-muted: #666666;
+        --p-border: #2A2A2A;
+        --p-accent-light: rgba(67,97,238,0.15);
+    }
+
+    .p-page {
+        background: var(--p-bg);
+        min-height: 100vh;
+        padding-top: 100px;
+        padding-bottom: 80px;
+    }
+
+    .p-container {
+        max-width: var(--p-max-width);
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* ---- Cover ---- */
+    .p-cover {
+        position: relative;
+        background: var(--p-text);
+        color: white;
+        padding: 60px 40px;
+        margin-bottom: 48px;
+        overflow: hidden;
+    }
+
+    .p-cover::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 15% 85%, rgba(67,97,238,0.2) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 15%, rgba(6,214,160,0.12) 0%, transparent 55%);
+        pointer-events: none;
+    }
+
+    .p-cover__overline {
+        font-family: var(--p-font-sans);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #4361EE;
+        margin-bottom: 16px;
+        position: relative; z-index: 1;
+    }
+
+    .p-cover__title {
+        font-family: var(--p-font-serif);
+        font-size: clamp(2rem, 4.5vw, 3rem);
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 12px;
+        position: relative; z-index: 1;
+    }
+
+    .p-cover__title em { font-style: italic; font-weight: 600; color: #4361EE; }
+
+    .p-cover__subtitle {
+        font-family: var(--p-font-sans);
+        font-size: 1.05rem; font-weight: 300; line-height: 1.7;
+        max-width: 560px; opacity: 0.85;
+        position: relative; z-index: 1;
+    }
+
+    .p-cover__meta {
+        display: flex; gap: 32px; margin-top: 32px; padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        position: relative; z-index: 1; flex-wrap: wrap;
+    }
+
+    .p-cover__meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .p-cover__meta-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.5; }
+    .p-cover__meta-value { font-family: var(--p-font-heading); font-size: 1rem; font-weight: 700; }
+
+    /* ---- Instructions ---- */
+    .p-instructions {
+        background: var(--p-surface);
+        border: 1px solid var(--p-border);
+        padding: 32px;
+        margin-bottom: 40px;
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .p-instructions__icon { font-size: 2rem; flex-shrink: 0; }
+
+    .p-instructions__content h3 {
+        font-family: var(--p-font-heading);
+        font-size: 1rem; font-weight: 700;
+        color: var(--p-text); margin-bottom: 8px;
+    }
+
+    .p-instructions__content p {
+        font-size: 0.9rem; color: var(--p-text-secondary); line-height: 1.7;
+    }
+
+    /* ---- Controls ---- */
+    .p-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .p-controls__label {
+        font-family: var(--p-font-sans);
+        font-size: 0.75rem; font-weight: 700;
+        letter-spacing: 2px; text-transform: uppercase;
+        color: var(--p-text-muted);
+    }
+
+    .p-controls__actions { display: flex; gap: 8px; }
+
+    .p-ctrl-btn {
+        padding: 8px 18px;
+        font-family: var(--p-font-sans);
+        font-size: 0.8rem; font-weight: 600;
+        border: 1px solid var(--p-border);
+        background: var(--p-surface);
+        color: var(--p-text);
+        cursor: pointer;
+        transition: var(--p-transition);
+    }
+
+    .p-ctrl-btn:hover {
+        background: var(--p-text);
+        color: var(--p-surface);
+        border-color: var(--p-text);
+    }
+
+    .p-ctrl-btn--active {
+        background: var(--p-accent);
+        color: white;
+        border-color: var(--p-accent);
+    }
+
+    /* ---- Cards Grid ---- */
+    .p-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 48px;
+    }
+
+    .p-grid--single {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* ---- Card (flip) ---- */
+    .p-card-wrapper {
+        perspective: 1000px;
+        height: 520px;
+    }
+
+    .p-card {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+        cursor: pointer;
+    }
+
+    .p-card.flipped { transform: rotateY(180deg); }
+
+    .p-card__face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--p-border);
+        background: var(--p-surface);
+    }
+
+    .p-card__front { z-index: 2; }
+    .p-card__back { transform: rotateY(180deg); }
+
+    /* ---- Front ---- */
+    .p-card__banner {
+        height: 140px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .p-card__banner-pattern {
+        position: absolute; inset: 0;
+        opacity: 0.08;
+    }
+
+    .p-card__avatar {
+        width: 80px; height: 80px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.8rem;
+        position: relative; z-index: 1;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.3);
+    }
+
+    .p-card__front-body {
+        padding: 24px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .p-card__name {
+        font-family: var(--p-font-serif);
+        font-size: 1.4rem; font-weight: 700;
+        color: var(--p-text);
+        margin-bottom: 4px;
+    }
+
+    .p-card__role {
+        font-size: 0.8rem; font-weight: 600;
+        letter-spacing: 1px; text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+
+    .p-card__quote {
+        font-family: var(--p-font-serif);
+        font-style: italic;
+        font-size: 0.95rem;
+        color: var(--p-text-secondary);
+        line-height: 1.6;
+        padding-left: 16px;
+        border-left: 3px solid var(--p-border);
+        flex: 1;
+    }
+
+    .p-card__tags {
+        display: flex; flex-wrap: wrap; gap: 6px;
+        margin-top: 16px;
+    }
+
+    .p-card__tag {
+        padding: 3px 10px;
+        font-size: 0.7rem; font-weight: 600;
+        letter-spacing: 0.5px;
+        background: var(--p-bg);
+        border: 1px solid var(--p-border);
+        color: var(--p-text-muted);
+    }
+
+    .p-card__flip-hint {
+        text-align: center;
+        padding: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--p-text-muted);
+        border-top: 1px solid var(--p-border);
+    }
+
+    /* ---- Back ---- */
+    .p-card__back-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--p-border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .p-card__back-avatar {
+        font-size: 1.5rem;
+    }
+
+    .p-card__back-name {
+        font-family: var(--p-font-heading);
+        font-size: 0.95rem; font-weight: 700;
+        color: var(--p-text);
+    }
+
+    .p-card__back-body {
+        padding: 20px 24px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .p-card__detail {
+        margin-bottom: 14px;
+    }
+
+    .p-card__detail-label {
+        font-size: 0.65rem; font-weight: 700;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        color: var(--p-text-muted);
+        margin-bottom: 3px;
+    }
+
+    .p-card__detail-value {
+        font-size: 0.88rem;
+        color: var(--p-text);
+        line-height: 1.5;
+    }
+
+    .p-card__pi-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        font-family: var(--p-font-heading);
+        font-size: 0.75rem; font-weight: 700;
+        color: white;
+        margin-top: 2px;
+    }
+
+    .p-card__back-footer {
+        padding: 12px 24px;
+        border-top: 1px solid var(--p-border);
+        font-size: 0.7rem;
+        color: var(--p-text-muted);
+        text-align: center;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* ---- Color Themes per Card ---- */
+    .p-card--blue .p-card__banner { background: linear-gradient(135deg, #4361EE, #3A0CA3); }
+    .p-card--blue .p-card__role { color: #4361EE; }
+    .p-card--blue .p-card__pi-badge { background: #4361EE; }
+
+    .p-card--purple .p-card__banner { background: linear-gradient(135deg, #7209B7, #560BAD); }
+    .p-card--purple .p-card__role { color: #7209B7; }
+    .p-card--purple .p-card__pi-badge { background: #7209B7; }
+
+    .p-card--pink .p-card__banner { background: linear-gradient(135deg, #F72585, #B5179E); }
+    .p-card--pink .p-card__role { color: #F72585; }
+    .p-card--pink .p-card__pi-badge { background: #F72585; }
+
+    .p-card--orange .p-card__banner { background: linear-gradient(135deg, #FF6D00, #E85D04); }
+    .p-card--orange .p-card__role { color: #FF6D00; }
+    .p-card--orange .p-card__pi-badge { background: #FF6D00; }
+
+    .p-card--green .p-card__banner { background: linear-gradient(135deg, #06D6A0, #05A97D); }
+    .p-card--green .p-card__role { color: #06D6A0; }
+    .p-card--green .p-card__pi-badge { background: #06D6A0; }
+
+    .p-card--teal .p-card__banner { background: linear-gradient(135deg, #00B4D8, #0096B7); }
+    .p-card--teal .p-card__role { color: #00B4D8; }
+    .p-card--teal .p-card__pi-badge { background: #00B4D8; }
+
+    .p-card--red .p-card__banner { background: linear-gradient(135deg, #D94848, #B71C1C); }
+    .p-card--red .p-card__role { color: #D94848; }
+    .p-card--red .p-card__pi-badge { background: #D94848; }
+
+    .p-card--amber .p-card__banner { background: linear-gradient(135deg, #E8A825, #D4940D); }
+    .p-card--amber .p-card__role { color: #D4940D; }
+    .p-card--amber .p-card__pi-badge { background: #D4940D; }
+
+    .p-card--indigo .p-card__banner { background: linear-gradient(135deg, #3F37C9, #2D2A9C); }
+    .p-card--indigo .p-card__role { color: #3F37C9; }
+    .p-card--indigo .p-card__pi-badge { background: #3F37C9; }
+
+    .p-card--emerald .p-card__banner { background: linear-gradient(135deg, #2D9F6F, #1B7A4F); }
+    .p-card--emerald .p-card__role { color: #2D9F6F; }
+    .p-card--emerald .p-card__pi-badge { background: #2D9F6F; }
+
+    /* ---- Facilitator Guide Section ---- */
+    .p-guide {
+        background: var(--p-surface);
+        border: 1px solid var(--p-border);
+        padding: 40px;
+        margin-bottom: 48px;
+    }
+
+    .p-guide__title {
+        font-family: var(--p-font-serif);
+        font-size: 1.5rem; font-weight: 700;
+        color: var(--p-text);
+        margin-bottom: 24px;
+    }
+
+    .p-guide__steps {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .p-guide__step {
+        display: flex; gap: 16px; align-items: flex-start;
+    }
+
+    .p-guide__step-num {
+        width: 32px; height: 32px;
+        background: var(--p-accent);
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--p-font-heading);
+        font-size: 0.8rem; font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .p-guide__step-content {
+        flex: 1;
+    }
+
+    .p-guide__step-title {
+        font-family: var(--p-font-heading);
+        font-size: 0.9rem; font-weight: 700;
+        color: var(--p-text);
+        margin-bottom: 4px;
+    }
+
+    .p-guide__step-text {
+        font-size: 0.88rem;
+        color: var(--p-text-secondary);
+        line-height: 1.6;
+    }
+
+    /* ---- Print ---- */
+    @media print {
+        .header, .footer, .reading-progress, .theme-toggle, .p-print-hide { display: none !important; }
+        .p-page { padding-top: 0; }
+        .p-card-wrapper { height: auto !important; page-break-inside: avoid; }
+        .p-card { transform: none !important; }
+        .p-card__face { position: relative !important; backface-visibility: visible !important; -webkit-backface-visibility: visible !important; }
+        .p-card__back { transform: none !important; margin-top: 16px; }
+        .p-card__flip-hint { display: none; }
+        .p-grid { grid-template-columns: 1fr 1fr; }
+        body { background: white; }
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+        .p-cover { padding: 40px 24px; }
+        .p-grid { grid-template-columns: 1fr; }
+        .p-instructions { flex-direction: column; }
+        .p-guide { padding: 24px; }
+    }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">💡</span>
+                <div>
+                    <strong class="header__logo-title">PI Thinking</strong>
+                    <span class="header__logo-sub">Cartas Personas</span>
+                </div>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
+                </ul>
+            </nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="p-page">
+        <div class="p-container">
+
+            <!-- ====== COVER ====== -->
+            <div class="p-cover">
+                <div class="p-cover__overline">Fase 1 — Descobrir</div>
+                <h1 class="p-cover__title">Cartas <em>Personas</em> da PI</h1>
+                <p class="p-cover__subtitle">10 perfis fictícios do ecossistema de Propriedade Intelectual. Cada persona carrega um dilema real que conecta criação, proteção e contexto amazônico.</p>
+                <div class="p-cover__meta">
+                    <div class="p-cover__meta-item">
+                        <span class="p-cover__meta-label">Cartas</span>
+                        <span class="p-cover__meta-value">10 personas</span>
+                    </div>
+                    <div class="p-cover__meta-item">
+                        <span class="p-cover__meta-label">Duração</span>
+                        <span class="p-cover__meta-value">30 min</span>
+                    </div>
+                    <div class="p-cover__meta-item">
+                        <span class="p-cover__meta-label">Grupo</span>
+                        <span class="p-cover__meta-value">3–6 pessoas</span>
+                    </div>
+                    <div class="p-cover__meta-item">
+                        <span class="p-cover__meta-label">Formato</span>
+                        <span class="p-cover__meta-value">Digital + Impressão</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== INSTRUCTIONS ====== -->
+            <div class="p-instructions">
+                <div class="p-instructions__icon">🃏</div>
+                <div class="p-instructions__content">
+                    <h3>Como usar as cartas</h3>
+                    <p>Clique em qualquer carta para virá-la e ver os detalhes completos da persona. Na oficina presencial, cada grupo sorteia uma carta e deve se colocar no lugar da persona para preencher o Canvas Mapa de Empatia do Inventor. Use o botão "Sortear" para distribuir aleatoriamente.</p>
+                </div>
+            </div>
+
+            <!-- ====== CONTROLS ====== -->
+            <div class="p-controls p-print-hide">
+                <span class="p-controls__label">10 Personas</span>
+                <div class="p-controls__actions">
+                    <button class="p-ctrl-btn" onclick="shuffleCards()">🎲 Sortear uma</button>
+                    <button class="p-ctrl-btn" onclick="showAll()">📋 Ver todas</button>
+                    <button class="p-ctrl-btn" onclick="flipAll()">🔄 Virar todas</button>
+                    <button class="p-ctrl-btn" onclick="window.print()">🖨️ Imprimir</button>
+                </div>
+            </div>
+
+            <!-- ====== CARDS GRID ====== -->
+            <div class="p-grid" id="cardsGrid"></div>
+
+            <!-- ====== FACILITATOR GUIDE ====== -->
+            <div class="p-guide">
+                <h3 class="p-guide__title">Guia de uso para o facilitador</h3>
+                <div class="p-guide__steps">
+                    <div class="p-guide__step">
+                        <div class="p-guide__step-num">1</div>
+                        <div class="p-guide__step-content">
+                            <div class="p-guide__step-title">Distribua as cartas (5 min)</div>
+                            <div class="p-guide__step-text">Sorteie uma carta por grupo usando o botão "Sortear" ou distribua manualmente. Cada grupo deve ter uma persona diferente. Se houver mais de 10 grupos, permita repetições.</div>
+                        </div>
+                    </div>
+                    <div class="p-guide__step">
+                        <div class="p-guide__step-num">2</div>
+                        <div class="p-guide__step-content">
+                            <div class="p-guide__step-title">Leitura e imersão (5 min)</div>
+                            <div class="p-guide__step-text">O grupo lê a carta inteira (frente e verso), identifica o dilema da persona e discute brevemente o cenário. O facilitador pode circular entre os grupos para tirar dúvidas.</div>
+                        </div>
+                    </div>
+                    <div class="p-guide__step">
+                        <div class="p-guide__step-num">3</div>
+                        <div class="p-guide__step-content">
+                            <div class="p-guide__step-title">Preencher o Canvas de Empatia (15 min)</div>
+                            <div class="p-guide__step-text">Usando o Canvas "Mapa de Empatia do Inventor" (Material 1.3), o grupo responde: O que a persona pensa, sente, vê, ouve, fala e faz? Quais são suas dores e ganhos esperados em relação à PI?</div>
+                        </div>
+                    </div>
+                    <div class="p-guide__step">
+                        <div class="p-guide__step-num">4</div>
+                        <div class="p-guide__step-content">
+                            <div class="p-guide__step-title">Apresentação cruzada (5 min)</div>
+                            <div class="p-guide__step-text">Cada grupo apresenta sua persona em 1 minuto para a turma: quem é, qual o dilema e qual tipo de PI está em jogo. Isso cria um panorama da diversidade de situações de PI.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== ACTIONS ====== -->
+            <div style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;" class="p-print-hide">
+                <a href="index.html" class="p-ctrl-btn">← Voltar ao Toolkit</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom" style="border:none; padding:0;">
+                <p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    const personas = [
+        {
+            id: 1, color: "blue", emoji: "🔬",
+            name: "Dr. Apressado",
+            role: "Pesquisador Universitário",
+            quote: "Publiquei os resultados no congresso antes de falar com o NIT. Será que perdi a chance de patentear?",
+            tags: ["Patente", "Período de Graça", "Universidade"],
+            context: "Professor adjunto de Química na UFRR. Desenvolveu um catalisador para tratamento de efluentes do garimpo. Na empolgação, apresentou os resultados completos em um congresso internacional há 4 meses.",
+            dilema: "A publicação no congresso destruiu a novidade da invenção? Ele ainda tem tempo para depositar a patente?",
+            piType: "Patente de Invenção",
+            piColor: "#4361EE",
+            dor: "Pressão acadêmica por publicação (publish or perish) vs. necessidade de sigilo para patentear.",
+            ganho: "Conseguir proteger a invenção e ao mesmo tempo manter a produção acadêmica.",
+            legal: "Lei 9.279/96, Art. 12 — Período de graça de 12 meses. Ele tem 8 meses restantes."
+        },
+        {
+            id: 2, color: "pink", emoji: "👩‍🔬",
+            name: "Ana Inventora",
+            role: "Mestranda em Biotecnologia",
+            quote: "Desenvolvi o protótipo no laboratório da universidade com bolsa CAPES. De quem é essa invenção?",
+            tags: ["Cotitularidade", "ICT", "Lei de Inovação"],
+            context: "Mestranda do PROFNIT/UFRR. Criou um biocompósito com fibras de buriti para embalagens biodegradáveis durante seu mestrado, usando laboratório e insumos da universidade.",
+            dilema: "A invenção pertence a ela, à universidade ou a ambos? Como funciona a titularidade de PI desenvolvida com recursos públicos?",
+            piType: "Patente de Invenção",
+            piColor: "#4361EE",
+            dor: "Não sabe se tem direito sobre a invenção que ela mesma criou com recursos da universidade.",
+            ganho: "Entender seus direitos como inventora e a participação nos ganhos econômicos.",
+            legal: "Lei 10.973/2004, Art. 11 — A ICT é titular da PI, mas o inventor tem direito à participação nos ganhos econômicos."
+        },
+        {
+            id: 3, color: "orange", emoji: "👨‍🍳",
+            name: "Chef Raízes",
+            role: "Chef e Empreendedor Gastronômico",
+            quote: "Criei uma receita única com tucumã e jambu. Posso proteger minha receita? E o nome do meu restaurante?",
+            tags: ["Marca", "Segredo Industrial", "Receita"],
+            context: "Chef de cozinha em Boa Vista com restaurante autoral chamado \"Sabor Lavrado\". Criou receitas originais com ingredientes amazônicos que viraram sucesso nas redes sociais.",
+            dilema: "Receitas não são patenteáveis no Brasil. Como proteger seu diferencial competitivo e a identidade do negócio?",
+            piType: "Marca + Segredo Industrial",
+            piColor: "#FF6D00",
+            dor: "Concorrentes já estão copiando suas receitas e usando nomes parecidos.",
+            ganho: "Proteger o nome do restaurante como marca e manter as receitas como segredo industrial.",
+            legal: "Lei 9.279/96, Art. 10, I — Receitas não são invenção patenteável. Art. 122 — Sinais distintivos são registráveis como marca."
+        },
+        {
+            id: 4, color: "green", emoji: "💻",
+            name: "Kayla Maker",
+            role: "Desenvolvedora de Software",
+            quote: "Criei um app de monitoramento de queimadas no lavrado. Registro como software ou como patente?",
+            tags: ["Software", "Direito Autoral", "Startup"],
+            context: "Graduada em Ciência da Computação pela UFRR. Desenvolveu sozinha, nas horas vagas, um aplicativo que usa imagens de satélite para alertar sobre queimadas em tempo real em Roraima.",
+            dilema: "Software é protegido por direito autoral no Brasil, não por patente. Mas e se o algoritmo tiver aplicação industrial inovadora?",
+            piType: "Registro de Software",
+            piColor: "#06D6A0",
+            dor: "Medo de que uma empresa grande copie o código-fonte antes dela conseguir se estabelecer.",
+            ganho: "Registrar o software no INPI e buscar investimento para escalar o aplicativo.",
+            legal: "Lei 9.609/98, Art. 2º — Software é protegido como obra literária (direito autoral). Vigência: 50 anos."
+        },
+        {
+            id: 5, color: "purple", emoji: "👨‍💻",
+            name: "Prof. Código",
+            role: "Docente de Engenharia Elétrica",
+            quote: "Orientei o aluno que fez toda a pesquisa. Sou coinventor? Tenho direito à patente?",
+            tags: ["Coinvenção", "Orientação", "Ética"],
+            context: "Professor titular da UFRR que orientou um aluno de iniciação científica. O aluno desenvolveu um dispositivo IoT para monitorar a qualidade da água em comunidades indígenas.",
+            dilema: "Orientar academicamente é diferente de contribuir intelectualmente para a invenção. Quando o orientador é coinventor?",
+            piType: "Patente — questão de titularidade",
+            piColor: "#7209B7",
+            dor: "Conflito ético: incluir seu nome como coinventor sem ter contribuído tecnicamente para a solução inventiva.",
+            ganho: "Estabelecer critérios claros de coinvenção e contribuir genuinamente para o mérito técnico.",
+            legal: "Lei 9.279/96, Art. 6º, §4º — A nomeação de inventor deve corresponder à contribuição pessoal para o ato inventivo."
+        },
+        {
+            id: 6, color: "emerald", emoji: "🌿",
+            name: "Dona Floresta",
+            role: "Extrativista e Líder Comunitária",
+            quote: "A empresa quer usar o óleo de copaíba que nós sabemos fazer há gerações. Temos algum direito?",
+            tags: ["Conhecimento Tradicional", "Biodiversidade", "Repartição de Benefícios"],
+            context: "Líder de uma comunidade ribeirinha no interior de Roraima. A comunidade domina técnicas ancestrais de extração e uso medicinal do óleo de copaíba. Uma empresa farmacêutica quer desenvolver um produto comercial baseado nesse conhecimento.",
+            dilema: "O acesso a conhecimento tradicional associado à biodiversidade exige consentimento e repartição de benefícios. A comunidade conhece seus direitos?",
+            piType: "Patrimônio Genético + CTA",
+            piColor: "#2D9F6F",
+            dor: "Medo de que o conhecimento ancestral seja apropriado sem retorno justo para a comunidade.",
+            ganho: "Garantir repartição de benefícios e preservação do conhecimento tradicional.",
+            legal: "Lei 13.123/2015 (Marco Legal da Biodiversidade), Art. 8º e 9º — Acesso a CTA exige consentimento prévio informado e repartição de benefícios."
+        },
+        {
+            id: 7, color: "teal", emoji: "🚀",
+            name: "Startup Roraima",
+            role: "Fundadores de AgTech",
+            quote: "Recebemos investimento-anjo mas o investidor quer saber: qual PI vocês têm registrada?",
+            tags: ["Startup", "Valoração", "Estratégia PI"],
+            context: "Trio de jovens que fundou a \"Agranus\", uma startup de tecnologia agrícola em Roraima que usa drones e IA para otimizar a colheita de açaí. Receberam proposta de investimento-anjo.",
+            dilema: "Investidores valorizam ativos de PI. Sem registros, a startup é apenas uma ideia. Como montar uma estratégia de proteção com orçamento limitado?",
+            piType: "Marca + Software + Patente (estratégia combinada)",
+            piColor: "#00B4D8",
+            dor: "Orçamento limitado para pagar taxas de registro e não sabem por onde começar.",
+            ganho: "Montar um portfólio mínimo de PI que valorize a empresa para captação de investimento.",
+            legal: "Dec. 10.886/2021 (ENPI), Eixo 3 — Uso estratégico da PI para competitividade e desenvolvimento econômico."
+        },
+        {
+            id: 8, color: "amber", emoji: "🧓",
+            name: "Mestre Pajé",
+            role: "Artesão Indígena Wapichana",
+            quote: "Os grafismos do meu povo estão sendo copiados em camisetas. Isso é permitido?",
+            tags: ["Direito Autoral", "Patrimônio Cultural", "Apropriação"],
+            context: "Artesão da etnia Wapichana que produz cerâmicas e redes com grafismos tradicionais. Descobriu que uma loja online está vendendo camisetas estampadas com os grafismos de seu povo sem autorização.",
+            dilema: "Grafismos indígenas são patrimônio cultural coletivo. O direito autoral individual protege? Que instrumento jurídico cabe?",
+            piType: "Direito Autoral + Patrimônio Cultural",
+            piColor: "#D4940D",
+            dor: "Ver o patrimônio cultural de seu povo sendo comercializado sem respeito, sem crédito e sem retorno.",
+            ganho: "Encontrar mecanismos legais para impedir a apropriação cultural e comercial indevida.",
+            legal: "Lei 9.610/98, Art. 45 — Obras de autoria desconhecida (domínio público coletivo). CF/88, Art. 216 — Patrimônio cultural brasileiro."
+        },
+        {
+            id: 9, color: "red", emoji: "🎨",
+            name: "Lia Artista",
+            role: "Ilustradora e Designer",
+            quote: "Fiz as ilustrações para o projeto do professor como voluntária. Os direitos autorais são meus ou dele?",
+            tags: ["Direito Autoral", "Obra sob Encomenda", "Coautoria"],
+            context: "Estudante de Design na UFRR que fez ilustrações científicas para o livro de um professor como trabalho voluntário. O livro foi publicado com seus desenhos mas sem crédito de autoria.",
+            dilema: "Ilustrações feitas voluntariamente para o projeto de terceiro — quem detém os direitos autorais? Trabalho voluntário transfere direitos?",
+            piType: "Direito Autoral",
+            piColor: "#D94848",
+            dor: "Seu trabalho artístico está sendo usado comercialmente sem crédito nem remuneração.",
+            ganho: "Ser reconhecida como autora e negociar termos justos de licenciamento.",
+            legal: "Lei 9.610/98, Art. 11 — Autor é a pessoa física criadora da obra. Art. 22 — Pertencem ao autor os direitos morais e patrimoniais sobre a obra."
+        },
+        {
+            id: 10, color: "indigo", emoji: "🏭",
+            name: "Tec Industrial",
+            role: "Engenheiro de Produção",
+            quote: "Melhorei a ferramenta de corte que usamos na fábrica. Isso dá modelo de utilidade?",
+            tags: ["Modelo de Utilidade", "Melhoria Funcional", "Indústria"],
+            context: "Engenheiro em uma fábrica de beneficiamento de madeira certificada em Rorainópolis. Redesenhou uma ferramenta de corte que reduziu o desperdício de madeira em 30%, alterando a geometria da lâmina.",
+            dilema: "A melhoria é funcional (não estética) mas não envolve grande salto inventivo. É patente de invenção ou modelo de utilidade?",
+            piType: "Modelo de Utilidade",
+            piColor: "#3F37C9",
+            dor: "Não sabe se uma melhoria \"simples\" merece proteção ou se só patentes de invenção \"complexas\" valem a pena.",
+            ganho: "Proteger a melhoria como MU e negociar participação nos ganhos com a empresa empregadora.",
+            legal: "Lei 9.279/96, Art. 9º — É patenteável como MU o objeto de uso prático suscetível de aplicação industrial com novo formato que resulte em melhoria funcional."
+        }
+    ];
+
+    let allVisible = true;
+
+    function renderCards(list) {
+        const grid = document.getElementById('cardsGrid');
+        grid.className = list.length === 1 ? 'p-grid p-grid--single' : 'p-grid';
+        grid.innerHTML = list.map(p => `
+            <div class="p-card-wrapper" id="cardWrapper-${p.id}">
+                <div class="p-card p-card--${p.color}" id="card-${p.id}" onclick="this.classList.toggle('flipped')">
+                    <!-- FRONT -->
+                    <div class="p-card__face p-card__front">
+                        <div class="p-card__banner">
+                            <div class="p-card__avatar">${p.emoji}</div>
+                        </div>
+                        <div class="p-card__front-body">
+                            <div class="p-card__name">${p.name}</div>
+                            <div class="p-card__role">${p.role}</div>
+                            <div class="p-card__quote">"${p.quote}"</div>
+                            <div class="p-card__tags">
+                                ${p.tags.map(t => `<span class="p-card__tag">${t}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="p-card__flip-hint">Clique para virar →</div>
+                    </div>
+
+                    <!-- BACK -->
+                    <div class="p-card__face p-card__back">
+                        <div class="p-card__back-header">
+                            <span class="p-card__back-avatar">${p.emoji}</span>
+                            <span class="p-card__back-name">${p.name} — ${p.role}</span>
+                        </div>
+                        <div class="p-card__back-body">
+                            <div class="p-card__detail">
+                                <div class="p-card__detail-label">Contexto</div>
+                                <div class="p-card__detail-value">${p.context}</div>
+                            </div>
+                            <div class="p-card__detail">
+                                <div class="p-card__detail-label">Dilema de PI</div>
+                                <div class="p-card__detail-value" style="font-weight:600; color:var(--p-text);">${p.dilema}</div>
+                            </div>
+                            <div class="p-card__detail">
+                                <div class="p-card__detail-label">Tipo de proteção</div>
+                                <div class="p-card__detail-value">
+                                    <span class="p-card__pi-badge" style="background:${p.piColor}">${p.piType}</span>
+                                </div>
+                            </div>
+                            <div class="p-card__detail">
+                                <div class="p-card__detail-label">Dor principal</div>
+                                <div class="p-card__detail-value">${p.dor}</div>
+                            </div>
+                            <div class="p-card__detail">
+                                <div class="p-card__detail-label">Ganho esperado</div>
+                                <div class="p-card__detail-value">${p.ganho}</div>
+                            </div>
+                        </div>
+                        <div class="p-card__back-footer">📜 ${p.legal}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function shuffleCards() {
+        const idx = Math.floor(Math.random() * personas.length);
+        renderCards([personas[idx]]);
+        allVisible = false;
+    }
+
+    function showAll() {
+        renderCards(personas);
+        allVisible = true;
+    }
+
+    function flipAll() {
+        document.querySelectorAll('.p-card').forEach(card => {
+            card.classList.toggle('flipped');
+        });
+    }
+
+    // Init
+    renderCards(personas);
+    </script>
+</body>
+</html>

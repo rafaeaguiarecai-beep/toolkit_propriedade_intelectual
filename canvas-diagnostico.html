@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas de Diagnóstico de PI — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+    :root {
+        --d-bg: #FAFAF7;
+        --d-surface: #FFFFFF;
+        --d-text: #1A1A1A;
+        --d-text-secondary: #5A5A5A;
+        --d-text-muted: #8A8A8A;
+        --d-border: #E8E5E0;
+        --d-accent: #7209B7;
+        --d-accent-light: rgba(114,9,183,0.08);
+        --d-font-serif: 'Playfair Display', Georgia, serif;
+        --d-font-sans: 'Inter', -apple-system, sans-serif;
+        --d-font-heading: 'Poppins', sans-serif;
+        --d-max-width: 1100px;
+        --d-transition: all 0.3s ease;
+        --d-c1: #4361EE; --d-c2: #7209B7; --d-c3: #F72585;
+        --d-c4: #FF6D00; --d-c5: #06D6A0; --d-c6: #00B4D8;
+        --d-c7: #D94848; --d-c8: #3F37C9;
+    }
+    [data-theme="dark"] {
+        --d-bg: #111; --d-surface: #1A1A1A; --d-text: #EAE AEA;
+        --d-text-secondary: #AAA; --d-text-muted: #666; --d-border: #2A2A2A;
+    }
+
+    .d-page { background: var(--d-bg); min-height: 100vh; padding-top: 100px; padding-bottom: 80px; }
+    .d-container { max-width: var(--d-max-width); margin: 0 auto; padding: 0 24px; }
+
+    /* Cover */
+    .d-cover { position: relative; background: var(--d-accent); color: white; padding: 60px 40px; margin-bottom: 48px; overflow: hidden; }
+    .d-cover::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(0,0,0,0.1) 0%, transparent 60%); pointer-events:none; }
+    .d-cover__overline { font-family:var(--d-font-sans); font-size:0.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; opacity:0.7; margin-bottom:16px; position:relative; z-index:1; }
+    .d-cover__title { font-family:var(--d-font-serif); font-size:clamp(2rem,4.5vw,3rem); font-weight:800; line-height:1.15; margin-bottom:12px; position:relative; z-index:1; }
+    .d-cover__title em { font-style:italic; font-weight:600; opacity:0.85; }
+    .d-cover__subtitle { font-family:var(--d-font-sans); font-size:1.05rem; font-weight:300; line-height:1.7; max-width:560px; opacity:0.85; position:relative; z-index:1; }
+    .d-cover__meta { display:flex; gap:32px; margin-top:32px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.2); position:relative; z-index:1; flex-wrap:wrap; }
+    .d-cover__meta-item { display:flex; flex-direction:column; gap:2px; }
+    .d-cover__meta-label { font-size:0.65rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; opacity:0.5; }
+    .d-cover__meta-value { font-family:var(--d-font-heading); font-size:1rem; font-weight:700; }
+
+    /* Canvas Grid */
+    .d-canvas { display:grid; grid-template-columns:1fr 1fr; gap:0; border:2px solid var(--d-text); margin-bottom:48px; background:var(--d-surface); }
+
+    .d-canvas__cell { padding:24px; min-height:180px; display:flex; flex-direction:column; border-bottom:1px solid var(--d-border); }
+    .d-canvas__cell--right { border-left:1px solid var(--d-border); }
+    .d-canvas__cell--full { grid-column:1/-1; }
+    .d-canvas__cell--last { border-bottom:none; }
+    .d-canvas__cell--trl { grid-column:1/-1; }
+
+    .d-canvas__cell-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    .d-canvas__cell-num { width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-family:var(--d-font-heading); font-size:0.65rem; font-weight:700; color:white; flex-shrink:0; }
+    .d-canvas__cell-title { font-family:var(--d-font-heading); font-size:0.8rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+    .d-canvas__cell-emoji { font-size:1.1rem; margin-left:auto; }
+    .d-canvas__cell-hint { font-size:0.75rem; color:var(--d-text-muted); font-style:italic; margin-bottom:12px; line-height:1.5; }
+
+    .d-canvas__textarea { flex:1; width:100%; min-height:80px; padding:12px; border:1px solid var(--d-border); background:var(--d-bg); font-family:var(--d-font-sans); font-size:0.88rem; color:var(--d-text); resize:vertical; transition:var(--d-transition); line-height:1.6; }
+    .d-canvas__textarea:focus { border-color:var(--d-accent); outline:none; }
+    .d-canvas__textarea::placeholder { color:var(--d-text-muted); }
+
+    /* TRL Slider */
+    .d-trl { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .d-trl__slider { flex:1; min-width:200px; -webkit-appearance:none; appearance: none; height:8px; background:var(--d-border); outline:none; border-radius:4px; }
+    .d-trl__slider::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; background:var(--d-accent); border-radius:50%; cursor:pointer; }
+    .d-trl__slider::-moz-range-thumb { width:24px; height:24px; background:var(--d-accent); border-radius:50%; cursor:pointer; border:none; }
+    .d-trl__value { font-family:var(--d-font-heading); font-size:2rem; font-weight:800; color:var(--d-accent); min-width:40px; text-align:center; }
+    .d-trl__label { font-size:0.85rem; color:var(--d-text-secondary); flex-basis:100%; line-height:1.5; margin-top:4px; }
+
+    /* Protection Selector */
+    .d-protection { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .d-protection__option { padding:8px 16px; border:2px solid var(--d-border); background:var(--d-surface); font-family:var(--d-font-sans); font-size:0.8rem; font-weight:600; cursor:pointer; transition:var(--d-transition); display:flex; align-items:center; gap:6px; }
+    .d-protection__option:hover { border-color:var(--d-text-muted); }
+    .d-protection__option.selected { border-color:var(--d-accent); background:var(--d-accent-light); color:var(--d-accent); }
+    .d-protection__option input { display:none; }
+
+    /* Controls */
+    .d-controls { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
+    .d-controls__label { font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--d-text-muted); }
+    .d-ctrl-btn { padding:8px 18px; font-family:var(--d-font-sans); font-size:0.8rem; font-weight:600; border:1px solid var(--d-border); background:var(--d-surface); color:var(--d-text); cursor:pointer; transition:var(--d-transition); }
+    .d-ctrl-btn:hover { background:var(--d-text); color:var(--d-surface); border-color:var(--d-text); }
+
+    /* Example */
+    .d-example { background:var(--d-surface); border:1px solid var(--d-border); margin-bottom:48px; overflow:hidden; }
+    .d-example__header { padding:20px 32px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:var(--d-transition); }
+    .d-example__header:hover { background:var(--d-bg); }
+    .d-example__header-title { font-family:var(--d-font-heading); font-size:0.95rem; font-weight:700; color:var(--d-text); display:flex; align-items:center; gap:8px; }
+    .d-example__toggle { transition:transform 0.3s ease; color:var(--d-text-muted); }
+    .d-example.open .d-example__toggle { transform:rotate(180deg); }
+    .d-example__body { max-height:0; overflow:hidden; transition:max-height 0.5s ease; }
+    .d-example.open .d-example__body { max-height:3000px; }
+    .d-example__content { padding:0 32px 32px; }
+    .d-example__grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .d-example__item { padding:16px; border-left:3px solid var(--d-accent); background:var(--d-bg); }
+    .d-example__item-label { font-size:0.7rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--d-accent); margin-bottom:4px; }
+    .d-example__item-text { font-size:0.85rem; color:var(--d-text-secondary); line-height:1.6; }
+
+    /* Howto */
+    .d-howto { background:var(--d-surface); border:1px solid var(--d-border); padding:40px; margin-bottom:48px; }
+    .d-howto__title { font-family:var(--d-font-serif); font-size:1.5rem; font-weight:700; color:var(--d-text); margin-bottom:20px; }
+    .d-howto__text { font-size:0.9rem; color:var(--d-text-secondary); line-height:1.7; }
+    .d-howto__text p { margin-bottom:12px; }
+    .d-howto__text strong { color:var(--d-text); }
+
+    /* Print */
+    @media print {
+        .header,.footer,.reading-progress,.theme-toggle,.d-print-hide { display:none!important; }
+        .d-page { padding-top:0; }
+        .d-canvas { break-inside:avoid; }
+        @page { size:A3 landscape; margin:1cm; }
+        body { background:white; }
+    }
+
+    @media (max-width:768px) {
+        .d-cover { padding:40px 24px; }
+        .d-canvas { grid-template-columns:1fr; }
+        .d-canvas__cell--right { border-left:none; }
+        .d-example__grid { grid-template-columns:1fr; }
+    }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo"><span class="header__logo-icon">💡</span><div><strong class="header__logo-title">PI Thinking</strong><span class="header__logo-sub">Canvas de Diagnóstico</span></div></a>
+            <nav class="nav" id="nav"><ul class="nav__list"><li><a href="index.html" class="nav__link">← Voltar ao Início</a></li></ul></nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="d-page">
+        <div class="d-container">
+            <div class="d-cover">
+                <div class="d-cover__overline">Fase 2 — Diagnosticar</div>
+                <h1 class="d-cover__title">Canvas de <em>Diagnóstico de PI</em></h1>
+                <p class="d-cover__subtitle">Sistematize informações sobre a criação para identificar o tipo de proteção mais adequado. Preencha os 8 campos e obtenha uma recomendação fundamentada.</p>
+                <div class="d-cover__meta">
+                    <div class="d-cover__meta-item"><span class="d-cover__meta-label">Campos</span><span class="d-cover__meta-value">8 blocos</span></div>
+                    <div class="d-cover__meta-item"><span class="d-cover__meta-label">Duração</span><span class="d-cover__meta-value">25 min</span></div>
+                    <div class="d-cover__meta-item"><span class="d-cover__meta-label">Grupo</span><span class="d-cover__meta-value">3–6 pessoas</span></div>
+                    <div class="d-cover__meta-item"><span class="d-cover__meta-label">Formato</span><span class="d-cover__meta-value">Digital + A2</span></div>
+                </div>
+            </div>
+
+            <div class="d-controls d-print-hide">
+                <span class="d-controls__label">Canvas de Diagnóstico</span>
+                <div style="display:flex;gap:8px;">
+                    <button class="d-ctrl-btn" onclick="clearDiagCanvas()">🗑️ Limpar tudo</button>
+                    <button class="d-ctrl-btn" onclick="window.print()">🖨️ Imprimir A3</button>
+                </div>
+            </div>
+
+            <!-- ====== THE CANVAS ====== -->
+            <div class="d-canvas" id="diagCanvas">
+                <!-- 1. Descrição da Criação -->
+                <div class="d-canvas__cell d-canvas__cell--full">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c1)">1</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c1)">Descrição da Criação</span>
+                        <span class="d-canvas__cell-emoji">💡</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">Descreva a criação em linguagem simples: o que é, como funciona, qual problema resolve. Não use jargão técnico.</div>
+                    <textarea class="d-canvas__textarea" placeholder="Descreva a criação aqui... (ex: 'Um filtro de água que usa areia do lavrado combinada com nanopartículas para remover mercúrio de rios contaminados por garimpo')"></textarea>
+                </div>
+
+                <!-- 2. Problema que Resolve / 3. Divulgação -->
+                <div class="d-canvas__cell">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c2)">2</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c2)">Problema que Resolve</span>
+                        <span class="d-canvas__cell-emoji">🎯</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">Qual necessidade ou dor do mercado/sociedade essa criação atende? Por que é importante?</div>
+                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Comunidades ribeirinhas de Roraima não têm acesso a água potável devido à contaminação por mercúrio do garimpo ilegal.'"></textarea>
+                </div>
+
+                <div class="d-canvas__cell d-canvas__cell--right">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c3)">3</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c3)">Já foi divulgada?</span>
+                        <span class="d-canvas__cell-emoji">📢</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">A criação já foi publicada em artigo, congresso, rede social, TCC, dissertação? Se sim, quando? (Atenção ao período de graça de 12 meses — Art. 12, Lei 9.279/96)</div>
+                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Apresentada no Congresso Nacional de Química em 15/03/2025. Dentro do período de graça (12 meses).'"></textarea>
+                </div>
+
+                <!-- 4. Participantes / 5. Financiamento -->
+                <div class="d-canvas__cell">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c4)">4</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c4)">Quem participou?</span>
+                        <span class="d-canvas__cell-emoji">👥</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">Liste todas as pessoas que contribuíram intelectualmente para a criação. Diferencie contribuição inventiva de apoio técnico ou orientação.</div>
+                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Inventores: Dra. Iara (pesquisadora principal), João (mestrando — desenvolveu o protótipo). Apoio: Prof. Silva (orientador — não contribuiu para a solução inventiva).'"></textarea>
+                </div>
+
+                <div class="d-canvas__cell d-canvas__cell--right">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c5)">5</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c5)">Fonte de Financiamento</span>
+                        <span class="d-canvas__cell-emoji">💰</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">Recursos próprios, bolsa (CAPES, CNPq, FAPER), edital, empresa parceira? Isso afeta a titularidade da PI (Lei 10.973/2004).</div>
+                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Bolsa CAPES (mestrado) + equipamentos do laboratório da UFRR + reagentes de edital FAPER.'"></textarea>
+                </div>
+
+                <!-- 6. Nível TRL -->
+                <div class="d-canvas__cell d-canvas__cell--full">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c6)">6</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c6)">Nível de Maturidade (TRL)</span>
+                        <span class="d-canvas__cell-emoji">📊</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">Em que estágio de desenvolvimento está a criação? Arraste o slider para indicar o nível TRL (Technology Readiness Level).</div>
+                    <div class="d-trl">
+                        <input type="range" class="d-trl__slider" id="trlSlider" min="1" max="9" value="1" oninput="updateTRL()">
+                        <div class="d-trl__value" id="trlValue">1</div>
+                        <div class="d-trl__label" id="trlLabel">TRL 1 — Princípios básicos observados e reportados. A pesquisa científica começa a ser traduzida em pesquisa aplicada.</div>
+                    </div>
+                </div>
+
+                <!-- 7. Tipo de Proteção Sugerido -->
+                <div class="d-canvas__cell d-canvas__cell--full">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c7)">7</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c7)">Tipo de Proteção Sugerido</span>
+                        <span class="d-canvas__cell-emoji">🛡️</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">Com base na análise acima, selecione o(s) tipo(s) de proteção que se aplica(m). Pode selecionar mais de um.</div>
+                    <div class="d-protection" id="protectionOptions">
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🔬 Patente de Invenção</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🔧 Modelo de Utilidade</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">™️ Marca</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🎨 Desenho Industrial</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">©️ Direito Autoral</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">💻 Software</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🌱 Cultivar</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🗺️ Indicação Geográfica</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🌿 Patrimônio Genético</label>
+                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🔒 Segredo Industrial</label>
+                    </div>
+                </div>
+
+                <!-- 8. Próximos Passos -->
+                <div class="d-canvas__cell d-canvas__cell--full d-canvas__cell--last">
+                    <div class="d-canvas__cell-header">
+                        <div class="d-canvas__cell-num" style="background:var(--d-c8)">8</div>
+                        <span class="d-canvas__cell-title" style="color:var(--d-c8)">Próximos Passos</span>
+                        <span class="d-canvas__cell-emoji">🚀</span>
+                    </div>
+                    <div class="d-canvas__cell-hint">Liste as ações imediatas: consultar o NIT, fazer busca de anterioridade, redigir relatório descritivo, assinar NDA com parceiros, etc.</div>
+                    <textarea class="d-canvas__textarea" placeholder="Ex: '1) Agendar reunião com NIT/InovaRR. 2) Busca de anterioridade no PatentScope e INPI. 3) NDA com empresa parceira antes de compartilhar detalhes técnicos. 4) Redigir relatório descritivo com apoio do NIT.'"></textarea>
+                </div>
+            </div>
+
+            <!-- Example -->
+            <div class="d-example" id="diagExample">
+                <div class="d-example__header" onclick="this.parentElement.classList.toggle('open')">
+                    <span class="d-example__header-title">📝 Ver exemplo preenchido — Filtro da Dra. Iara Tepui</span>
+                    <span class="d-example__toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
+                </div>
+                <div class="d-example__body">
+                    <div class="d-example__content">
+                        <div class="d-example__grid">
+                            <div class="d-example__item" style="grid-column:1/-1;"><div class="d-example__item-label">1. Descrição da Criação</div><div class="d-example__item-text">Filtro de água portátil que combina areia quartzosa do lavrado roraimense com nanopartículas de óxido de ferro para adsorver e remover mercúrio (Hg) de águas fluviais contaminadas por garimpo ilegal. O filtro opera por gravidade, sem eletricidade, e pode ser fabricado com materiais locais.</div></div>
+                            <div class="d-example__item"><div class="d-example__item-label">2. Problema que Resolve</div><div class="d-example__item-text">Comunidades ribeirinhas e indígenas de Roraima consomem água contaminada com mercúrio. Não existem filtros portáteis e acessíveis capazes de remover metais pesados sem eletricidade.</div></div>
+                            <div class="d-example__item"><div class="d-example__item-label">3. Já foi divulgada?</div><div class="d-example__item-text">Sim — resultados parciais apresentados em congresso há 4 meses (dentro do período de graça de 12 meses). Artigo completo ainda NÃO publicado. Ação urgente: depositar patente antes do fim do período de graça.</div></div>
+                            <div class="d-example__item"><div class="d-example__item-label">4. Quem participou?</div><div class="d-example__item-text">Inventores: Dra. Iara Tepui (concepção + experimentação), João Silva (mestrando — síntese das nanopartículas). Apoio técnico: Prof. Carlos (orientador — não contribuiu para solução inventiva). Titularidade: UFRR (ICT) + inventores.</div></div>
+                            <div class="d-example__item"><div class="d-example__item-label">5. Fonte de Financiamento</div><div class="d-example__item-text">Bolsa CAPES (mestrado de João) + edital FAPER 2023 (R$ 50.000 para equipamentos) + laboratório UFRR. Criação com recursos públicos → titularidade da ICT (Lei 10.973/2004, Art. 11).</div></div>
+                            <div class="d-example__item" style="grid-column:1/-1;"><div class="d-example__item-label">6. Nível TRL</div><div class="d-example__item-text">TRL 5 — Tecnologia validada em ambiente relevante. Protótipo testado em campo com água do Rio Uraricoera, obtendo 97% de remoção de Hg. Falta validação em escala piloto e estudo de durabilidade.</div></div>
+                            <div class="d-example__item"><div class="d-example__item-label">7. Tipo de Proteção Sugerido</div><div class="d-example__item-text">Patente de Invenção (processo + produto) + Marca ("TEPUÍ AQUA") + eventual registro de software (app de monitoramento). Estratégia combinada.</div></div>
+                            <div class="d-example__item"><div class="d-example__item-label">8. Próximos Passos</div><div class="d-example__item-text">1) Reunião com NIT/InovaRR esta semana. 2) Busca de anterioridade no PatentScope (já identificada anterioridade US2020/0198967). 3) Redigir relatório descritivo com reivindicações. 4) Depositar antes de 15/03/2026 (fim do período de graça). 5) Registrar marca "TEPUÍ AQUA" classe 11 (purificação de água).</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How to use -->
+            <div class="d-howto">
+                <h3 class="d-howto__title">Como usar o Canvas de Diagnóstico</h3>
+                <div class="d-howto__text">
+                    <p><strong>Antes da oficina:</strong> O facilitador pode pré-selecionar personas das Cartas Personas (Material 1.2) e distribuir uma por grupo. Cada grupo usará a persona como base para preencher o canvas, aplicando o que aprendeu no Mapa de Empatia.</p>
+                    <p><strong>Durante a oficina (25 min):</strong> Os grupos preenchem os 8 campos sequencialmente. Os campos 1 a 5 descrevem a situação. O campo 6 (TRL) localiza o estágio de maturidade. O campo 7 é a síntese — qual proteção se aplica. O campo 8 define ações concretas.</p>
+                    <p><strong>Dica:</strong> Após preencher o campo 7, o grupo pode usar a <a href="arvore.html">Árvore de Decisão</a> para validar se o tipo de proteção escolhido está correto. Use a <a href="calculadora.html">Calculadora de Vigência</a> para estimar prazos.</p>
+                    <p><strong>Fundamentação legal:</strong> O canvas integra referências à Lei 9.279/96 (PI), Lei 10.973/2004 (Inovação), Lei 9.610/98 (Direitos Autorais), Lei 9.609/98 (Software), Lei 9.456/97 (Cultivares) e Lei 13.123/2015 (Biodiversidade).</p>
+                </div>
+            </div>
+
+            <div style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;" class="d-print-hide">
+                <a href="arvore.html" class="d-ctrl-btn">🌳 Árvore de Decisão</a>
+                <a href="calculadora.html" class="d-ctrl-btn">📅 Calculadora de Vigência</a>
+                <a href="index.html" class="d-ctrl-btn">← Voltar ao Toolkit</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer"><div class="container"><div class="footer__bottom" style="border:none;padding:0;"><p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p></div></div></footer>
+
+    <script src="script.js"></script>
+    <script>
+    const trlDescriptions = [
+        "TRL 1 — Princípios básicos observados e reportados. A pesquisa científica começa a ser traduzida em pesquisa aplicada.",
+        "TRL 2 — Conceito da tecnologia formulado. Aplicações práticas podem ser inventadas. A teoria e os princípios científicos fundamentam o conceito.",
+        "TRL 3 — Prova de conceito experimental. Estudos analíticos e laboratoriais validam as previsões dos elementos-chave da tecnologia.",
+        "TRL 4 — Tecnologia validada em laboratório. Os componentes básicos são integrados e testados em ambiente de laboratório controlado.",
+        "TRL 5 — Tecnologia validada em ambiente relevante. O protótipo é testado em ambiente que simula condições reais de uso.",
+        "TRL 6 — Demonstração em ambiente relevante. O protótipo do sistema é demonstrado em ambiente operacional simulado ou real.",
+        "TRL 7 — Demonstração em ambiente operacional. O protótipo está próximo da escala planejada e opera em ambiente operacional.",
+        "TRL 8 — Sistema completo e qualificado. A tecnologia foi testada e qualificada em sua forma final, pronta para implementação.",
+        "TRL 9 — Sistema operacional comprovado. A tecnologia está em operação real, com desempenho comprovado em condições de mercado."
+    ];
+
+    function updateTRL() {
+        const val = document.getElementById('trlSlider').value;
+        document.getElementById('trlValue').textContent = val;
+        document.getElementById('trlLabel').textContent = trlDescriptions[val - 1];
+    }
+
+    function clearDiagCanvas() {
+        if (!confirm('Limpar todos os campos do canvas?')) return;
+        document.querySelectorAll('.d-canvas__textarea').forEach(t => t.value = '');
+        document.querySelectorAll('.d-protection__option').forEach(o => o.classList.remove('selected'));
+        document.getElementById('trlSlider').value = 1;
+        updateTRL();
+    }
+    </script>
+</body>
+</html>

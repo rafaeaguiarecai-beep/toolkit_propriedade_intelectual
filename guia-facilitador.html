@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia do Facilitador — Toolkit PI Thinking</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   CSS VARIABLES & RESET
+   ═══════════════════════════════════════ */
+:root {
+  --cor-fase1: #E91E63;
+  --cor-fase2: #FF9800;
+  --cor-fase3: #2196F3;
+  --cor-fase4: #9C27B0;
+  --cor-fase5: #4CAF50;
+  --cor-primaria: #1a1a2e;
+  --cor-fundo: #f8f9fa;
+  --cor-card: #ffffff;
+  --cor-texto: #2d3436;
+  --cor-texto-leve: #636e72;
+  --cor-borda: #e0e0e0;
+  --cor-destaque: #0984e3;
+  --sombra-card: 0 2px 12px rgba(0,0,0,.08);
+  --sombra-hover: 0 8px 30px rgba(0,0,0,.12);
+  --radius: 12px;
+  --max-w: 960px;
+  --transition: .3s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════
+   NAV LATERAL (ÍNDICE FLUTUANTE)
+   ═══════════════════════════════════════ */
+.side-nav {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: 280px; background: var(--cor-primaria);
+  color: #fff; overflow-y: auto; z-index: 100;
+  padding: 2rem 1.2rem;
+  transform: translateX(0);
+  transition: transform var(--transition);
+}
+.side-nav.collapsed { transform: translateX(-280px); }
+.side-nav h2 {
+  font-size: .85rem; text-transform: uppercase;
+  letter-spacing: .12em; color: rgba(255,255,255,.5);
+  margin-bottom: .8rem; margin-top: 1.6rem;
+}
+.side-nav h2:first-child { margin-top: 0; }
+.side-nav a {
+  display: block; color: rgba(255,255,255,.82);
+  text-decoration: none; font-size: .88rem;
+  padding: .4rem .6rem; border-radius: 6px;
+  transition: background var(--transition);
+}
+.side-nav a:hover, .side-nav a.active {
+  background: rgba(255,255,255,.12); color: #fff;
+}
+.side-nav .logo {
+  font-size: 1.1rem; font-weight: 700;
+  margin-bottom: 1.4rem; display: flex;
+  align-items: center; gap: .5rem;
+}
+.side-nav .logo span { font-size: 1.4rem; }
+
+.nav-toggle {
+  position: fixed; left: 16px; top: 16px; z-index: 200;
+  background: var(--cor-primaria); color: #fff;
+  border: none; border-radius: 8px; width: 42px; height: 42px;
+  font-size: 1.3rem; cursor: pointer; display: none;
+  align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,.2);
+}
+
+/* ═══════════════════════════════════════
+   MAIN CONTENT
+   ═══════════════════════════════════════ */
+.main {
+  margin-left: 280px; padding: 2.5rem 3rem 4rem;
+  max-width: calc(var(--max-w) + 6rem);
+  transition: margin-left var(--transition);
+}
+.main.expanded { margin-left: 0; }
+
+/* ═══════════════════════════════════════
+   CAPA / HERO
+   ═══════════════════════════════════════ */
+.hero {
+  background: linear-gradient(135deg, var(--cor-primaria) 0%, #16213e 100%);
+  color: #fff; padding: 3.5rem 3rem; border-radius: var(--radius);
+  margin-bottom: 3rem; position: relative; overflow: hidden;
+}
+.hero::after {
+  content: ''; position: absolute; right: -60px; top: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: rgba(255,255,255,.04);
+}
+.hero .badge {
+  display: inline-block; background: rgba(255,255,255,.15);
+  padding: .3rem .9rem; border-radius: 20px;
+  font-size: .78rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 1rem;
+}
+.hero h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: .8rem; }
+.hero p { font-size: 1.05rem; opacity: .85; max-width: 640px; }
+
+/* ═══════════════════════════════════════
+   SEÇÕES & TIPOGRAFIA
+   ═══════════════════════════════════════ */
+section { margin-bottom: 3rem; }
+h2.section-title {
+  font-size: 1.55rem; font-weight: 700;
+  border-bottom: 3px solid var(--cor-destaque);
+  padding-bottom: .5rem; margin-bottom: 1.4rem;
+}
+h3 { font-size: 1.2rem; font-weight: 600; margin: 1.6rem 0 .6rem; }
+h4 { font-size: 1.05rem; font-weight: 600; margin: 1.2rem 0 .4rem; }
+p { margin-bottom: 1rem; }
+
+/* FASES - HEADERS COLORIDOS */
+.fase-header {
+  display: flex; align-items: center; gap: .8rem;
+  padding: 1rem 1.4rem; border-radius: var(--radius);
+  color: #fff; margin: 2.5rem 0 1.2rem; font-weight: 700;
+  font-size: 1.3rem;
+}
+.fase-header.f1 { background: var(--cor-fase1); }
+.fase-header.f2 { background: var(--cor-fase2); }
+.fase-header.f3 { background: var(--cor-fase3); }
+.fase-header.f4 { background: var(--cor-fase4); }
+.fase-header.f5 { background: var(--cor-fase5); }
+.fase-header .icon { font-size: 1.6rem; }
+
+/* ═══════════════════════════════════════
+   CARDS DE MATERIAL
+   ═══════════════════════════════════════ */
+.material-card {
+  background: var(--cor-card); border-radius: var(--radius);
+  box-shadow: var(--sombra-card); padding: 1.8rem;
+  margin-bottom: 1.6rem; border-left: 5px solid var(--cor-destaque);
+  transition: box-shadow var(--transition);
+}
+.material-card:hover { box-shadow: var(--sombra-hover); }
+.material-card.f1 { border-color: var(--cor-fase1); }
+.material-card.f2 { border-color: var(--cor-fase2); }
+.material-card.f3 { border-color: var(--cor-fase3); }
+.material-card.f4 { border-color: var(--cor-fase4); }
+.material-card.f5 { border-color: var(--cor-fase5); }
+.material-card h4 { margin-top: 0; }
+.material-card .meta {
+  display: flex; flex-wrap: wrap; gap: .6rem;
+  margin-bottom: .8rem;
+}
+.material-card .meta span {
+  font-size: .78rem; background: #f0f0f0;
+  padding: .2rem .6rem; border-radius: 20px;
+  color: var(--cor-texto-leve); font-weight: 500;
+}
+
+/* ═══════════════════════════════════════
+   TABELA CRONOGRAMA
+   ═══════════════════════════════════════ */
+.table-wrap { overflow-x: auto; margin: 1.2rem 0; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: .9rem; background: var(--cor-card);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--sombra-card);
+}
+thead { background: var(--cor-primaria); color: #fff; }
+th, td { padding: .7rem 1rem; text-align: left; }
+th { font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
+tbody tr { border-bottom: 1px solid var(--cor-borda); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:nth-child(even) { background: #fafafa; }
+.badge-fase {
+  display: inline-block; color: #fff; padding: .15rem .55rem;
+  border-radius: 4px; font-size: .75rem; font-weight: 600;
+}
+.badge-fase.f1 { background: var(--cor-fase1); }
+.badge-fase.f2 { background: var(--cor-fase2); }
+.badge-fase.f3 { background: var(--cor-fase3); }
+.badge-fase.f4 { background: var(--cor-fase4); }
+.badge-fase.f5 { background: var(--cor-fase5); }
+
+/* ═══════════════════════════════════════
+   CALLOUT / DICA / ALERTA
+   ═══════════════════════════════════════ */
+.callout {
+  padding: 1.2rem 1.4rem; border-radius: var(--radius);
+  margin: 1.2rem 0; font-size: .93rem;
+}
+.callout.dica {
+  background: #e8f5e9; border-left: 4px solid var(--cor-fase5);
+}
+.callout.atencao {
+  background: #fff3e0; border-left: 4px solid var(--cor-fase2);
+}
+.callout.info {
+  background: #e3f2fd; border-left: 4px solid var(--cor-fase3);
+}
+.callout .label {
+  font-weight: 700; text-transform: uppercase;
+  font-size: .78rem; letter-spacing: .06em;
+  margin-bottom: .3rem;
+}
+
+/* ═══════════════════════════════════════
+   CHECKLIST
+   ═══════════════════════════════════════ */
+.checklist { list-style: none; padding: 0; margin: 1rem 0; }
+.checklist li {
+  padding: .5rem 0 .5rem 2rem; position: relative;
+  border-bottom: 1px dashed var(--cor-borda);
+}
+.checklist li::before {
+  content: '☐'; position: absolute; left: 0; top: .5rem;
+  font-size: 1.1rem;
+}
+
+/* ═══════════════════════════════════════
+   PASSO A PASSO (STEPS)
+   ═══════════════════════════════════════ */
+.steps { counter-reset: step; margin: 1.2rem 0; }
+.step {
+  counter-increment: step; padding: 1rem 1rem 1rem 3.4rem;
+  position: relative; margin-bottom: .8rem;
+  background: var(--cor-card); border-radius: var(--radius);
+  box-shadow: var(--sombra-card);
+}
+.step::before {
+  content: counter(step); position: absolute; left: 1rem; top: 1rem;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--cor-destaque); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem;
+}
+.step strong { display: block; margin-bottom: .2rem; }
+
+/* ═══════════════════════════════════════
+   ACCORDION
+   ═══════════════════════════════════════ */
+details {
+  background: var(--cor-card); border-radius: var(--radius);
+  box-shadow: var(--sombra-card); margin-bottom: .8rem;
+  overflow: hidden;
+}
+details summary {
+  padding: 1rem 1.4rem; cursor: pointer;
+  font-weight: 600; font-size: .95rem;
+  list-style: none; display: flex;
+  align-items: center; gap: .6rem;
+  transition: background var(--transition);
+}
+details summary:hover { background: #f5f5f5; }
+details summary::before { content: '▸'; transition: transform var(--transition); }
+details[open] summary::before { transform: rotate(90deg); }
+details .content { padding: 0 1.4rem 1.2rem; }
+
+/* ═══════════════════════════════════════
+   BACK TO TOP
+   ═══════════════════════════════════════ */
+.back-top {
+  position: fixed; bottom: 2rem; right: 2rem;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--cor-primaria); color: #fff;
+  border: none; font-size: 1.2rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--transition);
+  z-index: 90;
+}
+.back-top.visible { opacity: 1; pointer-events: auto; }
+
+/* ═══════════════════════════════════════
+   PRINT
+   ═══════════════════════════════════════ */
+@media print {
+  .side-nav, .nav-toggle, .back-top { display: none !important; }
+  .main { margin-left: 0 !important; padding: 1rem !important; }
+  .hero { break-after: page; }
+  .material-card, .step, details { break-inside: avoid; }
+  body { font-size: 11pt; }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .side-nav { transform: translateX(-280px); }
+  .side-nav.open { transform: translateX(0); }
+  .nav-toggle { display: flex; }
+  .main { margin-left: 0; padding: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ BOTÃO TOGGLE NAV ════════════════════ -->
+<button class="nav-toggle" id="navToggle" aria-label="Abrir menu">☰</button>
+
+<!-- ════════════════════ NAVEGAÇÃO LATERAL ════════════════════ -->
+<nav class="side-nav" id="sideNav">
+  <div class="logo"><span>🧠</span> PI Thinking</div>
+
+  <h2>Introdução</h2>
+  <a href="#sobre">Sobre este Guia</a>
+  <a href="#publico">Público e Pré-requisitos</a>
+  <a href="#objetivos">Objetivos de Aprendizagem</a>
+  <a href="#estrutura">Estrutura Geral</a>
+  <a href="#cronograma">Cronograma Completo</a>
+  <a href="#preparacao">Preparação</a>
+
+  <h2>Fase 1 — Descobrir</h2>
+  <a href="#f1-visao">Visão Geral</a>
+  <a href="#f1-mat1">1.1 Quiz Diagnóstico</a>
+  <a href="#f1-mat2">1.2 Mapa Mental PI</a>
+  <a href="#f1-mat3">1.3 Casos Reais</a>
+
+  <h2>Fase 2 — Explorar</h2>
+  <a href="#f2-visao">Visão Geral</a>
+  <a href="#f2-mat1">2.1 Radar de PI</a>
+  <a href="#f2-mat2">2.2 Matriz de Proteção</a>
+  <a href="#f2-mat3">2.3 Jornada do Inventor</a>
+
+  <h2>Fase 3 — Estrategar</h2>
+  <a href="#f3-visao">Visão Geral</a>
+  <a href="#f3-mat1">3.1 Canvas de Estratégia</a>
+  <a href="#f3-mat2">3.2 Crazy 8s da PI</a>
+  <a href="#f3-mat3">3.3 Storyboard de Proteção</a>
+
+  <h2>Fase 4 — Prototipar</h2>
+  <a href="#f4-visao">Visão Geral</a>
+  <a href="#f4-mat1">4.1 Simulador de Depósito</a>
+  <a href="#f4-mat2">4.2 Escape Room</a>
+  <a href="#f4-mat3">4.3 Baralho de Dilemas</a>
+
+  <h2>Fase 5 — Avaliar</h2>
+  <a href="#f5-visao">Visão Geral</a>
+  <a href="#f5-mat1">5.1 PI Quest</a>
+  <a href="#f5-mat2">5.2 Canvas de Avaliação</a>
+  <a href="#f5-mat3">5.3 Quiz Final</a>
+
+  <h2>Apêndices</h2>
+  <a href="#referencias">Referências Legais</a>
+  <a href="#custos">Tabela de Custos INPI 2025</a>
+  <a href="#dicas-gerais">Dicas Gerais de Facilitação</a>
+  <a href="#adaptacoes">Adaptações e Variantes</a>
+  <a href="#pos-oficina">Pós-Oficina</a>
+</nav>
+
+<!-- ════════════════════ CONTEÚDO PRINCIPAL ════════════════════ -->
+<div class="main" id="mainContent">
+
+<!-- ─────────── CAPA ─────────── -->
+<header class="hero" id="sobre">
+  <span class="badge">Documento do Facilitador</span>
+  <h1>Guia do Facilitador<br>Toolkit PI Thinking</h1>
+  <p>Manual completo para condução da oficina de Propriedade Intelectual baseada em Design Thinking. Inclui orientações detalhadas para cada ferramenta, cronograma minuto a minuto, dicas de mediação e referências legais atualizadas.</p>
+  <p style="margin-top:1rem;font-size:.88rem;opacity:.65;">Versão 1.0 — Maio 2026 · Duração da oficina: 4 h · 15 materiais interativos</p>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEÇÃO 1 — INTRODUÇÃO
+     ═══════════════════════════════════════════════════════════ -->
+<section id="publico">
+  <h2 class="section-title">Público-Alvo e Pré-requisitos</h2>
+  <p>O Toolkit PI Thinking foi desenvolvido para ser aplicado em ambientes acadêmicos, corporativos e de inovação. O público primário inclui pesquisadores, professores, estudantes de pós-graduação, empreendedores, equipes de Núcleos de Inovação Tecnológica (NITs) e profissionais de Pesquisa &amp; Desenvolvimento. Não é exigido conhecimento prévio em propriedade intelectual; a oficina parte do nível diagnóstico e constrói conhecimento progressivamente.</p>
+  <p>O número ideal de participantes é de 8 a 20 pessoas, organizadas em grupos de 3 a 5 integrantes. Para turmas maiores (até 40 participantes), recomenda-se a presença de um cofacilitador para cada 10 participantes adicionais. A oficina pode ser realizada presencialmente, de forma híbrida ou inteiramente online — para cada formato, este guia oferece orientações específicas nas seções de cada material.</p>
+</section>
+
+<section id="objetivos">
+  <h2 class="section-title">Objetivos de Aprendizagem</h2>
+  <p>Ao final da oficina, os participantes serão capazes de identificar os diferentes tipos de proteção intelectual previstos na legislação brasileira (patentes de invenção, modelos de utilidade, marcas, desenhos industriais, direitos autorais, programas de computador, indicações geográficas, cultivares e topografias de circuitos integrados), associar cada tipo de criação à forma de proteção adequada, estimar custos e prazos de depósito no INPI com base na tabela de retribuições vigente (Portaria GM/MDIC nº 110/2025 e Portaria INPI PR nº 10/2025), formular estratégias combinadas de proteção para cenários realistas e conduzir simulações de depósito utilizando os formulários e classificações do INPI.</p>
+  <p>Do ponto de vista atitudinal, espera-se que os participantes desenvolvam uma consciência ética sobre dilemas de PI (acesso à saúde versus patentes, biopirataria versus conhecimento tradicional, publicação acadêmica versus proteção), e que se sintam motivados a buscar orientação do NIT ou de profissionais especializados antes de divulgar suas criações.</p>
+</section>
+
+<section id="estrutura">
+  <h2 class="section-title">Estrutura Geral da Oficina</h2>
+  <p>A oficina segue a lógica de Design Thinking adaptada para propriedade intelectual, organizada em cinco fases cromáticas, cada uma com três materiais interativos — totalizando 15 ferramentas. A progressão é intencional: parte-se da exploração do conhecimento prévio (Fase 1 — Descobrir, cor rosa), aprofunda-se na taxonomia e nos caminhos de proteção (Fase 2 — Explorar, cor laranja), passa-se à formulação de estratégias (Fase 3 — Estrategar, cor azul), avança para a prototipação prática de depósitos e discussão de dilemas (Fase 4 — Prototipar, cor roxa), e encerra com avaliação gamificada e reflexão sobre evolução de aprendizagem (Fase 5 — Avaliar, cor verde).</p>
+  <p>Cada fase dura entre 40 e 55 minutos, incluindo uma transição de 5 minutos entre fases. A duração total da oficina é de 4 horas, com um intervalo de 15 minutos entre as Fases 3 e 4. O facilitador pode optar por dividir a oficina em dois encontros de 2 horas, separando as Fases 1–3 (primeira sessão) das Fases 4–5 (segunda sessão).</p>
+</section>
+
+<!-- ─────────── CRONOGRAMA COMPLETO ─────────── -->
+<section id="cronograma">
+  <h2 class="section-title">Cronograma Minuto a Minuto</h2>
+  <p>A tabela abaixo apresenta o fluxo completo da oficina considerando início às 8h00. Todos os horários podem ser ajustados proporcionalmente. A coluna "Prioridade" indica quais atividades podem ser abreviadas (★) ou omitidas (☆) em oficinas de duração reduzida (3 h ou 2 h).</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Horário</th>
+        <th>Fase</th>
+        <th>Atividade / Material</th>
+        <th>Duração</th>
+        <th>Prioridade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>8:00</td>
+        <td>—</td>
+        <td>Abertura: boas-vindas, apresentação do facilitador, regras do dia</td>
+        <td>10 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>8:10</td>
+        <td><span class="badge-fase f1">Fase 1</span></td>
+        <td><strong>1.1 Quiz Diagnóstico</strong> — aplicação individual + projeção coletiva dos resultados</td>
+        <td>15 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>8:25</td>
+        <td><span class="badge-fase f1">Fase 1</span></td>
+        <td><strong>1.2 Mapa Mental PI</strong> — construção colaborativa por grupo</td>
+        <td>15 min</td>
+        <td>★</td>
+      </tr>
+      <tr>
+        <td>8:40</td>
+        <td><span class="badge-fase f1">Fase 1</span></td>
+        <td><strong>1.3 Casos Reais</strong> — leitura e debate de 2–3 casos selecionados</td>
+        <td>15 min</td>
+        <td>★</td>
+      </tr>
+      <tr>
+        <td>8:55</td>
+        <td>—</td>
+        <td>Transição: síntese da Fase 1, contextualização da Fase 2</td>
+        <td>5 min</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>9:00</td>
+        <td><span class="badge-fase f2">Fase 2</span></td>
+        <td><strong>2.1 Radar de PI</strong> — exploração dos tipos de proteção no diagrama interativo</td>
+        <td>15 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>9:15</td>
+        <td><span class="badge-fase f2">Fase 2</span></td>
+        <td><strong>2.2 Matriz de Proteção</strong> — classificação de criações nos tipos adequados</td>
+        <td>15 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>9:30</td>
+        <td><span class="badge-fase f2">Fase 2</span></td>
+        <td><strong>2.3 Jornada do Inventor</strong> — jogo de trilha com decisões de proteção</td>
+        <td>15 min</td>
+        <td>★</td>
+      </tr>
+      <tr>
+        <td>9:45</td>
+        <td>—</td>
+        <td>Transição: consolidação da Fase 2, introdução da Fase 3</td>
+        <td>5 min</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>9:50</td>
+        <td><span class="badge-fase f3">Fase 3</span></td>
+        <td><strong>3.2 Crazy 8s da PI</strong> — geração de 8 estratégias em 8 minutos + votação</td>
+        <td>15 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>10:05</td>
+        <td><span class="badge-fase f3">Fase 3</span></td>
+        <td><strong>3.3 Storyboard de Proteção</strong> — narrativa visual em 6 cenas</td>
+        <td>15 min</td>
+        <td>★</td>
+      </tr>
+      <tr>
+        <td>10:20</td>
+        <td><span class="badge-fase f3">Fase 3</span></td>
+        <td><strong>3.1 Canvas de Estratégia de PI</strong> — preenchimento dos 10 blocos</td>
+        <td>15 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>10:35</td>
+        <td>—</td>
+        <td>Transição: galeria das estratégias, apresentações rápidas (1 min/grupo)</td>
+        <td>10 min</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>10:45</td>
+        <td>—</td>
+        <td><strong>☕ Intervalo</strong></td>
+        <td>15 min</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>11:00</td>
+        <td><span class="badge-fase f4">Fase 4</span></td>
+        <td><strong>4.1 Simulador de Depósito</strong> — simulação de 7 etapas do depósito INPI</td>
+        <td>30 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>11:30</td>
+        <td><span class="badge-fase f4">Fase 4</span></td>
+        <td><strong>4.3 Baralho de Dilemas</strong> — debate de 2–3 cartas selecionadas</td>
+        <td>15 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>11:45</td>
+        <td><span class="badge-fase f4">Fase 4</span></td>
+        <td><strong>4.2 Escape Room</strong> — desafio em 5 etapas (atividade bônus)</td>
+        <td>10 min</td>
+        <td>☆</td>
+      </tr>
+      <tr>
+        <td>11:55</td>
+        <td>—</td>
+        <td>Transição: debrief da Fase 4, preparação para avaliação final</td>
+        <td>5 min</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>12:00</td>
+        <td><span class="badge-fase f5">Fase 5</span></td>
+        <td><strong>5.1 PI Quest</strong> — jogo de tabuleiro (versão rápida: 15 casas)</td>
+        <td>15 min</td>
+        <td>★</td>
+      </tr>
+      <tr>
+        <td>12:15</td>
+        <td><span class="badge-fase f5">Fase 5</span></td>
+        <td><strong>5.3 Quiz Final</strong> — 10 questões com comparação pré/pós</td>
+        <td>15 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>12:30</td>
+        <td><span class="badge-fase f5">Fase 5</span></td>
+        <td><strong>5.2 Canvas de Avaliação</strong> — GAF + NPS + estrelas</td>
+        <td>10 min</td>
+        <td>Essencial</td>
+      </tr>
+      <tr>
+        <td>12:40</td>
+        <td>—</td>
+        <td>Encerramento: síntese, certificados, próximos passos</td>
+        <td>10 min</td>
+        <td>Essencial</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout dica">
+    <div class="label">Dica de tempo</div>
+    Tudo levará mais tempo do que o planejado. Reserve pelo menos 5 minutos de "colchão" por fase. Se perceber que uma atividade gerou engajamento intenso, permita que ela se estenda e abrevie a atividade marcada com ★ da mesma fase.
+  </div>
+</section>
+
+<!-- ─────────── PREPARAÇÃO ─────────── -->
+<section id="preparacao">
+  <h2 class="section-title">Preparação Pré-Oficina</h2>
+
+  <h3>Checklist Logístico</h3>
+  <ul class="checklist">
+    <li>Reservar sala com projetor/TV, wi-fi estável e tomadas acessíveis para os participantes</li>
+    <li>Garantir que todos os 15 arquivos HTML estejam acessíveis (servidor local ou links online) — testar em navegador Chrome/Firefox/Edge</li>
+    <li>Imprimir cópias de backup do Canvas de Estratégia (Material 3.1) e do Storyboard (Material 3.3) em formato A3, caso a internet falhe</li>
+    <li>Preparar post-its coloridos (5 cores), canetas marcadoras, folhas A4 e fita adesiva para paredes</li>
+    <li>Configurar projeção com a página <code>index.html</code> aberta na aba principal e cada material em abas separadas</li>
+    <li>Testar o timer do Crazy 8s (Material 3.2) e o timer do Escape Room (Material 4.2)</li>
+    <li>Organizar mesas em ilhas de 3–5 cadeiras; cada ilha é um grupo</li>
+    <li>Disponibilizar água, café e um lanche rápido para o intervalo</li>
+    <li>Preparar lista de presença (física ou digital) e formulário de consentimento LGPD, se aplicável</li>
+    <li>Ter à mão os links das referências legais para projeção durante discussões (veja seção "Referências Legais")</li>
+  </ul>
+
+  <h3>Checklist do Facilitador (Estudo Prévio)</h3>
+  <ul class="checklist">
+    <li>Ler integralmente este guia pelo menos 48 horas antes da oficina</li>
+    <li>Navegar por cada um dos 15 materiais HTML e completar pelo menos uma interação de teste</li>
+    <li>Rever os casos reais utilizados nos materiais: caso Gradiente vs. Apple (iPhone no Brasil), cupuaçu/Asahi Foods, licenciamento compulsório do Efavirenz, soja transgênica Monsanto, indicações geográficas brasileiras</li>
+    <li>Familiarizar-se com a tabela de retribuições INPI 2025 e os valores de referência para patente (R$ 175 depósito PF MEI), marca (R$ 355 eletrônico PF) e desenho industrial</li>
+    <li>Preparar 2–3 exemplos locais de PI relevantes para o público específico (ex.: pesquisas da universidade, produtos da empresa)</li>
+    <li>Definir quais cartas do Baralho de Dilemas (Material 4.3) serão usadas — selecionar 2–3 com base no perfil dos participantes</li>
+    <li>Ter anotados os números dos artigos-chave: Art. 8 e 11 da Lei 9.279/96 (patentes), Art. 7 da Lei 9.610/98 (direito autoral), Art. 122 da Lei 9.279/96 (marcas)</li>
+  </ul>
+
+  <div class="callout info">
+    <div class="label">Formato Online</div>
+    Para oficinas remotas, substitua a projeção por compartilhamento de tela e utilize breakout rooms para os trabalhos em grupo. Cada participante deve abrir os materiais HTML em seu próprio navegador. Plataformas recomendadas: Google Meet, Zoom ou Microsoft Teams com suporte a salas simultâneas.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FASE 1 — DESCOBRIR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="fase-header f1" id="f1-visao">
+  <span class="icon">🔍</span> Fase 1 — Descobrir
+</div>
+
+<section>
+  <h3>Objetivo da Fase</h3>
+  <p>A primeira fase tem como objetivo mapear o conhecimento prévio dos participantes, despertar curiosidade sobre propriedade intelectual e criar uma linha de base (score diagnóstico) que será comparada com o resultado final na Fase 5. É a fase de "aquecimento cognitivo" — o facilitador não ensina conteúdo formalmente, mas conduz atividades que revelam o que os participantes já sabem (e o que acreditam erroneamente).</p>
+  <p>A cor da fase é rosa (<code>#E91E63</code>), presente na interface de todos os materiais desta etapa. Duração sugerida: 45 minutos (incluindo transição).</p>
+
+  <h3>Postura do Facilitador na Fase 1</h3>
+  <p>Nesta fase, o facilitador atua como um mediador socrático: faz perguntas, acolhe respostas sem julgamento e anota na lousa ou em post-its os conceitos que surgirem espontaneamente. Evite corrigir erros factuais neste momento — eles serão naturalmente confrontados nas fases seguintes. A única exceção são afirmações que possam gerar dano imediato (ex.: "não preciso registrar marca porque já publiquei no Instagram").</p>
+</section>
+
+<!-- Material 1.1 -->
+<section id="f1-mat1">
+  <div class="material-card f1">
+    <h4>Material 1.1 — Quiz Diagnóstico</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👤 Individual</span>
+      <span>💻 Digital</span>
+      <span>📄 quiz-diagnostico.html</span>
+    </div>
+    <p>O Quiz Diagnóstico contém 10 questões de múltipla escolha que cobrem conceitos fundamentais de PI. O sistema gera automaticamente um código de pontuação no formato <strong>D-X</strong> (onde X é o número de acertos de 0 a 10). Este código será reutilizado no Quiz Final (Material 5.3) para comparação de evolução.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Contextualização (2 min)</strong>
+        Explique que o quiz não é uma prova e não há nota — é uma ferramenta de autoconhecimento. Peça que os participantes respondam com honestidade, sem consultar colegas ou internet. Diga: "Esse resultado inicial vai ser comparado com um quiz final para vocês mesmos verem o quanto aprenderam hoje."
+      </div>
+      <div class="step">
+        <strong>Aplicação individual (8 min)</strong>
+        Cada participante acessa o arquivo <code>quiz-diagnostico.html</code> em seu dispositivo (celular, tablet ou computador). O quiz avança automaticamente e exibe feedback imediato a cada questão. Circule pela sala para auxiliar com problemas técnicos, mas não responda dúvidas sobre o conteúdo das perguntas.
+      </div>
+      <div class="step">
+        <strong>Projeção coletiva (3 min)</strong>
+        Após todos completarem, projete a tela final do quiz e peça: "Quem obteve D-7 ou mais? D-4 a D-6? D-3 ou menos?" Faça uma rápida contagem visual (mãos levantadas). Isso ajuda você a calibrar a profundidade das explicações nas fases seguintes.
+      </div>
+      <div class="step">
+        <strong>Registro do código (2 min)</strong>
+        Peça que cada participante anote seu código D-X em um post-it e o guarde. Esse post-it será solicitado novamente na Fase 5. Em ambiente online, peça que anotem no chat privado ou em um bloco de notas.
+      </div>
+    </div>
+
+    <div class="callout atencao">
+      <div class="label">Atenção</div>
+      Se a média da turma for D-7 ou superior, considere acelerar as Fases 1 e 2, dedicando mais tempo às Fases 3 e 4, que são mais desafiadoras. Se a média for D-3 ou inferior, reserve tempo extra na Fase 2 para explicações conceituais mais detalhadas.
+    </div>
+  </div>
+</section>
+
+<!-- Material 1.2 -->
+<section id="f1-mat2">
+  <div class="material-card f1">
+    <h4>Material 1.2 — Mapa Mental PI</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Grupos de 3–5</span>
+      <span>💻 Digital ou 📝 Papel</span>
+      <span>📄 mapa-mental.html</span>
+    </div>
+    <p>O Mapa Mental é uma ferramenta de expansão conceitual: a partir de um nó central ("Propriedade Intelectual"), os participantes adicionam ramificações com tudo o que associam ao tema. A versão digital permite arrastar nós, alterar cores e expandir subnós. Em papel, basta uma folha A3 e canetas coloridas.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Formação dos grupos (1 min)</strong>
+        Divida os participantes nas ilhas previamente organizadas. Cada grupo nomeia um "escriba" que operará o computador ou segurará a caneta.
+      </div>
+      <div class="step">
+        <strong>Construção livre (8 min)</strong>
+        Instrua: "Coloquem tudo o que vem à mente quando ouvem 'Propriedade Intelectual'. Pode ser palavra, conceito, exemplo, sentimento, dúvida — tudo vale." Não interfira durante a construção, apenas circule e observe quais conceitos aparecem e quais estão ausentes (isso informará sua mediação nas fases seguintes).
+      </div>
+      <div class="step">
+        <strong>Compartilhamento (5 min)</strong>
+        Cada grupo apresenta seu mapa em 1 minuto. Anote na lousa os termos mais frequentes e destaque lacunas comuns (geralmente indicações geográficas, cultivares e topografias de circuitos integrados ficam de fora).
+      </div>
+      <div class="step">
+        <strong>Ponte para a Fase 2 (1 min)</strong>
+        Diga algo como: "Vocês mapearam X conceitos — na próxima fase, vamos descobrir que existem pelo menos 9 formas distintas de proteção. Vamos ver quais vocês já acertaram e quais são novas."
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Material 1.3 -->
+<section id="f1-mat3">
+  <div class="material-card f1">
+    <h4>Material 1.3 — Casos Reais</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Plenária</span>
+      <span>💻 Digital (projeção)</span>
+      <span>📄 casos-reais.html</span>
+    </div>
+    <p>Uma coleção de casos reais de PI no Brasil, apresentados em formato de cards com resumo, cronologia e desfecho. Os casos incluem a disputa Gradiente vs. Apple pela marca iPhone, o registro do cupuaçu pela Asahi Foods no Japão, o licenciamento compulsório do Efavirenz em 2007, a disputa de royalties da soja transgênica da Monsanto, e a conquista da Indicação Geográfica das panelas de barro da Raposa (Roraima).</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Seleção de casos (antes da oficina)</strong>
+        Escolha 2–3 casos com maior afinidade ao perfil dos participantes. Para público de TI, priorize o caso iPhone e a discussão sobre software patente vs. direito autoral. Para público agro, o caso Monsanto e cultivares. Para público de saúde, o Efavirenz. Para público regional de Roraima, as panelas da Raposa.
+      </div>
+      <div class="step">
+        <strong>Projeção e leitura coletiva (5 min por caso)</strong>
+        Projete o card do caso e leia o resumo em voz alta. Após a leitura, faça 2–3 perguntas provocativas, por exemplo: "A Gradiente tinha razão em reivindicar a marca iPhone se registrou antes da Apple no Brasil?" ou "O governo brasileiro agiu corretamente ao quebrar a patente do Efavirenz?"
+      </div>
+      <div class="step">
+        <strong>Debate breve (5 min total)</strong>
+        Permita que 3–4 participantes se manifestem. Não dê respostas definitivas — a intenção é gerar engajamento e incômodo produtivo que será trabalhado nas fases seguintes.
+      </div>
+    </div>
+
+    <div class="callout dica">
+      <div class="label">Dica</div>
+      Se os participantes se engajarem intensamente com os casos, este é um ótimo sinal — mas controle o tempo. Você pode dizer: "Guardem essas reflexões — na Fase 4, vamos debater dilemas éticos parecidos com mais profundidade usando o Baralho de Dilemas."
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FASE 2 — EXPLORAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="fase-header f2" id="f2-visao">
+  <span class="icon">🧭</span> Fase 2 — Explorar
+</div>
+
+<section>
+  <h3>Objetivo da Fase</h3>
+  <p>A Fase 2 é o coração conceitual da oficina. Aqui, os participantes aprendem formalmente os 9 tipos de proteção de propriedade intelectual reconhecidos no Brasil, compreendem os requisitos legais de cada modalidade e praticam a classificação de criações reais nos tipos corretos. A postura do facilitador muda de mediador socrático para instrutor ativo — é o momento de transmitir conhecimento estruturado, sem perder a interatividade.</p>
+  <p>A cor da fase é laranja (<code>#FF9800</code>). Duração sugerida: 50 minutos (incluindo transição).</p>
+
+  <h3>Conceitos-chave que devem ser abordados</h3>
+  <p>Os 9 tipos de proteção: Patente de Invenção (PI), Modelo de Utilidade (MU), Marca, Desenho Industrial (DI), Direito Autoral, Programa de Computador, Indicação Geográfica (IG — Indicação de Procedência e Denominação de Origem), Cultivar e Topografia de Circuito Integrado. Para cada tipo, os participantes devem compreender: o que protege, o que não protege, por quanto tempo protege, onde se registra (INPI, Biblioteca Nacional, SNPC/MAPA) e qual legislação rege.</p>
+</section>
+
+<!-- Material 2.1 -->
+<section id="f2-mat1">
+  <div class="material-card f2">
+    <h4>Material 2.1 — Radar de PI</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Plenária + Individual</span>
+      <span>💻 Digital (projeção + dispositivos)</span>
+      <span>📄 radar-pi.html</span>
+    </div>
+    <p>O Radar de PI é um diagrama circular interativo com 9 segmentos, um para cada tipo de proteção. Ao clicar em cada segmento, abre-se um painel lateral com definição, exemplos, legislação, órgão responsável e prazo de vigência. É a "bússola" que o participante poderá consultar ao longo de toda a oficina.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Tour guiado (8 min)</strong>
+        Projete o Radar e percorra os 9 segmentos na seguinte ordem lógica: primeiro a Propriedade Industrial (Patente de Invenção → Modelo de Utilidade → Marca → Desenho Industrial), depois Direito Autoral e Programa de Computador, e por fim os sui generis (IG → Cultivar → Topografia). Para cada tipo, leia a definição em voz alta, dê um exemplo concreto e destaque um dado surpreendente (ex.: "A patente de invenção dura 20 anos, mas leva em média 10 anos para ser concedida no Brasil").
+      </div>
+      <div class="step">
+        <strong>Exploração livre (5 min)</strong>
+        Peça que os participantes naveguem pelo Radar em seus dispositivos e identifiquem o tipo de proteção mais relevante para sua própria atuação profissional/acadêmica.
+      </div>
+      <div class="step">
+        <strong>Enquete rápida (2 min)</strong>
+        Pergunte: "Qual tipo de proteção vocês acham mais relevante para o trabalho de vocês?" Anote as respostas — isso ajuda a personalizar os exemplos nas fases seguintes.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Material 2.2 -->
+<section id="f2-mat2">
+  <div class="material-card f2">
+    <h4>Material 2.2 — Matriz de Proteção</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Grupos de 3–5</span>
+      <span>💻 Digital (drag-and-drop)</span>
+      <span>📄 matriz-protecao.html</span>
+    </div>
+    <p>A Matriz de Proteção apresenta uma lista de criações (uma fórmula farmacêutica, um logotipo, um aplicativo, uma receita culinária, uma variedade de café, um chip) que devem ser arrastadas para a coluna do tipo de proteção correto. Ao soltar a criação no local correto, um feedback verde é exibido com a base legal. Se errado, o card fica vermelho e dá uma dica.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Demonstração (2 min)</strong>
+        Projete a Matriz e faça o primeiro exemplo junto com a turma: "Uma fórmula farmacêutica nova que resolve um problema técnico — onde vocês colocariam?" Arraste para Patente de Invenção e mostre o feedback.
+      </div>
+      <div class="step">
+        <strong>Exercício em grupo (10 min)</strong>
+        Cada grupo completa a Matriz em seu dispositivo. O sistema registra tempo e acertos. Circule para tirar dúvidas — as mais comuns são: "Software é patente ou direito autoral?" (resposta: pode ser programa de computador via Lei 9.609/98, mas o processo técnico inovador que o software executa pode ser patenteável via Lei 9.279/96, Art. 8) e "Receita é patenteável?" (resposta: não, pois não é solução técnica — mas pode ser protegida como segredo de negócio ou o prato pronto pode ganhar Indicação Geográfica).
+      </div>
+      <div class="step">
+        <strong>Correção coletiva (3 min)</strong>
+        Projete a solução completa e discuta brevemente os itens que geraram mais erro.
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="label">Conceito-chave</div>
+      Enfatize que muitas criações admitem proteção combinada — um mesmo produto pode ter a marca registrada, o design protegido como desenho industrial, a tecnologia patenteada e o manual protegido por direito autoral. Essa ideia de "proteção em camadas" será aprofundada na Fase 3.
+    </div>
+  </div>
+</section>
+
+<!-- Material 2.3 -->
+<section id="f2-mat3">
+  <div class="material-card f2">
+    <h4>Material 2.3 — Jornada do Inventor</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Grupos de 3–5</span>
+      <span>💻 Digital (jogo de trilha)</span>
+      <span>📄 jornada-inventor.html</span>
+    </div>
+    <p>Um jogo de trilha digital em que cada grupo acompanha um personagem (pesquisador, artista, agricultor ou empreendedor) desde a concepção da ideia até a comercialização. Em cada "casa" da trilha, o grupo enfrenta uma decisão (publicar antes de depositar? buscar parceiro sem NDA? registrar só a marca ou também o DI?) e a escolha gera consequências na pontuação.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Formação e escolha de personagem (2 min)</strong>
+        Cada grupo escolhe ou recebe por sorteio um dos 4 personagens. Explique que o jogo tem 10 casas e que cada decisão vale pontos.
+      </div>
+      <div class="step">
+        <strong>Jogo (10 min)</strong>
+        Os grupos jogam simultaneamente. O facilitador observa e anota quais decisões geram mais debate. Não intervenha nas escolhas — os erros são parte do aprendizado.
+      </div>
+      <div class="step">
+        <strong>Placar e debrief (3 min)</strong>
+        Compare os placares dos grupos e pergunte ao grupo com maior pontuação qual foi a decisão mais difícil. Destaque os aprendizados-chave: "Publicar antes de depositar elimina a novidade", "NDA protege durante negociações", "Proteção combinada maximiza o valor do ativo".
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FASE 3 — ESTRATEGAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="fase-header f3" id="f3-visao">
+  <span class="icon">📐</span> Fase 3 — Estrategar
+</div>
+
+<section>
+  <h3>Objetivo da Fase</h3>
+  <p>Na Fase 3, os participantes passam de consumidores de conhecimento a criadores de estratégia. Utilizando técnicas de Design Sprint (Crazy 8s e Storyboard) e um Canvas estruturado, cada grupo formula uma estratégia de proteção intelectual para um cenário realista. Esta é a fase mais criativa da oficina e exige do facilitador um equilíbrio entre liberdade para ideação e rigor técnico-legal.</p>
+  <p>A cor da fase é azul (<code>#2196F3</code>). Duração sugerida: 50 minutos (incluindo galeria de apresentações).</p>
+
+  <h3>Sequência recomendada</h3>
+  <p>A ordem de aplicação dos materiais nesta fase é intencional: começa-se pelo Crazy 8s (divergência rápida), passa-se ao Storyboard (narrativa visual de uma estratégia selecionada) e finaliza-se com o Canvas de Estratégia (estruturação formal com dados de custos, prazos e legislação). Essa progressão espelha o funil de Design Thinking: divergir → convergir → formalizar.</p>
+</section>
+
+<!-- Material 3.2 (Crazy 8s vem primeiro na sequência) -->
+<section id="f3-mat2">
+  <div class="material-card f3">
+    <h4>Material 3.2 — Crazy 8s da PI</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👤 Individual → 👥 Grupo</span>
+      <span>💻 Digital (timer + votação)</span>
+      <span>📄 crazy8s.html</span>
+    </div>
+    <p>O Crazy 8s é uma técnica de design sprint adaptada para PI: cada participante gera 8 ideias de estratégias de proteção em 8 minutos, uma por minuto, usando os cenários predefinidos (Dr. Apressado, Ana Inventora, Chef Raízes, Kayla Maker, Dona Floresta, Startup Roraima, Produtor Rural, Lia Artista). O timer integrado destaca o quadro ativo e emite um som a cada minuto.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Escolha do cenário (2 min)</strong>
+        Cada grupo escolhe ou recebe um cenário. Se possível, distribua cenários diferentes para cada grupo, garantindo diversidade nas apresentações finais. Para turmas avançadas, permita que os grupos criem seu próprio cenário baseado em uma criação real de um dos integrantes.
+      </div>
+      <div class="step">
+        <strong>Rodada Crazy 8s (8 min)</strong>
+        Inicie o timer projetado. Cada participante trabalha individualmente (em papel ou na tela), gerando uma ideia por quadro. As ideias podem ser textos curtos, desenhos ou esquemas. Mantenha o ambiente silencioso e concentrado durante o timer — diga: "Velocidade importa mais que perfeição. Não censure nenhuma ideia."
+      </div>
+      <div class="step">
+        <strong>Apresentação e votação (5 min)</strong>
+        Cada participante mostra suas 8 ideias ao grupo (30 s cada). O grupo vota nas 2 melhores usando o sistema de estrelas (⭐) do material. As ideias vencedoras serão desenvolvidas no Storyboard.
+      </div>
+    </div>
+
+    <div class="callout dica">
+      <div class="label">Dica de facilitação</div>
+      Se algum participante ficar "travado", sugira que pense em combinações de proteção (marca + DI, patente + segredo industrial), em sequências temporais (registrar agora vs. publicar antes vs. depositar provisório) ou em públicos diferentes (mercado nacional vs. internacional via PCT).
+    </div>
+  </div>
+</section>
+
+<!-- Material 3.3 -->
+<section id="f3-mat3">
+  <div class="material-card f3">
+    <h4>Material 3.3 — Storyboard de Proteção</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Grupos de 3–5</span>
+      <span>💻 Digital (campos editáveis)</span>
+      <span>📄 storyboard.html</span>
+    </div>
+    <p>O Storyboard traduz a estratégia vencedora do Crazy 8s em uma narrativa visual de 6 cenas: (1) Criação — o momento em que a ideia nasce; (2) Erro — o que pode dar errado sem proteção; (3) Busca — pesquisa de anterioridade; (4) Depósito — formalização no órgão competente; (5) Exame — acompanhamento do processo; (6) Futuro — exploração comercial do ativo protegido. Cada cena tem campos editáveis para "ação" e "narração", além de referência legal automática.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Contextualização (2 min)</strong>
+        Explique a metáfora do storyboard cinematográfico: "Vocês vão contar a história da proteção intelectual do personagem de vocês em 6 cenas, como se fosse um mini-filme. Pensem em começo, meio e fim."
+      </div>
+      <div class="step">
+        <strong>Preenchimento colaborativo (10 min)</strong>
+        O grupo preenche os 6 quadros juntos. Incentive a discussão: "O que aconteceria na cena 2 se o pesquisador publicasse o artigo antes de depositar a patente?" Use o toggle de exemplo (caso Dr. Apressado) se algum grupo estiver perdido.
+      </div>
+      <div class="step">
+        <strong>Visualização rápida (3 min)</strong>
+        Cada grupo mostra seu storyboard completo na projeção (30 s). Destaque as narrativas mais criativas e os erros mais realistas identificados na cena 2.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Material 3.1 -->
+<section id="f3-mat1">
+  <div class="material-card f3">
+    <h4>Material 3.1 — Canvas de Estratégia de PI</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Grupos de 3–5</span>
+      <span>💻 Digital (auto-cálculo)</span>
+      <span>📄 canvas-estrategia.html</span>
+    </div>
+    <p>O Canvas de Estratégia é o produto principal da Fase 3. Contém 10 blocos: (1) Criação, (2) Tipo de PI, (3) Fundamento Legal, (4) Custos INPI 2025, (5) Prazos, (6) Órgão Competente, (7) Rota de Depósito, (8) Stakeholders, (9) Riscos, (10) Plano de Ação. Ao selecionar o tipo de proteção no bloco 2, os blocos 3, 4, 5, 6 e 7 são preenchidos automaticamente com dados da Portaria GM/MDIC nº 110/2025.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Demonstração rápida (3 min)</strong>
+        Projete o Canvas vazio. Selecione "Patente de Invenção" no bloco 2 e mostre como os dados de custo (R$ 175 para PF/MEI, R$ 700 para demais), legislação (Lei 9.279/96, Art. 8) e rota (Busca → Redação → Depósito → Exame) são preenchidos automaticamente. Destaque que os valores vêm da tabela oficial do INPI e podem mudar — sempre consultar o link da tabela completa.
+      </div>
+      <div class="step">
+        <strong>Preenchimento em grupo (10 min)</strong>
+        Cada grupo preenche o Canvas para o cenário trabalhado no Crazy 8s e Storyboard. Foque nos blocos 8 (stakeholders), 9 (riscos) e 10 (plano de ação), que exigem reflexão original.
+      </div>
+      <div class="step">
+        <strong>Galeria de Estratégias (integrada à transição — 10 min)</strong>
+        Cada grupo apresenta seu Canvas em 1–2 minutos. Os demais grupos fazem uma pergunta ou sugestão. Anote as estratégias no quadro para criar uma "galeria de soluções" visível durante o intervalo.
+      </div>
+    </div>
+
+    <div class="callout atencao">
+      <div class="label">Atenção aos custos</div>
+      Os valores exibidos no Canvas são baseados na tabela INPI vigente a partir de agosto de 2025 (Portaria GM/MDIC nº 110/2025 e Portaria INPI PR nº 10/2025). Se a oficina for aplicada após eventual nova atualização de tabela, o facilitador deve verificar os valores atuais em: <a href="https://www.gov.br/inpi/pt-br/inpi-data/precificacao-dos-servicos/tabela-de-retribuicoes-inpi_portaria-mdic-no110_2025-e-portaria-inpi-no-10_2025.pdf" target="_blank">Tabela de Retribuições INPI</a>.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FASE 4 — PROTOTIPAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="fase-header f4" id="f4-visao">
+  <span class="icon">🔬</span> Fase 4 — Prototipar
+</div>
+
+<section>
+  <h3>Objetivo da Fase</h3>
+  <p>A Fase 4 é a mais prática e imersiva: os participantes "colocam a mão na massa" simulando um depósito real no INPI, debatendo dilemas éticos complexos e, opcionalmente, enfrentando um escape room temático. A postura do facilitador combina instrutor técnico (no simulador), mediador de debate (no baralho de dilemas) e game master (no escape room).</p>
+  <p>A cor da fase é roxa (<code>#9C27B0</code>). Duração sugerida: 55 minutos. Esta é a fase que ocorre após o intervalo — os participantes retornam com energia renovada para atividades de alta interação.</p>
+
+  <h3>Preparação específica para a Fase 4</h3>
+  <p>Antes do intervalo, deixe os três materiais pré-carregados em abas do navegador. Para o Baralho de Dilemas, decida quais 2–3 cartas serão usadas com base no perfil da turma (as 12 disponíveis cobrem saúde pública, biodiversidade, academia, tecnologia, agronegócio e cultura). Para o Escape Room, verifique se todos os drag-and-drop estão funcionando no navegador da projeção.</p>
+</section>
+
+<!-- Material 4.1 -->
+<section id="f4-mat1">
+  <div class="material-card f4">
+    <h4>Material 4.1 — Simulador de Depósito</h4>
+    <div class="meta">
+      <span>⏱ 30 min</span>
+      <span>👥 Grupos de 3–5</span>
+      <span>💻 Digital (7 etapas interativas)</span>
+      <span>📄 simulador-deposito.html</span>
+    </div>
+    <p>O Simulador reproduz as 7 etapas de um depósito no INPI: (1) Busca de anterioridade, (2) Classificação IPC/Nice, (3) Documentação técnica (relatório descritivo, reivindicações, resumo, desenhos), (4) Identificação de inventores e titulares, (5) Cálculo de custos (tabela 2025), (6) Formulário de depósito eletrônico (e-INPI simulado), (7) Acompanhamento pós-depósito. Possui abas para Patente de Invenção, Modelo de Utilidade e Marca, com barra de progresso e score final de 0 a 100.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Contextualização (3 min)</strong>
+        Explique que o simulador não faz um depósito real — é um ambiente seguro para aprender o processo. Diga: "Se vocês soubessem que registrar uma marca custa a partir de R$ 355 e pode ser feito inteiramente online, já teriam feito? Vamos passar por cada etapa para desmistificar o processo."
+      </div>
+      <div class="step">
+        <strong>Etapa 1 — Busca (5 min)</strong>
+        Demonstre projetando a aba "Patente". Mostre como preencher termos de busca e interpretar resultados. Explique a importância: "Depositar sem buscar é como construir uma casa sem verificar se o terreno já tem dono." Cada grupo então realiza a busca para o cenário da Fase 3.
+      </div>
+      <div class="step">
+        <strong>Etapas 2–5 — Classificação, Documentação, Inventores, Custos (15 min)</strong>
+        Os grupos avançam pelas etapas no próprio ritmo. Circule e ajude com as dúvidas mais comuns: diferença entre inventor e titular (Art. 6 da Lei 9.279/96), estrutura mínima de um relatório descritivo, e cálculo de custo com desconto para pessoa física/MEI.
+      </div>
+      <div class="step">
+        <strong>Etapas 6–7 — Depósito e Acompanhamento (5 min)</strong>
+        Mostre a simulação do formulário e-INPI e o gerador de protocolo fictício. Explique o fluxo pós-depósito: publicação na RPI, exame formal, exame técnico, possíveis exigências e concessão. Destaque que a aba de acompanhamento mostra prazos realistas.
+      </div>
+      <div class="step">
+        <strong>Score e debrief (2 min)</strong>
+        Cada grupo vê sua pontuação (0–100). Discuta brevemente os pontos de atenção dos grupos com menor score.
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="label">Para saber mais</div>
+      Para quem quiser ver o processo real, o INPI disponibiliza um tutorial oficial de depósito em: <a href="https://www.gov.br/inpi/pt-br/servicos/patentes/tutorial-de-deposito" target="_blank">Tutorial de Depósito — INPI</a>. Considere projetar brevemente esta página para mostrar que o simulador reflete fielmente o processo real.
+    </div>
+  </div>
+</section>
+
+<!-- Material 4.3 -->
+<section id="f4-mat3">
+  <div class="material-card f4">
+    <h4>Material 4.3 — Baralho de Dilemas</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👥 Plenária (debate mediado)</span>
+      <span>💻 Digital (cards filtráveis)</span>
+      <span>📄 baralho-dilemas.html</span>
+    </div>
+    <p>Um conjunto de 12 cartas digitais cobrindo 6 categorias temáticas. Cada carta apresenta: cenário do dilema, base legal, argumentos a favor, argumentos contra e perguntas para debate. Os dilemas incluem: licenciamento compulsório de antirretrovirais, biopirataria do cupuaçu, publicar vs. patentear na academia, código aberto vs. proprietário, uso de grafismos indígenas na moda, e criação por inteligência artificial.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Seleção de cartas (antes da oficina)</strong>
+        Escolha 2–3 cartas alinhadas ao perfil dos participantes. Para público acadêmico, use "Publicar ou Patentear?" (categoria Academia) e "Invenção por IA" (categoria Tecnologia). Para público de saúde, use "Efavirenz: Saúde vs. Patente" (categoria Saúde Pública). Para público de cultura, use "Grafismos Indígenas" (categoria Cultura).
+      </div>
+      <div class="step">
+        <strong>Apresentação do dilema (2 min por carta)</strong>
+        Projete a carta e leia o cenário em voz alta. Revele a base legal e os argumentos "a favor" e "contra" usando os toggles do material.
+      </div>
+      <div class="step">
+        <strong>Debate estruturado (5 min por carta)</strong>
+        Divida a turma em dois lados (a favor e contra) independentemente da opinião pessoal. Cada lado tem 2 minutos para argumentar, seguidos de 1 minuto de réplica. O facilitador modera e garante que ambos os lados sejam ouvidos.
+      </div>
+      <div class="step">
+        <strong>Síntese (2 min)</strong>
+        Não dê uma "resposta certa". Em vez disso, destaque a tensão central: "A PI existe para incentivar a inovação dando exclusividade ao criador, mas quando esse incentivo colide com direitos fundamentais como saúde ou cultura, a sociedade precisa de mecanismos de equilíbrio — e a legislação brasileira prevê vários deles."
+      </div>
+    </div>
+
+    <div class="callout atencao">
+      <div class="label">Sensibilidade</div>
+      Alguns dilemas tocam em temas sensíveis (biopirataria, conhecimento tradicional indígena, acesso a medicamentos). Aborde com respeito e escuta ativa. Se houver participantes de comunidades tradicionais ou indígenas, valorize especialmente seu conhecimento e perspectiva.
+    </div>
+  </div>
+</section>
+
+<!-- Material 4.2 -->
+<section id="f4-mat2">
+  <div class="material-card f4">
+    <h4>Material 4.2 — Escape Room (Atividade Bônus)</h4>
+    <div class="meta">
+      <span>⏱ 10–45 min (flexível)</span>
+      <span>👥 Grupos de 3–5</span>
+      <span>💻 Digital (drag-and-drop, timer)</span>
+      <span>📄 escape-room.html</span>
+    </div>
+    <p>Um escape room digital com 5 desafios temáticos de PI, timer regressivo, sistema de pistas e um código final de 5 dígitos. É classificado como atividade bônus porque sua duração completa (45 min) excede o tempo disponível no cronograma padrão de 4 horas. Na versão rápida (10 min), os grupos fazem apenas os desafios 1 e 2.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Decisão de formato (antes da oficina)</strong>
+        Se a oficina tem duração de 4 horas, aplique a versão curta (10 min, desafios 1 e 2). Se tem 5+ horas ou se está dividida em 2 sessões, aplique a versão completa (45 min). Se o tempo está muito apertado, omita esta atividade (prioridade ☆).
+      </div>
+      <div class="step">
+        <strong>Ambientação (1 min)</strong>
+        Diga: "Vocês estão presos em um escritório de PI e precisam resolver desafios para encontrar o código de saída. Têm X minutos." Projete o timer.
+      </div>
+      <div class="step">
+        <strong>Desafios (8–40 min conforme formato)</strong>
+        Os grupos trabalham simultaneamente em seus dispositivos. O facilitador atua como "game master" — se um grupo estiver preso por mais de 3 minutos, ofereça a primeira pista.
+      </div>
+      <div class="step">
+        <strong>Celebração (1 min)</strong>
+        O primeiro grupo a inserir o código correto "escapa". Parabenize e pergunte qual desafio foi mais difícil.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FASE 5 — AVALIAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="fase-header f5" id="f5-visao">
+  <span class="icon">📊</span> Fase 5 — Avaliar
+</div>
+
+<section>
+  <h3>Objetivo da Fase</h3>
+  <p>A fase final fecha o ciclo de Design Thinking com avaliação de aprendizagem e feedback sobre a experiência. Três materiais trabalham em camadas complementares: o PI Quest (jogo de tabuleiro) consolida conhecimentos de forma lúdica, o Quiz Final mede a evolução comparando com o diagnóstico inicial, e o Canvas de Avaliação coleta feedback estruturado sobre a oficina. O facilitador encerra como um coach: celebra conquistas, identifica lacunas e orienta próximos passos.</p>
+  <p>A cor da fase é verde (<code>#4CAF50</code>). Duração sugerida: 40 minutos + 10 minutos de encerramento.</p>
+</section>
+
+<!-- Material 5.1 -->
+<section id="f5-mat1">
+  <div class="material-card f5">
+    <h4>Material 5.1 — PI Quest (Jogo de Tabuleiro Virtual)</h4>
+    <div class="meta">
+      <span>⏱ 15 min (versão rápida: 15 casas) / 30 min (completo: 30 casas)</span>
+      <span>👥 2–4 jogadores por tabuleiro</span>
+      <span>💻 Digital (dados, cards, placar)</span>
+      <span>📄 pi-quest.html</span>
+    </div>
+    <p>Jogo de tabuleiro virtual com 30 casas e 30 cartas-pergunta em 6 categorias (Patentes, Marcas, Direito Autoral, Biodiversidade, Estratégia, Desafio). Suporta 2–4 jogadores, com dado animado, modal de pergunta com 4 alternativas, feedback imediato com citação legal e scoreboard final.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Organização (2 min)</strong>
+        Forme duplas ou trios que jogarão no mesmo dispositivo. Se houver mais dispositivos disponíveis, jogue individualmente. Configure o número de jogadores na tela inicial do jogo. Para a versão rápida de 15 minutos, defina a meta de "quem chegar à casa 15 primeiro" ou "quem tiver mais pontos em 15 min".
+      </div>
+      <div class="step">
+        <strong>Jogo (10–25 min)</strong>
+        Os grupos jogam simultaneamente. O facilitador circula e esclarece dúvidas sobre as respostas — cada card mostra a base legal após a resposta, o que transforma cada pergunta em um microepisódio de aprendizagem.
+      </div>
+      <div class="step">
+        <strong>Placar final (3 min)</strong>
+        Identifique o vencedor de cada tabuleiro. Se houver tempo, faça uma final entre os vencedores de cada mesa projetada. Celebre com aplausos.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Material 5.3 -->
+<section id="f5-mat3">
+  <div class="material-card f5">
+    <h4>Material 5.3 — Quiz Final</h4>
+    <div class="meta">
+      <span>⏱ 15 min</span>
+      <span>👤 Individual</span>
+      <span>💻 Digital</span>
+      <span>📄 quiz-final.html</span>
+    </div>
+    <p>10 questões avançadas de PI, com barra de progresso e feedback detalhado por questão. Ao final, o sistema gera um código <strong>F-X</strong> (0–10). O participante insere seu código diagnóstico <strong>D-X</strong> (anotado na Fase 1) e o sistema exibe dois gráficos de barras lado a lado mostrando a evolução, com indicação de pontos ganhos (+) ou perdidos (−) e mensagem personalizada.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Preparação (2 min)</strong>
+        Peça que os participantes resgatem o post-it com o código D-X da Fase 1 (ou consultem suas anotações). Reforce: "Lembram do quiz do início? Agora vão responder um quiz similar, mas com questões mais elaboradas. Vamos ver o quanto vocês evoluíram."
+      </div>
+      <div class="step">
+        <strong>Aplicação individual (10 min)</strong>
+        Cada participante responde as 10 questões em seu dispositivo. As questões são intencionalmente mais difíceis que as do diagnóstico — pedem aplicação de conceitos, não apenas reconhecimento.
+      </div>
+      <div class="step">
+        <strong>Comparação de resultados (3 min)</strong>
+        Ao final, o participante insere seu D-X e visualiza os gráficos de evolução. Peça que compartilhem: "Quem melhorou 3 ou mais pontos?" "Quem manteve?" Celebre as evoluções e tranquilize quem não melhorou: "As questões finais são mais difíceis — manter o score já é evolução."
+      </div>
+    </div>
+
+    <div class="callout dica">
+      <div class="label">Dados para o facilitador</div>
+      Se possível, anote os scores D-X e F-X de toda a turma para calcular a média de evolução. Esse dado é valioso para justificar a oficina institucionalmente e para melhorar versões futuras. A diferença média entre D e F em turmas iniciantes geralmente fica entre +2 e +4 pontos.
+    </div>
+  </div>
+</section>
+
+<!-- Material 5.2 -->
+<section id="f5-mat2">
+  <div class="material-card f5">
+    <h4>Material 5.2 — Canvas de Avaliação</h4>
+    <div class="meta">
+      <span>⏱ 10 min</span>
+      <span>👤 Individual</span>
+      <span>💻 Digital</span>
+      <span>📄 canvas-avaliacao.html</span>
+    </div>
+    <p>Ferramenta de feedback estruturado com três componentes: (1) GAF — post-its digitais em três colunas: Gostei, Aprendi, Faltou; (2) 7 critérios de avaliação por estrelas (Conteúdo, Materiais, Interatividade, Facilitador, Tempo, Aplicabilidade, Visual); (3) NPS (Net Promoter Score) de 0 a 10 com codificação por cor. Um botão "Gerar Resumo" calcula a média de estrelas, classifica o NPS e totaliza as notas GAF.</p>
+
+    <h4>Como Conduzir</h4>
+    <div class="steps">
+      <div class="step">
+        <strong>Instrução (1 min)</strong>
+        Diga: "Esse é o momento de vocês avaliarem a oficina — não tem resposta certa ou errada. Suas opiniões vão ajudar a melhorar as próximas edições. Comecem pelo GAF: algo que Gostaram, algo que Aprenderam e algo que Faltou."
+      </div>
+      <div class="step">
+        <strong>Preenchimento individual (7 min)</strong>
+        Os participantes preenchem o Canvas em silêncio. Incentive a serem específicos: em vez de "gostei de tudo", algo como "gostei do simulador de depósito porque desmistificou o processo".
+      </div>
+      <div class="step">
+        <strong>Síntese coletiva (2 min)</strong>
+        Se a turma for pequena (até 12 pessoas), peça que cada um compartilhe verbalmente seu principal "Faltou". Se for grande, projete 3–4 respostas anonimizadas e comente brevemente. Agradeça o feedback.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     APÊNDICES
+     ═══════════════════════════════════════════════════════════ -->
+<section id="referencias">
+  <h2 class="section-title">Apêndice A — Referências Legais</h2>
+  <p>Abaixo estão as principais legislações referenciadas nos materiais do toolkit, com links para o texto integral. O facilitador deve consultar esses textos quando surgirem dúvidas técnicas durante a oficina.</p>
+
+  <details>
+    <summary>Lei 9.279/1996 — Lei da Propriedade Industrial (LPI)</summary>
+    <div class="content">
+      <p>Regulamenta patentes de invenção, modelos de utilidade, marcas, desenhos industriais, indicações geográficas e concorrência desleal. Artigos-chave para a oficina: Art. 8 (requisitos de patenteabilidade — novidade, atividade inventiva, aplicação industrial), Art. 10 (o que não é invenção), Art. 11 (novidade e estado da técnica), Art. 40 (prazo de vigência — 20 anos para PI, 15 para MU), Art. 122 (definição de marca), Art. 95 (desenho industrial).</p>
+      <p>Texto integral: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">planalto.gov.br/ccivil_03/leis/l9279.htm</a></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Lei 9.610/1998 — Lei de Direitos Autorais (LDA)</summary>
+    <div class="content">
+      <p>Protege obras literárias, artísticas e científicas. Não exige registro para ter efeito, mas o registro na Biblioteca Nacional ou EDA/Escola de Belas Artes serve como prova de autoria. Art. 7 lista as obras protegidas; Art. 8 lista o que não é protegido (ideias, conceitos, métodos).</p>
+      <p>Texto integral: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">planalto.gov.br/ccivil_03/leis/l9610.htm</a></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Lei 9.609/1998 — Lei de Software</summary>
+    <div class="content">
+      <p>Equipara programa de computador a obra literária para fins de proteção autoral. O registro é facultativo (feito no INPI) e a proteção dura 50 anos. O código-fonte não precisa ser divulgado; basta o hash do código (resumo digital) no pedido de registro.</p>
+      <p>Texto integral: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank">planalto.gov.br/ccivil_03/leis/l9609.htm</a></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Lei 9.456/1997 — Lei de Proteção de Cultivares</summary>
+    <div class="content">
+      <p>Protege novas variedades vegetais que atendam aos requisitos DHE (Distinguibilidade, Homogeneidade e Estabilidade). O registro é feito no SNPC/MAPA. A proteção dura 15 anos (18 para videiras e árvores). Essencial para o público agro.</p>
+      <p>Texto integral: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank">planalto.gov.br/ccivil_03/leis/l9456.htm</a></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Lei 11.484/2007 — Topografias de Circuitos Integrados</summary>
+    <div class="content">
+      <p>Protege o layout tridimensional de circuitos integrados ("chips"). O registro é feito no INPI e a proteção dura 10 anos. É o tipo de PI menos conhecido e frequentemente omitido em oficinas — incluí-lo no Radar de PI (Material 2.1) demonstra abrangência.</p>
+      <p>Texto integral: <a href="http://www.planalto.gov.br/ccivil_03/_ato2007-2010/2007/lei/L11484.htm" target="_blank">planalto.gov.br/ccivil_03/_ato2007-2010/2007/lei/L11484.htm</a></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Lei 13.123/2015 — Marco Legal da Biodiversidade</summary>
+    <div class="content">
+      <p>Regulamenta o acesso ao patrimônio genético e ao conhecimento tradicional associado, e a repartição de benefícios. Fundamental para os dilemas de biopirataria discutidos no Baralho de Dilemas (Material 4.3), especialmente os casos do cupuaçu e da ayahuasca.</p>
+      <p>Texto integral: <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm</a></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Acordo TRIPS (OMC) — Artigo 27</summary>
+    <div class="content">
+      <p>O Acordo sobre Aspectos dos Direitos de Propriedade Intelectual Relacionados ao Comércio (TRIPS) estabelece padrões mínimos de proteção de PI entre os países-membros da OMC. O Art. 27 define o que é patenteável e quais exclusões são permitidas (ordem pública, moralidade, métodos diagnósticos, plantas e animais).</p>
+      <p>Texto em português: <a href="https://www.gov.br/inpi/pt-br/backup/legislacao-1/27-trips-portugues1.pdf" target="_blank">TRIPS Art. 27 — PDF INPI</a></p>
+    </div>
+  </details>
+</section>
+
+<section id="custos">
+  <h2 class="section-title">Apêndice B — Tabela Resumida de Custos INPI 2025</h2>
+  <p>Valores de referência vigentes a partir de agosto de 2025, conforme Portaria GM/MDIC nº 110/2025 e Portaria INPI PR nº 10/2025. Os valores abaixo são para depósito eletrônico. Para a tabela completa, consulte o <a href="https://www.gov.br/inpi/pt-br/inpi-data/precificacao-dos-servicos/tabela-de-retribuicoes-inpi_portaria-mdic-no110_2025-e-portaria-inpi-no-10_2025.pdf" target="_blank">PDF oficial do INPI</a>.</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo de PI</th>
+        <th>Serviço</th>
+        <th>PF / MEI / ME / EPP</th>
+        <th>Demais</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Patente de Invenção</td>
+        <td>Depósito</td>
+        <td>R$ 175</td>
+        <td>R$ 700</td>
+      </tr>
+      <tr>
+        <td>Modelo de Utilidade</td>
+        <td>Depósito</td>
+        <td>R$ 175</td>
+        <td>R$ 700</td>
+      </tr>
+      <tr>
+        <td>Marca</td>
+        <td>Pedido de Registro (eletrônico)</td>
+        <td>R$ 355</td>
+        <td>R$ 710</td>
+      </tr>
+      <tr>
+        <td>Desenho Industrial</td>
+        <td>Depósito</td>
+        <td>R$ 175</td>
+        <td>R$ 700</td>
+      </tr>
+      <tr>
+        <td>Programa de Computador</td>
+        <td>Registro</td>
+        <td>R$ 185</td>
+        <td>R$ 740</td>
+      </tr>
+      <tr>
+        <td>Indicação Geográfica</td>
+        <td>Pedido de Registro</td>
+        <td colspan="2" style="text-align:center">R$ 590</td>
+      </tr>
+      <tr>
+        <td>Topografia de CI</td>
+        <td>Depósito</td>
+        <td>R$ 175</td>
+        <td>R$ 700</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout info">
+    <div class="label">Nota</div>
+    Os valores para Pessoa Física (PF), Microempreendedor Individual (MEI), Microempresa (ME) e Empresa de Pequeno Porte (EPP) correspondem aos descontos previstos na tabela INPI. Instituições de ensino e pesquisa, entidades sem fins lucrativos e órgãos públicos também podem ter descontos — consultar a tabela oficial para cada caso.
+  </div>
+</section>
+
+<section id="dicas-gerais">
+  <h2 class="section-title">Apêndice C — Dicas Gerais de Facilitação</h2>
+
+  <details>
+    <summary>Gestão de tempo</summary>
+    <div class="content">
+      <p>Use um timer visível (projetado ou físico) para todas as atividades cronometradas. Anuncie "5 minutos restantes" e "1 minuto restante" antes do término de cada atividade. Se uma atividade precisa ser encurtada, reduza o tempo de compartilhamento (apresentações de grupo), nunca o tempo de trabalho — é melhor ouvir menos grupos em profundidade do que apressar a reflexão.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Engajamento de participantes silenciosos</summary>
+    <div class="content">
+      <p>Alguns participantes não se manifestam em plenária, mas contribuem intensamente em grupo. Observe quem fica quieto nos debates e, durante os trabalhos em grupo, pergunte diretamente (com gentileza): "E você, Maria, qual sua leitura desse dilema?" Os materiais digitais ajudam nesse aspecto, pois permitem contribuição individual (quiz, canvas) mesmo sem exposição verbal.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Como lidar com perguntas que você não sabe responder</summary>
+    <div class="content">
+      <p>PI é um campo técnico e nenhum facilitador é obrigado a saber tudo. Se uma pergunta exigir conhecimento especializado (ex.: "Posso patentear um método de negócios no Brasil?"), seja transparente: "Não tenho certeza absoluta sobre esse ponto — o Art. 10, inciso III da LPI exclui métodos de negócios, mas há nuances que dependem da redação das reivindicações. Recomendo consultar o NIT ou um agente de PI." Anote a pergunta para pesquisar depois e, se possível, envie a resposta por e-mail aos participantes.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Problemas técnicos (internet, projeção)</summary>
+    <div class="content">
+      <p>Tenha sempre um plano B analógico: cópias impressas do Canvas (3.1) e do Storyboard (3.3), post-its para o Mapa Mental (1.2) e versões em papel dos quizzes. Se a internet cair, os arquivos HTML podem ser abertos localmente (copie-os para um pen drive antes da oficina). O Crazy 8s e o Baralho de Dilemas funcionam perfeitamente sem tecnologia — basta usar folhas em branco e ler os cenários em voz alta.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Adaptação para públicos com deficiência</summary>
+    <div class="content">
+      <p>Todos os materiais HTML são navegáveis por teclado e compatíveis com leitores de tela (NVDA, JAWS, VoiceOver). Os contrastes de cor seguem as diretrizes WCAG 2.1 nível AA. Para participantes com deficiência visual, o facilitador pode ler em voz alta os conteúdos projetados. Para participantes surdos, garanta intérprete de Libras e posicione-o próximo à projeção.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Tom e linguagem</summary>
+    <div class="content">
+      <p>Evite jargão jurídico desnecessário. Quando usar termos técnicos (anterioridade, estado da técnica, reivindicações, exame formal), defina-os imediatamente. Use analogias: "Busca de anterioridade é como pesquisar no Google antes de comprar um domínio — você quer ter certeza de que ninguém já usou aquilo." Mantenha entusiasmo genuíno: PI pode parecer burocrática, mas é a chave para transformar criatividade em valor.</p>
+    </div>
+  </details>
+</section>
+
+<section id="adaptacoes">
+  <h2 class="section-title">Apêndice D — Adaptações e Variantes</h2>
+
+  <details>
+    <summary>Oficina de 2 horas (versão compacta)</summary>
+    <div class="content">
+      <p>Use apenas os materiais marcados como "Essencial" no cronograma: Quiz Diagnóstico (1.1), Radar de PI (2.1), Matriz de Proteção (2.2), Canvas de Estratégia (3.1), Simulador de Depósito (4.1 — apenas aba de Marca, 15 min), Quiz Final (5.3) e Canvas de Avaliação (5.2). Duração total: 2h10 com transições. Omita: Mapa Mental, Casos Reais, Jornada do Inventor, Crazy 8s, Storyboard, Baralho de Dilemas, Escape Room e PI Quest.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Oficina de 8 horas (versão estendida / dia inteiro)</summary>
+    <div class="content">
+      <p>Use todos os 15 materiais com tempos ampliados. Adicione: sessão de brainstorming para aplicação ao contexto real dos participantes após a Fase 3 (30 min), Escape Room completo na Fase 4 (45 min), e rodada de pitch (5 min/grupo) onde cada equipe apresenta sua estratégia de PI como se estivesse diante de um comitê de NIT. Inclua duas pausas de 15 min e almoço de 1 hora.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Oficina 100% online (síncrona)</summary>
+    <div class="content">
+      <p>Compartilhe os links dos materiais HTML no chat da videoconferência. Use breakout rooms para trabalhos em grupo (Fases 2, 3 e 4). O facilitador principal fica na sala principal para projeções e o cofacilitador transita entre salas. Para o Crazy 8s, use o timer compartilhado por tela. Para o Canvas de Avaliação, envie o link 5 min antes do encerramento e dê tempo para preenchimento individual. Aumente a duração total em 15–20% para compensar atrasos técnicos.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Oficina para ensino médio / público jovem</summary>
+    <div class="content">
+      <p>Simplifique a linguagem e priorize os materiais gamificados: Jornada do Inventor (2.3), Crazy 8s (3.2), Escape Room (4.2) e PI Quest (5.1). Substitua os cenários técnicos do Crazy 8s por cenários próximos da realidade jovem: proteger a música de uma banda escolar, registrar o logotipo do grêmio estudantil, patentear uma invenção da feira de ciências. Reduza o Simulador de Depósito para a aba de Marca apenas (mais acessível).</p>
+    </div>
+  </details>
+</section>
+
+<section id="pos-oficina">
+  <h2 class="section-title">Apêndice E — Pós-Oficina</h2>
+
+  <h3>Ações imediatas (mesma semana)</h3>
+  <p>Envie por e-mail aos participantes: link para os 15 materiais HTML (que podem continuar sendo acessados como material de consulta), um resumo de 1 página com os principais conceitos abordados (pode ser gerado a partir do Canvas de Avaliação — seção "Aprendi"), e os contatos do NIT ou profissional de PI da instituição para encaminhamento de demandas reais de proteção.</p>
+
+  <h3>Acompanhamento (30 dias depois)</h3>
+  <p>Se possível, envie um breve formulário de follow-up perguntando: "Você tomou alguma ação relacionada à proteção de PI desde a oficina?" As respostas mais comuns (procurou o NIT, fez busca de anterioridade, registrou marca) são indicadores de impacto real da formação e podem ser usados para justificar novas edições da oficina.</p>
+
+  <h3>Melhoria contínua</h3>
+  <p>Analise os dados do Canvas de Avaliação (5.2) e identifique padrões: se o critério "Tempo" recebeu estrelas baixas, considere estender a duração ou reduzir o número de atividades. Se "Faltou" menciona frequentemente um tema específico (ex.: "PI internacional", "contratos de licenciamento"), considere incluí-lo em uma versão futura do toolkit. Os scores comparados D-X vs. F-X indicam a efetividade do conteúdo — se a evolução média for inferior a +2, revise a profundidade conceitual das Fases 2 e 3.</p>
+</section>
+
+<!-- ─────────── RODAPÉ ─────────── -->
+<footer style="text-align:center; padding:2rem 0; color:var(--cor-texto-leve); font-size:.85rem; border-top:1px solid var(--cor-borda); margin-top:3rem;">
+  <p><strong>Toolkit PI Thinking</strong> — Guia do Facilitador v1.0</p>
+  <p>Propriedade Intelectual × Design Thinking</p>
+  <p style="margin-top:.5rem;">Materiais educacionais de uso livre para fins acadêmicos e institucionais.</p>
+  <p style="margin-top:.3rem;">Maio 2026</p>
+</footer>
+
+</div><!-- /.main -->
+
+<!-- ════════════════════ BOTÃO TOPO ════════════════════ -->
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<!-- ════════════════════ JAVASCRIPT ════════════════════ -->
+<script>
+// Nav toggle (mobile)
+const navToggle = document.getElementById('navToggle');
+const sideNav = document.getElementById('sideNav');
+const mainContent = document.getElementById('mainContent');
+navToggle.addEventListener('click', () => {
+  sideNav.classList.toggle('open');
+});
+
+// Close nav on link click (mobile)
+sideNav.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 900) sideNav.classList.remove('open');
+  });
+});
+
+// Active nav link on scroll
+const sections = document.querySelectorAll('section[id], div[id]');
+const navLinks = sideNav.querySelectorAll('a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = sideNav.querySelector(`a[href="#${id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+
+// Back to top
+const backTop = document.getElementById('backTop');
+window.addEventListener('scroll', () => {
+  backTop.classList.toggle('visible', window.scrollY > 600);
+});
+backTop.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

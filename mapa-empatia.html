@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Empatia do Inventor — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+    :root {
+        --m-bg: #FAFAF7;
+        --m-surface: #FFFFFF;
+        --m-text: #1A1A1A;
+        --m-text-secondary: #5A5A5A;
+        --m-text-muted: #8A8A8A;
+        --m-border: #E8E5E0;
+        --m-accent: #4361EE;
+        --m-accent-light: rgba(67,97,238,0.08);
+        --m-font-serif: 'Playfair Display', Georgia, serif;
+        --m-font-sans: 'Inter', -apple-system, sans-serif;
+        --m-font-heading: 'Poppins', sans-serif;
+        --m-max-width: 1100px;
+        --m-transition: all 0.3s ease;
+        --m-see: #4361EE;
+        --m-hear: #7209B7;
+        --m-think: #F72585;
+        --m-say: #FF6D00;
+        --m-pain: #D94848;
+        --m-gain: #06D6A0;
+    }
+
+    [data-theme="dark"] {
+        --m-bg: #111111;
+        --m-surface: #1A1A1A;
+        --m-text: #EAEAEA;
+        --m-text-secondary: #AAAAAA;
+        --m-text-muted: #666666;
+        --m-border: #2A2A2A;
+    }
+
+    .m-page {
+        background: var(--m-bg);
+        min-height: 100vh;
+        padding-top: 100px;
+        padding-bottom: 80px;
+    }
+
+    .m-container {
+        max-width: var(--m-max-width);
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* ---- Cover ---- */
+    .m-cover {
+        position: relative;
+        background: var(--m-text);
+        color: white;
+        padding: 60px 40px;
+        margin-bottom: 48px;
+        overflow: hidden;
+    }
+
+    .m-cover::before {
+        content: '';
+        position: absolute; inset: 0;
+        background:
+            radial-gradient(ellipse at 20% 80%, rgba(67,97,238,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse at 80% 20%, rgba(247,37,133,0.1) 0%, transparent 55%),
+            radial-gradient(ellipse at 50% 50%, rgba(6,214,160,0.06) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .m-cover__overline {
+        font-family: var(--m-font-sans);
+        font-size: 0.7rem; font-weight: 700;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: #4361EE; margin-bottom: 16px;
+        position: relative; z-index: 1;
+    }
+
+    .m-cover__title {
+        font-family: var(--m-font-serif);
+        font-size: clamp(2rem, 4.5vw, 3rem);
+        font-weight: 800; line-height: 1.15;
+        margin-bottom: 12px;
+        position: relative; z-index: 1;
+    }
+
+    .m-cover__title em { font-style: italic; font-weight: 600; color: #4361EE; }
+
+    .m-cover__subtitle {
+        font-family: var(--m-font-sans);
+        font-size: 1.05rem; font-weight: 300; line-height: 1.7;
+        max-width: 560px; opacity: 0.85;
+        position: relative; z-index: 1;
+    }
+
+    .m-cover__meta {
+        display: flex; gap: 32px; margin-top: 32px; padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        position: relative; z-index: 1; flex-wrap: wrap;
+    }
+
+    .m-cover__meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .m-cover__meta-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.5; }
+    .m-cover__meta-value { font-family: var(--m-font-heading); font-size: 1rem; font-weight: 700; }
+
+    /* ---- Persona Selector ---- */
+    .m-persona-bar {
+        background: var(--m-surface);
+        border: 1px solid var(--m-border);
+        padding: 24px 32px;
+        margin-bottom: 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .m-persona-bar__label {
+        font-family: var(--m-font-sans);
+        font-size: 0.7rem; font-weight: 700;
+        letter-spacing: 2px; text-transform: uppercase;
+        color: var(--m-text-muted);
+        flex-shrink: 0;
+    }
+
+    .m-persona-bar__select {
+        flex: 1; min-width: 200px;
+        padding: 10px 16px;
+        border: 2px solid var(--m-border);
+        background: var(--m-surface);
+        color: var(--m-text);
+        font-family: var(--m-font-sans);
+        font-size: 0.9rem; font-weight: 600;
+        cursor: pointer;
+        transition: var(--m-transition);
+    }
+
+    .m-persona-bar__select:focus {
+        border-color: var(--m-accent);
+        outline: none;
+    }
+
+    .m-persona-bar__btn {
+        padding: 10px 20px;
+        font-family: var(--m-font-sans);
+        font-size: 0.8rem; font-weight: 600;
+        border: 2px solid var(--m-border);
+        background: var(--m-surface);
+        color: var(--m-text);
+        cursor: pointer;
+        transition: var(--m-transition);
+    }
+
+    .m-persona-bar__btn:hover {
+        background: var(--m-text);
+        color: var(--m-surface);
+        border-color: var(--m-text);
+    }
+
+    .m-persona-bar__btn--accent {
+        background: var(--m-accent);
+        color: white;
+        border-color: var(--m-accent);
+    }
+
+    .m-persona-bar__btn--accent:hover {
+        background: #3451D1;
+        border-color: #3451D1;
+    }
+
+    /* ---- Persona Preview ---- */
+    .m-persona-preview {
+        background: var(--m-surface);
+        border: 1px solid var(--m-border);
+        padding: 20px 32px;
+        margin-bottom: 32px;
+        display: none;
+        align-items: center;
+        gap: 16px;
+        animation: mFadeIn 0.3s ease;
+    }
+
+    .m-persona-preview.visible { display: flex; }
+
+    .m-persona-preview__emoji { font-size: 2.5rem; flex-shrink: 0; }
+
+    .m-persona-preview__info { flex: 1; }
+
+    .m-persona-preview__name {
+        font-family: var(--m-font-serif);
+        font-size: 1.2rem; font-weight: 700;
+        color: var(--m-text);
+    }
+
+    .m-persona-preview__role {
+        font-size: 0.8rem; color: var(--m-text-muted);
+        font-weight: 600; letter-spacing: 0.5px;
+    }
+
+    .m-persona-preview__quote {
+        font-family: var(--m-font-serif);
+        font-style: italic; font-size: 0.9rem;
+        color: var(--m-text-secondary);
+        margin-top: 4px;
+    }
+
+    /* ---- CANVAS ---- */
+    .m-canvas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 0;
+        border: 2px solid var(--m-text);
+        margin-bottom: 48px;
+        background: var(--m-surface);
+    }
+
+    /* Goal row spans full width */
+    .m-canvas__goal {
+        grid-column: 1 / -1;
+        padding: 24px 32px;
+        border-bottom: 2px solid var(--m-text);
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .m-canvas__goal-header {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .m-canvas__goal-num {
+        width: 28px; height: 28px;
+        background: var(--m-text);
+        color: var(--m-surface);
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--m-font-heading);
+        font-size: 0.75rem; font-weight: 700;
+    }
+
+    .m-canvas__goal-label {
+        font-family: var(--m-font-heading);
+        font-size: 0.75rem; font-weight: 700;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        color: var(--m-text);
+    }
+
+    .m-canvas__goal-fields {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .m-canvas__goal-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .m-canvas__goal-field label {
+        font-size: 0.7rem; font-weight: 600;
+        letter-spacing: 1px; text-transform: uppercase;
+        color: var(--m-text-muted);
+    }
+
+    .m-canvas__goal-field input {
+        padding: 8px 12px;
+        border: 1px solid var(--m-border);
+        background: var(--m-bg);
+        font-family: var(--m-font-sans);
+        font-size: 0.9rem;
+        color: var(--m-text);
+        transition: var(--m-transition);
+    }
+
+    .m-canvas__goal-field input:focus {
+        border-color: var(--m-accent);
+        outline: none;
+    }
+
+    /* Quadrant cells */
+    .m-canvas__cell {
+        padding: 24px;
+        min-height: 220px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .m-canvas__cell--bordered-right { border-right: 1px solid var(--m-border); }
+    .m-canvas__cell--bordered-bottom { border-bottom: 1px solid var(--m-border); }
+
+    .m-canvas__cell-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .m-canvas__cell-num {
+        width: 24px; height: 24px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--m-font-heading);
+        font-size: 0.65rem; font-weight: 700;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .m-canvas__cell-title {
+        font-family: var(--m-font-heading);
+        font-size: 0.8rem; font-weight: 700;
+        letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    .m-canvas__cell-emoji {
+        font-size: 1.2rem;
+        margin-left: auto;
+    }
+
+    .m-canvas__cell-hint {
+        font-size: 0.75rem;
+        color: var(--m-text-muted);
+        font-style: italic;
+        margin-bottom: 12px;
+        line-height: 1.5;
+    }
+
+    /* Sticky notes area */
+    .m-canvas__notes {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 8px;
+        min-height: 100px;
+    }
+
+    .m-canvas__note {
+        padding: 8px 12px;
+        font-family: var(--m-font-sans);
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--m-text);
+        max-width: 100%;
+        word-break: break-word;
+        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        animation: mNoteIn 0.2s ease;
+    }
+
+    .m-canvas__note-remove {
+        cursor: pointer;
+        opacity: 0.4;
+        font-size: 0.7rem;
+        transition: opacity 0.2s;
+        flex-shrink: 0;
+    }
+
+    .m-canvas__note-remove:hover { opacity: 1; }
+
+    /* Note colors by section */
+    .m-canvas__cell--see .m-canvas__note { background: rgba(67,97,238,0.1); border-left: 3px solid var(--m-see); }
+    .m-canvas__cell--hear .m-canvas__note { background: rgba(114,9,183,0.08); border-left: 3px solid var(--m-hear); }
+    .m-canvas__cell--say .m-canvas__note { background: rgba(255,109,0,0.08); border-left: 3px solid var(--m-say); }
+    .m-canvas__cell--think .m-canvas__note { background: rgba(247,37,133,0.08); border-left: 3px solid var(--m-think); }
+    .m-canvas__cell--pain .m-canvas__note { background: rgba(217,72,72,0.08); border-left: 3px solid var(--m-pain); }
+    .m-canvas__cell--gain .m-canvas__note { background: rgba(6,214,160,0.08); border-left: 3px solid var(--m-gain); }
+
+    /* Input row */
+    .m-canvas__input-row {
+        display: flex;
+        gap: 6px;
+        margin-top: auto;
+        padding-top: 12px;
+    }
+
+    .m-canvas__input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid var(--m-border);
+        background: var(--m-bg);
+        font-family: var(--m-font-sans);
+        font-size: 0.8rem;
+        color: var(--m-text);
+        transition: var(--m-transition);
+    }
+
+    .m-canvas__input:focus {
+        border-color: var(--m-accent);
+        outline: none;
+    }
+
+    .m-canvas__input-btn {
+        padding: 8px 14px;
+        border: none;
+        background: var(--m-text);
+        color: var(--m-surface);
+        font-family: var(--m-font-sans);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--m-transition);
+        flex-shrink: 0;
+    }
+
+    .m-canvas__input-btn:hover {
+        background: var(--m-accent);
+    }
+
+    /* Center head */
+    .m-canvas__center {
+        grid-column: 1 / -1;
+        border-top: 2px solid var(--m-text);
+        border-bottom: 2px solid var(--m-text);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+    }
+
+    /* ---- How-to Section ---- */
+    .m-howto {
+        background: var(--m-surface);
+        border: 1px solid var(--m-border);
+        padding: 40px;
+        margin-bottom: 48px;
+    }
+
+    .m-howto__title {
+        font-family: var(--m-font-serif);
+        font-size: 1.5rem; font-weight: 700;
+        color: var(--m-text); margin-bottom: 24px;
+    }
+
+    .m-howto__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .m-howto__card {
+        padding: 20px;
+        border: 1px solid var(--m-border);
+        background: var(--m-bg);
+    }
+
+    .m-howto__card-num {
+        font-family: var(--m-font-heading);
+        font-size: 0.7rem; font-weight: 700;
+        color: var(--m-accent);
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+
+    .m-howto__card-title {
+        font-family: var(--m-font-heading);
+        font-size: 0.95rem; font-weight: 700;
+        color: var(--m-text);
+        margin-bottom: 6px;
+    }
+
+    .m-howto__card-text {
+        font-size: 0.85rem;
+        color: var(--m-text-secondary);
+        line-height: 1.6;
+    }
+
+    /* ---- Example (collapsed) ---- */
+    .m-example {
+        background: var(--m-surface);
+        border: 1px solid var(--m-border);
+        margin-bottom: 48px;
+        overflow: hidden;
+    }
+
+    .m-example__header {
+        padding: 20px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: var(--m-transition);
+    }
+
+    .m-example__header:hover { background: var(--m-bg); }
+
+    .m-example__header-title {
+        font-family: var(--m-font-heading);
+        font-size: 0.95rem; font-weight: 700;
+        color: var(--m-text);
+        display: flex; align-items: center; gap: 8px;
+    }
+
+    .m-example__toggle {
+        transition: transform 0.3s ease;
+        color: var(--m-text-muted);
+    }
+
+    .m-example.open .m-example__toggle { transform: rotate(180deg); }
+
+    .m-example__body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+    }
+
+    .m-example.open .m-example__body { max-height: 2000px; }
+
+    .m-example__content {
+        padding: 0 32px 32px;
+    }
+
+    .m-example__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .m-example__item {
+        padding: 16px;
+        border-left: 3px solid var(--m-border);
+    }
+
+    .m-example__item-label {
+        font-size: 0.7rem; font-weight: 700;
+        letter-spacing: 1px; text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .m-example__item--see .m-example__item-label { color: var(--m-see); }
+    .m-example__item--see { border-left-color: var(--m-see); }
+    .m-example__item--hear .m-example__item-label { color: var(--m-hear); }
+    .m-example__item--hear { border-left-color: var(--m-hear); }
+    .m-example__item--say .m-example__item-label { color: var(--m-say); }
+    .m-example__item--say { border-left-color: var(--m-say); }
+    .m-example__item--think .m-example__item-label { color: var(--m-think); }
+    .m-example__item--think { border-left-color: var(--m-think); }
+    .m-example__item--pain .m-example__item-label { color: var(--m-pain); }
+    .m-example__item--pain { border-left-color: var(--m-pain); }
+    .m-example__item--gain .m-example__item-label { color: var(--m-gain); }
+    .m-example__item--gain { border-left-color: var(--m-gain); }
+
+    .m-example__item-text {
+        font-size: 0.85rem;
+        color: var(--m-text-secondary);
+        line-height: 1.6;
+    }
+
+    /* ---- Print ---- */
+    @media print {
+        .header, .footer, .reading-progress, .theme-toggle, .m-print-hide { display: none !important; }
+        .m-page { padding-top: 0; }
+        .m-canvas { break-inside: avoid; }
+        .m-canvas__input-row { display: none; }
+        .m-canvas__note-remove { display: none; }
+        @page { size: A3 landscape; margin: 1cm; }
+        body { background: white; }
+    }
+
+    @keyframes mFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes mNoteIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+        .m-cover { padding: 40px 24px; }
+        .m-canvas { grid-template-columns: 1fr; }
+        .m-canvas__cell--bordered-right { border-right: none; border-bottom: 1px solid var(--m-border); }
+        .m-canvas__center { grid-template-columns: 1fr; }
+        .m-canvas__goal-fields { grid-template-columns: 1fr; }
+        .m-persona-bar { flex-direction: column; align-items: stretch; }
+        .m-persona-preview { flex-direction: column; text-align: center; }
+        .m-example__grid { grid-template-columns: 1fr; }
+        .m-howto__grid { grid-template-columns: 1fr; }
+    }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">💡</span>
+                <div>
+                    <strong class="header__logo-title">PI Thinking</strong>
+                    <span class="header__logo-sub">Mapa de Empatia</span>
+                </div>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
+                </ul>
+            </nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="m-page">
+        <div class="m-container">
+
+            <!-- ====== COVER ====== -->
+            <div class="m-cover">
+                <div class="m-cover__overline">Fase 1 — Descobrir</div>
+                <h1 class="m-cover__title">Mapa de Empatia<br>do <em>Inventor</em></h1>
+                <p class="m-cover__subtitle">Coloque-se no lugar da persona. Mapeie o que ela vê, ouve, pensa, sente, fala e faz no universo da Propriedade Intelectual. Identifique suas dores e ganhos esperados.</p>
+                <div class="m-cover__meta">
+                    <div class="m-cover__meta-item">
+                        <span class="m-cover__meta-label">Campos</span>
+                        <span class="m-cover__meta-value">6 quadrantes</span>
+                    </div>
+                    <div class="m-cover__meta-item">
+                        <span class="m-cover__meta-label">Duração</span>
+                        <span class="m-cover__meta-value">20 min</span>
+                    </div>
+                    <div class="m-cover__meta-item">
+                        <span class="m-cover__meta-label">Grupo</span>
+                        <span class="m-cover__meta-value">3–6 pessoas</span>
+                    </div>
+                    <div class="m-cover__meta-item">
+                        <span class="m-cover__meta-label">Complemento</span>
+                        <span class="m-cover__meta-value">Cartas Personas</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== PERSONA SELECTOR ====== -->
+            <div class="m-persona-bar m-print-hide">
+                <span class="m-persona-bar__label">Persona</span>
+                <select class="m-persona-bar__select" id="personaSelect" onchange="selectPersona()">
+                    <option value="">Selecione a persona do seu grupo...</option>
+                    <option value="0">🔬 Dr. Apressado — Pesquisador Universitário</option>
+                    <option value="1">👩‍🔬 Ana Inventora — Mestranda em Biotecnologia</option>
+                    <option value="2">👨‍🍳 Chef Raízes — Empreendedor Gastronômico</option>
+                    <option value="3">💻 Kayla Maker — Desenvolvedora de Software</option>
+                    <option value="4">👨‍💻 Prof. Código — Docente de Engenharia</option>
+                    <option value="5">🌿 Dona Floresta — Extrativista e Líder Comunitária</option>
+                    <option value="6">🚀 Startup Roraima — Fundadores de AgTech</option>
+                    <option value="7">🧓 Mestre Pajé — Artesão Wapichana</option>
+                    <option value="8">🎨 Lia Artista — Ilustradora e Designer</option>
+                    <option value="9">🏭 Tec Industrial — Engenheiro de Produção</option>
+                    <option value="custom">✏️ Persona personalizada...</option>
+                </select>
+                <button class="m-persona-bar__btn" onclick="clearCanvas()">🗑️ Limpar tudo</button>
+                <button class="m-persona-bar__btn" onclick="window.print()">🖨️ Imprimir</button>
+            </div>
+
+            <!-- ====== PERSONA PREVIEW ====== -->
+            <div class="m-persona-preview" id="personaPreview">
+                <div class="m-persona-preview__emoji" id="previewEmoji">🔬</div>
+                <div class="m-persona-preview__info">
+                    <div class="m-persona-preview__name" id="previewName">Dr. Apressado</div>
+                    <div class="m-persona-preview__role" id="previewRole">Pesquisador Universitário</div>
+                    <div class="m-persona-preview__quote" id="previewQuote">"Publiquei os resultados no congresso antes de falar com o NIT..."</div>
+                </div>
+            </div>
+
+            <!-- ====== THE CANVAS ====== -->
+            <div class="m-canvas" id="empathyCanvas">
+
+                <!-- GOAL ROW -->
+                <div class="m-canvas__goal">
+                    <div class="m-canvas__goal-header">
+                        <div class="m-canvas__goal-num">0</div>
+                        <span class="m-canvas__goal-label">Objetivo</span>
+                    </div>
+                    <div class="m-canvas__goal-fields">
+                        <div class="m-canvas__goal-field">
+                            <label for="goalWho">Quem é a persona?</label>
+                            <input type="text" id="goalWho" placeholder="Nome e papel da persona...">
+                        </div>
+                        <div class="m-canvas__goal-field">
+                            <label for="goalWhat">O que ela precisa decidir sobre PI?</label>
+                            <input type="text" id="goalWhat" placeholder="Decisão ou situação-chave...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 1: SEE + HEAR -->
+                <div class="m-canvas__cell m-canvas__cell--see m-canvas__cell--bordered-right m-canvas__cell--bordered-bottom">
+                    <div class="m-canvas__cell-header">
+                        <div class="m-canvas__cell-num" style="background:var(--m-see)">1</div>
+                        <span class="m-canvas__cell-title" style="color:var(--m-see)">O que vê?</span>
+                        <span class="m-canvas__cell-emoji">👀</span>
+                    </div>
+                    <div class="m-canvas__cell-hint">Que informações sobre PI chegam até ela? O que vê colegas fazendo? Que exemplos de proteção (ou falta dela) observa ao redor?</div>
+                    <div class="m-canvas__notes" id="notes-see"></div>
+                    <div class="m-canvas__input-row">
+                        <input class="m-canvas__input" id="input-see" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('see')">
+                        <button class="m-canvas__input-btn" onclick="addNote('see')">+</button>
+                    </div>
+                </div>
+
+                <div class="m-canvas__cell m-canvas__cell--hear m-canvas__cell--bordered-bottom">
+                    <div class="m-canvas__cell-header">
+                        <div class="m-canvas__cell-num" style="background:var(--m-hear)">2</div>
+                        <span class="m-canvas__cell-title" style="color:var(--m-hear)">O que ouve?</span>
+                        <span class="m-canvas__cell-emoji">👂</span>
+                    </div>
+                    <div class="m-canvas__cell-hint">O que colegas, chefes, orientadores e a mídia dizem sobre PI? Que conselhos recebe? Que mitos escuta?</div>
+                    <div class="m-canvas__notes" id="notes-hear"></div>
+                    <div class="m-canvas__input-row">
+                        <input class="m-canvas__input" id="input-hear" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('hear')">
+                        <button class="m-canvas__input-btn" onclick="addNote('hear')">+</button>
+                    </div>
+                </div>
+
+                <!-- ROW 2: SAY+DO + THINK+FEEL -->
+                <div class="m-canvas__cell m-canvas__cell--say m-canvas__cell--bordered-right m-canvas__cell--bordered-bottom">
+                    <div class="m-canvas__cell-header">
+                        <div class="m-canvas__cell-num" style="background:var(--m-say)">3</div>
+                        <span class="m-canvas__cell-title" style="color:var(--m-say)">O que fala e faz?</span>
+                        <span class="m-canvas__cell-emoji">💬</span>
+                    </div>
+                    <div class="m-canvas__cell-hint">Que atitudes toma (ou deixa de tomar) em relação à PI? O que diz para os outros sobre proteger criações? Como se comporta?</div>
+                    <div class="m-canvas__notes" id="notes-say"></div>
+                    <div class="m-canvas__input-row">
+                        <input class="m-canvas__input" id="input-say" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('say')">
+                        <button class="m-canvas__input-btn" onclick="addNote('say')">+</button>
+                    </div>
+                </div>
+
+                <div class="m-canvas__cell m-canvas__cell--think m-canvas__cell--bordered-bottom">
+                    <div class="m-canvas__cell-header">
+                        <div class="m-canvas__cell-num" style="background:var(--m-think)">4</div>
+                        <span class="m-canvas__cell-title" style="color:var(--m-think)">O que pensa e sente?</span>
+                        <span class="m-canvas__cell-emoji">🧠</span>
+                    </div>
+                    <div class="m-canvas__cell-hint">Quais preocupações, medos e expectativas ela tem sobre PI? O que realmente importa para ela? O que a mantém acordada à noite?</div>
+                    <div class="m-canvas__notes" id="notes-think"></div>
+                    <div class="m-canvas__input-row">
+                        <input class="m-canvas__input" id="input-think" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('think')">
+                        <button class="m-canvas__input-btn" onclick="addNote('think')">+</button>
+                    </div>
+                </div>
+
+                <!-- ROW 3: PAIN + GAIN -->
+                <div class="m-canvas__cell m-canvas__cell--pain m-canvas__cell--bordered-right">
+                    <div class="m-canvas__cell-header">
+                        <div class="m-canvas__cell-num" style="background:var(--m-pain)">5</div>
+                        <span class="m-canvas__cell-title" style="color:var(--m-pain)">Dores</span>
+                        <span class="m-canvas__cell-emoji">😣</span>
+                    </div>
+                    <div class="m-canvas__cell-hint">Quais são seus maiores obstáculos para proteger suas criações? Medos, frustrações, riscos que enfrenta? O que pode dar errado?</div>
+                    <div class="m-canvas__notes" id="notes-pain"></div>
+                    <div class="m-canvas__input-row">
+                        <input class="m-canvas__input" id="input-pain" placeholder="Adicionar dor..." onkeydown="if(event.key==='Enter')addNote('pain')">
+                        <button class="m-canvas__input-btn" onclick="addNote('pain')">+</button>
+                    </div>
+                </div>
+
+                <div class="m-canvas__cell m-canvas__cell--gain">
+                    <div class="m-canvas__cell-header">
+                        <div class="m-canvas__cell-num" style="background:var(--m-gain)">6</div>
+                        <span class="m-canvas__cell-title" style="color:var(--m-gain)">Ganhos esperados</span>
+                        <span class="m-canvas__cell-emoji">🎯</span>
+                    </div>
+                    <div class="m-canvas__cell-hint">O que ela ganha ao proteger sua criação? Que resultado de sucesso ela imagina? Quais métricas indicariam que deu certo?</div>
+                    <div class="m-canvas__notes" id="notes-gain"></div>
+                    <div class="m-canvas__input-row">
+                        <input class="m-canvas__input" id="input-gain" placeholder="Adicionar ganho..." onkeydown="if(event.key==='Enter')addNote('gain')">
+                        <button class="m-canvas__input-btn" onclick="addNote('gain')">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== EXAMPLE (collapsible) ====== -->
+            <div class="m-example" id="exampleSection">
+                <div class="m-example__header" onclick="document.getElementById('exampleSection').classList.toggle('open')">
+                    <span class="m-example__header-title">📝 Ver exemplo preenchido — Dr. Apressado</span>
+                    <span class="m-example__toggle">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </span>
+                </div>
+                <div class="m-example__body">
+                    <div class="m-example__content">
+                        <p style="font-size:0.85rem; color:var(--m-text-muted); margin-bottom:16px; line-height:1.6;">
+                            <strong>Persona:</strong> Dr. Apressado — Pesquisador Universitário da UFRR<br>
+                            <strong>Decisão:</strong> Avaliar se ainda pode patentear após publicação em congresso (período de graça)
+                        </p>
+                        <div class="m-example__grid">
+                            <div class="m-example__item m-example__item--see">
+                                <div class="m-example__item-label">👀 O que vê?</div>
+                                <div class="m-example__item-text">Colegas publicando artigos sem se preocupar com patentes. Editais de fomento que exigem publicações. Rankings universitários baseados em papers. Poucos pesquisadores na UFRR com patentes concedidas.</div>
+                            </div>
+                            <div class="m-example__item m-example__item--hear">
+                                <div class="m-example__item-label">👂 O que ouve?</div>
+                                <div class="m-example__item-text">"Publish or perish." "Patente é coisa de empresa, não de universidade." "O NIT demora demais para responder." "Fulano publicou e depois patenteou, deu tudo certo." Orientador diz para focar nos papers.</div>
+                            </div>
+                            <div class="m-example__item m-example__item--say">
+                                <div class="m-example__item-label">💬 O que fala e faz?</div>
+                                <div class="m-example__item-text">Apresenta resultados em congressos antes de consultar o NIT. Compartilha dados com colaboradores sem NDA. Diz que "não tem tempo para burocracia de patente". Publica preprints no ResearchGate.</div>
+                            </div>
+                            <div class="m-example__item m-example__item--think">
+                                <div class="m-example__item-label">🧠 O que pensa e sente?</div>
+                                <div class="m-example__item-text">Ansiedade: "Será que perdi a chance?" Confusão entre autoria (artigo) e titularidade (patente). Sente que PI é um obstáculo à ciência aberta. No fundo, quer que sua pesquisa tenha impacto real.</div>
+                            </div>
+                            <div class="m-example__item m-example__item--pain">
+                                <div class="m-example__item-label">😣 Dores</div>
+                                <div class="m-example__item-text">Pressão por produtividade acadêmica vs. tempo para proteção. Falta de conhecimento sobre processo de depósito. Medo de burocracia e custos. Incerteza jurídica sobre o que pode ou não patentear após publicar.</div>
+                            </div>
+                            <div class="m-example__item m-example__item--gain">
+                                <div class="m-example__item-label">🎯 Ganhos esperados</div>
+                                <div class="m-example__item-text">Conseguir proteger a invenção dentro do período de graça de 12 meses. Ter apoio do NIT no processo. Conciliar publicação e proteção. Ver a tecnologia transferida para a sociedade com retorno para a universidade.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== HOW TO USE ====== -->
+            <div class="m-howto">
+                <h3 class="m-howto__title">Como preencher o canvas</h3>
+                <div class="m-howto__grid">
+                    <div class="m-howto__card">
+                        <div class="m-howto__card-num">PASSO 0</div>
+                        <div class="m-howto__card-title">Defina o objetivo</div>
+                        <div class="m-howto__card-text">Identifique quem é a persona (use as Cartas Personas) e qual decisão de PI ela precisa tomar. Isso dá foco a todo o exercício.</div>
+                    </div>
+                    <div class="m-howto__card">
+                        <div class="m-howto__card-num">PASSOS 1–2</div>
+                        <div class="m-howto__card-title">Comece pelo observável</div>
+                        <div class="m-howto__card-text">Preencha primeiro "O que vê" e "O que ouve" — são fenômenos externos que você pode imaginar concretamente. Isso cria a base para inferir pensamentos e sentimentos.</div>
+                    </div>
+                    <div class="m-howto__card">
+                        <div class="m-howto__card-num">PASSOS 3–4</div>
+                        <div class="m-howto__card-title">Avance para o interno</div>
+                        <div class="m-howto__card-text">Com a base dos passos anteriores, infira o que a persona "fala e faz" (comportamento) e "pensa e sente" (mundo interior). É aqui que a empatia se aprofunda.</div>
+                    </div>
+                    <div class="m-howto__card">
+                        <div class="m-howto__card-num">PASSOS 5–6</div>
+                        <div class="m-howto__card-title">Identifique dores e ganhos</div>
+                        <div class="m-howto__card-text">Sintetize: quais são os maiores obstáculos (dores) que impedem a persona de proteger suas criações? Que resultado de sucesso (ganhos) ela almeja?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== ACTIONS ====== -->
+            <div style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;" class="m-print-hide">
+                <a href="cartas-personas.html" class="m-persona-bar__btn">🃏 Ver Cartas Personas</a>
+                <a href="index.html" class="m-persona-bar__btn">← Voltar ao Toolkit</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom" style="border:none; padding:0;">
+                <p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    /* =============================================
+       MAPA DE EMPATIA — ENGINE
+       ============================================= */
+
+    const personasData = [
+        { emoji: "🔬", name: "Dr. Apressado", role: "Pesquisador Universitário", quote: "Publiquei os resultados no congresso antes de falar com o NIT. Será que perdi a chance de patentear?", goal: "Avaliar se ainda pode patentear após publicação (período de graça)" },
+        { emoji: "👩‍🔬", name: "Ana Inventora", role: "Mestranda em Biotecnologia", quote: "Desenvolvi o protótipo no laboratório da universidade com bolsa CAPES. De quem é essa invenção?", goal: "Entender a titularidade de PI criada com recursos da universidade" },
+        { emoji: "👨‍🍳", name: "Chef Raízes", role: "Empreendedor Gastronômico", quote: "Criei uma receita única com tucumã e jambu. Posso proteger minha receita?", goal: "Proteger o diferencial competitivo do restaurante e a identidade do negócio" },
+        { emoji: "💻", name: "Kayla Maker", role: "Desenvolvedora de Software", quote: "Criei um app de monitoramento de queimadas. Registro como software ou como patente?", goal: "Decidir a melhor forma de proteger seu aplicativo e buscar investimento" },
+        { emoji: "👨‍💻", name: "Prof. Código", role: "Docente de Engenharia", quote: "Orientei o aluno que fez toda a pesquisa. Sou coinventor?", goal: "Definir se a orientação acadêmica configura coinvenção" },
+        { emoji: "🌿", name: "Dona Floresta", role: "Extrativista e Líder Comunitária", quote: "A empresa quer usar o óleo de copaíba que nós sabemos fazer há gerações.", goal: "Garantir consentimento e repartição de benefícios para sua comunidade" },
+        { emoji: "🚀", name: "Startup Roraima", role: "Fundadores de AgTech", quote: "O investidor quer saber: qual PI vocês têm registrada?", goal: "Montar um portfólio mínimo de PI para captação de investimento" },
+        { emoji: "🧓", name: "Mestre Pajé", role: "Artesão Wapichana", quote: "Os grafismos do meu povo estão sendo copiados em camisetas.", goal: "Encontrar mecanismos para impedir a apropriação cultural indevida" },
+        { emoji: "🎨", name: "Lia Artista", role: "Ilustradora e Designer", quote: "Fiz as ilustrações para o projeto do professor como voluntária.", goal: "Ser reconhecida como autora e negociar termos justos" },
+        { emoji: "🏭", name: "Tec Industrial", role: "Engenheiro de Produção", quote: "Melhorei a ferramenta de corte que usamos na fábrica.", goal: "Proteger a melhoria funcional como Modelo de Utilidade" }
+    ];
+
+    // Notes state
+    const sections = ['see', 'hear', 'say', 'think', 'pain', 'gain'];
+    const notes = {};
+    sections.forEach(s => notes[s] = []);
+
+    function selectPersona() {
+        const val = document.getElementById('personaSelect').value;
+        const preview = document.getElementById('personaPreview');
+
+        if (val === '' || val === 'custom') {
+            preview.classList.remove('visible');
+            if (val === 'custom') {
+                document.getElementById('goalWho').value = '';
+                document.getElementById('goalWhat').value = '';
+                document.getElementById('goalWho').focus();
+            }
+            return;
+        }
+
+        const p = personasData[parseInt(val)];
+        document.getElementById('previewEmoji').textContent = p.emoji;
+        document.getElementById('previewName').textContent = p.name;
+        document.getElementById('previewRole').textContent = p.role;
+        document.getElementById('previewQuote').textContent = '"' + p.quote + '"';
+        document.getElementById('goalWho').value = p.name + ' — ' + p.role;
+        document.getElementById('goalWhat').value = p.goal;
+        preview.classList.add('visible');
+    }
+
+    function addNote(section) {
+        const input = document.getElementById('input-' + section);
+        const text = input.value.trim();
+        if (!text) return;
+
+        notes[section].push(text);
+        renderNotes(section);
+        input.value = '';
+        input.focus();
+    }
+
+    function removeNote(section, index) {
+        notes[section].splice(index, 1);
+        renderNotes(section);
+    }
+
+    function renderNotes(section) {
+        const container = document.getElementById('notes-' + section);
+        container.innerHTML = notes[section].map((text, i) => `
+            <div class="m-canvas__note">
+                <span>${text}</span>
+                <span class="m-canvas__note-remove" onclick="removeNote('${section}', ${i})">✕</span>
+            </div>
+        `).join('');
+    }
+
+    function clearCanvas() {
+        if (!confirm('Limpar todos os campos do canvas?')) return;
+        sections.forEach(s => {
+            notes[s] = [];
+            renderNotes(s);
+        });
+        document.getElementById('goalWho').value = '';
+        document.getElementById('goalWhat').value = '';
+        document.getElementById('personaSelect').value = '';
+        document.getElementById('personaPreview').classList.remove('visible');
+    }
+    </script>
+</body>
+</html>

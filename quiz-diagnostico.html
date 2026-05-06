@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Diagnóstico — PI Thinking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+    :root {
+        --q-bg: #FAFAF7;
+        --q-surface: #FFFFFF;
+        --q-text: #1A1A1A;
+        --q-text-secondary: #5A5A5A;
+        --q-text-muted: #8A8A8A;
+        --q-border: #E8E5E0;
+        --q-accent: #4361EE;
+        --q-accent-light: rgba(67,97,238,0.08);
+        --q-accent-dark: #3451D1;
+        --q-success: #2D9F6F;
+        --q-success-light: rgba(45,159,111,0.08);
+        --q-danger: #D94848;
+        --q-danger-light: rgba(217,72,72,0.08);
+        --q-warning: #E8A825;
+        --q-font-serif: 'Playfair Display', Georgia, serif;
+        --q-font-sans: 'Inter', -apple-system, sans-serif;
+        --q-font-heading: 'Poppins', sans-serif;
+        --q-max-width: 760px;
+        --q-transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] {
+        --q-bg: #111111;
+        --q-surface: #1A1A1A;
+        --q-text: #EAEAEA;
+        --q-text-secondary: #AAAAAA;
+        --q-text-muted: #666666;
+        --q-border: #2A2A2A;
+        --q-accent-light: rgba(67,97,238,0.15);
+        --q-success-light: rgba(45,159,111,0.15);
+        --q-danger-light: rgba(217,72,72,0.15);
+    }
+
+    /* ---- Layout ---- */
+    .q-page {
+        background: var(--q-bg);
+        min-height: 100vh;
+        padding-top: 100px;
+        padding-bottom: 80px;
+    }
+
+    .q-container {
+        max-width: var(--q-max-width);
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* ---- Cover ---- */
+    .q-cover {
+        position: relative;
+        background: var(--q-accent);
+        color: white;
+        padding: 60px 40px;
+        margin-bottom: 48px;
+        overflow: hidden;
+    }
+
+    .q-cover::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 60%),
+            radial-gradient(ellipse at 20% 80%, rgba(0,0,0,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .q-cover__overline {
+        font-family: var(--q-font-sans);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .q-cover__title {
+        font-family: var(--q-font-serif);
+        font-size: clamp(2rem, 4.5vw, 3rem);
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .q-cover__subtitle {
+        font-family: var(--q-font-sans);
+        font-size: 1.05rem;
+        font-weight: 300;
+        line-height: 1.7;
+        max-width: 520px;
+        opacity: 0.85;
+        position: relative;
+        z-index: 1;
+    }
+
+    .q-cover__meta {
+        display: flex;
+        gap: 32px;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+    }
+
+    .q-cover__meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .q-cover__meta-label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        opacity: 0.5;
+    }
+
+    .q-cover__meta-value {
+        font-family: var(--q-font-heading);
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    /* ---- Progress Bar ---- */
+    .q-progress {
+        margin-bottom: 40px;
+    }
+
+    .q-progress__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .q-progress__label {
+        font-family: var(--q-font-sans);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--q-text-muted);
+        letter-spacing: 0.5px;
+    }
+
+    .q-progress__count {
+        font-family: var(--q-font-heading);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--q-accent);
+    }
+
+    .q-progress__bar {
+        width: 100%;
+        height: 6px;
+        background: var(--q-border);
+        overflow: hidden;
+    }
+
+    .q-progress__fill {
+        height: 100%;
+        background: var(--q-accent);
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 0%;
+    }
+
+    /* ---- Question Card ---- */
+    .q-card {
+        background: var(--q-surface);
+        border: 1px solid var(--q-border);
+        margin-bottom: 32px;
+        transition: var(--q-transition);
+        animation: qFadeIn 0.4s ease;
+    }
+
+    .q-card--answered {
+        opacity: 0.95;
+    }
+
+    .q-card__header {
+        padding: 28px 32px 0;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .q-card__number {
+        width: 40px;
+        height: 40px;
+        background: var(--q-accent);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--q-font-heading);
+        font-size: 0.9rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .q-card__category {
+        font-family: var(--q-font-sans);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--q-accent);
+        padding: 3px 10px;
+        background: var(--q-accent-light);
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    .q-card__question {
+        font-family: var(--q-font-serif);
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--q-text);
+        line-height: 1.4;
+    }
+
+    .q-card__body {
+        padding: 24px 32px 32px;
+    }
+
+    /* ---- Options ---- */
+    .q-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .q-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 20px;
+        border: 2px solid var(--q-border);
+        background: var(--q-surface);
+        cursor: pointer;
+        transition: var(--q-transition);
+        position: relative;
+    }
+
+    .q-option:hover {
+        border-color: var(--q-text-muted);
+        background: var(--q-bg);
+    }
+
+    .q-option__marker {
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--q-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--q-font-heading);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--q-text-muted);
+        flex-shrink: 0;
+        margin-top: 1px;
+        transition: var(--q-transition);
+    }
+
+    .q-option__text {
+        font-family: var(--q-font-sans);
+        font-size: 0.95rem;
+        color: var(--q-text);
+        line-height: 1.5;
+    }
+
+    .q-option.selected {
+        border-color: var(--q-accent);
+        background: var(--q-accent-light);
+    }
+
+    .q-option.selected .q-option__marker {
+        background: var(--q-accent);
+        border-color: var(--q-accent);
+        color: white;
+    }
+
+    .q-option.correct {
+        border-color: var(--q-success);
+        background: var(--q-success-light);
+        pointer-events: none;
+    }
+
+    .q-option.correct .q-option__marker {
+        background: var(--q-success);
+        border-color: var(--q-success);
+        color: white;
+    }
+
+    .q-option.wrong {
+        border-color: var(--q-danger);
+        background: var(--q-danger-light);
+        pointer-events: none;
+    }
+
+    .q-option.wrong .q-option__marker {
+        background: var(--q-danger);
+        border-color: var(--q-danger);
+        color: white;
+    }
+
+    .q-option.disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .q-option__icon {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.1rem;
+    }
+
+    /* ---- Explanation ---- */
+    .q-explanation {
+        margin-top: 16px;
+        padding: 20px 24px;
+        border-left: 3px solid var(--q-accent);
+        background: var(--q-bg);
+        display: none;
+        animation: qFadeIn 0.4s ease;
+    }
+
+    .q-explanation.visible {
+        display: block;
+    }
+
+    .q-explanation__title {
+        font-family: var(--q-font-heading);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--q-accent);
+        margin-bottom: 6px;
+    }
+
+    .q-explanation__text {
+        font-family: var(--q-font-sans);
+        font-size: 0.9rem;
+        color: var(--q-text-secondary);
+        line-height: 1.7;
+    }
+
+    .q-explanation__legal {
+        font-size: 0.8rem;
+        color: var(--q-text-muted);
+        margin-top: 8px;
+        font-style: italic;
+    }
+
+    .q-explanation--correct { border-left-color: var(--q-success); }
+    .q-explanation--correct .q-explanation__title { color: var(--q-success); }
+    .q-explanation--wrong { border-left-color: var(--q-danger); }
+    .q-explanation--wrong .q-explanation__title { color: var(--q-danger); }
+
+    /* ---- Results Panel ---- */
+    .q-results {
+        display: none;
+        animation: qFadeIn 0.5s ease;
+    }
+
+    .q-results.visible {
+        display: block;
+    }
+
+    .q-results__hero {
+        background: var(--q-text);
+        color: white;
+        padding: 48px 40px;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .q-results__icon {
+        font-size: 4rem;
+        margin-bottom: 12px;
+    }
+
+    .q-results__title {
+        font-family: var(--q-font-serif);
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .q-results__subtitle {
+        font-size: 0.95rem;
+        opacity: 0.7;
+        margin-bottom: 32px;
+    }
+
+    .q-results__score {
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .q-results__score-num {
+        font-family: var(--q-font-heading);
+        font-size: 5rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .q-results__score-total {
+        font-family: var(--q-font-heading);
+        font-size: 1.5rem;
+        font-weight: 600;
+        opacity: 0.5;
+    }
+
+    .q-results__bar {
+        max-width: 300px;
+        margin: 16px auto 0;
+        height: 8px;
+        background: rgba(255,255,255,0.1);
+        overflow: hidden;
+    }
+
+    .q-results__bar-fill {
+        height: 100%;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 0%;
+    }
+
+    .q-results__bar-fill--good { background: var(--q-success); }
+    .q-results__bar-fill--ok { background: var(--q-warning); }
+    .q-results__bar-fill--low { background: var(--q-danger); }
+
+    .q-results__message {
+        margin-top: 16px;
+        font-size: 0.95rem;
+        opacity: 0.8;
+        line-height: 1.6;
+    }
+
+    .q-results__code {
+        margin-top: 24px;
+        padding: 16px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        display: inline-block;
+    }
+
+    .q-results__code-label {
+        font-size: 0.7rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        opacity: 0.5;
+        margin-bottom: 4px;
+    }
+
+    .q-results__code-value {
+        font-family: var(--q-font-heading);
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+    }
+
+    /* ---- Category Breakdown ---- */
+    .q-breakdown {
+        background: var(--q-surface);
+        border: 1px solid var(--q-border);
+        padding: 32px;
+        margin-bottom: 32px;
+    }
+
+    .q-breakdown__title {
+        font-family: var(--q-font-serif);
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--q-text);
+        margin-bottom: 24px;
+    }
+
+    .q-breakdown__items {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .q-breakdown__item {
+        display: grid;
+        grid-template-columns: 1fr auto 120px;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .q-breakdown__item-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--q-text);
+    }
+
+    .q-breakdown__item-score {
+        font-family: var(--q-font-heading);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--q-text-muted);
+    }
+
+    .q-breakdown__item-bar {
+        height: 6px;
+        background: var(--q-border);
+        overflow: hidden;
+    }
+
+    .q-breakdown__item-fill {
+        height: 100%;
+        background: var(--q-accent);
+        transition: width 0.8s ease;
+    }
+
+    /* ---- Save Token ---- */
+    .q-save {
+        background: var(--q-accent-light);
+        border: 1px solid var(--q-accent);
+        padding: 24px 32px;
+        margin-bottom: 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .q-save__icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .q-save__text {
+        flex: 1;
+        font-size: 0.9rem;
+        color: var(--q-text);
+        line-height: 1.6;
+    }
+
+    .q-save__text strong {
+        display: block;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+    }
+
+    /* ---- Buttons ---- */
+    .q-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 28px;
+        font-family: var(--q-font-sans);
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: var(--q-transition);
+        text-decoration: none;
+    }
+
+    .q-btn--primary {
+        background: var(--q-accent);
+        color: white;
+        border-color: var(--q-accent);
+    }
+
+    .q-btn--primary:hover {
+        background: var(--q-accent-dark);
+        transform: translateY(-1px);
+    }
+
+    .q-btn--outline {
+        background: transparent;
+        color: var(--q-text);
+        border-color: var(--q-border);
+    }
+
+    .q-btn--outline:hover {
+        border-color: var(--q-text);
+        background: var(--q-text);
+        color: var(--q-surface);
+    }
+
+    .q-btn--block {
+        width: 100%;
+    }
+
+    /* ---- Start Screen ---- */
+    .q-start {
+        text-align: center;
+        padding: 40px;
+        background: var(--q-surface);
+        border: 1px solid var(--q-border);
+    }
+
+    .q-start__icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+    }
+
+    .q-start__title {
+        font-family: var(--q-font-serif);
+        font-size: 1.5rem;
+        color: var(--q-text);
+        margin-bottom: 8px;
+    }
+
+    .q-start__text {
+        color: var(--q-text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 24px;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .q-start__rules {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+
+    .q-start__rule {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .q-start__rule-num {
+        font-family: var(--q-font-heading);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--q-accent);
+    }
+
+    .q-start__rule-label {
+        font-size: 0.75rem;
+        color: var(--q-text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ---- Print ---- */
+    @media print {
+        .header, .footer, .reading-progress, .theme-toggle, .q-print-hide { display: none !important; }
+        .q-page { padding-top: 0; }
+        .q-card { break-inside: avoid; }
+        .q-explanation { display: block !important; }
+        .q-option.correct, .q-option.wrong { opacity: 1 !important; }
+        body { background: white; color: black; }
+    }
+
+    /* ---- Animations ---- */
+    @keyframes qFadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+        .q-cover { padding: 40px 24px; }
+        .q-card__header { padding: 20px 20px 0; }
+        .q-card__body { padding: 20px; }
+        .q-card__question { font-size: 1.1rem; }
+        .q-breakdown__item { grid-template-columns: 1fr auto 80px; }
+        .q-results__hero { padding: 32px 24px; }
+        .q-results__score-num { font-size: 3.5rem; }
+    }
+    </style>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+    </button>
+
+    <header class="header" id="header">
+        <div class="header__container">
+            <a href="index.html" class="header__logo">
+                <span class="header__logo-icon">💡</span>
+                <div>
+                    <strong class="header__logo-title">PI Thinking</strong>
+                    <span class="header__logo-sub">Quiz Diagnóstico</span>
+                </div>
+            </a>
+            <nav class="nav" id="nav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
+                </ul>
+            </nav>
+            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main class="q-page">
+        <div class="q-container">
+
+            <!-- ====== COVER ====== -->
+            <div class="q-cover">
+                <div class="q-cover__overline">Fase 1 — Descobrir</div>
+                <h1 class="q-cover__title">Quiz Diagnóstico<br>de Propriedade Intelectual</h1>
+                <p class="q-cover__subtitle">Mapeie seu conhecimento prévio sobre PI. Suas respostas serão comparadas com o Quiz Final ao término da oficina para medir sua evolução.</p>
+                <div class="q-cover__meta">
+                    <div class="q-cover__meta-item">
+                        <span class="q-cover__meta-label">Questões</span>
+                        <span class="q-cover__meta-value">10</span>
+                    </div>
+                    <div class="q-cover__meta-item">
+                        <span class="q-cover__meta-label">Tempo</span>
+                        <span class="q-cover__meta-value">~10 min</span>
+                    </div>
+                    <div class="q-cover__meta-item">
+                        <span class="q-cover__meta-label">Dificuldade</span>
+                        <span class="q-cover__meta-value">Introdutório</span>
+                    </div>
+                    <div class="q-cover__meta-item">
+                        <span class="q-cover__meta-label">Formato</span>
+                        <span class="q-cover__meta-value">Múltipla escolha</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== START SCREEN ====== -->
+            <div class="q-start" id="startScreen">
+                <div class="q-start__icon">📋</div>
+                <h2 class="q-start__title">Pronto para começar?</h2>
+                <p class="q-start__text">Este quiz mapeia o que você já sabe sobre Propriedade Intelectual. Não se preocupe com erros — o objetivo é identificar seus pontos de partida.</p>
+                <div class="q-start__rules">
+                    <div class="q-start__rule">
+                        <div class="q-start__rule-num">10</div>
+                        <div class="q-start__rule-label">Questões</div>
+                    </div>
+                    <div class="q-start__rule">
+                        <div class="q-start__rule-num">4</div>
+                        <div class="q-start__rule-label">Alternativas</div>
+                    </div>
+                    <div class="q-start__rule">
+                        <div class="q-start__rule-num">1</div>
+                        <div class="q-start__rule-label">Correta</div>
+                    </div>
+                </div>
+                <button class="q-btn q-btn--primary" onclick="startQuiz()">Iniciar Quiz</button>
+            </div>
+
+            <!-- ====== PROGRESS ====== -->
+            <div class="q-progress q-print-hide" id="progressSection" style="display:none;">
+                <div class="q-progress__header">
+                    <span class="q-progress__label">Progresso</span>
+                    <span class="q-progress__count" id="progressCount">0 / 10</span>
+                </div>
+                <div class="q-progress__bar">
+                    <div class="q-progress__fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- ====== QUESTIONS CONTAINER ====== -->
+            <div id="questionsContainer"></div>
+
+            <!-- ====== FINISH BUTTON ====== -->
+            <div id="finishSection" style="display:none; text-align:center; margin-top:32px;" class="q-print-hide">
+                <button class="q-btn q-btn--primary q-btn--block" onclick="showResults()" id="finishBtn" disabled>
+                    Finalizar e ver resultado
+                </button>
+                <p style="margin-top:10px; font-size:0.85rem; color:var(--q-text-muted);" id="finishHint">Responda todas as questões para habilitar.</p>
+            </div>
+
+            <!-- ====== RESULTS ====== -->
+            <div class="q-results" id="resultsPanel">
+                <div class="q-results__hero">
+                    <div class="q-results__icon" id="resultsIcon">📊</div>
+                    <h2 class="q-results__title">Seu resultado</h2>
+                    <p class="q-results__subtitle">Quiz Diagnóstico — Fase 1: Descobrir</p>
+                    <div class="q-results__score">
+                        <span class="q-results__score-num" id="scoreNum">0</span>
+                        <span class="q-results__score-total">/ 10</span>
+                    </div>
+                    <div class="q-results__bar">
+                        <div class="q-results__bar-fill" id="scoreBar"></div>
+                    </div>
+                    <p class="q-results__message" id="scoreMessage"></p>
+                    <div class="q-results__code">
+                        <div class="q-results__code-label">Código para comparação</div>
+                        <div class="q-results__code-value" id="scoreCode">D-0</div>
+                    </div>
+                </div>
+
+                <div class="q-breakdown" id="breakdownPanel">
+                    <h3 class="q-breakdown__title">Desempenho por tema</h3>
+                    <div class="q-breakdown__items" id="breakdownItems"></div>
+                </div>
+
+                <div class="q-save">
+                    <div class="q-save__icon">💾</div>
+                    <div class="q-save__text">
+                        <strong>Guarde seu código!</strong>
+                        Anote o código acima (ex: D-7). Ao final da oficina, você fará o Quiz Final e receberá o código F-X. Compare os dois para medir sua evolução em Propriedade Intelectual.
+                    </div>
+                </div>
+
+                <div style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;" class="q-print-hide">
+                    <button class="q-btn q-btn--outline" onclick="window.print()">🖨️ Imprimir resultado</button>
+                    <button class="q-btn q-btn--outline" onclick="restartQuiz()">🔄 Refazer quiz</button>
+                    <a href="index.html" class="q-btn q-btn--outline">← Voltar ao Toolkit</a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom" style="border:none; padding:0;">
+                <p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    /* =============================================
+       QUIZ DIAGNÓSTICO — ENGINE
+       ============================================= */
+
+    const questions = [
+        {
+            id: 1,
+            category: "Conceitos Básicos",
+            question: "Um pesquisador da UFRR desenvolveu um novo método para purificar água usando plantas do lavrado. Qual é o primeiro passo recomendado antes de divulgar essa invenção em um congresso?",
+            options: [
+                { letter: "A", text: "Publicar um artigo científico o mais rápido possível para garantir autoria." },
+                { letter: "B", text: "Consultar o NIT da universidade e avaliar a possibilidade de depósito de patente." },
+                { letter: "C", text: "Registrar a invenção em cartório para ter uma prova formal." },
+                { letter: "D", text: "Compartilhar com colegas de outras universidades para validar a pesquisa." }
+            ],
+            correct: "B",
+            explanation: "O NIT (Núcleo de Inovação Tecnológica) é o órgão da universidade responsável por avaliar e gerenciar a proteção de PI. Publicar ou divulgar antes do depósito pode destruir a novidade, requisito essencial para patentear. Na UFRR, o NIT é o InovaRR.",
+            legal: "Lei 10.973/2004 (Lei de Inovação), Art. 16 — Todo ICT deve ter seu NIT. Lei 9.279/96, Art. 11 — Requisito de novidade."
+        },
+        {
+            id: 2,
+            category: "Tipos de PI",
+            question: "Uma artesã de Boa Vista cria peças de cerâmica com design original inspirado na cultura indígena. Qual tipo de proteção de PI é mais adequado para a FORMA dessas peças?",
+            options: [
+                { letter: "A", text: "Patente de Invenção, pois é uma criação nova." },
+                { letter: "B", text: "Registro de Marca, pois identifica os produtos da artesã." },
+                { letter: "C", text: "Desenho Industrial, pois protege a forma ornamental do objeto." },
+                { letter: "D", text: "Direito Autoral, pois é uma expressão artística." }
+            ],
+            correct: "C",
+            explanation: "O Desenho Industrial protege a forma plástica ornamental de um objeto, ou o conjunto de linhas e cores que lhe confira aspecto visual novo e original. A patente protegeria uma função técnica, não a aparência. O direito autoral protege obras artísticas em geral, mas o desenho industrial é a proteção específica para a forma aplicada a produtos industrializáveis.",
+            legal: "Lei 9.279/1996, Art. 95 — Considera-se desenho industrial a forma plástica ornamental de um objeto ou o conjunto ornamental de linhas e cores."
+        },
+        {
+            id: 3,
+            category: "Direito Autoral",
+            question: "Um professor da UFRR escreveu um livro didático sobre a biodiversidade de Roraima. Sobre o direito autoral dessa obra, é correto afirmar que:",
+            options: [
+                { letter: "A", text: "O direito autoral só existe após o registro na Biblioteca Nacional." },
+                { letter: "B", text: "O direito autoral nasce automaticamente com a criação da obra, sem necessidade de registro." },
+                { letter: "C", text: "O direito autoral precisa ser registrado no INPI para ter validade." },
+                { letter: "D", text: "O direito autoral não se aplica a livros didáticos, apenas a obras de ficção." }
+            ],
+            correct: "B",
+            explanation: "No Brasil, o direito autoral nasce automaticamente com a criação da obra, sem necessidade de qualquer registro. O registro na Biblioteca Nacional é facultativo e serve como prova de anterioridade em caso de disputas, mas não é condição para a existência do direito. Livros didáticos são protegidos como qualquer obra literária.",
+            legal: "Lei 9.610/1998, Art. 18 — A proteção aos direitos de que trata esta Lei independe de registro. Art. 7º — São obras intelectuais protegidas as criações do espírito, expressas por qualquer meio."
+        },
+        {
+            id: 4,
+            category: "Marcas",
+            question: "Uma startup de Boa Vista quer registrar a marca \"AÇAÍ RORAIMA\" para sua polpa de açaí. Essa marca provavelmente será:",
+            options: [
+                { letter: "A", text: "Registrada sem problemas, pois é um nome original." },
+                { letter: "B", text: "Registrada como marca tridimensional, pois é um produto." },
+                { letter: "C", text: "Indeferida, pois combina termo genérico do produto com nome geográfico." },
+                { letter: "D", text: "Registrada automaticamente, pois startups têm prioridade no INPI." }
+            ],
+            correct: "C",
+            explanation: "A marca \"AÇAÍ RORAIMA\" combina dois impedimentos: \"açaí\" é designação genérica do produto (todos os vendedores de açaí precisam usar esse nome), e \"Roraima\" é um nome geográfico usado de forma descritiva. O INPI provavelmente indeferirá por falta de distintividade. Uma alternativa seria criar um nome fantasioso.",
+            legal: "Lei 9.279/1996, Art. 124, VI — Não são registráveis: sinal de caráter genérico ou descritivo. Art. 124, IX — Indicação geográfica quando usada de forma que induza a falsa procedência."
+        },
+        {
+            id: 5,
+            category: "Patentes",
+            question: "Uma pesquisadora publicou os resultados de sua invenção em uma revista científica há 8 meses. Ela ainda pode depositar pedido de patente no Brasil?",
+            options: [
+                { letter: "A", text: "Não, a publicação destruiu a novidade de forma irreversível." },
+                { letter: "B", text: "Sim, pois no Brasil existe um período de graça de 12 meses." },
+                { letter: "C", text: "Sim, mas apenas se a revista concordar em retirar a publicação." },
+                { letter: "D", text: "Não, salvo se ela tiver registrado a invenção em cartório antes da publicação." }
+            ],
+            correct: "B",
+            explanation: "A Lei de Propriedade Industrial brasileira prevê o chamado \"período de graça\" de 12 meses. Se a divulgação foi feita pelo próprio inventor ou por terceiros que obtiveram a informação dele, a novidade não é considerada destruída desde que o depósito ocorra em até 12 meses. A pesquisadora tem 4 meses restantes para depositar.",
+            legal: "Lei 9.279/1996, Art. 12 — Não será considerada como estado da técnica a divulgação de invenção ou modelo de utilidade, quando ocorrida durante os 12 meses que precederem a data de depósito."
+        },
+        {
+            id: 6,
+            category: "Software",
+            question: "Um aluno de Ciência da Computação da UFRR desenvolveu um aplicativo inovador para monitorar queimadas no lavrado. No Brasil, programas de computador são protegidos por:",
+            options: [
+                { letter: "A", text: "Patente de Invenção, como qualquer criação tecnológica." },
+                { letter: "B", text: "Direito Autoral, equiparados às obras literárias, com vigência de 50 anos." },
+                { letter: "C", text: "Desenho Industrial, pois protege a interface visual do aplicativo." },
+                { letter: "D", text: "Não possuem proteção específica no Brasil, apenas em outros países." }
+            ],
+            correct: "B",
+            explanation: "No Brasil, programas de computador são protegidos pelo regime de direito autoral, sendo equiparados às obras literárias. A vigência é de 50 anos contados a partir de 1º de janeiro do ano seguinte à publicação ou criação. O registro no INPI é facultativo mas recomendado para fins probatórios. A interface visual pode ter proteção adicional como desenho industrial, mas o código-fonte em si é direito autoral.",
+            legal: "Lei 9.609/1998, Art. 2º — O regime de proteção à propriedade intelectual de programa de computador é o conferido às obras literárias pela legislação de direitos autorais. §2º — A tutela (...) terá o prazo de cinquenta anos."
+        },
+        {
+            id: 7,
+            category: "Tipos de PI",
+            question: "Um agricultor de Pacaraima desenvolveu uma nova variedade de pimenta com sabor único e alta resistência a pragas. Qual proteção de PI é específica para essa criação?",
+            options: [
+                { letter: "A", text: "Patente de Invenção, registrada no INPI." },
+                { letter: "B", text: "Indicação Geográfica, registrada no INPI." },
+                { letter: "C", text: "Proteção de Cultivar, registrada no SNPC/MAPA." },
+                { letter: "D", text: "Segredo Industrial, sem necessidade de registro." }
+            ],
+            correct: "C",
+            explanation: "Novas variedades vegetais são protegidas pela Lei de Proteção de Cultivares e registradas no SNPC (Serviço Nacional de Proteção de Cultivares), vinculado ao MAPA (Ministério da Agricultura). Para ser protegida, a variedade deve ser distinta, homogênea e estável (critérios DHE). A Indicação Geográfica protege a origem do produto, não a variedade em si.",
+            legal: "Lei 9.456/1997, Art. 2º — A proteção dos direitos relativos à propriedade intelectual referente a cultivar se efetua mediante concessão de Certificado de Proteção de Cultivar."
+        },
+        {
+            id: 8,
+            category: "Conceitos Básicos",
+            question: "O que significa a sigla INPI no contexto da Propriedade Intelectual brasileira?",
+            options: [
+                { letter: "A", text: "Instituto Nacional de Pesquisa e Inovação." },
+                { letter: "B", text: "Instituto Nacional da Propriedade Industrial." },
+                { letter: "C", text: "Instituto Nacional de Patentes e Invenções." },
+                { letter: "D", text: "Instituto Nacional de Proteção Intelectual." }
+            ],
+            correct: "B",
+            explanation: "O INPI — Instituto Nacional da Propriedade Industrial — é a autarquia federal responsável pelo registro de marcas, concessão de patentes, averbação de contratos de transferência de tecnologia, e registro de programas de computador, desenhos industriais e indicações geográficas no Brasil. Foi criado em 1970.",
+            legal: "Lei 5.648/1970 — Cria o INPI. Suas atribuições estão definidas na Lei 9.279/1996 (LPI)."
+        },
+        {
+            id: 9,
+            category: "Patentes",
+            question: "Para que uma invenção seja patenteável no Brasil, ela precisa atender simultaneamente a três requisitos. São eles:",
+            options: [
+                { letter: "A", text: "Originalidade, utilidade e beleza estética." },
+                { letter: "B", text: "Novidade, atividade inventiva e aplicação industrial." },
+                { letter: "C", text: "Registro no INPI, pagamento de taxas e publicação em revista científica." },
+                { letter: "D", text: "Autoria comprovada, parecer técnico e aprovação do NIT." }
+            ],
+            correct: "B",
+            explanation: "Os três requisitos de patenteabilidade são: novidade (não fazer parte do estado da técnica), atividade inventiva (não ser óbvia para um técnico da área) e aplicação industrial (poder ser fabricada ou utilizada em qualquer indústria). Esses requisitos são cumulativos — a ausência de qualquer um impede a concessão.",
+            legal: "Lei 9.279/1996, Art. 8º — É patenteável a invenção que atenda aos requisitos de novidade, atividade inventiva e aplicação industrial."
+        },
+        {
+            id: 10,
+            category: "Conceitos Básicos",
+            question: "A Estratégia Nacional de Propriedade Intelectual (ENPI 2021–2030) do Brasil possui um eixo dedicado à \"Disseminação, Formação e Capacitação em PI\". Qual é o principal objetivo desse eixo?",
+            options: [
+                { letter: "A", text: "Aumentar o número de processos judiciais sobre PI no Brasil." },
+                { letter: "B", text: "Difundir o conhecimento sobre PI na sociedade para estimular o uso estratégico da proteção intelectual." },
+                { letter: "C", text: "Restringir o acesso à PI apenas para grandes empresas e universidades." },
+                { letter: "D", text: "Substituir o INPI por órgãos estaduais de propriedade intelectual." }
+            ],
+            correct: "B",
+            explanation: "O Eixo 2 da ENPI foca em tornar o conhecimento sobre PI acessível a toda a sociedade brasileira — universidades, empresas, inventores independentes, agricultores, artistas. O objetivo é que mais pessoas usem a PI de forma estratégica para proteger suas criações e gerar valor. O Toolkit PI Thinking está alinhado a esse eixo.",
+            legal: "Decreto 10.886/2021 — Institui a ENPI 2021–2030. Eixo 2: Disseminação, formação e capacitação em PI, com metas de ampliar a cultura de PI em todos os níveis educacionais."
+        }
+    ];
+
+    // State
+    let answered = 0;
+    let score = 0;
+    let answers = {};
+
+    // Categories for breakdown
+    const categories = {
+        "Conceitos Básicos": { total: 0, correct: 0 },
+        "Tipos de PI": { total: 0, correct: 0 },
+        "Patentes": { total: 0, correct: 0 },
+        "Marcas": { total: 0, correct: 0 },
+        "Direito Autoral": { total: 0, correct: 0 },
+        "Software": { total: 0, correct: 0 }
+    };
+
+    questions.forEach(q => {
+        if (categories[q.category]) categories[q.category].total++;
+    });
+
+    function startQuiz() {
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('progressSection').style.display = 'block';
+        document.getElementById('finishSection').style.display = 'block';
+        renderQuestions();
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = questions.map((q, i) => `
+            <div class="q-card" id="qcard-${q.id}" style="animation-delay: ${i * 0.05}s">
+                <div class="q-card__header">
+                    <div class="q-card__number">${q.id}</div>
+                    <div>
+                        <span class="q-card__category">${q.category}</span>
+                        <div class="q-card__question">${q.question}</div>
+                    </div>
+                </div>
+                <div class="q-card__body">
+                    <div class="q-options" id="options-${q.id}">
+                        ${q.options.map(opt => `
+                            <div class="q-option" data-question="${q.id}" data-letter="${opt.letter}" onclick="selectOption(this)">
+                                <div class="q-option__marker">${opt.letter}</div>
+                                <div class="q-option__text">${opt.text}</div>
+                                <span class="q-option__icon"></span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="q-explanation" id="explanation-${q.id}">
+                        <div class="q-explanation__title">Comentário</div>
+                        <div class="q-explanation__text">${q.explanation}</div>
+                        <div class="q-explanation__legal">📜 ${q.legal}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function selectOption(el) {
+        const qId = parseInt(el.dataset.question);
+        const letter = el.dataset.letter;
+        const q = questions.find(x => x.id === qId);
+
+        // Prevent re-answering
+        if (answers[qId] !== undefined) return;
+
+        // Record answer
+        answers[qId] = letter;
+        answered++;
+
+        const isCorrect = letter === q.correct;
+        if (isCorrect) {
+            score++;
+            categories[q.category].correct++;
+        }
+
+        // Visual feedback
+        const allOptions = document.querySelectorAll(`#options-${qId} .q-option`);
+        allOptions.forEach(opt => {
+            opt.classList.add('disabled');
+            if (opt.dataset.letter === q.correct) {
+                opt.classList.add('correct');
+                opt.querySelector('.q-option__icon').textContent = '✓';
+            }
+            if (opt.dataset.letter === letter && !isCorrect) {
+                opt.classList.add('wrong');
+                opt.querySelector('.q-option__icon').textContent = '✗';
+            }
+        });
+
+        // Show explanation
+        const explanation = document.getElementById(`explanation-${qId}`);
+        explanation.classList.add('visible');
+        explanation.classList.add(isCorrect ? 'q-explanation--correct' : 'q-explanation--wrong');
+        explanation.querySelector('.q-explanation__title').textContent = isCorrect ? '✅ Correto!' : '❌ Incorreto — veja o comentário:';
+
+        // Mark card
+        document.getElementById(`qcard-${qId}`).classList.add('q-card--answered');
+
+        // Update progress
+        updateProgress();
+
+        // Check if all answered
+        if (answered === questions.length) {
+            document.getElementById('finishBtn').disabled = false;
+            document.getElementById('finishHint').textContent = 'Todas as questões respondidas. Clique para ver seu resultado!';
+            document.getElementById('finishBtn').classList.add('q-btn--primary');
+        }
+    }
+
+    function updateProgress() {
+        const pct = (answered / questions.length) * 100;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressCount').textContent = `${answered} / ${questions.length}`;
+    }
+
+    function showResults() {
+        // Hide quiz
+        document.getElementById('questionsContainer').style.display = 'none';
+        document.getElementById('finishSection').style.display = 'none';
+        document.getElementById('progressSection').style.display = 'none';
+
+        // Show results
+        const panel = document.getElementById('resultsPanel');
+        panel.classList.add('visible');
+
+        // Score
+        const pct = (score / questions.length) * 100;
+        document.getElementById('scoreNum').textContent = score;
+
+        const bar = document.getElementById('scoreBar');
+        let barClass = 'q-results__bar-fill--low';
+        if (pct >= 70) barClass = 'q-results__bar-fill--good';
+        else if (pct >= 40) barClass = 'q-results__bar-fill--ok';
+        bar.className = 'q-results__bar-fill ' + barClass;
+        setTimeout(() => { bar.style.width = pct + '%'; }, 300);
+
+        // Icon & message
+        let icon = '🌱';
+        let msg = '';
+        if (pct >= 80) {
+            icon = '🏆';
+            msg = 'Excelente! Você já tem uma base sólida em PI. A oficina vai aprofundar e ampliar seus conhecimentos.';
+        } else if (pct >= 60) {
+            icon = '📚';
+            msg = 'Bom começo! Você conhece os fundamentos. A oficina vai preencher as lacunas e trazer casos práticos.';
+        } else if (pct >= 40) {
+            icon = '🌱';
+            msg = 'Você está no caminho! Muitos conceitos de PI são novos para a maioria das pessoas. A oficina foi feita para isso.';
+        } else {
+            icon = '🚀';
+            msg = 'Que bom que você está aqui! A oficina vai apresentar todo o universo da PI de forma prática e acessível. Prepare-se para aprender muito.';
+        }
+        document.getElementById('resultsIcon').textContent = icon;
+        document.getElementById('scoreMessage').textContent = msg;
+        document.getElementById('scoreCode').textContent = `D-${score}`;
+
+        // Breakdown
+        const breakdownContainer = document.getElementById('breakdownItems');
+        breakdownContainer.innerHTML = '';
+        Object.entries(categories).forEach(([cat, data]) => {
+            if (data.total === 0) return;
+            const catPct = (data.correct / data.total) * 100;
+            breakdownContainer.innerHTML += `
+                <div class="q-breakdown__item">
+                    <span class="q-breakdown__item-label">${cat}</span>
+                    <span class="q-breakdown__item-score">${data.correct}/${data.total}</span>
+                    <div class="q-breakdown__item-bar">
+                        <div class="q-breakdown__item-fill" style="width:${catPct}%"></div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Scroll to top
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function restartQuiz() {
+        answered = 0;
+        score = 0;
+        answers = {};
+        Object.keys(categories).forEach(k => { categories[k].correct = 0; });
+
+        document.getElementById('resultsPanel').classList.remove('visible');
+        document.getElementById('questionsContainer').style.display = 'block';
+        document.getElementById('questionsContainer').innerHTML = '';
+        document.getElementById('startScreen').style.display = 'block';
+        document.getElementById('progressSection').style.display = 'none';
+        document.getElementById('finishSection').style.display = 'none';
+        document.getElementById('finishBtn').disabled = true;
+        document.getElementById('finishHint').textContent = 'Responda todas as questões para habilitar.';
+        document.getElementById('progressFill').style.width = '0%';
+        document.getElementById('progressCount').textContent = '0 / 10';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas de Estratégia de PI — PI Thinking</title>
+  <meta name="description" content="Planeje sua estratégia completa de proteção de Propriedade Intelectual: tipo, custos INPI 2025, prazos, órgão competente, rota de depósito e ações.">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ce-bg: #FFFDE7;
+      --ce-surface: #FFFFFF;
+      --ce-accent: #FFC107;
+      --ce-accent-dark: #FF8F00;
+      --ce-text: #212121;
+      --ce-text-light: #757575;
+      --ce-border: #FFF59D;
+      --ce-success: #4CAF50;
+      --ce-info: #2196F3;
+      --ce-radius: 16px;
+      --ce-shadow: 0 2px 12px rgba(255,193,7,.15);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ce-bg: #1a1a0e;
+        --ce-surface: #2a2a1a;
+        --ce-text: #f5f5f0;
+        --ce-text-light: #bdb8a0;
+        --ce-border: #4a4520;
+        --ce-shadow: 0 2px 12px rgba(0,0,0,.4);
+      }
+    }
+
+    body.ce-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--ce-bg);
+      color: var(--ce-text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.7;
+    }
+
+    .ce-cover {
+      background: linear-gradient(135deg, #FFC107 0%, #FF9800 50%, #FF6F00 100%);
+      color: #fff;
+      padding: 4rem 2rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .ce-cover::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -30%;
+      width: 160%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .ce-cover__overline {
+      font-family: 'Poppins', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      opacity: .9;
+      margin-bottom: .5rem;
+    }
+    .ce-cover__title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      margin: .5rem 0;
+    }
+    .ce-cover__sub {
+      font-size: 1.1rem;
+      opacity: .92;
+      max-width: 640px;
+      margin: .5rem auto 0;
+    }
+    .ce-cover__meta {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+      font-size: .9rem;
+    }
+    .ce-cover__meta span {
+      background: rgba(255,255,255,.2);
+      padding: .35rem .8rem;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .ce-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* === INTRO === */
+    .ce-intro {
+      background: var(--ce-surface);
+      border: 2px solid var(--ce-border);
+      border-radius: var(--ce-radius);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--ce-shadow);
+    }
+    .ce-intro h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.4rem;
+      color: var(--ce-accent-dark);
+      margin-top: 0;
+    }
+    .ce-intro p {
+      margin: .5rem 0;
+    }
+
+    /* === CANVAS GRID === */
+    .ce-canvas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) {
+      .ce-canvas { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .ce-canvas { grid-template-columns: 1fr; }
+    }
+
+    .ce-cell {
+      background: var(--ce-surface);
+      border: 2px solid var(--ce-border);
+      border-radius: var(--ce-radius);
+      padding: 1.5rem;
+      box-shadow: var(--ce-shadow);
+      position: relative;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .ce-cell:hover {
+      border-color: var(--ce-accent);
+      box-shadow: 0 4px 20px rgba(255,193,7,.25);
+    }
+    .ce-cell--full {
+      grid-column: 1 / -1;
+    }
+    .ce-cell__number {
+      position: absolute;
+      top: -12px;
+      left: 16px;
+      background: var(--ce-accent);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: .8rem;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ce-cell__header {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .8rem;
+    }
+    .ce-cell__icon {
+      font-size: 1.6rem;
+    }
+    .ce-cell__title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ce-accent-dark);
+    }
+    .ce-cell__hint {
+      font-size: .82rem;
+      color: var(--ce-text-light);
+      margin-bottom: .8rem;
+      font-style: italic;
+    }
+    .ce-cell textarea,
+    .ce-cell select,
+    .ce-cell input[type="text"],
+    .ce-cell input[type="number"] {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: .92rem;
+      border: 1px solid var(--ce-border);
+      border-radius: 8px;
+      padding: .6rem;
+      background: var(--ce-bg);
+      color: var(--ce-text);
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .ce-cell textarea { min-height: 80px; }
+    .ce-cell select { cursor: pointer; }
+
+    /* === COST TABLE === */
+    .ce-cost-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+      margin-top: .8rem;
+    }
+    .ce-cost-table th {
+      background: var(--ce-accent);
+      color: #fff;
+      padding: .5rem;
+      text-align: left;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+    }
+    .ce-cost-table td {
+      padding: .5rem;
+      border-bottom: 1px solid var(--ce-border);
+    }
+    .ce-cost-table tr:nth-child(even) td {
+      background: rgba(255,193,7,.05);
+    }
+    .ce-cost-table .ce-highlight {
+      background: rgba(255,193,7,.15);
+      font-weight: 600;
+    }
+
+    /* === BUTTONS === */
+    .ce-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    .ce-btn {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: .95rem;
+      padding: .7rem 1.5rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .ce-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .ce-btn--primary { background: var(--ce-accent); color: #fff; }
+    .ce-btn--outline { background: transparent; border: 2px solid var(--ce-accent); color: var(--ce-accent-dark); }
+    .ce-btn--danger { background: #ef5350; color: #fff; }
+
+    /* === LEGAL REF === */
+    .ce-legal {
+      background: var(--ce-surface);
+      border-left: 4px solid var(--ce-accent);
+      border-radius: 0 var(--ce-radius) var(--ce-radius) 0;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      font-size: .88rem;
+    }
+    .ce-legal h3 {
+      font-family: 'Poppins', sans-serif;
+      color: var(--ce-accent-dark);
+      margin-top: 0;
+    }
+    .ce-legal a {
+      color: var(--ce-info);
+      text-decoration: underline;
+    }
+
+    /* === HOW-TO === */
+    .ce-howto {
+      background: var(--ce-surface);
+      border-radius: var(--ce-radius);
+      padding: 2rem;
+      margin: 2rem 0;
+      box-shadow: var(--ce-shadow);
+    }
+    .ce-howto h2 {
+      font-family: 'Poppins', sans-serif;
+      color: var(--ce-accent-dark);
+      margin-top: 0;
+    }
+    .ce-howto__step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+    }
+    .ce-howto__num {
+      background: var(--ce-accent);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ce-howto__text h4 {
+      margin: 0 0 .2rem;
+      font-family: 'Poppins', sans-serif;
+      font-size: .95rem;
+    }
+    .ce-howto__text p {
+      margin: 0;
+      font-size: .9rem;
+      color: var(--ce-text-light);
+    }
+
+    /* === FOOTER === */
+    .ce-footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: .82rem;
+      color: var(--ce-text-light);
+      border-top: 1px solid var(--ce-border);
+      margin-top: 2rem;
+    }
+    .ce-footer a { color: var(--ce-accent-dark); }
+
+    /* === PRINT === */
+    @media print {
+      .ce-cover { padding: 2rem 1rem 1.5rem; break-after: avoid; }
+      .ce-canvas { grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+      .ce-cell { border: 1px solid #ccc; padding: 1rem; break-inside: avoid; }
+      .ce-cell textarea, .ce-cell select, .ce-cell input { border: 1px solid #aaa; min-height: 60px; }
+      .ce-actions, .ce-btn { display: none !important; }
+      body.ce-page { background: #fff; }
+      @page { size: A3 landscape; margin: 1cm; }
+    }
+  </style>
+</head>
+<body class="ce-page">
+
+  <!-- COVER -->
+  <header class="ce-cover">
+    <div class="ce-cover__overline">Fase 3 — Estrategar</div>
+    <h1 class="ce-cover__title">Canvas de Estratégia de PI</h1>
+    <p class="ce-cover__sub">Planeje a rota completa de proteção da sua criação: tipo, custos, prazos, órgão e ações necessárias.</p>
+    <div class="ce-cover__meta">
+      <span>📐 10 blocos</span>
+      <span>⏱ 30 min</span>
+      <span>👥 3–6 pessoas</span>
+      <span>💻 Digital + A3</span>
+    </div>
+  </header>
+
+  <main class="ce-container">
+
+    <!-- INTRO -->
+    <section class="ce-intro">
+      <h2>🎯 Objetivo</h2>
+      <p>Este canvas transforma o diagnóstico realizado na Fase 2 em uma <strong>estratégia concreta de proteção</strong>. Ele conecta o tipo de PI identificado na Árvore de Decisão com custos reais (tabela INPI 2025 — Portaria GM/MDIC nº 110/2025), prazos legais, órgão competente e um plano de ação passo a passo.</p>
+      <p>Use-o como uma ferramenta de decisão individual ou em grupo. Ao final, cada participante terá um <em>plano de proteção</em> pronto para ser executado.</p>
+    </section>
+
+    <!-- CANVAS -->
+    <div class="ce-canvas" id="strategyCanvas">
+
+      <!-- 1. CRIAÇÃO -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">1</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">💡</span>
+          <span class="ce-cell__title">A Criação</span>
+        </div>
+        <div class="ce-cell__hint">Descreva a criação/inovação que deseja proteger. Seja específico.</div>
+        <textarea id="field-creation" placeholder="Ex.: Filtro de água portátil usando cerâmica de comunidade indígena macuxi, com capacidade para 5L/hora..."></textarea>
+      </div>
+
+      <!-- 2. TIPO DE PI -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">2</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">🛡️</span>
+          <span class="ce-cell__title">Tipo de Proteção</span>
+        </div>
+        <div class="ce-cell__hint">Selecione o tipo principal e, se aplicável, proteções complementares.</div>
+        <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:.3rem;">Principal:</label>
+        <select id="field-type-main" onchange="updateCosts()">
+          <option value="">Selecione...</option>
+          <option value="patente-invencao">Patente de Invenção (PI)</option>
+          <option value="modelo-utilidade">Modelo de Utilidade (MU)</option>
+          <option value="marca">Marca</option>
+          <option value="desenho-industrial">Desenho Industrial (DI)</option>
+          <option value="direito-autoral">Direito Autoral</option>
+          <option value="software">Registro de Software</option>
+          <option value="cultivar">Proteção de Cultivar</option>
+          <option value="indicacao-geografica">Indicação Geográfica (IG)</option>
+          <option value="patrimonio-genetico">Patrimônio Genético (CTA)</option>
+          <option value="segredo-industrial">Segredo Industrial</option>
+        </select>
+        <label style="font-size:.85rem;font-weight:600;display:block;margin:.6rem 0 .3rem;">Complementar (opcional):</label>
+        <select id="field-type-complement">
+          <option value="">Nenhuma</option>
+          <option value="patente-invencao">Patente de Invenção</option>
+          <option value="modelo-utilidade">Modelo de Utilidade</option>
+          <option value="marca">Marca</option>
+          <option value="desenho-industrial">Desenho Industrial</option>
+          <option value="direito-autoral">Direito Autoral</option>
+          <option value="software">Registro de Software</option>
+          <option value="segredo-industrial">Segredo Industrial</option>
+        </select>
+      </div>
+
+      <!-- 3. FUNDAMENTO LEGAL -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">3</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">⚖️</span>
+          <span class="ce-cell__title">Fundamento Legal</span>
+        </div>
+        <div class="ce-cell__hint">Qual lei ou tratado sustenta essa proteção?</div>
+        <div id="field-legal" style="font-size:.88rem; min-height:80px; padding:.4rem;">
+          <em style="color:var(--ce-text-light)">Selecione o tipo de proteção acima para ver a fundamentação automaticamente.</em>
+        </div>
+      </div>
+
+      <!-- 4. CUSTOS INPI 2025 -->
+      <div class="ce-cell ce-cell--full">
+        <span class="ce-cell__number">4</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">💰</span>
+          <span class="ce-cell__title">Custos INPI 2025 (Portaria GM/MDIC nº 110/2025)</span>
+        </div>
+        <div class="ce-cell__hint">Valores atualizados conforme a tabela vigente. Desconto de 50% para: ICTs, MEIs, ME/EPPs, cooperativas, instituições de ensino e pesquisa, entidades sem fins lucrativos e pessoas físicas (art. 2º, Portaria INPI/PR nº 10/2025).</div>
+        <div id="field-costs">
+          <table class="ce-cost-table">
+            <thead>
+              <tr>
+                <th>Etapa</th>
+                <th>Valor Normal (R$)</th>
+                <th>Com Desconto* (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="costs-body">
+              <tr><td colspan="3" style="text-align:center;color:var(--ce-text-light);padding:1rem;">Selecione o tipo de proteção no bloco 2 para exibir os custos.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5. PRAZOS -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">5</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">⏳</span>
+          <span class="ce-cell__title">Prazos de Vigência</span>
+        </div>
+        <div class="ce-cell__hint">Duração da proteção e prazos processuais.</div>
+        <div id="field-deadlines" style="font-size:.88rem; min-height:80px; padding:.4rem;">
+          <em style="color:var(--ce-text-light)">Selecione o tipo acima.</em>
+        </div>
+      </div>
+
+      <!-- 6. ÓRGÃO COMPETENTE -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">6</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">🏛️</span>
+          <span class="ce-cell__title">Órgão Competente</span>
+        </div>
+        <div class="ce-cell__hint">Onde depositar ou registrar?</div>
+        <div id="field-organ" style="font-size:.88rem; min-height:60px; padding:.4rem;">
+          <em style="color:var(--ce-text-light)">Selecione o tipo acima.</em>
+        </div>
+      </div>
+
+      <!-- 7. ROTA DE DEPÓSITO -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">7</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">🗺️</span>
+          <span class="ce-cell__title">Rota de Depósito</span>
+        </div>
+        <div class="ce-cell__hint">Passo a passo do processo de registro/depósito.</div>
+        <div id="field-route" style="font-size:.88rem; min-height:80px; padding:.4rem;">
+          <em style="color:var(--ce-text-light)">Selecione o tipo acima.</em>
+        </div>
+      </div>
+
+      <!-- 8. STAKEHOLDERS -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">8</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">👥</span>
+          <span class="ce-cell__title">Partes Envolvidas</span>
+        </div>
+        <div class="ce-cell__hint">Quem são os inventores, titulares, financiadores? Há coinvenção com ICT?</div>
+        <textarea id="field-stakeholders" placeholder="Ex.: Inventor: Prof. João (UFRR); Coinventora: Maria (aluna IC); Titular: UFRR (cláusula ICT – Lei 10.973/2004); Financiamento: FAPEAM."></textarea>
+      </div>
+
+      <!-- 9. RISCOS E BARREIRAS -->
+      <div class="ce-cell">
+        <span class="ce-cell__number">9</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">⚠️</span>
+          <span class="ce-cell__title">Riscos e Barreiras</span>
+        </div>
+        <div class="ce-cell__hint">Quais riscos podem impedir ou dificultar a proteção?</div>
+        <textarea id="field-risks" placeholder="Ex.: Publicação antecipada em congresso (verificar período de graça de 12 meses – art. 12, Lei 9.279/96); falta de busca de anterioridade; custo de manutenção de anuidades; conhecimento tradicional associado pode exigir consulta prévia (Lei 13.123/2015)."></textarea>
+      </div>
+
+      <!-- 10. PLANO DE AÇÃO -->
+      <div class="ce-cell ce-cell--full">
+        <span class="ce-cell__number">10</span>
+        <div class="ce-cell__header">
+          <span class="ce-cell__icon">🚀</span>
+          <span class="ce-cell__title">Plano de Ação — Próximos 5 Passos</span>
+        </div>
+        <div class="ce-cell__hint">Defina ações concretas, com responsável e prazo estimado.</div>
+        <div class="ce-action-list" id="actionList">
+          <div class="ce-action-row" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;margin-bottom:.5rem;align-items:center;">
+            <input type="text" placeholder="Ação: ex.: Realizar busca no INPI" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <input type="text" placeholder="Responsável" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <input type="text" placeholder="Prazo" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <span style="font-size:1.2rem;cursor:pointer;" onclick="removeAction(this)" title="Remover">✕</span>
+          </div>
+          <div class="ce-action-row" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;margin-bottom:.5rem;align-items:center;">
+            <input type="text" placeholder="Ação: ex.: Redigir relatório descritivo" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <input type="text" placeholder="Responsável" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <input type="text" placeholder="Prazo" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <span style="font-size:1.2rem;cursor:pointer;" onclick="removeAction(this)" title="Remover">✕</span>
+          </div>
+          <div class="ce-action-row" style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;margin-bottom:.5rem;align-items:center;">
+            <input type="text" placeholder="Ação: ex.: Pagar GRU de depósito" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <input type="text" placeholder="Responsável" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <input type="text" placeholder="Prazo" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+            <span style="font-size:1.2rem;cursor:pointer;" onclick="removeAction(this)" title="Remover">✕</span>
+          </div>
+        </div>
+        <button class="ce-btn ce-btn--outline" onclick="addAction()" style="margin-top:.5rem;font-size:.85rem;padding:.4rem 1rem;">+ Adicionar passo</button>
+      </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="ce-actions">
+      <button class="ce-btn ce-btn--primary" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+      <button class="ce-btn ce-btn--danger" onclick="clearCanvas()">🗑️ Limpar Canvas</button>
+      <a href="arvore.html" class="ce-btn ce-btn--outline">🌳 Árvore de Decisão</a>
+      <a href="calculadora.html" class="ce-btn ce-btn--outline">📅 Calculadora de Vigência</a>
+      <a href="index.html" class="ce-btn ce-btn--outline">🏠 Toolkit</a>
+    </div>
+
+    <!-- LEGAL REFERENCE -->
+    <section class="ce-legal">
+      <h3>📚 Referências Legais Completas</h3>
+      <p><strong>Patentes e Modelos de Utilidade:</strong> Lei nº 9.279/1996 (LPI), arts. 6–18 (patenteabilidade), art. 12 (período de graça 12 meses), arts. 40 (vigência PI: 20 anos) e 40 §único (vigência MU: 15 anos). <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Texto integral</a>.</p>
+      <p><strong>Marcas:</strong> Lei nº 9.279/1996, arts. 122–175 (registro, oposição, vigência 10 anos renovável). <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Texto integral</a>.</p>
+      <p><strong>Desenho Industrial:</strong> Lei nº 9.279/1996, arts. 94–121 (registro, vigência 25 anos: 10+5+5+5).</p>
+      <p><strong>Direito Autoral:</strong> Lei nº 9.610/1998 (proteção automática, vigência 70 anos post-mortem). <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">Texto integral</a>.</p>
+      <p><strong>Software:</strong> Lei nº 9.609/1998 (proteção por direito autoral, vigência 50 anos, registro facultativo no INPI). <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank">Texto integral</a>.</p>
+      <p><strong>Cultivares:</strong> Lei nº 9.456/1997 (proteção junto ao SNPC/MAPA, vigência 15–18 anos).</p>
+      <p><strong>Indicação Geográfica:</strong> Lei nº 9.279/1996, arts. 176–182 + IN INPI nº 095/2018.</p>
+      <p><strong>Patrimônio Genético:</strong> Lei nº 13.123/2015 (Marco da Biodiversidade, acesso e repartição de benefícios). <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">Texto integral</a>.</p>
+      <p><strong>Inovação em ICTs:</strong> Lei nº 10.973/2004 (Lei de Inovação) e Lei nº 13.243/2016 (Marco Legal de CT&I).</p>
+      <p><strong>Custos:</strong> Portaria GM/MDIC nº 110/2025 e Portaria INPI/PR nº 10/2025 — <a href="https://www.gov.br/inpi/pt-br/inpi-data/precificacao-dos-servicos/tabela-de-retribuicoes-inpi_portaria-mdic-no110_2025-e-portaria-inpi-no-10_2025.pdf" target="_blank">Tabela completa (PDF)</a>.</p>
+    </section>
+
+    <!-- HOW-TO -->
+    <section class="ce-howto">
+      <h2>📝 Como Preencher (Guia do Facilitador)</h2>
+      <div class="ce-howto__step">
+        <span class="ce-howto__num">0</span>
+        <div class="ce-howto__text">
+          <h4>Pré-requisito</h4>
+          <p>O participante já deve ter preenchido o Canvas de Diagnóstico (Material 2.1) e consultado a Árvore de Decisão (Material 2.3).</p>
+        </div>
+      </div>
+      <div class="ce-howto__step">
+        <span class="ce-howto__num">1</span>
+        <div class="ce-howto__text">
+          <h4>Descreva a Criação (Bloco 1)</h4>
+          <p>Copie a descrição do Canvas de Diagnóstico e refine: inclua funcionalidade, diferencial e público-alvo.</p>
+        </div>
+      </div>
+      <div class="ce-howto__step">
+        <span class="ce-howto__num">2</span>
+        <div class="ce-howto__text">
+          <h4>Selecione o Tipo de Proteção (Bloco 2)</h4>
+          <p>Use a resposta da Árvore de Decisão. Os blocos 3–7 serão preenchidos automaticamente com base na seleção.</p>
+        </div>
+      </div>
+      <div class="ce-howto__step">
+        <span class="ce-howto__num">3</span>
+        <div class="ce-howto__text">
+          <h4>Analise os Custos (Bloco 4)</h4>
+          <p>Discuta com o grupo: o custo é viável? Há direito a desconto (ICT, MEI, pessoa física)? Use a Calculadora de Vigência para simulações.</p>
+        </div>
+      </div>
+      <div class="ce-howto__step">
+        <span class="ce-howto__num">4</span>
+        <div class="ce-howto__text">
+          <h4>Identifique Riscos (Bloco 9)</h4>
+          <p>Pergunte: "O que pode dar errado?" — divulgação prematura, falta de documentação, custo de manutenção, concorrente com pedido anterior.</p>
+        </div>
+      </div>
+      <div class="ce-howto__step">
+        <span class="ce-howto__num">5</span>
+        <div class="ce-howto__text">
+          <h4>Monte o Plano de Ação (Bloco 10)</h4>
+          <p>Defina 3–5 ações concretas com responsável e prazo. Sugestão: busca de anterioridade → redação → pagamento GRU → depósito → acompanhamento.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="ce-footer">
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+    <p>Custos: Portaria GM/MDIC nº 110/2025 · Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96</a></p>
+  </footer>
+
+  <script>
+    // ============================================================
+    //  DATA: COST/LEGAL/DEADLINE DATABASE BY PI TYPE
+    // ============================================================
+    const piData = {
+      'patente-invencao': {
+        legal: '<strong>Lei nº 9.279/1996</strong>, arts. 6–18 (requisitos: novidade, atividade inventiva, aplicação industrial).<br>Art. 12: período de graça de 12 meses.<br>Art. 40: vigência de 20 anos a partir do depósito.<br>Acordo TRIPS (1994), art. 33.',
+        costs: [
+          ['Depósito (eletrônico)', '260,00', '90,00'],
+          ['Pedido de exame (até 10 reiv.)', '870,00', '435,00'],
+          ['Expedição de carta-patente', '240,00', '120,00'],
+          ['Anuidade (pedido, ordinário)', '400,00', '200,00'],
+          ['Anuidade 3º–6º ano (concedida)', '1.000,00', '500,00'],
+          ['Anuidade 7º–10º ano', '1.600,00', '800,00'],
+          ['Anuidade 11º–15º ano', '2.200,00', '1.100,00'],
+          ['Anuidade 16º+ ano', '2.800,00', '1.400,00'],
+          ['<strong>Custo total estimado (depósito + exame + carta)</strong>', '<strong>1.370,00</strong>', '<strong>645,00</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> 20 anos a partir da data de depósito (art. 40, LPI).<br><strong>Período de graça:</strong> 12 meses para publicação anterior ao depósito (art. 12).<br><strong>Exame:</strong> solicitar em até 36 meses do depósito.<br><strong>Anuidades:</strong> a partir do início do 3º ano do depósito.<br><strong>Tempo médio de análise INPI:</strong> 3–5 anos (em redução).',
+        organ: '<strong>INPI</strong> — Instituto Nacional da Propriedade Industrial<br>Sistema e-Patentes: <a href="https://www.gov.br/inpi/pt-br/servicos/patentes" target="_blank">gov.br/inpi/patentes</a><br>Para proteção internacional: via PCT (WIPO) ou Convenção de Paris.',
+        route: '1. Busca de anterioridade (base INPI + Patentscope/WIPO)<br>2. Redigir: relatório descritivo, reivindicações, resumo, desenhos<br>3. Gerar GRU (cód. 200) e pagar taxa de depósito<br>4. Depositar via e-Patentes (formulário + documentos PDF)<br>5. Publicação na RPI (18 meses ou antecipada)<br>6. Solicitar exame técnico (GRU cód. 203, até 36 meses)<br>7. Responder exigências/pareceres do examinador<br>8. Carta-patente concedida → manter anuidades'
+      },
+      'modelo-utilidade': {
+        legal: '<strong>Lei nº 9.279/1996</strong>, art. 9 (objeto de uso prático com ato inventivo e melhoria funcional).<br>Art. 40 §único: vigência de 15 anos a partir do depósito.<br>Art. 12: período de graça de 12 meses.',
+        costs: [
+          ['Depósito (eletrônico)', '260,00', '90,00'],
+          ['Pedido de exame', '560,00', '280,00'],
+          ['Expedição de carta-patente', '240,00', '120,00'],
+          ['Anuidade (pedido, ordinário)', '240,00', '120,00'],
+          ['Anuidade 3º–6º ano (concedida)', '650,00', '325,00'],
+          ['Anuidade 7º–10º ano', '1.000,00', '500,00'],
+          ['Anuidade 11º+ ano', '1.580,00', '790,00'],
+          ['<strong>Custo total estimado (depósito + exame + carta)</strong>', '<strong>1.060,00</strong>', '<strong>490,00</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> 15 anos a partir da data de depósito (art. 40 §único).<br><strong>Período de graça:</strong> 12 meses (art. 12).<br><strong>Exame:</strong> solicitar em até 36 meses do depósito.<br><strong>Tempo médio de análise INPI:</strong> 2–4 anos.',
+        organ: '<strong>INPI</strong> — e-Patentes<br><a href="https://www.gov.br/inpi/pt-br/servicos/patentes" target="_blank">gov.br/inpi/patentes</a>',
+        route: '1. Busca de anterioridade<br>2. Redigir: relatório, reivindicações (uso prático), desenhos obrigatórios<br>3. GRU cód. 202 → pagar taxa de depósito<br>4. Depositar via e-Patentes<br>5. Solicitar exame (GRU cód. 204)<br>6. Acompanhar publicação na RPI<br>7. Carta-patente → manter anuidades'
+      },
+      'marca': {
+        legal: '<strong>Lei nº 9.279/1996</strong>, arts. 122–175.<br>Art. 122: sinais visualmente perceptíveis, distintivos.<br>Art. 133: vigência de 10 anos, prorrogável indefinidamente.<br>Protocolo de Madri (adesão do Brasil em 2019).',
+        costs: [
+          ['Pedido (espec. pré-aprovada, por classe)', '360,00', '180,00'],
+          ['Pedido (espec. livre, por classe)', '420,00', '210,00'],
+          ['Oposição (por classe)', '520,00', '260,00'],
+          ['1º decênio + certificado (ordinário)', '750,00', '375,00'],
+          ['Prorrogação (ordinário, por classe)', '1.000,00', '500,00'],
+          ['<strong>Custo total estimado (pedido + 1º decênio)</strong>', '<strong>1.110,00</strong>', '<strong>555,00</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> 10 anos a partir da concessão, prorrogável por períodos iguais (art. 133).<br><strong>Prorrogação:</strong> requerida no último ano de vigência ou nos 6 meses seguintes (extraordinário, taxa dobrada).<br><strong>Tempo médio de análise INPI:</strong> 6–12 meses (trâmite prioritário disponível).',
+        organ: '<strong>INPI</strong> — Sistema e-Marcas<br><a href="https://www.gov.br/inpi/pt-br/servicos/marcas" target="_blank">gov.br/inpi/marcas</a><br>Para proteção internacional: Protocolo de Madri.',
+        route: '1. Pesquisa de disponibilidade (base INPI)<br>2. Definir classe NCL (Nice) e especificação<br>3. GRU cód. 389 ou 394 → pagar taxa<br>4. Depositar via e-Marcas<br>5. Publicação na RPI (prazo de oposição: 60 dias)<br>6. Exame de mérito pelo INPI<br>7. Deferimento → pagar 1º decênio (GRU cód. 372)<br>8. Certificado emitido → renovar a cada 10 anos'
+      },
+      'desenho-industrial': {
+        legal: '<strong>Lei nº 9.279/1996</strong>, arts. 94–121.<br>Art. 95: forma plástica ornamental com resultado visual novo e original.<br>Art. 108: vigência 10 anos + 3 prorrogações de 5 anos = 25 anos máximo.',
+        costs: [
+          ['Pedido de registro', '350,00', '175,00'],
+          ['Exame de novidade/originalidade', '360,00', '—'],
+          ['Manutenção 2º quinquênio (ordinário)', '630,00', '315,00'],
+          ['Renovação 3º quinquênio (ordinário)', '840,00', '420,00'],
+          ['<strong>Custo total estimado (registro)</strong>', '<strong>350,00</strong>', '<strong>175,00</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> 10 anos a partir do depósito + 3 prorrogações de 5 anos = máximo 25 anos (art. 108).<br><strong>Período de graça:</strong> 180 dias (art. 96 §3º).<br><strong>Registro:</strong> concedido automaticamente (sem exame de mérito obrigatório).<br><strong>Tempo médio:</strong> 1–3 meses para concessão.',
+        organ: '<strong>INPI</strong> — Sistema e-DI<br><a href="https://www.gov.br/inpi/pt-br/servicos/desenhos-industriais" target="_blank">gov.br/inpi/desenhos-industriais</a>',
+        route: '1. Preparar representações gráficas (vistas do objeto)<br>2. GRU cód. 100 → pagar taxa<br>3. Depositar via e-DI<br>4. Registro concedido automaticamente<br>5. Manter: pagar quinquênios para prolongar vigência'
+      },
+      'direito-autoral': {
+        legal: '<strong>Lei nº 9.610/1998</strong> (Lei de Direitos Autorais).<br>Art. 7º: obras intelectuais protegidas.<br>Art. 18: proteção independe de registro.<br>Art. 41: vigência 70 anos post-mortem (pessoa física).<br>Art. 43: vigência 70 anos da 1ª publicação (pessoa jurídica).',
+        costs: [
+          ['Registro (opcional, na Biblioteca Nacional)', '20,00–80,00', '—'],
+          ['Registro (EDA/Escola de Belas Artes)', 'variável', '—'],
+          ['<strong>Proteção automática — custo zero</strong>', '<strong>0,00</strong>', '<strong>0,00</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> 70 anos após a morte do autor (pessoa física) ou 70 anos após a 1ª publicação (pessoa jurídica).<br><strong>Registro:</strong> facultativo, mas recomendado como prova de anterioridade.<br><strong>Proteção:</strong> automática a partir da criação da obra.',
+        organ: '<strong>Biblioteca Nacional</strong> (livros, textos) — <a href="https://www.bn.gov.br" target="_blank">bn.gov.br</a><br><strong>EDA/CREA</strong> (obras de engenharia/arquitetura)<br><strong>Escola de Belas Artes/UFRJ</strong> (artes visuais, música)<br>Registro facultativo — a proteção independe de registro (art. 18).',
+        route: '1. Criar a obra (proteção automática desde a criação)<br>2. Reunir provas de autoria (rascunhos, e-mails, timestamps)<br>3. Opcionalmente: registrar na Biblioteca Nacional ou EDA<br>4. Indicar autoria: símbolo ©, nome do autor, ano<br>5. Considerar licenças (ex.: Creative Commons) para uso compartilhado'
+      },
+      'software': {
+        legal: '<strong>Lei nº 9.609/1998</strong> (Lei de Software).<br>Art. 2º: proteção por direito autoral, independe de registro.<br>Art. 2º §2º: vigência de 50 anos a partir de 1º de janeiro do ano seguinte à publicação ou criação.<br><strong>Lei nº 9.610/1998</strong> (subsidiariamente).',
+        costs: [
+          ['Registro no INPI (eletrônico)', '185,00', '90,00'],
+          ['Registro no INPI (papel)', '380,00', '130,00'],
+          ['<strong>Proteção automática — custo zero</strong>', '<strong>0,00</strong>', '<strong>0,00</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> 50 anos a partir de 1º de janeiro do ano seguinte à publicação ou criação.<br><strong>Registro:</strong> facultativo, mas recomendado para comprovar autoria.<br><strong>Tempo médio de registro no INPI:</strong> 7–30 dias.',
+        organ: '<strong>INPI</strong> — Registro de Programas de Computador<br><a href="https://www.gov.br/inpi/pt-br/servicos/programas-de-computador" target="_blank">gov.br/inpi/programas-de-computador</a>',
+        route: '1. Documentar o código-fonte (hash SHA-512 do código)<br>2. Preparar documentação técnica (manual, especificação funcional)<br>3. GRU de registro → pagar taxa<br>4. Depositar via e-Software no INPI<br>5. Certificado de registro emitido<br>6. Manter documentação atualizada a cada versão'
+      },
+      'cultivar': {
+        legal: '<strong>Lei nº 9.456/1997</strong> (Lei de Proteção de Cultivares).<br>Art. 11: vigência de 15 anos (geral) ou 18 anos (videiras, árvores frutíferas, árvores florestais e ornamentais).<br>Decreto nº 2.366/1997 (regulamentação).',
+        costs: [
+          ['Pedido de proteção (SNPC)', '1.045,00', '—'],
+          ['Manutenção anual', '545,00', '—'],
+          ['<strong>Custo 1º ano (pedido)</strong>', '<strong>1.045,00</strong>', '<strong>—</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> 15 anos (geral) ou 18 anos (videiras, frutíferas, florestais, ornamentais).<br><strong>Exame:</strong> testes DHE (Distinguibilidade, Homogeneidade, Estabilidade) — 2 a 3 ciclos de cultivo.',
+        organ: '<strong>SNPC</strong> — Serviço Nacional de Proteção de Cultivares<br>Ministério da Agricultura e Pecuária (MAPA)<br><a href="https://www.gov.br/agricultura/pt-br/assuntos/insumos-agropecuarios/insumos-agricolas/protecao-de-cultivar" target="_blank">gov.br/agricultura/cultivar</a>',
+        route: '1. Desenvolver e caracterizar a cultivar<br>2. Realizar testes DHE (2–3 ciclos de cultivo)<br>3. Preparar formulários e relatório técnico<br>4. Depositar no SNPC/MAPA<br>5. Manter pagamento anual durante vigência'
+      },
+      'indicacao-geografica': {
+        legal: '<strong>Lei nº 9.279/1996</strong>, arts. 176–182.<br>Art. 177: Indicação de Procedência (IP).<br>Art. 178: Denominação de Origem (DO).<br><strong>IN INPI nº 095/2018</strong> (procedimentos).<br>Vigência: indeterminada (enquanto existirem as condições).',
+        costs: [
+          ['Pedido de IP (Indicação de Procedência)', '870,00', '—'],
+          ['Pedido de DO (Denominação de Origem)', '2.360,00', '—'],
+          ['<strong>Vigência indeterminada — sem anuidades</strong>', '<strong>—</strong>', '<strong>—</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> indeterminada — não expira enquanto subsistirem as condições que a justificam.<br><strong>Tempo de análise:</strong> variável (geralmente 1–3 anos).',
+        organ: '<strong>INPI</strong> — Coordenação de Indicações Geográficas<br><a href="https://www.gov.br/inpi/pt-br/servicos/indicacoes-geograficas" target="_blank">gov.br/inpi/indicacoes-geograficas</a>',
+        route: '1. Constituir entidade representativa dos produtores/prestadores<br>2. Documentar o vínculo geográfico (caderno de especificações técnicas)<br>3. Delimitar área geográfica e comprovar notoriedade (IP) ou qualidade/característica (DO)<br>4. Depositar pedido no INPI com documentação completa<br>5. Publicação → Análise → Concessão'
+      },
+      'patrimonio-genetico': {
+        legal: '<strong>Lei nº 13.123/2015</strong> (Marco da Biodiversidade).<br>Regulamentada pelo Decreto nº 8.772/2016.<br>Acesso ao patrimônio genético e conhecimento tradicional associado (CTA).<br>Repartição de benefícios via PNRB (Programa Nacional de Repartição de Benefícios).',
+        costs: [
+          ['Cadastro no SisGen', '0,00', '0,00'],
+          ['Repartição de benefícios (se comercialização)', 'variável', '—'],
+          ['<strong>Cadastro gratuito</strong>', '<strong>0,00</strong>', '<strong>0,00</strong>']
+        ],
+        deadlines: '<strong>Cadastro:</strong> antes do acesso ao patrimônio genético ou CTA.<br><strong>Repartição:</strong> até a comercialização do produto acabado.<br><strong>Notificação:</strong> obrigatória no SisGen antes da remessa ao exterior.',
+        organ: '<strong>SisGen</strong> — Sistema Nacional de Gestão do Patrimônio Genético<br>Ministério do Meio Ambiente<br><a href="https://sisgen.gov.br" target="_blank">sisgen.gov.br</a><br>Conselho de Gestão do Patrimônio Genético (CGen).',
+        route: '1. Cadastrar a atividade de acesso no SisGen<br>2. Obter anuência prévia (se CTA de origem identificável)<br>3. Realizar a pesquisa/bioprospecção<br>4. Notificar no SisGen antes da remessa, requerimento de PI ou comercialização<br>5. Firmar acordo de repartição de benefícios (monetária ou não monetária)'
+      },
+      'segredo-industrial': {
+        legal: '<strong>Lei nº 9.279/1996</strong>, arts. 195 (concorrência desleal — crime) e art. 206 (segredo de negócio).<br>Acordo TRIPS, art. 39 (informação não divulgada).<br>Não há registro formal — proteção por sigilo e contratos.',
+        costs: [
+          ['Elaboração de NDA (custo jurídico)', 'variável', '—'],
+          ['Registro em cartório (facultativo)', '~100,00–300,00', '—'],
+          ['<strong>Sem taxa governamental</strong>', '<strong>0,00</strong>', '<strong>0,00</strong>']
+        ],
+        deadlines: '<strong>Vigência:</strong> indefinida — enquanto a informação permanecer secreta.<br><strong>Risco:</strong> perde proteção se divulgada ou se terceiro descobrir independentemente.',
+        organ: 'Não há órgão de registro.<br>Proteção via: <strong>contratos (NDA)</strong>, políticas internas de sigilo, controle de acesso e cláusulas trabalhistas.',
+        route: '1. Identificar a informação estratégica a ser protegida<br>2. Classificar como "confidencial" / "segredo de negócio"<br>3. Elaborar NDA (Acordo de Confidencialidade) com todas as partes<br>4. Implementar controles de acesso (físicos e digitais)<br>5. Monitorar e auditar vazamentos periodicamente'
+      }
+    };
+
+    // ============================================================
+    //  FUNCTIONS
+    // ============================================================
+    function updateCosts() {
+      const type = document.getElementById('field-type-main').value;
+      const data = piData[type];
+
+      if (!data) {
+        document.getElementById('costs-body').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--ce-text-light);padding:1rem;">Selecione o tipo de proteção no bloco 2.</td></tr>';
+        document.getElementById('field-legal').innerHTML = '<em style="color:var(--ce-text-light)">Selecione o tipo de proteção acima.</em>';
+        document.getElementById('field-deadlines').innerHTML = '<em style="color:var(--ce-text-light)">Selecione o tipo acima.</em>';
+        document.getElementById('field-organ').innerHTML = '<em style="color:var(--ce-text-light)">Selecione o tipo acima.</em>';
+        document.getElementById('field-route').innerHTML = '<em style="color:var(--ce-text-light)">Selecione o tipo acima.</em>';
+        return;
+      }
+
+      // Costs table
+      let rows = '';
+      data.costs.forEach(c => {
+        const isTotal = c[0].includes('<strong>');
+        rows += `<tr class="${isTotal ? 'ce-highlight' : ''}"><td>${c[0]}</td><td style="text-align:right">${c[1]}</td><td style="text-align:right">${c[2]}</td></tr>`;
+      });
+      document.getElementById('costs-body').innerHTML = rows;
+
+      // Legal
+      document.getElementById('field-legal').innerHTML = data.legal;
+
+      // Deadlines
+      document.getElementById('field-deadlines').innerHTML = data.deadlines;
+
+      // Organ
+      document.getElementById('field-organ').innerHTML = data.organ;
+
+      // Route
+      document.getElementById('field-route').innerHTML = data.route;
+    }
+
+    function addAction() {
+      const list = document.getElementById('actionList');
+      const row = document.createElement('div');
+      row.className = 'ce-action-row';
+      row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;margin-bottom:.5rem;align-items:center;';
+      row.innerHTML = `
+        <input type="text" placeholder="Ação" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+        <input type="text" placeholder="Responsável" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+        <input type="text" placeholder="Prazo" style="font-family:'Inter';font-size:.88rem;padding:.5rem;border:1px solid var(--ce-border);border-radius:8px;background:var(--ce-bg);color:var(--ce-text);">
+        <span style="font-size:1.2rem;cursor:pointer;" onclick="removeAction(this)" title="Remover">✕</span>
+      `;
+      list.appendChild(row);
+    }
+
+    function removeAction(el) {
+      el.closest('.ce-action-row').remove();
+    }
+
+    function clearCanvas() {
+      if (!confirm('Tem certeza que deseja limpar todo o canvas?')) return;
+      document.querySelectorAll('.ce-cell textarea, .ce-cell input[type="text"], .ce-cell input[type="number"]').forEach(f => f.value = '');
+      document.getElementById('field-type-main').value = '';
+      document.getElementById('field-type-complement').value = '';
+      updateCosts();
+    }
+  </script>
+
+</body>
+</html>

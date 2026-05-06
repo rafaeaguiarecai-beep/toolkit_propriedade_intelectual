@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storyboard de Proteção — PI Thinking</title>
+  <meta name="description" content="Construa uma narrativa visual passo a passo do processo de proteção da sua criação intelectual, da ideia ao registro.">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sb-bg: #FFFDE7;
+      --sb-surface: #FFFFFF;
+      --sb-accent: #FFC107;
+      --sb-accent-dark: #FF8F00;
+      --sb-text: #212121;
+      --sb-text-light: #757575;
+      --sb-border: #FFF59D;
+      --sb-radius: 16px;
+      --sb-shadow: 0 2px 12px rgba(255,193,7,.15);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --sb-bg: #1a1a0e;
+        --sb-surface: #2a2a1a;
+        --sb-text: #f5f5f0;
+        --sb-text-light: #bdb8a0;
+        --sb-border: #4a4520;
+        --sb-shadow: 0 2px 12px rgba(0,0,0,.4);
+      }
+    }
+    body.sb-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--sb-bg);
+      color: var(--sb-text);
+      margin: 0; padding: 0; line-height: 1.7;
+    }
+    .sb-cover {
+      background: linear-gradient(135deg, #FFE082 0%, #FFC107 40%, #FF9800 100%);
+      color: #fff;
+      padding: 4rem 2rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .sb-cover::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='none'/%3E%3Cpath d='M0 30h60M30 0v60' stroke='rgba(255,255,255,0.06)' stroke-width='1'/%3E%3C/svg%3E");
+    }
+    .sb-cover__overline {
+      font-family: 'Poppins', sans-serif;
+      font-size: .85rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 3px; opacity: .9;
+    }
+    .sb-cover__title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      margin: .5rem 0;
+    }
+    .sb-cover__sub {
+      font-size: 1.1rem; opacity: .92;
+      max-width: 640px; margin: .5rem auto 0;
+    }
+    .sb-cover__meta {
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 1.5rem; font-size: .9rem;
+    }
+    .sb-cover__meta span {
+      background: rgba(255,255,255,.2);
+      padding: .35rem .8rem; border-radius: 20px;
+    }
+
+    .sb-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .sb-intro {
+      background: var(--sb-surface);
+      border: 2px solid var(--sb-border);
+      border-radius: var(--sb-radius);
+      padding: 2rem; margin-bottom: 2rem;
+      box-shadow: var(--sb-shadow);
+    }
+    .sb-intro h2 { font-family: 'Poppins', sans-serif; color: var(--sb-accent-dark); margin-top: 0; }
+
+    /* === STORYBOARD STRIP === */
+    .sb-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 800px) { .sb-strip { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .sb-strip { grid-template-columns: 1fr; } }
+
+    .sb-frame {
+      background: var(--sb-surface);
+      border: 2px solid var(--sb-border);
+      border-radius: var(--sb-radius);
+      overflow: hidden;
+      box-shadow: var(--sb-shadow);
+      transition: border-color .3s, transform .2s;
+    }
+    .sb-frame:hover { border-color: var(--sb-accent); transform: translateY(-3px); }
+
+    .sb-frame__header {
+      background: var(--sb-accent);
+      color: #fff;
+      padding: .6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: .85rem;
+    }
+    .sb-frame__num {
+      background: rgba(255,255,255,.3);
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 700;
+    }
+
+    .sb-frame__canvas {
+      height: 160px;
+      background: var(--sb-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      position: relative;
+      border-bottom: 1px solid var(--sb-border);
+      cursor: pointer;
+    }
+    .sb-frame__canvas .sb-icon-scene {
+      transition: transform .3s;
+    }
+    .sb-frame__canvas:hover .sb-icon-scene { transform: scale(1.15); }
+
+    .sb-frame__body { padding: 1rem 1.2rem; }
+
+    .sb-frame__label {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sb-accent-dark);
+      margin-bottom: .3rem;
+    }
+    .sb-frame textarea {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: .85rem;
+      border: 1px solid var(--sb-border);
+      border-radius: 6px;
+      padding: .4rem .5rem;
+      background: var(--sb-bg);
+      color: var(--sb-text);
+      resize: vertical;
+      box-sizing: border-box;
+      min-height: 50px;
+    }
+    .sb-frame__legal {
+      margin-top: .5rem;
+      font-size: .78rem;
+      color: var(--sb-text-light);
+      background: rgba(255,193,7,.06);
+      padding: .4rem .6rem;
+      border-radius: 6px;
+    }
+    .sb-frame__legal strong { color: var(--sb-accent-dark); }
+
+    /* === EXAMPLE TOGGLE === */
+    .sb-example-toggle {
+      text-align: center;
+      margin: 1rem 0 2rem;
+    }
+    .sb-example-toggle button {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: .9rem;
+      padding: .6rem 1.5rem;
+      background: var(--sb-accent);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .sb-example-toggle button:hover { transform: translateY(-2px); }
+
+    /* === BUTTONS === */
+    .sb-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      justify-content: center; margin: 2rem 0;
+    }
+    .sb-btn {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600; font-size: .95rem;
+      padding: .7rem 1.5rem; border: none;
+      border-radius: 30px; cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .sb-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .sb-btn--primary { background: var(--sb-accent); color: #fff; }
+    .sb-btn--outline { background: transparent; border: 2px solid var(--sb-accent); color: var(--sb-accent-dark); }
+    .sb-btn--danger { background: #EF5350; color: #fff; }
+
+    /* === FOOTER === */
+    .sb-footer {
+      text-align: center; padding: 2rem;
+      font-size: .82rem; color: var(--sb-text-light);
+      border-top: 1px solid var(--sb-border); margin-top: 2rem;
+    }
+    .sb-footer a { color: var(--sb-accent-dark); }
+
+    /* === PRINT === */
+    @media print {
+      .sb-cover { padding: 1.5rem 1rem; break-after: avoid; }
+      .sb-strip { grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+      .sb-frame { break-inside: avoid; border: 1px solid #ccc; }
+      .sb-frame__canvas { height: 100px; }
+      .sb-actions, .sb-example-toggle { display: none !important; }
+      @page { size: A3 landscape; margin: 1cm; }
+    }
+  </style>
+</head>
+<body class="sb-page">
+
+  <header class="sb-cover">
+    <div class="sb-cover__overline">Fase 3 — Estrategar</div>
+    <h1 class="sb-cover__title">Storyboard de Proteção</h1>
+    <p class="sb-cover__sub">Conte a história da proteção da sua criação — da ideia ao registro — em 6 cenas visuais.</p>
+    <div class="sb-cover__meta">
+      <span>🎬 6 cenas</span>
+      <span>⏱ 20 min</span>
+      <span>👥 Individual / Dupla</span>
+      <span>💻 Digital + A3</span>
+    </div>
+  </header>
+
+  <main class="sb-container">
+
+    <section class="sb-intro">
+      <h2>🎯 O que é o Storyboard de Proteção?</h2>
+      <p>O <strong>Storyboard</strong> é uma ferramenta narrativa que transforma o plano de proteção em uma <strong>história visual</strong> com início, meio e fim. Cada cena representa uma etapa do processo: da identificação da criação até a manutenção da proteção concedida.</p>
+      <p>Diferente do Canvas de Estratégia (analítico), o Storyboard é <strong>narrativo e sequencial</strong> — ajuda o participante a visualizar o caminho completo e identificar gargalos, custos e decisões em cada momento.</p>
+    </section>
+
+    <div class="sb-example-toggle">
+      <button onclick="toggleExample()">💡 Ver/Ocultar Exemplo Preenchido (Dr. Apressado)</button>
+    </div>
+
+    <!-- 6 FRAMES -->
+    <div class="sb-strip" id="storyStrip">
+    </div>
+
+    <div class="sb-actions">
+      <button class="sb-btn sb-btn--primary" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      <button class="sb-btn sb-btn--danger" onclick="clearStory()">🗑️ Limpar</button>
+      <a href="canvas-estrategia.html" class="sb-btn sb-btn--outline">📐 Canvas de Estratégia</a>
+      <a href="crazy8s.html" class="sb-btn sb-btn--outline">⚡ Crazy 8s</a>
+      <a href="index.html" class="sb-btn sb-btn--outline">🏠 Toolkit</a>
+    </div>
+
+  </main>
+
+  <footer class="sb-footer">
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+    <p>Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96</a> · Custos: Portaria GM/MDIC nº 110/2025</p>
+  </footer>
+
+  <script>
+    const frames = [
+      {
+        num: 1,
+        title: 'A Criação Nasce',
+        icon: '💡',
+        labelAction: 'O que acontece?',
+        labelNarration: 'Narração',
+        hint: 'Descreva o momento em que a criação surgiu: contexto, problema identificado, insight.',
+        legal: 'Art. 6º, LPI: o autor de invenção ou modelo de utilidade tem direito de obter a patente.',
+        example: {
+          action: 'Dr. Apressado, pesquisador da UFRR, descobre em laboratório que uma molécula extraída de planta amazônica tem potente efeito anti-inflamatório. Ele documenta os resultados no caderno de laboratório com data e testemunhas.',
+          narration: '"Após 2 anos de pesquisa, finalmente encontrei um composto promissor. Preciso registrar tudo antes de publicar."'
+        }
+      },
+      {
+        num: 2,
+        title: 'O Erro (ou Quase Erro)',
+        icon: '⚠️',
+        labelAction: 'O que acontece?',
+        labelNarration: 'Narração',
+        hint: 'Qual risco ou erro quase aconteceu? Publicação prematura? Divulgação sem proteção?',
+        legal: 'Art. 12, LPI: período de graça de 12 meses para divulgação anterior ao depósito. Atenção: fora do Brasil, muitos países NÃO têm período de graça.',
+        example: {
+          action: 'Empolgado com os resultados, Dr. Apressado publica artigo em revista científica detalhando a molécula, a estrutura química e os testes in vitro. Ele NÃO fez o depósito de patente antes da publicação.',
+          narration: '"Publiquei o artigo para garantir o Lattes, mas agora descobri que posso ter perdido a chance de patentear em outros países. No Brasil, tenho 12 meses de graça a partir da publicação."'
+        }
+      },
+      {
+        num: 3,
+        title: 'A Busca de Anterioridade',
+        icon: '🔍',
+        labelAction: 'O que acontece?',
+        labelNarration: 'Narração',
+        hint: 'Como foi a busca? O que encontrou? Há anterioridade?',
+        legal: 'Art. 11, LPI: a invenção deve ser nova (estado da técnica). Ferramentas: base INPI, Patentscope (WIPO), Google Patents, Espacenet.',
+        example: {
+          action: 'Com ajuda do NIT, Dr. Apressado faz busca nas bases do INPI e Patentscope. Encontra 3 patentes relacionadas a anti-inflamatórios de origem vegetal, mas nenhuma com a mesma molécula. A criação é NOVA.',
+          narration: '"O NIT me ajudou a buscar. Não há nada igual registrado. Minha molécula é inédita — posso seguir com o depósito!"'
+        }
+      },
+      {
+        num: 4,
+        title: 'O Depósito',
+        icon: '📝',
+        labelAction: 'O que acontece?',
+        labelNarration: 'Narração',
+        hint: 'Como foi o processo de depósito? Quem ajudou? Quanto custou?',
+        legal: 'Arts. 19–22, LPI: documentação do pedido. Custo depósito eletrônico: R$ 260,00 (normal) / R$ 90,00 (com desconto ICT). Portaria GM/MDIC nº 110/2025.',
+        example: {
+          action: 'O NIT da UFRR redige o relatório descritivo, reivindicações e resumo. A universidade (ICT) é titular; Dr. Apressado e sua aluna de IC são inventores. GRU paga: R$ 90,00 (desconto ICT). Depósito via e-Patentes.',
+          narration: '"A universidade como ICT tem desconto de 50% em todas as taxas do INPI. O NIT cuidou de toda a redação técnica. Custo até aqui: R$ 90 de depósito."'
+        }
+      },
+      {
+        num: 5,
+        title: 'O Exame e a Espera',
+        icon: '⏳',
+        labelAction: 'O que acontece?',
+        labelNarration: 'Narração',
+        hint: 'O que acontece durante o exame? Há exigências? Quanto tempo?',
+        legal: 'Art. 33, LPI: pedido de exame em até 36 meses. Art. 35: exigência técnica. Custo exame PI (até 10 reiv.): R$ 870,00 / R$ 435,00 (desconto).',
+        example: {
+          action: 'Após 18 meses, o pedido é publicado na RPI. O NIT solicita o exame técnico (R$ 435,00 com desconto). O examinador faz uma exigência para esclarecer o escopo das reivindicações. O NIT responde em 60 dias. Após 3 anos, a patente é concedida.',
+          narration: '"A espera é longa, mas o examinador reconheceu a novidade e a atividade inventiva. Recebi a carta-patente! Agora preciso manter as anuidades."'
+        }
+      },
+      {
+        num: 6,
+        title: 'O Futuro da Proteção',
+        icon: '🚀',
+        labelAction: 'O que acontece?',
+        labelNarration: 'Narração',
+        hint: 'Qual o destino da proteção? Licenciamento? Transferência? Manutenção?',
+        legal: 'Art. 40, LPI: vigência 20 anos (PI). Arts. 61–74: licenciamento e transferência. Art. 78: anuidades obrigatórias.',
+        example: {
+          action: 'A UFRR licencia a patente para uma farmacêutica que desenvolve o medicamento. O contrato prevê royalties de 3% sobre vendas líquidas. A universidade e os inventores dividem conforme a política de PI institucional. A anuidade é paga pela licenciada.',
+          narration: '"A pesquisa virou um medicamento real. A patente gerou renda para a universidade e reconhecimento para nós, inventores. O NIT monitora o contrato e as anuidades."'
+        }
+      }
+    ];
+
+    let showExample = false;
+
+    function renderFrames() {
+      const strip = document.getElementById('storyStrip');
+      strip.innerHTML = '';
+      frames.forEach(f => {
+        strip.innerHTML += `
+          <div class="sb-frame">
+            <div class="sb-frame__header">
+              <span class="sb-frame__num">${f.num}</span>
+              ${f.title}
+            </div>
+            <div class="sb-frame__canvas">
+              <span class="sb-icon-scene">${f.icon}</span>
+            </div>
+            <div class="sb-frame__body">
+              <div class="sb-frame__label">${f.labelAction}</div>
+              <textarea placeholder="${f.hint}" id="action-${f.num}">${showExample ? f.example.action : ''}</textarea>
+
+              <div class="sb-frame__label" style="margin-top:.6rem;">${f.labelNarration}</div>
+              <textarea placeholder="Fala do personagem ou voz do narrador..." id="narration-${f.num}">${showExample ? f.example.narration : ''}</textarea>
+
+              <div class="sb-frame__legal">
+                <strong>⚖️ Base Legal:</strong> ${f.legal}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function toggleExample() {
+      showExample = !showExample;
+      renderFrames();
+    }
+
+    function clearStory() {
+      if (!confirm('Limpar todo o storyboard?')) return;
+      showExample = false;
+      renderFrames();
+    }
+
+    renderFrames();
+  </script>
+
+</body>
+</html>

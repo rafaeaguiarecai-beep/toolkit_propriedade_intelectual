@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas de Avaliação — PI Thinking</title>
+  <meta name="description" content="Avalie a oficina PI Thinking: o que gostou, o que aprendeu, o que faltou, NPS e sugestões.">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --ca-bg:#F3E5F5;--ca-surface:#FFFFFF;--ca-accent:#9C27B0;--ca-accent-dark:#6A1B9A;
+      --ca-text:#212121;--ca-text-light:#757575;--ca-border:#CE93D8;--ca-radius:16px;
+      --ca-shadow:0 2px 12px rgba(156,39,176,.12);--ca-green:#4CAF50;--ca-yellow:#FFC107;--ca-red:#EF5350;
+    }
+    @media(prefers-color-scheme:dark){:root{--ca-bg:#1a0e1a;--ca-surface:#2a1a2a;--ca-text:#f5f0f5;--ca-text-light:#b8a0b8;--ca-border:#3a1e3a;--ca-shadow:0 2px 12px rgba(0,0,0,.4);}}
+    body.ca-page{font-family:'Inter',sans-serif;background:var(--ca-bg);color:var(--ca-text);margin:0;padding:0;line-height:1.7;}
+    .ca-cover{background:linear-gradient(135deg,#CE93D8 0%,#9C27B0 50%,#6A1B9A 100%);color:#fff;padding:3.5rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden;}
+    .ca-cover::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 80%,rgba(255,255,255,.08) 0%,transparent 50%);}
+    .ca-cover__overline{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;opacity:.9;}
+    .ca-cover__title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);margin:.5rem 0;}
+    .ca-cover__sub{font-size:1.05rem;opacity:.92;max-width:600px;margin:.5rem auto 0;}
+    .ca-container{max-width:900px;margin:0 auto;padding:2rem 1.5rem;}
+
+    /* GAF GRID */
+    .ca-gaf{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem;}
+    @media(max-width:700px){.ca-gaf{grid-template-columns:1fr;}}
+    .ca-gaf__col{background:var(--ca-surface);border-radius:var(--ca-radius);padding:1.5rem;box-shadow:var(--ca-shadow);border-top:4px solid var(--ca-green);}
+    .ca-gaf__col:nth-child(2){border-top-color:var(--ca-yellow);}
+    .ca-gaf__col:nth-child(3){border-top-color:var(--ca-red);}
+    .ca-gaf__col h3{font-family:'Poppins',sans-serif;margin-top:0;display:flex;align-items:center;gap:.5rem;}
+    .ca-gaf__notes{min-height:100px;}
+    .ca-gaf__note{background:var(--ca-bg);border-radius:8px;padding:.5rem .8rem;margin:.4rem 0;display:flex;justify-content:space-between;align-items:center;font-size:.88rem;animation:fadeIn .3s;}
+    .ca-gaf__note button{background:none;border:none;font-size:1rem;cursor:pointer;opacity:.5;}
+    .ca-gaf__note button:hover{opacity:1;}
+    .ca-gaf__add{display:flex;gap:.5rem;margin-top:.5rem;}
+    .ca-gaf__add input{flex:1;font-family:'Inter',sans-serif;font-size:.88rem;padding:.5rem;border:1px solid var(--ca-border);border-radius:8px;background:var(--ca-bg);color:var(--ca-text);}
+    .ca-gaf__add button{font-family:'Poppins',sans-serif;font-weight:600;padding:.5rem 1rem;border:none;border-radius:8px;background:var(--ca-accent);color:#fff;cursor:pointer;font-size:.85rem;}
+
+    /* STARS RATING */
+    .ca-rating{background:var(--ca-surface);border-radius:var(--ca-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--ca-shadow);}
+    .ca-rating h3{font-family:'Poppins',sans-serif;color:var(--ca-accent-dark);margin-top:0;}
+    .ca-rating__row{display:flex;align-items:center;gap:1rem;margin:.8rem 0;flex-wrap:wrap;}
+    .ca-rating__label{min-width:200px;font-weight:500;font-size:.92rem;}
+    .ca-rating__stars{display:flex;gap:4px;}
+    .ca-rating__star{font-size:1.8rem;cursor:pointer;transition:transform .15s;filter:grayscale(100%);opacity:.4;}
+    .ca-rating__star:hover{transform:scale(1.2);}
+    .ca-rating__star.active{filter:grayscale(0);opacity:1;}
+
+    /* NPS */
+    .ca-nps{background:var(--ca-surface);border-radius:var(--ca-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--ca-shadow);}
+    .ca-nps h3{font-family:'Poppins',sans-serif;color:var(--ca-accent-dark);margin-top:0;}
+    .ca-nps__scale{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:1rem 0;}
+    .ca-nps__num{width:40px;height:40px;border-radius:8px;border:2px solid var(--ca-border);display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;transition:all .2s;font-size:.9rem;background:var(--ca-bg);}
+    .ca-nps__num:hover{border-color:var(--ca-accent);transform:scale(1.1);}
+    .ca-nps__num.selected{color:#fff;border-color:transparent;}
+    .ca-nps__labels{display:flex;justify-content:space-between;font-size:.75rem;color:var(--ca-text-light);margin-top:.3rem;}
+
+    /* FREE TEXT */
+    .ca-free{background:var(--ca-surface);border-radius:var(--ca-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--ca-shadow);}
+    .ca-free h3{font-family:'Poppins',sans-serif;color:var(--ca-accent-dark);margin-top:0;}
+    .ca-free textarea{width:100%;font-family:'Inter',sans-serif;font-size:.92rem;border:2px solid var(--ca-border);border-radius:8px;padding:.6rem;background:var(--ca-bg);color:var(--ca-text);min-height:80px;resize:vertical;box-sizing:border-box;}
+    .ca-free label{display:block;font-weight:600;font-size:.9rem;margin:.8rem 0 .3rem;}
+
+    /* SUMMARY */
+    .ca-summary{background:linear-gradient(135deg,#E1BEE7,#CE93D8);border-radius:var(--ca-radius);padding:2rem;margin:2rem 0;text-align:center;display:none;}
+    .ca-summary.show{display:block;animation:fadeIn .5s;}
+    .ca-summary h2{font-family:'Playfair Display',serif;color:#4A148C;}
+    .ca-summary__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1rem 0;}
+    @media(max-width:600px){.ca-summary__grid{grid-template-columns:1fr;}}
+    .ca-summary__item{background:rgba(255,255,255,.6);border-radius:12px;padding:1rem;}
+    .ca-summary__value{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;color:var(--ca-accent-dark);}
+    .ca-summary__label{font-size:.85rem;color:#4A148C;}
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .ca-btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;padding:.7rem 1.5rem;border:none;border-radius:30px;cursor:pointer;transition:transform .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
+    .ca-btn:hover{transform:translateY(-2px);}
+    .ca-btn--primary{background:var(--ca-accent);color:#fff;}
+    .ca-btn--outline{background:transparent;border:2px solid var(--ca-accent);color:var(--ca-accent-dark);}
+    .ca-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin:2rem 0;}
+
+    .ca-footer{text-align:center;padding:2rem;font-size:.82rem;color:var(--ca-text-light);border-top:1px solid var(--ca-border);margin-top:2rem;}
+    .ca-footer a{color:var(--ca-accent-dark);}
+
+    @media print{
+      .ca-gaf__add,.ca-actions{display:none!important;}
+      .ca-gaf__col,.ca-rating,.ca-nps,.ca-free{break-inside:avoid;border:1px solid #ccc;}
+      @page{size:A4 portrait;margin:1.5cm;}
+    }
+  </style>
+</head>
+<body class="ca-page">
+
+  <header class="ca-cover">
+    <div class="ca-cover__overline">Fase 5 — Avaliar</div>
+    <h1 class="ca-cover__title">Canvas de Avaliação</h1>
+    <p class="ca-cover__sub">Avalie a oficina PI Thinking: o que gostou, o que aprendeu, o que faltou — e ajude a melhorar!</p>
+  </header>
+
+  <main class="ca-container">
+
+    <!-- GAF: Gostei, Aprendi, Faltou -->
+    <section class="ca-gaf">
+      <div class="ca-gaf__col">
+        <h3>😊 Gostei</h3>
+        <p style="font-size:.82rem;color:var(--ca-text-light);">O que mais gostou na oficina?</p>
+        <div class="ca-gaf__notes" id="gaf-gostei"></div>
+        <div class="ca-gaf__add">
+          <input type="text" id="input-gostei" placeholder="Adicionar..." onkeypress="if(event.key==='Enter')addGaf('gostei')">
+          <button onclick="addGaf('gostei')">+</button>
+        </div>
+      </div>
+      <div class="ca-gaf__col">
+        <h3>💡 Aprendi</h3>
+        <p style="font-size:.82rem;color:var(--ca-text-light);">O que aprendeu de novo?</p>
+        <div class="ca-gaf__notes" id="gaf-aprendi"></div>
+        <div class="ca-gaf__add">
+          <input type="text" id="input-aprendi" placeholder="Adicionar..." onkeypress="if(event.key==='Enter')addGaf('aprendi')">
+          <button onclick="addGaf('aprendi')">+</button>
+        </div>
+      </div>
+      <div class="ca-gaf__col">
+        <h3>🔍 Faltou</h3>
+        <p style="font-size:.82rem;color:var(--ca-text-light);">O que faltou ou poderia melhorar?</p>
+        <div class="ca-gaf__notes" id="gaf-faltou"></div>
+        <div class="ca-gaf__add">
+          <input type="text" id="input-faltou" placeholder="Adicionar..." onkeypress="if(event.key==='Enter')addGaf('faltou')">
+          <button onclick="addGaf('faltou')">+</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAR RATINGS -->
+    <section class="ca-rating">
+      <h3>⭐ Avalie cada aspecto (1–5 estrelas)</h3>
+      <div id="ratingsArea"></div>
+    </section>
+
+    <!-- NPS -->
+    <section class="ca-nps">
+      <h3>📊 NPS — Recomendação</h3>
+      <p>De 0 a 10, qual a probabilidade de você recomendar esta oficina a um colega?</p>
+      <div class="ca-nps__scale" id="npsScale"></div>
+      <div class="ca-nps__labels"><span>Nada provável</span><span>Neutro</span><span>Muito provável</span></div>
+    </section>
+
+    <!-- FREE TEXT -->
+    <section class="ca-free">
+      <h3>✍️ Comentários Livres</h3>
+      <label>O que você faria diferente na próxima edição?</label>
+      <textarea id="free-diferente" placeholder="Suas sugestões..."></textarea>
+      <label>Qual ferramenta do toolkit foi mais útil para você?</label>
+      <textarea id="free-ferramenta" placeholder="Ex.: A Árvore de Decisão me ajudou a..."></textarea>
+      <label>Mensagem para o facilitador:</label>
+      <textarea id="free-mensagem" placeholder="Feedback aberto..."></textarea>
+    </section>
+
+    <div class="ca-actions">
+      <button class="ca-btn ca-btn--primary" onclick="generateSummary()">📊 Gerar Resumo</button>
+      <button class="ca-btn ca-btn--primary" onclick="window.print()">🖨️ Imprimir</button>
+      <a href="index.html" class="ca-btn ca-btn--outline">🏠 Toolkit</a>
+    </div>
+
+    <!-- SUMMARY -->
+    <section class="ca-summary" id="summaryScreen">
+      <h2>📊 Resumo da Avaliação</h2>
+      <div class="ca-summary__grid" id="summaryGrid"></div>
+      <p style="font-size:.85rem;color:#4A148C;margin-top:1rem;">Obrigado pela sua avaliação! Ela é fundamental para melhorar o Toolkit PI Thinking.</p>
+    </section>
+
+  </main>
+
+  <footer class="ca-footer">
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+  </footer>
+
+  <script>
+    // ============================================================
+    //  GAF
+    // ============================================================
+    const gafData = {gostei:[], aprendi:[], faltou:[]};
+
+    function addGaf(type) {
+      const input = document.getElementById('input-'+type);
+      const val = input.value.trim();
+      if (!val) return;
+      gafData[type].push(val);
+      input.value = '';
+      renderGaf(type);
+    }
+
+    function removeGaf(type, idx) {
+      gafData[type].splice(idx, 1);
+      renderGaf(type);
+    }
+
+    function renderGaf(type) {
+      const container = document.getElementById('gaf-'+type);
+      container.innerHTML = '';
+      gafData[type].forEach((note, i) => {
+        container.innerHTML += `<div class="ca-gaf__note"><span>${note}</span><button onclick="removeGaf('${type}',${i})">✕</button></div>`;
+      });
+    }
+
+    // ============================================================
+    //  STAR RATINGS
+    // ============================================================
+    const ratingItems = [
+      {id:'conteudo', label:'Conteúdo e profundidade técnica'},
+      {id:'materiais', label:'Qualidade dos materiais/ferramentas'},
+      {id:'interatividade', label:'Interatividade e dinâmicas'},
+      {id:'facilitador', label:'Didática do facilitador'},
+      {id:'tempo', label:'Gestão do tempo'},
+      {id:'aplicabilidade', label:'Aplicabilidade no dia a dia'},
+      {id:'visual', label:'Design visual e usabilidade'}
+    ];
+
+    const ratings = {};
+
+    function renderRatings() {
+      const area = document.getElementById('ratingsArea');
+      area.innerHTML = '';
+      ratingItems.forEach(item => {
+        ratings[item.id] = ratings[item.id] || 0;
+        let starsHtml = '';
+        for (let s = 1; s <= 5; s++) {
+          starsHtml += `<span class="ca-rating__star ${s <= ratings[item.id] ? 'active' : ''}" onclick="setRating('${item.id}',${s})">⭐</span>`;
+        }
+        area.innerHTML += `<div class="ca-rating__row"><span class="ca-rating__label">${item.label}</span><div class="ca-rating__stars">${starsHtml}</div></div>`;
+      });
+    }
+
+    function setRating(id, val) {
+      ratings[id] = val;
+      renderRatings();
+    }
+
+    renderRatings();
+
+    // ============================================================
+    //  NPS
+    // ============================================================
+    let npsValue = -1;
+
+    function renderNps() {
+      const scale = document.getElementById('npsScale');
+      scale.innerHTML = '';
+      for (let i = 0; i <= 10; i++) {
+        let bg = '#EF5350'; // 0-6 detractor
+        if (i >= 7 && i <= 8) bg = '#FFC107'; // passive
+        if (i >= 9) bg = '#4CAF50'; // promoter
+        scale.innerHTML += `<div class="ca-nps__num ${npsValue === i ? 'selected' : ''}" style="${npsValue === i ? 'background:'+bg+';' : ''}" onclick="setNps(${i})">${i}</div>`;
+      }
+    }
+
+    function setNps(val) {
+      npsValue = val;
+      renderNps();
+    }
+
+    renderNps();
+
+    // ============================================================
+    //  SUMMARY
+    // ============================================================
+    function generateSummary() {
+      const summary = document.getElementById('summaryScreen');
+      const grid = document.getElementById('summaryGrid');
+
+      // Average rating
+      const ratingValues = Object.values(ratings).filter(v => v > 0);
+      const avgRating = ratingValues.length > 0 ? (ratingValues.reduce((a,b) => a+b, 0) / ratingValues.length).toFixed(1) : '—';
+
+      // NPS category
+      let npsLabel = '—';
+      if (npsValue >= 0) {
+        if (npsValue >= 9) npsLabel = '🟢 Promotor';
+        else if (npsValue >= 7) npsLabel = '🟡 Neutro';
+        else npsLabel = '🔴 Detrator';
+      }
+
+      // GAF counts
+      const totalNotes = gafData.gostei.length + gafData.aprendi.length + gafData.faltou.length;
+
+      grid.innerHTML = `
+        <div class="ca-summary__item">
+          <div class="ca-summary__value">${avgRating}/5</div>
+          <div class="ca-summary__label">Nota média (${ratingValues.length} critérios)</div>
+        </div>
+        <div class="ca-summary__item">
+          <div class="ca-summary__value">${npsValue >= 0 ? npsValue+'/10' : '—'}</div>
+          <div class="ca-summary__label">NPS ${npsLabel}</div>
+        </div>
+        <div class="ca-summary__item">
+          <div class="ca-summary__value">${totalNotes}</div>
+          <div class="ca-summary__label">Notas GAF (${gafData.gostei.length}G + ${gafData.aprendi.length}A + ${gafData.faltou.length}F)</div>
+        </div>
+      `;
+
+      summary.classList.add('show');
+      summary.scrollIntoView({behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>

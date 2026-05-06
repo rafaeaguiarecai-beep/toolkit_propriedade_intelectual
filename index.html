@@ -1,913 +1,844 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Toolkit completo para facilitar oficinas de Propriedade Intelectual. Combine Design Thinking e Lean Inception para transformar PI em experiência prática.">
-    <meta name="theme-color" content="#0F2B46">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Toolkit completo para facilitar oficinas de Propriedade Intelectual. Combine Design Thinking e Lean Inception para transformar PI em experiência prática.">
+<meta name="theme-color" content="#0A1249">
+<meta property="og:title" content="PI Thinking — Toolkit de Propriedade Intelectual">
+<meta property="og:description" content="Propriedade Intelectual com Mindset Ágil e Experimental">
+<meta property="og:type" content="website">
+<title>PI Thinking — Toolkit de Propriedade Intelectual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   TOKENS — UFRR Manual 2024
+   ═══════════════════════════════════════ */
+:root{
+  --azul-escuro:#0A1249;
+  --azul:#151D77;
+  --vermelho:#FF0000;
+  --amarelo:#FFED00;
+  --verde:#009640;
+  --preto:#000;
+  --bg:#fff;
+  --bg-alt:#F5F5F8;
+  --bg-dark:#060C2E;
+  --txt:#1a1a2e;
+  --txt-light:#6b6b80;
+  --border:#e4e4ec;
+  --f1:#E91E63;--f2:#FF9800;--f3:#2196F3;--f4:#9C27B0;--f5:#4CAF50;
+  --font:'Montserrat',system-ui,sans-serif;
+  --max:1140px;
+  --radius:10px;
+  --ease:cubic-bezier(.25,.46,.45,.94);
+}
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="PI Thinking — Toolkit de Propriedade Intelectual">
-    <meta property="og:description" content="Propriedade Intelectual com Mindset Ágil e Experimental">
-    <meta property="og:type" content="website">
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
 
-    <title>PI Thinking — Toolkit de Propriedade Intelectual</title>
+/* ═══ REVEAL ═══ */
+.rv{opacity:0;transform:translateY(36px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.rv.left{transform:translateX(-50px)}
+.rv.right{transform:translateX(50px)}
+.rv.vis{opacity:1;transform:none}
+.rv-d1{transition-delay:.1s}.rv-d2{transition-delay:.2s}.rv-d3{transition-delay:.3s}.rv-d4{transition-delay:.4s}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+/* ═══ TOPBAR ═══ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:64px;display:flex;align-items:center;
+  padding:0 clamp(1rem,4vw,2.5rem);
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid transparent;
+  transition:border-color .3s,box-shadow .3s;
+}
+.topbar.stuck{border-bottom-color:var(--border);box-shadow:0 1px 8px rgba(0,0,0,.04)}
+.topbar .brand{display:flex;align-items:center;gap:.65rem}
+.topbar .brand img{height:38px;width:auto}
+.topbar .brand-name{font-weight:800;font-size:.82rem;color:var(--azul-escuro);text-transform:uppercase;letter-spacing:.02em;line-height:1.2}
+.topbar .brand-name small{display:block;font-weight:500;font-size:.66rem;color:var(--txt-light);text-transform:none;letter-spacing:0}
+.topbar nav{margin-left:auto;display:flex;align-items:center;gap:1.6rem}
+.topbar nav a{font-size:.78rem;font-weight:600;color:var(--txt-light);text-transform:uppercase;letter-spacing:.05em;transition:color .3s}
+.topbar nav a:hover{color:var(--azul)}
+.topbar .cta-btn{background:var(--azul-escuro);color:#fff !important;padding:.5rem 1.1rem;border-radius:6px;font-size:.75rem;transition:background .3s}
+.topbar .cta-btn:hover{background:var(--azul)}
+.burger{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.burger span{display:block;width:22px;height:2px;background:var(--azul-escuro);margin:5px 0;transition:.3s}
 
-    <link rel="stylesheet" href="style.css">
+/* ═══ HERO — SPLIT ═══ */
+.hero{
+  min-height:100vh;display:grid;
+  grid-template-columns:1fr 1fr;
+  margin-top:64px;
+}
+.hero-text{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(2.5rem,5vw,5rem) clamp(2rem,4vw,4rem);
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--bg-alt);border:1px solid var(--border);
+  padding:.35rem .9rem;border-radius:20px;
+  font-size:.7rem;font-weight:600;color:var(--azul);
+  text-transform:uppercase;letter-spacing:.07em;
+  width:fit-content;margin-bottom:1.5rem;
+}
+.hero-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--verde);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero h1{
+  font-size:clamp(2.2rem,4.5vw,3.5rem);
+  font-weight:900;line-height:1.06;
+  color:var(--azul-escuro);margin-bottom:1rem;
+  letter-spacing:-.02em;
+}
+.hero h1 em{font-style:normal;color:var(--azul)}
+.hero .lead{font-size:clamp(.95rem,1.4vw,1.08rem);color:var(--txt-light);max-width:460px;margin-bottom:2rem}
+.hero-actions{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.75rem 1.5rem;border-radius:7px;
+  font-family:var(--font);font-weight:700;font-size:.82rem;
+  cursor:pointer;border:none;transition:.3s var(--ease);
+  text-transform:uppercase;letter-spacing:.03em;
+}
+.btn-p{background:var(--azul-escuro);color:#fff}
+.btn-p:hover{background:var(--azul);transform:translateY(-2px);box-shadow:0 8px 20px rgba(10,18,73,.2)}
+.btn-o{background:transparent;color:var(--azul-escuro);border:2px solid var(--border)}
+.btn-o:hover{border-color:var(--azul-escuro);background:var(--bg-alt)}
+.hero-logos{display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap}
+.hero-logos img{height:44px;width:auto;opacity:.7;filter:grayscale(.2);transition:.3s}
+.hero-logos img:hover{opacity:1;filter:none}
+.hero-visual{
+  background:var(--azul-escuro);display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.hero-visual::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 70%,rgba(0,150,64,.12),transparent 55%),
+             radial-gradient(circle at 70% 25%,rgba(21,29,119,.25),transparent 55%);
+}
+.hero-visual .orbit{position:relative;z-index:1;width:clamp(220px,24vw,340px);height:clamp(220px,24vw,340px)}
+.orbit-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,237,0,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.3rem;color:rgba(255,255,255,.7);
+}
+.orbit-item{
+  position:absolute;font-size:1.6rem;
+  animation:spin 20s linear infinite;
+}
+.orbit-item:nth-child(2){top:0;left:50%;transform:translateX(-50%);animation-delay:0s}
+.orbit-item:nth-child(3){top:25%;right:0;animation-delay:-4s}
+.orbit-item:nth-child(4){bottom:0;left:50%;transform:translateX(-50%);animation-delay:-8s}
+.orbit-item:nth-child(5){top:25%;left:0;animation-delay:-12s}
+.orbit-item:nth-child(6){bottom:25%;right:5%;animation-delay:-16s}
+@keyframes spin{0%{transform:rotate(0deg) translateX(110px) rotate(0deg)}100%{transform:rotate(360deg) translateX(110px) rotate(-360deg)}}
+.hero-visual .motto{
+  position:absolute;bottom:clamp(1.5rem,3vw,3rem);left:50%;transform:translateX(-50%);
+  color:rgba(255,255,255,.35);font-size:.72rem;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;z-index:1;
+}
+
+/* ═══ SECTIONS ═══ */
+.sec{padding:clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)}
+.sec-inner{max-width:var(--max);margin:0 auto}
+.sec.alt{background:var(--bg-alt)}
+.sec.dark{background:var(--bg-dark);color:#fff}
+.overline{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--azul);margin-bottom:.6rem;display:block}
+.sec.dark .overline{color:var(--amarelo)}
+.sec-title{font-size:clamp(1.7rem,3.2vw,2.4rem);font-weight:800;line-height:1.1;color:var(--azul-escuro);margin-bottom:.8rem;letter-spacing:-.01em}
+.sec.dark .sec-title{color:#fff}
+.sec-desc{font-size:clamp(.9rem,1.3vw,1.02rem);color:var(--txt-light);max-width:580px;line-height:1.7}
+.sec.dark .sec-desc{color:rgba(255,255,255,.6)}
+
+/* ═══ SPLIT SECTIONS (FASES) ═══ */
+.split{display:grid;grid-template-columns:1fr 1fr;min-height:65vh}
+.split-body{display:flex;flex-direction:column;justify-content:center;padding:clamp(2.5rem,5vw,4.5rem)}
+.split-vis{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.split-vis .big-num{font-size:clamp(10rem,18vw,18rem);font-weight:900;color:rgba(255,255,255,.06);position:absolute;line-height:1;user-select:none}
+.split-vis .big-icon{font-size:clamp(3.5rem,7vw,6rem);position:relative;z-index:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,.15))}
+.split.flip .split-vis{order:-1}
+.fase-tag{display:inline-block;padding:.28rem .7rem;border-radius:4px;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fff;margin-bottom:1rem}
+.fase-tag.t1{background:var(--f1)}.fase-tag.t2{background:var(--f2)}.fase-tag.t3{background:var(--f3)}.fase-tag.t4{background:var(--f4)}.fase-tag.t5{background:var(--f5)}
+.split-body h2{font-size:clamp(1.5rem,2.8vw,2rem);font-weight:800;line-height:1.12;margin-bottom:.4rem}
+.split-body .question{font-size:.88rem;color:var(--txt-light);font-style:italic;margin-bottom:1.2rem}
+.meta-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.meta-item{font-size:.74rem;font-weight:600;color:var(--txt-light);display:flex;align-items:center;gap:.25rem}
+
+/* ═══ TOOL CARDS (3-col grid dentro das fases) ═══ */
+.tools-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.3rem}
+.tcard{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius);padding:1.1rem;cursor:pointer;
+  transition:.3s var(--ease);text-decoration:none;display:block;
+}
+.sec:not(.dark) .tcard,.split-body .tcard{background:var(--bg);border-color:var(--border);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.tcard:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.08);border-color:transparent}
+.tcard .ico{font-size:1.4rem;margin-bottom:.4rem}
+.tcard h4{font-size:.8rem;font-weight:700;margin-bottom:.2rem;color:var(--txt)}
+.tcard p{font-size:.72rem;line-height:1.45;color:var(--txt-light);margin:0}
+
+/* ═══ GUIA DO FACILITADOR (TIMELINE) ═══ */
+.timeline{position:relative;padding-left:2.5rem;margin-top:2rem}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:1.8rem;padding-left:1.5rem}
+.tl-item::before{
+  content:'';position:absolute;left:-2.5rem;top:.35rem;
+  width:18px;height:18px;border-radius:50%;border:3px solid;
+  background:var(--bg);z-index:1;
+}
+.tl-item.i1::before{border-color:var(--f1)}.tl-item.i2::before{border-color:var(--f2)}
+.tl-item.i3::before{border-color:var(--f3)}.tl-item.i4::before{border-color:var(--f4)}
+.tl-item.i5::before{border-color:var(--f5)}.tl-item.brk::before{border-color:var(--txt-light);background:var(--txt-light)}
+.tl-time{font-size:.72rem;font-weight:700;color:var(--txt-light);margin-bottom:.2rem}
+.tl-item h4{font-size:.92rem;font-weight:700;margin-bottom:.3rem}
+.tl-item p{font-size:.84rem;color:var(--txt-light);line-height:1.6}
+.tl-item a{color:var(--azul);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+
+/* ═══ FERRAMENTAS DIGITAIS ═══ */
+.digi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.5rem}
+.digi-card{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius);padding:1.5rem;text-align:center;
+  transition:.3s var(--ease);
+}
+.digi-card:hover{background:rgba(255,255,255,.1);transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.digi-card .ico{font-size:2rem;margin-bottom:.8rem}
+.digi-card h4{font-size:.9rem;font-weight:700;margin-bottom:.3rem;color:#fff}
+.digi-card p{font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;margin-bottom:1rem}
+.digi-card .btn{font-size:.72rem;padding:.45rem 1rem;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.digi-card .btn:hover{background:rgba(255,255,255,.2)}
+
+/* ═══ DOWNLOADS ═══ */
+.dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-top:2rem}
+.dl-card{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.3rem;display:flex;align-items:flex-start;gap:1rem;
+  transition:.3s var(--ease);
+}
+.dl-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06);border-color:var(--azul)}
+.dl-card .ico{font-size:1.5rem;flex-shrink:0;margin-top:.1rem}
+.dl-card h4{font-size:.84rem;font-weight:700;margin-bottom:.15rem}
+.dl-card p{font-size:.74rem;color:var(--txt-light);line-height:1.45}
+.dl-card .link{display:inline-block;margin-top:.5rem;font-size:.72rem;font-weight:700;color:var(--azul);transition:.3s}
+.dl-card:hover .link{letter-spacing:.02em}
+.dl-card .badge-soon{display:inline-block;margin-top:.5rem;font-size:.65rem;font-weight:700;color:var(--txt-light);background:var(--bg-alt);padding:.2rem .6rem;border-radius:4px}
+
+/* ═══ REFERÊNCIAS ═══ */
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem}
+.ref-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.ref-card h4{font-size:.92rem;font-weight:700;margin-bottom:.8rem;color:var(--azul-escuro)}
+.ref-card ul{list-style:none;padding:0}
+.ref-card li{padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.ref-card li:last-child{border-bottom:none}
+.ref-card a{color:var(--azul);text-decoration:underline;text-underline-offset:2px;transition:.3s}
+.ref-card a:hover{color:var(--azul-escuro)}
+
+/* ═══ FAQ ═══ */
+.faq-list{max-width:720px;margin:2rem auto 0}
+.faq-q{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:.6rem;
+  font-family:var(--font);font-size:.88rem;font-weight:600;
+  text-align:left;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:center;transition:.3s;color:var(--txt);
+}
+.faq-q:hover{border-color:var(--azul)}
+.faq-q svg{transition:transform .3s;flex-shrink:0}
+.faq-q.open svg{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s;padding:0 1.3rem}
+.faq-a.open{max-height:300px;padding:0 1.3rem .8rem}
+.faq-a p{font-size:.84rem;color:var(--txt-light);line-height:1.6}
+.faq-a a{color:var(--azul)}
+
+/* ═══ FOOTER ═══ */
+footer{background:var(--azul-escuro);color:rgba(255,255,255,.5);padding:3rem clamp(1.5rem,4vw,3rem)}
+footer .inner{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:2.5rem;align-items:start}
+footer h5{color:rgba(255,255,255,.8);font-size:.82rem;font-weight:700;margin-bottom:.6rem}
+footer p{font-size:.78rem;line-height:1.6}
+footer .f-logos{display:flex;gap:1rem;align-items:center;margin-top:.8rem}
+footer .f-logos img{height:36px;opacity:.6;filter:brightness(0) invert(1);transition:.3s}
+footer .f-logos img:hover{opacity:1}
+footer .f-links a{display:block;font-size:.78rem;padding:.25rem 0;color:rgba(255,255,255,.5);transition:.3s}
+footer .f-links a:hover{color:#fff}
+footer .bar{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.1);padding-top:1.2rem;margin-top:.5rem;text-align:center;font-size:.72rem}
+footer .bar a{color:rgba(255,255,255,.6)}
+
+/* ═══ BACK TO TOP ═══ */
+.btt{
+  position:fixed;bottom:2rem;right:2rem;width:42px;height:42px;
+  border-radius:50%;background:var(--azul-escuro);color:#fff;
+  border:none;font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  opacity:0;pointer-events:none;transition:.3s;z-index:90;
+}
+.btt.show{opacity:1;pointer-events:auto}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .topbar nav{display:none;position:absolute;top:64px;left:0;right:0;background:#fff;flex-direction:column;padding:1.5rem;border-bottom:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+  .topbar nav.open{display:flex}
+  .burger{display:block}
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-visual{min-height:45vh}
+  .split{grid-template-columns:1fr}
+  .split-vis{min-height:35vh}
+  .split.flip .split-vis{order:0}
+  .tools-row{grid-template-columns:1fr}
+  .digi-grid{grid-template-columns:1fr 1fr}
+  .ref-grid{grid-template-columns:1fr}
+  footer .inner{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .hero-text{padding:2rem 1.2rem}
+  .digi-grid{grid-template-columns:1fr}
+  .dl-grid{grid-template-columns:1fr}
+}
+@media print{
+  .topbar,.btt,footer{display:none}
+  .hero{min-height:auto;grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .split{grid-template-columns:1fr}
+  .split-vis{display:none}
+  .rv{opacity:1!important;transform:none!important}
+}
+</style>
 </head>
 <body>
 
-<!-- Progresso de Leitura -->
-<div class="reading-progress" id="readingProgress"></div>
-
-<!-- Preloader -->
-<div class="preloader" id="preloader">
-    <div class="preloader__content">
-        <span class="preloader__icon">💡</span>
-        <div class="preloader__bar">
-            <div class="preloader__bar-fill"></div>
-        </div>
-        <p class="preloader__text">Carregando toolkit...</p>
-    </div>
-</div>
-
-<!-- Botão Voltar ao Topo -->
-<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-</button>
-
-<!-- Toggle Tema -->
-<button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
-    <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
-    <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
-</button>
-
-<!-- ============ HEADER / NAVEGAÇÃO ============ -->
-<header class="header" id="header">
-    <div class="header__container">
-        <a href="index.html" class="header__logo">
-            <span class="header__logo-icon">💡</span>
-            <div>
-                <strong class="header__logo-title">PI Thinking</strong>
-                <span class="header__logo-sub">Toolkit de Propriedade Intelectual</span>
-            </div>
-        </a>
-
-        <nav class="nav" id="nav" aria-label="Navegação principal">
-            <ul class="nav__list">
-                <li><a href="#home" class="nav__link nav__link--active">Início</a></li>
-                <li><a href="#sobre" class="nav__link">Sobre</a></li>
-                <li><a href="#guia" class="nav__link">Guia do Facilitador</a></li>
-                <li class="nav__dropdown">
-                    <a href="#fases" class="nav__link nav__link--dropdown" aria-haspopup="true" aria-expanded="false">
-                        Fases <span class="nav__dropdown-arrow">▾</span>
-                    </a>
-                    <ul class="nav__dropdown-menu" role="menu">
-                        <li><a href="#fase1" class="dropdown__link dropdown__link--fase1" role="menuitem"><span class="dropdown__dot" style="--dot-color: var(--fase-1)"></span>① Descobrir</a></li>
-                        <li><a href="#fase2" class="dropdown__link dropdown__link--fase2" role="menuitem"><span class="dropdown__dot" style="--dot-color: var(--fase-2)"></span>② Diagnosticar</a></li>
-                        <li><a href="#fase3" class="dropdown__link dropdown__link--fase3" role="menuitem"><span class="dropdown__dot" style="--dot-color: var(--fase-3)"></span>③ Estrategar</a></li>
-                        <li><a href="#fase4" class="dropdown__link dropdown__link--fase4" role="menuitem"><span class="dropdown__dot" style="--dot-color: var(--fase-4)"></span>④ Prototipar</a></li>
-                        <li><a href="#fase5" class="dropdown__link dropdown__link--fase5" role="menuitem"><span class="dropdown__dot" style="--dot-color: var(--fase-5)"></span>⑤ Evoluir</a></li>
-                    </ul>
-                </li>
-                <li><a href="#ferramentas" class="nav__link">Ferramentas Digitais</a></li>
-                <li><a href="#downloads" class="nav__link">Downloads</a></li>
-                <li><a href="#referencias" class="nav__link">Referências</a></li>
-            </ul>
-        </nav>
-
-        <button class="header__toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav">
-            <span></span><span></span><span></span>
-        </button>
-    </div>
+<!-- ═══════════ TOPBAR ═══════════ -->
+<header class="topbar" id="topbar">
+  <a href="#" class="brand">
+    <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="Brasão UFRR" >
+    <div class="brand-name">PI Thinking <small>PROFNIT · UFRR · INOVARR</small></div>
+  </a>
+  <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  <nav id="nav">
+    <a href="#sobre">Sobre</a>
+    <a href="#guia">Guia</a>
+    <a href="#fases">Fases</a>
+    <a href="#ferramentas">Ferramentas</a>
+    <a href="#downloads">Downloads</a>
+    <a href="guia-facilitador.html" class="cta-btn">Guia do Facilitador</a>
+  </nav>
 </header>
 
-<main id="main-content">
-
-    <!-- ============ HERO ============ -->
-    <section class="hero" id="home">
-        <div class="hero__bg-pattern"></div>
-        <div class="hero__container">
-            <div class="hero__content" data-reveal>
-                <span class="hero__badge">
-                    <span class="hero__badge-pulse"></span>
-                    PROFNIT • UFRR • INOVARR
-                </span>
-                <h1 class="hero__title">PI <span class="hero__title--accent">Thinking</span></h1>
-                <p class="hero__subtitle">Propriedade Intelectual com Mindset Ágil e Experimental</p>
-                <p class="hero__desc">Um toolkit completo para facilitar oficinas, cursos e capacitações sobre Propriedade Intelectual. Combine <strong>Design Thinking</strong> e <strong>Lean Inception</strong> para transformar PI em experiência prática, colaborativa e envolvente.</p>
-                <div class="hero__buttons">
-                    <a href="#fases" class="btn btn--primary btn--glow">
-                        <span>Explorar Ferramentas</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                    <a href="#guia" class="btn btn--outline">
-                        <span>Guia do Facilitador</span>
-                    </a>
-                </div>
-                <div class="hero__stats-row">
-                    <div class="hero__stat">
-                        <strong class="hero__stat-num" data-count="16">0</strong>
-                        <span>Ferramentas</span>
-                    </div>
-                    <div class="hero__stat">
-                        <strong class="hero__stat-num" data-count="5">0</strong>
-                        <span>Fases</span>
-                    </div>
-                    <div class="hero__stat">
-                        <strong class="hero__stat-num" data-count="4">0</strong>
-                        <span>Horas</span>
-                    </div>
-                </div>
-            </div>
-            <div class="hero__visual" data-reveal data-reveal-delay="200">
-                <div class="hero__orbit">
-                    <div class="hero__orbit-center">PI</div>
-                    <div class="hero__orbit-item" style="--i:0; --color: var(--fase-1)">🧠</div>
-                    <div class="hero__orbit-item" style="--i:1; --color: var(--fase-2)">🔍</div>
-                    <div class="hero__orbit-item" style="--i:2; --color: var(--fase-3)">🚀</div>
-                    <div class="hero__orbit-item" style="--i:3; --color: var(--fase-4)">🛠️</div>
-                    <div class="hero__orbit-item" style="--i:4; --color: var(--fase-5)">📈</div>
-                </div>
-            </div>
-            <div class="hero__logos" data-reveal data-reveal-delay="400">
-                <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="Logo UFRR" class="hero__logo-img" loading="lazy">
-                <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="Logo INOVARR" class="hero__logo-img hero__logo-img--wide" loading="lazy">
-                <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="Logo PROFNIT" class="hero__logo-img" loading="lazy">
-            </div>
-        </div>
-        <div class="hero__scroll-indicator">
-            <div class="hero__mouse">
-                <div class="hero__mouse-wheel"></div>
-            </div>
-            <span>Role para explorar</span>
-        </div>
-    </section>
-
-    <!-- ============ SOBRE ============ -->
-    <section class="section" id="sobre">
-        <div class="container">
-            <span class="section__overline" data-reveal>Sobre o Toolkit</span>
-            <h2 class="section__title" data-reveal>O que é o PI Thinking?</h2>
-            <div class="about__grid">
-                <div class="about__text" data-reveal>
-                    <p>O <strong>PI Thinking</strong> é um toolkit educacional que reúne ferramentas de <strong>Design Thinking</strong>, <strong>Lean Inception</strong> e <strong>gamificação</strong> aplicadas ao universo da <strong>Propriedade Intelectual</strong>. Foi desenvolvido no âmbito do Mestrado Profissional em Propriedade Intelectual e Transferência de Tecnologia para a Inovação (<strong>PROFNIT</strong>), ponto focal da Universidade Federal de Roraima (<strong>UFRR</strong>).</p>
-                    <p>O toolkit está alinhado ao <strong>Eixo 2 da Estratégia Nacional de Propriedade Intelectual (ENPI 2021-2030)</strong> — Disseminação, Formação e Capacitação em PI — e às melhores práticas internacionais da OMPI (IP4Youth&Teachers, INCIPE).</p>
-                    <p>Destinado a <strong>professores, técnicos, pesquisadores e estudantes</strong>, o PI Thinking permite que qualquer facilitador conduza oficinas de PI de forma autônoma, utilizando materiais prontos para uso (canvas, cartas, jogos e ferramentas digitais interativas).</p>
-                    <a href="#downloads" class="btn btn--primary btn--small" style="margin-top: 1rem;">Ver Materiais para Download</a>
-                </div>
-                <div class="about__cards" data-reveal data-reveal-delay="200">
-                    <div class="stat-card stat-card--animated">
-                        <span class="stat-card__number" data-count="16">0</span>
-                        <span class="stat-card__label">Ferramentas</span>
-                    </div>
-                    <div class="stat-card stat-card--animated">
-                        <span class="stat-card__number" data-count="5">0</span>
-                        <span class="stat-card__label">Fases</span>
-                    </div>
-                    <div class="stat-card stat-card--animated">
-                        <span class="stat-card__number" data-count="4" data-suffix="h">0</span>
-                        <span class="stat-card__label">Oficina Completa</span>
-                    </div>
-                    <div class="stat-card stat-card--animated">
-                        <span class="stat-card__number" data-count="4">0</span>
-                        <span class="stat-card__label">Ferramentas Digitais</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ GUIA DO FACILITADOR ============ -->
-    <section class="section section--alt" id="guia">
-        <div class="container">
-            <span class="section__overline" data-reveal>Roteiro da Oficina</span>
-            <h2 class="section__title" data-reveal>Guia do Facilitador — Oficina de 4 horas</h2>
-            <p class="section__intro" data-reveal>Este roteiro permite que qualquer facilitador conduza a oficina de Propriedade Intelectual de forma autônoma. Cada bloco indica a ferramenta utilizada, o tempo estimado e os materiais necessários.</p>
-
-            <div class="timeline" data-reveal>
-                <div class="timeline__progress" id="timelineProgress"></div>
-
-                <div class="timeline__item timeline__item--fase1" data-timeline>
-                    <div class="timeline__time">0:00 — 0:15</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-1)">Fase 1</div>
-                        <h3>Abertura e Quiz Diagnóstico</h3>
-                        <p><strong>Ferramenta:</strong> Quiz Diagnóstico (Kahoot/Google Forms) — 10 perguntas sobre PI para mapear o conhecimento prévio dos participantes.</p>
-                        <p><strong>Materiais:</strong> Projetor, celulares dos participantes, link do quiz.</p>
-                    </div>
-                </div>
-
-                <div class="timeline__item timeline__item--fase1" data-timeline>
-                    <div class="timeline__time">0:15 — 0:45</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-1)">Fase 1</div>
-                        <h3>Imersão: Personas + Canvas de Diagnóstico</h3>
-                        <p><strong>Ferramenta:</strong> Cartas Personas da PI + Canvas de Diagnóstico de PI. Cada equipe recebe uma persona e preenche o Canvas.</p>
-                        <p><strong>Materiais:</strong> Cartas Personas impressas, Canvas A2, post-its, canetas.</p>
-                    </div>
-                </div>
-
-                <div class="timeline__item timeline__item--fase2" data-timeline>
-                    <div class="timeline__time">0:45 — 1:15</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-2)">Fase 2</div>
-                        <h3>Descoberta: Árvore de Decisão + Linha do Tempo</h3>
-                        <p><strong>Ferramenta:</strong> Árvore de Decisão Interativa + Pôster da Linha do Tempo da PI no Brasil.</p>
-                        <p><strong>Materiais:</strong> Projetor ou celulares, pôster da Linha do Tempo.</p>
-                    </div>
-                </div>
-
-                <div class="timeline__item timeline__item--intervalo" data-timeline>
-                    <div class="timeline__time">1:15 — 1:30</div>
-                    <div class="timeline__content timeline__content--intervalo">
-                        <h3>☕ Intervalo</h3>
-                        <p>Coffee break. Aproveite para expor a Linha do Tempo e os Canvas preenchidos na parede.</p>
-                    </div>
-                </div>
-
-                <div class="timeline__item timeline__item--fase3" data-timeline>
-                    <div class="timeline__time">1:30 — 2:00</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-3)">Fase 3</div>
-                        <h3>Desmistificação: É/Não É + Baralho de Dilemas</h3>
-                        <p><strong>Ferramenta:</strong> Canvas "É / Não É / Faz / Não Faz" + Baralho de Dilemas.</p>
-                        <p><strong>Materiais:</strong> Canvas A2, Baralho de Dilemas (40 cartas), post-its.</p>
-                    </div>
-                </div>
-
-                <div class="timeline__item timeline__item--fase3" data-timeline>
-                    <div class="timeline__time">2:00 — 2:45</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-3)">Fase 3</div>
-                        <h3>Estratégia: Canvas MVP de PI + Dados da Inovação</h3>
-                        <p><strong>Ferramenta:</strong> Canvas MVP de PI + Dados da Inovação.</p>
-                        <p><strong>Materiais:</strong> Canvas MVP A2, Dados da Inovação (2 dados), post-its, canetas.</p>
-                    </div>
-                </div>
-
-                <div class="timeline__item timeline__item--fase4" data-timeline>
-                    <div class="timeline__time">2:45 — 3:15</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-4)">Fase 4</div>
-                        <h3>Jogo: PI Quest (versão 30 min)</h3>
-                        <p><strong>Ferramenta:</strong> Jogo de tabuleiro PI Quest — versão rápida.</p>
-                        <p><strong>Materiais:</strong> Tabuleiro PI Quest, cartas de desafio, dados, peões.</p>
-                        <p><strong>Guia Completo:</strong> <a href="download/Escape-Room-completo.pdf" download>Baixar Escape Room Completo (PDF)</a></p>
-                    </div>
-                </div>
-                <div class="timeline__item timeline__item--fase5" data-timeline>
-                    <div class="timeline__time">3:15 — 3:45</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-5)">Fase 5</div>
-                        <h3>Pitch: Apresentação do Plano de PI</h3>
-                        <p><strong>Ferramenta:</strong> Pitch de PI. Cada equipe apresenta seu plano em 5 minutos.</p>
-                        <p><strong>Materiais:</strong> Canvas MVP preenchido, timer, post-its coloridos.</p>
-                    </div>
-                </div>
-
-                <div class="timeline__item timeline__item--fase5" data-timeline>
-                    <div class="timeline__time">3:45 — 4:00</div>
-                    <div class="timeline__content">
-                        <div class="timeline__badge" style="--badge-color: var(--fase-5)">Fase 5</div>
-                        <h3>Encerramento: Quiz Final + Certificados</h3>
-                        <p><strong>Ferramenta:</strong> Quiz Final — 10 perguntas para medir evolução.</p>
-                        <p><strong>Materiais:</strong> Projetor, celulares, QR Code dos certificados.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ BARRA DE FASES ============ -->
-    <section class="section" id="fases">
-        <div class="container">
-            <span class="section__overline" data-reveal>Metodologia</span>
-            <h2 class="section__title" data-reveal>As 5 Fases do PI Thinking</h2>
-            <p class="section__intro" data-reveal>Cada fase possui ferramentas específicas para conduzir o participante da curiosidade inicial até a ação concreta de proteção. Clique em uma fase para explorar suas ferramentas.</p>
-
-            <div class="phases-bar" data-reveal data-reveal-delay="200">
-                <a href="#fase1" class="phase-pill phase-pill--1" data-phase="1">
-                    <span class="phase-pill__num">①</span>
-                    <span class="phase-pill__text">Descobrir</span>
-                </a>
-                <a href="#fase2" class="phase-pill phase-pill--2" data-phase="2">
-                    <span class="phase-pill__num">②</span>
-                    <span class="phase-pill__text">Diagnosticar</span>
-                </a>
-                <a href="#fase3" class="phase-pill phase-pill--3" data-phase="3">
-                    <span class="phase-pill__num">③</span>
-                    <span class="phase-pill__text">Estrategar</span>
-                </a>
-                <a href="#fase4" class="phase-pill phase-pill--4" data-phase="4">
-                    <span class="phase-pill__num">④</span>
-                    <span class="phase-pill__text">Prototipar</span>
-                </a>
-                <a href="#fase5" class="phase-pill phase-pill--5" data-phase="5">
-                    <span class="phase-pill__num">⑤</span>
-                    <span class="phase-pill__text">Evoluir</span>
-                </a>
-            </div>
-
-            <!-- Visualização das fases -->
-            <div class="phases-visual" data-reveal data-reveal-delay="300">
-                <div class="phases-visual__track">
-                    <div class="phases-visual__step phases-visual__step--active" data-step="1">
-                        <div class="phases-visual__icon">🧠</div>
-                        <h4>Descobrir</h4>
-                        <p>Mapear conhecimento prévio e criar empatia com personas do ecossistema de PI.</p>
-                    </div>
-                    <div class="phases-visual__connector"></div>
-                    <div class="phases-visual__step" data-step="2">
-                        <div class="phases-visual__icon">🔍</div>
-                        <h4>Diagnosticar</h4>
-                        <p>Identificar o tipo de proteção ideal através da árvore de decisão e linha do tempo.</p>
-                    </div>
-                    <div class="phases-visual__connector"></div>
-                    <div class="phases-visual__step" data-step="3">
-                        <div class="phases-visual__icon">🚀</div>
-                        <h4>Estrategar</h4>
-                        <p>Planejar o MVP de proteção e debater dilemas reais em grupo.</p>
-                    </div>
-                    <div class="phases-visual__connector"></div>
-                    <div class="phases-visual__step" data-step="4">
-                        <div class="phases-visual__icon">🛠️</div>
-                        <h4>Prototipar</h4>
-                        <p>Testar e validar o plano com jogos, storyboards e crazy 8s.</p>
-                    </div>
-                    <div class="phases-visual__connector"></div>
-                    <div class="phases-visual__step" data-step="5">
-                        <div class="phases-visual__icon">📈</div>
-                        <h4>Evoluir</h4>
-                        <p>Sequenciar ações, apresentar pitches e medir evolução.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FASE 1 — DESCOBRIR ============ -->
-    <section class="section section--fase section--fase1" id="fase1">
-        <div class="container">
-            <div class="fase-header fase-header--1" data-reveal>
-                <span class="fase-header__number">FASE 1</span>
-                <h2 class="fase-header__title">Descobrir</h2>
-                <p class="fase-header__question">"O que os participantes já sabem sobre PI?"</p>
-            </div>
-            <div class="tools-grid">
-
-                <article class="tool-card" id="tool-quiz-diagnostico" data-reveal>
-                    <div class="tool-card__phase-tag tool-card__phase-tag--1">Fase 1 • Descobrir</div>
-                    <h3 class="tool-card__title">📋 Quiz Diagnóstico</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 15 min</span>
-                        <span>👥 Ilimitado</span>
-                        <span>📱 Digital</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Mapear o conhecimento prévio dos participantes sobre Propriedade Intelectual, identificando lacunas e concepções equivocadas.</p>
-                        <h4>Passo a passo</h4>
-                        <ol>
-                            <li>Projete o QR Code ou link do quiz na tela.</li>
-                            <li>Os participantes respondem individualmente as 10 questões.</li>
-                            <li>Exiba o ranking e as respostas corretas.</li>
-                            <li>Registre a pontuação média para comparação posterior.</li>
-                        </ol>
-                    </div>
-                    <div class="tool-card__footer">
-                        <span class="tool-card__tip">💡 Dica: Use linguagem acessível e situações do cotidiano.</span>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-cartas-personas" data-reveal data-reveal-delay="100">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--1">Fase 1 • Descobrir</div>
-                    <h3 class="tool-card__title">🃏 Cartas Personas da PI</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 30 min</span>
-                        <span>👥 3-6 por grupo</span>
-                        <span>🖨 Impresso</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Apresentar perfis típicos do ecossistema de PI de forma lúdica e empática.</p>
-                        <h4>As 10 Personas</h4>
-                        <div class="persona-grid">
-                            <div class="persona-chip">Dr. Apressado</div>
-                            <div class="persona-chip">Ana Inventora</div>
-                            <div class="persona-chip">Chef Raízes</div>
-                            <div class="persona-chip">Kayla Maker</div>
-                            <div class="persona-chip">Prof. Código</div>
-                            <div class="persona-chip">Dona Floresta</div>
-                            <div class="persona-chip">Startup Roraima</div>
-                            <div class="persona-chip">Mestre Pajé</div>
-                            <div class="persona-chip">Lia Artista</div>
-                            <div class="persona-chip">Tec Industrial</div>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-mapa-empatia" data-reveal data-reveal-delay="200">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--1">Fase 1 • Descobrir</div>
-                    <h3 class="tool-card__title">🗺️ Mapa de Empatia do Inventor</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 20 min</span>
-                        <span>👥 3-6 por grupo</span>
-                        <span>🖨 Impresso (A2)</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Aprofundar a compreensão sobre a persona, mapeando o que ela pensa, sente, vê, ouve, fala e faz.</p>
-                        <h4>Campos do Canvas</h4>
-                        <p>O que pensa e sente • O que vê • O que ouve • O que fala e faz • Dores • Ganhos esperados</p>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FASE 2 — DIAGNOSTICAR ============ -->
-    <section class="section section--fase section--fase2" id="fase2">
-        <div class="container">
-            <div class="fase-header fase-header--2" data-reveal>
-                <span class="fase-header__number">FASE 2</span>
-                <h2 class="fase-header__title">Diagnosticar</h2>
-                <p class="fase-header__question">"Qual tipo de proteção se aplica a cada criação?"</p>
-            </div>
-            <div class="tools-grid">
-
-                <article class="tool-card" id="tool-canvas-diagnostico" data-reveal>
-                    <div class="tool-card__phase-tag tool-card__phase-tag--2">Fase 2 • Diagnosticar</div>
-                    <h3 class="tool-card__title">📐 Canvas de Diagnóstico de PI</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 25 min</span>
-                        <span>👥 3-6 por grupo</span>
-                        <span>🖨 Impresso (A2)</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Sistematizar as informações sobre a criação para identificar o tipo de proteção mais adequado.</p>
-                        <h4>Campos</h4>
-                        <ol>
-                            <li>Descrição da Criação</li>
-                            <li>Problema que Resolve</li>
-                            <li>Já foi publicada/divulgada?</li>
-                            <li>Quem participou da criação?</li>
-                            <li>Fonte de financiamento</li>
-                            <li>Nível TRL (1-9)</li>
-                            <li>Tipo de Proteção Sugerido</li>
-                            <li>Próximos Passos</li>
-                        </ol>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-linha-tempo" data-reveal data-reveal-delay="100">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--2">Fase 2 • Diagnosticar</div>
-                    <h3 class="tool-card__title">📅 Linha do Tempo da PI no Brasil</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 15 min</span>
-                        <span>👥 Toda a turma</span>
-                        <span>🖨 Pôster (banner)</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Marcos Históricos</h4>
-                        <div class="marco-list">
-                            <div class="marco-item"><span class="marco-year">1883</span><span>Convenção de Paris</span></div>
-                            <div class="marco-item"><span class="marco-year">1970</span><span>Criação do INPI</span></div>
-                            <div class="marco-item"><span class="marco-year">1996</span><span>Lei 9.279 (PI)</span></div>
-                            <div class="marco-item"><span class="marco-year">1998</span><span>Leis 9.609 e 9.610</span></div>
-                            <div class="marco-item"><span class="marco-year">2004</span><span>Lei 10.973 (Inovação)</span></div>
-                            <div class="marco-item"><span class="marco-year">2015</span><span>Lei 13.123 (Biodiversidade)</span></div>
-                            <div class="marco-item"><span class="marco-year">2021</span><span>Decreto 10.886 (ENPI)</span></div>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-arvore-decisao" data-reveal data-reveal-delay="200">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--2">Fase 2 • Diagnosticar</div>
-                    <h3 class="tool-card__title">🌳 Árvore de Decisão Interativa</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 10 min</span>
-                        <span>👥 Individual ou grupo</span>
-                        <span>💻 Digital (JS)</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Guiar o participante por 6 perguntas simples que identificam automaticamente o tipo de proteção ideal.</p>
-                        <div class="tool-card__highlight">
-                            <p>🚀 <strong>Experimente agora:</strong> Acesse nossa ferramenta digital e descubra em minutos qual proteção se aplica à sua criação.</p>
-                        </div>
-                    </div>
-                    <div class="tool-card__action">
-                        <a href="arvore.html" class="btn btn--primary btn--small">Acessar Árvore de Decisão</a>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FASE 3 — ESTRATEGAR ============ -->
-    <section class="section section--fase section--fase3" id="fase3">
-        <div class="container">
-            <div class="fase-header fase-header--3" data-reveal>
-                <span class="fase-header__number">FASE 3</span>
-                <h2 class="fase-header__title">Estrategar</h2>
-                <p class="fase-header__question">"Como planejar a proteção de forma estratégica?"</p>
-            </div>
-            <div class="tools-grid">
-
-                <article class="tool-card" id="tool-e-nao-e" data-reveal>
-                    <div class="tool-card__phase-tag tool-card__phase-tag--3">Fase 3 • Estrategar</div>
-                    <h3 class="tool-card__title">⚖️ Canvas É / Não É / Faz / Não Faz</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 20 min</span>
-                        <span>👥 3-6 por grupo</span>
-                        <span>🖨 Impresso (A2)</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Clarificar limites e características de cada tipo de proteção, eliminando mitos comuns.</p>
-                        <div class="canvas-preview">
-                            <div class="canvas-quadrant canvas-quadrant--is">É...</div>
-                            <div class="canvas-quadrant canvas-quadrant--isnot">Não É...</div>
-                            <div class="canvas-quadrant canvas-quadrant--does">Faz...</div>
-                            <div class="canvas-quadrant canvas-quadrant--doesnot">Não Faz...</div>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-baralho-dilemas" data-reveal data-reveal-delay="100">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--3">Fase 3 • Estrategar</div>
-                    <h3 class="tool-card__title">🎴 Baralho de Dilemas de PI</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 25 min</span>
-                        <span>👥 3-6 por grupo</span>
-                        <span>🖨 Impresso (40 cartas)</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Provocar discussões sobre situações éticas, estratégicas e jurídicas reais.</p>
-                        <h4>Exemplos de dilemas</h4>
-                        <div class="dilema-cards">
-                            <div class="dilema-card">
-                                <span class="dilema-card__num">01</span>
-                                <p>Professor orientou aluno que desenvolveu invenção. É cotitular?</p>
-                            </div>
-                            <div class="dilema-card">
-                                <span class="dilema-card__num">02</span>
-                                <p>Pesquisadora publicou artigo antes. Ainda pode patentear?</p>
-                            </div>
-                            <div class="dilema-card">
-                                <span class="dilema-card__num">03</span>
-                                <p>Startup quer registrar marca similar, mas em classe diferente. Pode?</p>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-canvas-mvp" data-reveal data-reveal-delay="200">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--3">Fase 3 • Estrategar</div>
-                    <h3 class="tool-card__title">🚀 Canvas MVP de PI</h3>
-                    <div class="tool-card__meta">
-                        <span>⏱ 30 min</span>
-                        <span>👥 3-6 por grupo</span>
-                        <span>🖨 Impresso (A2)</span>
-                    </div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Definir o Mínimo Viável de Proteção — as ações essenciais e imediatas.</p>
-                        <h4>Campos</h4>
-                        <p>Visão • Personas • Jornada • Tipo de Proteção • Custos • Métricas • Resultado Esperado</p>
-                    </div>
-                    <div class="tool-card__action">
-                        <a href="calculadora.html" class="btn btn--primary btn--small">Usar Calculadora de Vigência</a>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FASE 4 — PROTOTIPAR ============ -->
-    <section class="section section--fase section--fase4" id="fase4">
-        <div class="container">
-            <div class="fase-header fase-header--4" data-reveal>
-                <span class="fase-header__number">FASE 4</span>
-                <h2 class="fase-header__title">Prototipar</h2>
-                <p class="fase-header__question">"Como testar e validar o plano de proteção?"</p>
-            </div>
-            <div class="tools-grid">
-
-                <article class="tool-card" id="tool-crazy8s" data-reveal>
-                    <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
-                    <h3 class="tool-card__title">⚡ Crazy 8s de PI</h3>
-                    <div class="tool-card__meta"><span>⏱ 15 min</span><span>👥 Individual</span><span>🖨 Papel A4</span></div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Gerar rapidamente 8 ideias diferentes de estratégias de proteção. Dobre uma folha A4 em 8 partes e gaste 1 minuto por quadrante.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-escape-room" data-reveal data-reveal-delay="100">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
-                    <h3 class="tool-card__title">🔐 Escape Room da PI</h3>
-                    <div class="tool-card__meta"><span>⏱ 45 min</span><span>👥 4-6 por grupo</span><span>🖨 Kit impresso</span></div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Atividade gamificada com 5 desafios encadeados: busca de anterioridade, classificação, cálculo de vigência, análise de marca e fluxo de depósito.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-storyboard" data-reveal data-reveal-delay="200">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
-                    <h3 class="tool-card__title">🎬 Storyboard de Proteção</h3>
-                    <div class="tool-card__meta"><span>⏱ 20 min</span><span>👥 3-6 por grupo</span><span>🖨 Papel A3</span></div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Visualizar em 6 quadros a jornada da persona desde a criação até o registro, identificando pontos de decisão críticos.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-pi-quest" data-reveal data-reveal-delay="300">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--4">Fase 4 • Prototipar</div>
-                    <h3 class="tool-card__title">🎲 PI Quest — O Jogo</h3>
-                    <div class="tool-card__meta"><span>⏱ 30 min</span><span>👥 4-6 por grupo</span><span>🖨 Tabuleiro + Cartas</span></div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Jogo de tabuleiro narrativo: a "Jornada do Inventor Amazônico" com desafios, perguntas e decisões estratégicas.</p>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FASE 5 — EVOLUIR ============ -->
-    <section class="section section--fase section--fase5" id="fase5">
-        <div class="container">
-            <div class="fase-header fase-header--5" data-reveal>
-                <span class="fase-header__number">FASE 5</span>
-                <h2 class="fase-header__title">Evoluir</h2>
-                <p class="fase-header__question">"Como manter e ampliar a proteção ao longo do tempo?"</p>
-            </div>
-            <div class="tools-grid">
-
-                <article class="tool-card" id="tool-sequenciador" data-reveal>
-                    <div class="tool-card__phase-tag tool-card__phase-tag--5">Fase 5 • Evoluir</div>
-                    <h3 class="tool-card__title">📊 Canvas Sequenciador</h3>
-                    <div class="tool-card__meta"><span>⏱ 20 min</span><span>👥 3-6 por grupo</span><span>🖨 Impresso (A2)</span></div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Priorizar e sequenciar ações em ondas de implementação (curto, médio e longo prazo).</p>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-pitch" data-reveal data-reveal-delay="100">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--5">Fase 5 • Evoluir</div>
-                    <h3 class="tool-card__title">🎤 Pitch de PI</h3>
-                    <div class="tool-card__meta"><span>⏱ 5 min/grupo</span><span>👥 Toda a turma</span><span>📱 Apresentação</span></div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Cada equipe apresenta seu plano em 5 minutos. As demais avaliam com post-its: 🟢 ponto forte, 🟡 sugestão, 🔴 risco.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card" id="tool-quiz-final" data-reveal data-reveal-delay="200">
-                    <div class="tool-card__phase-tag tool-card__phase-tag--5">Fase 5 • Evoluir</div>
-                    <h3 class="tool-card__title">🏆 Quiz Final</h3>
-                    <div class="tool-card__meta"><span>⏱ 15 min</span><span>👥 Ilimitado</span><span>📱 Digital</span></div>
-                    <div class="tool-card__body">
-                        <h4>Objetivo</h4>
-                        <p>Medir a evolução comparando com o Quiz Diagnóstico inicial. Identifique temas que mais evoluíram e os que precisam de reforço.</p>
-                    </div>
-                </article>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FERRAMENTAS DIGITAIS ============ -->
-    <section class="section section--dark" id="ferramentas">
-        <div class="container">
-            <span class="section__overline section__overline--light" data-reveal>Interatividade</span>
-            <h2 class="section__title section__title--light" data-reveal>Ferramentas Digitais</h2>
-            <p class="section__intro section__intro--light" data-reveal>Quatro ferramentas em JavaScript que funcionam diretamente no navegador, sem instalação. Use durante a oficina ou como recurso de consulta permanente.</p>
-
-            <div class="digital-tools-grid">
-                <div class="digital-tool-card" data-reveal>
-                    <div class="digital-tool-card__glow" style="--glow-color: var(--fase-2)"></div>
-                    <span class="digital-tool-card__icon">🌳</span>
-                    <h3>Árvore de Decisão</h3>
-                    <p>Wizard de 6 perguntas que identifica automaticamente o tipo de proteção mais adequado.</p>
-                    <a href="arvore.html" class="btn btn--small">Usar Agora →</a>
-                </div>
-                <div class="digital-tool-card" data-reveal data-reveal-delay="100">
-                    <div class="digital-tool-card__glow" style="--glow-color: var(--fase-3)"></div>
-                    <span class="digital-tool-card__icon">📅</span>
-                    <h3>Calculadora de Vigência</h3>
-                    <p>Calcule quando sua proteção cai em domínio público, com alertas visuais e calendário.</p>
-                    <a href="calculadora.html" class="btn btn--small">Usar Agora →</a>
-                </div>
-                <div class="digital-tool-card" data-reveal data-reveal-delay="200">
-                    <div class="digital-tool-card__glow" style="--glow-color: var(--fase-1)"></div>
-                    <span class="digital-tool-card__icon">📖</span>
-                    <h3>Glossário Dinâmico</h3>
-                    <p>30+ termos essenciais de PI com busca instantânea e definições interativas.</p>
-                    <a href="glossario.html" class="btn btn--small">Consultar →</a>
-                </div>
-                <div class="digital-tool-card" data-reveal data-reveal-delay="300">
-                    <div class="digital-tool-card__glow" style="--glow-color: var(--fase-4)"></div>
-                    <span class="digital-tool-card__icon">🔍</span>
-                    <h3>Painel de Busca Guiada</h3>
-                    <p>Links diretos + mini-tutoriais para INPI, PatentScope (OMPI) e SNPC.</p>
-                    <a href="busca.html" class="btn btn--small">Acessar →</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ DOWNLOADS ============ -->
-    <section class="section" id="downloads">
-        <div class="container">
-            <span class="section__overline" data-reveal>Materiais para Impressão</span>
-            <h2 class="section__title" data-reveal>Downloads</h2>
-            <p class="section__intro" data-reveal>Todos os materiais do toolkit em PDF, prontos para impressão. Use na oficina presencial ou distribua digitalmente.</p>
-            <div class="downloads-grid">
-                <div class="download-card" data-reveal>
-                    <div class="download-card__icon-wrap">📘</div>
-                    <div class="download-card__content">
-                        <h4>Guia do Facilitador</h4>
-                        <p>Roteiro completo da oficina de 4h (20 páginas, A5)</p>
-                    </div>
-                    <a href="download/Escape-Room-completo.pdf" download class="download-card__link">Baixar PDF</a>
-                </div>
-                <div class="download-card" data-reveal data-reveal-delay="50">
-                    <div class="download-card__icon-wrap">🃏</div>
-                    <div class="download-card__content">
-                        <h4>Cartas Personas (10)</h4>
-                        <p>10 cartas A5 com perfis do ecossistema de PI</p>
-                    </div>
-                    <span class="download-card__status">Em breve</span>
-                </div>
-                <div class="download-card" data-reveal data-reveal-delay="100">
-                    <div class="download-card__icon-wrap">📐</div>
-                    <div class="download-card__content">
-                        <h4>Canvas A2 (6 modelos)</h4>
-                        <p>Diagnóstico, Empatia, É/Não É, MVP, Sequenciador, Storyboard</p>
-                    </div>
-                    <span class="download-card__status">Em breve</span>
-                </div>
-                <div class="download-card" data-reveal data-reveal-delay="150">
-                    <div class="download-card__icon-wrap">🎴</div>
-                    <div class="download-card__content">
-                        <h4>Baralho de Dilemas (40)</h4>
-                        <p>40 cartas de situações-problema sobre PI</p>
-                    </div>
-                    <span class="download-card__status">Em breve</span>
-                </div>
-                <div class="download-card" data-reveal data-reveal-delay="200">
-                    <div class="download-card__icon-wrap">🎲</div>
-                    <div class="download-card__content">
-                        <h4>PI Quest — Jogo</h4>
-                        <p>Tabuleiro + cartas de desafio + regras</p>
-                    </div>
-                    <span class="download-card__status">Em breve</span>
-                </div>
-                <div class="download-card" data-reveal data-reveal-delay="250">
-                    <div class="download-card__icon-wrap">📅</div>
-                    <div class="download-card__content">
-                        <h4>Pôster Linha do Tempo</h4>
-                        <p>Banner 3m × 0,9m com marcos da PI no Brasil</p>
-                    </div>
-                    <span class="download-card__status">Em breve</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ REFERÊNCIAS ============ -->
-    <section class="section section--alt" id="referencias">
-        <div class="container">
-            <span class="section__overline" data-reveal>Fundamentação</span>
-            <h2 class="section__title" data-reveal>Referências e Legislação</h2>
-            <div class="ref-grid">
-                <div class="ref-card" data-reveal>
-                    <h4>Legislação Brasileira</h4>
-                    <ul>
-                        <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener">Lei 9.279/1996 — Propriedade Industrial</a></li>
-                        <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank" rel="noopener">Lei 9.456/1997 — Proteção de Cultivares</a></li>
-                        <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank" rel="noopener">Lei 9.609/1998 — Proteção de Software</a></li>
-                        <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank" rel="noopener">Lei 9.610/1998 — Direitos Autorais</a></li>
-                        <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank" rel="noopener">Lei 13.123/2015 — Marco da Biodiversidade</a></li>
-                        <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2016/lei/l13243.htm" target="_blank" rel="noopener">Lei 13.243/2016 — Marco Legal de CT&I</a></li>
-                        <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10886.htm" target="_blank" rel="noopener">Decreto 10.886/2021 — ENPI 2021-2030</a></li>
-                    </ul>
-                </div>
-                <div class="ref-card" data-reveal data-reveal-delay="100">
-                    <h4>Referências Acadêmicas e Institucionais</h4>
-                    <ul>
-                        <li><a href="https://www.gov.br/propriedade-intelectual/pt-br/assuntos/estrategia-nacional-de-propriedade-intelectual" target="_blank" rel="noopener">ENPI — Estratégia Nacional de PI</a></li>
-                        <li><a href="https://www.gov.br/inpi/pt-br" target="_blank" rel="noopener">INPI — Instituto Nacional da Propriedade Industrial</a></li>
-                        <li><a href="https://welc.wipo.int/ipedu" target="_blank" rel="noopener">OMPI — IP4Youth & Teachers</a></li>
-                        <li><a href="https://www.wipo.int/en/web/wipo-academy/programs/ip-for-youth-and-teachers" target="_blank" rel="noopener">OMPI — Programa INCIPE</a></li>
-                        <li><a href="https://ufrr.br/nit/" target="_blank" rel="noopener">NIT / INOVARR — UFRR</a></li>
-                        <li><a href="https://ufrr.br/profnit/" target="_blank" rel="noopener">PROFNIT — Ponto Focal UFRR</a></li>
-                        <li>CAROLI, Paulo. <em>Lean Inception: como alinhar pessoas e construir o produto certo.</em> 2018.</li>
-                        <li><a href="https://sites.tcu.gov.br/design_thinking/" target="_blank" rel="noopener">TCU — Toolkit de Design Thinking</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FAQ / AJUDA ============ -->
-    <section class="section" id="faq">
-        <div class="container">
-            <span class="section__overline" data-reveal>Dúvidas Comuns</span>
-            <h2 class="section__title" data-reveal>Perguntas Frequentes</h2>
-            <div class="faq-grid" data-reveal>
-                <div class="faq-item">
-                    <button class="faq-item__question" aria-expanded="false">
-                        <span>Preciso de conhecimento prévio em PI para usar o toolkit?</span>
-                        <svg class="faq-item__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-item__answer">
-                        <p>Não. O PI Thinking foi projetado para ser autônomo. O Guia do Facilitador contém todas as instruções necessárias, e as ferramentas digitais possuem explicações integradas.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-item__question" aria-expanded="false">
-                        <span>Posso adaptar as personas para outra região do Brasil?</span>
-                        <svg class="faq-item__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-item__answer">
-                        <p>Sim! As personas foram contextualizadas para a realidade amazônica, mas você pode adaptar nomes e contextos mantendo a diversidade de tipos de PI.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-item__question" aria-expanded="false">
-                        <span>As ferramentas digitais funcionam offline?</span>
-                        <svg class="faq-item__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-item__answer">
-                        <p>Sim. Após carregar a página uma vez, as ferramentas funcionam no navegador sem necessidade de conexão contínua com a internet.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-item__question" aria-expanded="false">
-                        <span>Qual a licença de uso dos materiais?</span>
-                        <svg class="faq-item__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-item__answer">
-                        <p>Todo o conteúdo é licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a>. Você pode usar, adaptar e compartilhar para fins não comerciais, desde que atribua os créditos.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-</main>
-
-<!-- ============ FOOTER ============ -->
-<footer class="footer">
-    <div class="container">
-        <div class="footer__grid">
-            <div class="footer__about">
-                <strong class="footer__title">PI Thinking</strong>
-                <p>Toolkit de Propriedade Intelectual com Mindset Ágil e Experimental. Produto do Mestrado Profissional PROFNIT — Ponto Focal UFRR.</p>
-                <div class="footer__social">
-                    <a href="#" aria-label="Instagram" class="footer__social-link">📷</a>
-                    <a href="#" aria-label="YouTube" class="footer__social-link">▶️</a>
-                    <a href="#" aria-label="E-mail" class="footer__social-link">✉️</a>
-                </div>
-            </div>
-            <div class="footer__logos">
-                <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="Logo UFRR" class="footer__logo" loading="lazy">
-                <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="Logo INOVARR" class="footer__logo footer__logo--wide" loading="lazy">
-                <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="Logo PROFNIT" class="footer__logo" loading="lazy">
-            </div>
-            <div class="footer__links">
-                <strong class="footer__title">Links Rápidos</strong>
-                <a href="#sobre">Sobre</a>
-                <a href="#guia">Guia do Facilitador</a>
-                <a href="#fases">Fases</a>
-                <a href="#ferramentas">Ferramentas Digitais</a>
-                <a href="#downloads">Downloads</a>
-                <a href="#faq">FAQ</a>
-            </div>
-        </div>
-        <div class="footer__bottom">
-            <p>© 2025 PI Thinking — PROFNIT / UFRR. Conteúdo licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
-        </div>
+<!-- ═══════════ HERO — SPLIT SCREEN ═══════════ -->
+<section class="hero" id="home">
+  <div class="hero-text">
+    <div class="hero-badge rv">PROFNIT · UFRR · INOVARR</div>
+    <h1 class="rv rv-d1">PI <em>Thinking</em></h1>
+    <p class="lead rv rv-d2">Um toolkit completo para facilitar oficinas de Propriedade Intelectual. Combine <strong>Design Thinking</strong> e <strong>Lean Inception</strong> para transformar PI em experiência prática, colaborativa e envolvente.</p>
+    <div class="hero-actions rv rv-d3">
+      <a href="#fases" class="btn btn-p">Explorar Fases →</a>
+      <a href="guia-facilitador.html" class="btn btn-o">Guia do Facilitador</a>
     </div>
+    <div class="hero-logos rv rv-d4">
+      <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="UFRR">
+      <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="INOVARR">
+      <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="PROFNIT">
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="orbit">
+      <div class="orbit-center">PI</div>
+      <div class="orbit-item">🧠</div>
+      <div class="orbit-item">🔍</div>
+      <div class="orbit-item">🚀</div>
+      <div class="orbit-item">🛠️</div>
+      <div class="orbit-item">📈</div>
+    </div>
+    <div class="motto">SAPIENTIA · HOMO · NATURA</div>
+  </div>
+</section>
+
+<!-- ═══════════ SOBRE ═══════════ -->
+<section class="sec alt" id="sobre">
+  <div class="sec-inner">
+    <span class="overline rv">Sobre o Toolkit</span>
+    <h2 class="sec-title rv rv-d1">O que é o PI Thinking?</h2>
+    <p class="sec-desc rv rv-d2" style="max-width:720px">
+      O <strong>PI Thinking</strong> é um toolkit educacional que reúne ferramentas de Design Thinking, Lean Inception e gamificação aplicadas ao universo da Propriedade Intelectual. Desenvolvido no âmbito do PROFNIT — ponto focal UFRR, alinhado ao Eixo 2 da ENPI 2021-2030 (Disseminação, Formação e Capacitação em PI). São <strong>16 ferramentas</strong> em <strong>5 fases</strong> para uma oficina completa de <strong>4 horas</strong>.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════ GUIA DO FACILITADOR — TIMELINE ═══════════ -->
+<section class="sec" id="guia">
+  <div class="sec-inner">
+    <span class="overline rv">Roteiro da Oficina</span>
+    <h2 class="sec-title rv rv-d1">Guia do Facilitador — 4 horas</h2>
+    <p class="sec-desc rv rv-d2">Roteiro passo a passo que permite a qualquer facilitador conduzir a oficina de forma autônoma.</p>
+
+    <div class="timeline rv rv-d3">
+      <div class="tl-item i1">
+        <div class="tl-time">0:00 — 0:15</div>
+        <h4>Abertura e Quiz Diagnóstico</h4>
+        <p><a href="quiz-diagnostico.html">Quiz Diagnóstico</a> — 10 perguntas para mapear conhecimento prévio. Registrar código D-X.</p>
+      </div>
+      <div class="tl-item i1">
+        <div class="tl-time">0:15 — 0:45</div>
+        <h4>Personas + Mapa de Empatia</h4>
+        <p><a href="cartas-personas.html">Cartas Personas</a> + <a href="mapa-empatia.html">Mapa de Empatia</a> — Sortear persona, preencher canvas com post-its.</p>
+      </div>
+      <div class="tl-item i2">
+        <div class="tl-time">0:45 — 1:15</div>
+        <h4>Diagnóstico + Árvore + Linha do Tempo</h4>
+        <p><a href="canvas-diagnostico.html">Canvas de Diagnóstico</a> → <a href="arvore.html">Árvore de Decisão</a> → <a href="linha-do-tempo.html">Linha do Tempo</a>.</p>
+      </div>
+      <div class="tl-item brk">
+        <div class="tl-time">1:15 — 1:30</div>
+        <h4>☕ Intervalo</h4>
+        <p>Coffee break. Expor canvas e linha do tempo na parede.</p>
+      </div>
+      <div class="tl-item i3">
+        <div class="tl-time">1:30 — 2:15</div>
+        <h4>Crazy 8s → Storyboard → Canvas de Estratégia</h4>
+        <p><a href="crazy8s.html">Crazy 8s</a> (8 min) → <a href="storyboard.html">Storyboard</a> (20 min) → <a href="canvas-estrategia.html">Canvas de Estratégia</a> (10 min).</p>
+      </div>
+      <div class="tl-item i4">
+        <div class="tl-time">2:15 — 3:15</div>
+        <h4>Simulador + Dilemas + Escape Room</h4>
+        <p><a href="simulador-deposito.html">Simulador de Depósito</a> (30 min) → <a href="baralho-dilemas.html">Baralho de Dilemas</a> (15 min) → <a href="escape-room.html">Escape Room</a> (opcional).</p>
+      </div>
+      <div class="tl-item i5">
+        <div class="tl-time">3:15 — 3:45</div>
+        <h4>Pitch de PI</h4>
+        <p>Cada equipe apresenta seu plano em 5 minutos. Avaliação por post-its: 🟢 ponto forte, 🟡 sugestão, 🔴 risco.</p>
+      </div>
+      <div class="tl-item i5">
+        <div class="tl-time">3:45 — 4:00</div>
+        <h4>Quiz Final + Encerramento</h4>
+        <p>Quiz Final para medir evolução (comparação D-X vs F-X). Certificados e próximos passos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BARRA DE FASES ═══════════ -->
+<section class="sec alt" id="fases" style="text-align:center">
+  <div class="sec-inner">
+    <span class="overline rv">Metodologia</span>
+    <h2 class="sec-title rv rv-d1" style="margin-left:auto;margin-right:auto">As 5 Fases do PI Thinking</h2>
+    <p class="sec-desc rv rv-d2" style="margin-left:auto;margin-right:auto;text-align:center">Cada fase possui ferramentas específicas para conduzir o participante da curiosidade inicial até a ação concreta de proteção.</p>
+  </div>
+</section>
+
+<!-- ═══════════ FASE 1 — DESCOBRIR ═══════════ -->
+<section class="split" id="fase1">
+  <div class="split-body rv left">
+    <span class="fase-tag t1">Fase 1</span>
+    <h2>Descobrir</h2>
+    <p class="question">"O que os participantes já sabem sobre PI?"</p>
+    <div class="meta-row">
+      <span class="meta-item">⏱ 45 min</span>
+      <span class="meta-item">🎯 Empatia + Diagnóstico</span>
+    </div>
+    <div class="tools-row">
+      <a href="quiz-diagnostico.html" class="tcard">
+        <div class="ico">📋</div>
+        <h4>Quiz Diagnóstico</h4>
+        <p>10 questões · Score D-X</p>
+      </a>
+      <a href="cartas-personas.html" class="tcard">
+        <div class="ico">🃏</div>
+        <h4>Cartas Personas</h4>
+        <p>10 perfis · Efeito flip</p>
+      </a>
+      <a href="mapa-empatia.html" class="tcard">
+        <div class="ico">🗺️</div>
+        <h4>Mapa de Empatia</h4>
+        <p>6 quadrantes · Post-its</p>
+      </a>
+    </div>
+  </div>
+  <div class="split-vis" style="background:var(--f1)">
+    <span class="big-num">01</span>
+    <span class="big-icon">🧠</span>
+  </div>
+</section>
+
+<!-- ═══════════ FASE 2 — DIAGNOSTICAR ═══════════ -->
+<section class="split flip" id="fase2">
+  <div class="split-body rv right">
+    <span class="fase-tag t2">Fase 2</span>
+    <h2>Diagnosticar</h2>
+    <p class="question">"Qual tipo de proteção se aplica a cada criação?"</p>
+    <div class="meta-row">
+      <span class="meta-item">⏱ 30 min</span>
+      <span class="meta-item">🔍 Classificação + Contextualização</span>
+    </div>
+    <div class="tools-row">
+      <a href="canvas-diagnostico.html" class="tcard">
+        <div class="ico">📐</div>
+        <h4>Canvas de Diagnóstico</h4>
+        <p>8 campos · Slider TRL</p>
+      </a>
+      <a href="linha-do-tempo.html" class="tcard">
+        <div class="ico">📅</div>
+        <h4>Linha do Tempo</h4>
+        <p>16 marcos · 1809–2023</p>
+      </a>
+      <a href="arvore.html" class="tcard">
+        <div class="ico">🌳</div>
+        <h4>Árvore de Decisão</h4>
+        <p>Wizard · 10 tipos de PI</p>
+      </a>
+    </div>
+  </div>
+  <div class="split-vis" style="background:var(--f2)">
+    <span class="big-num">02</span>
+    <span class="big-icon">🔍</span>
+  </div>
+</section>
+
+<!-- ═══════════ FASE 3 — ESTRATEGAR ═══════════ -->
+<section class="split" id="fase3">
+  <div class="split-body rv left">
+    <span class="fase-tag t3">Fase 3</span>
+    <h2>Estrategar</h2>
+    <p class="question">"Como planejar a proteção de forma estratégica?"</p>
+    <div class="meta-row">
+      <span class="meta-item">⏱ 45 min</span>
+      <span class="meta-item">💡 Ideação → Convergência</span>
+    </div>
+    <div class="tools-row">
+      <a href="crazy8s.html" class="tcard">
+        <div class="ico">⚡</div>
+        <h4>Crazy 8s da PI</h4>
+        <p>8 ideias · 8 min · Timer</p>
+      </a>
+      <a href="storyboard.html" class="tcard">
+        <div class="ico">🎬</div>
+        <h4>Storyboard</h4>
+        <p>6 cenas · Base legal</p>
+      </a>
+      <a href="canvas-estrategia.html" class="tcard">
+        <div class="ico">📐</div>
+        <h4>Canvas de Estratégia</h4>
+        <p>10 blocos · Custos INPI</p>
+      </a>
+    </div>
+  </div>
+  <div class="split-vis" style="background:var(--f3)">
+    <span class="big-num">03</span>
+    <span class="big-icon">🚀</span>
+  </div>
+</section>
+
+<!-- ═══════════ FASE 4 — PROTOTIPAR ═══════════ -->
+<section class="split flip" id="fase4">
+  <div class="split-body rv right">
+    <span class="fase-tag t4">Fase 4</span>
+    <h2>Prototipar</h2>
+    <p class="question">"Como testar e validar o plano de proteção?"</p>
+    <div class="meta-row">
+      <span class="meta-item">⏱ 60 min</span>
+      <span class="meta-item">🛠️ Simulação + Debate + Desafio</span>
+    </div>
+    <div class="tools-row">
+      <a href="simulador-deposito.html" class="tcard">
+        <div class="ico">📝</div>
+        <h4>Simulador de Depósito</h4>
+        <p>7 etapas · Score 0–100</p>
+      </a>
+      <a href="baralho-dilemas.html" class="tcard">
+        <div class="ico">🃏</div>
+        <h4>Baralho de Dilemas</h4>
+        <p>12 cartas · 6 categorias</p>
+      </a>
+      <a href="escape-room.html" class="tcard">
+        <div class="ico">🔐</div>
+        <h4>Escape Room</h4>
+        <p>5 desafios · Timer · Código</p>
+      </a>
+    </div>
+  </div>
+  <div class="split-vis" style="background:var(--f4)">
+    <span class="big-num">04</span>
+    <span class="big-icon">🛠️</span>
+  </div>
+</section>
+
+<!-- ═══════════ FASE 5 — EVOLUIR ═══════════ -->
+<section class="split" id="fase5">
+  <div class="split-body rv left">
+    <span class="fase-tag t5">Fase 5</span>
+    <h2>Evoluir</h2>
+    <p class="question">"Como manter e ampliar a proteção ao longo do tempo?"</p>
+    <div class="meta-row">
+      <span class="meta-item">⏱ 45 min</span>
+      <span class="meta-item">📈 Pitch + Avaliação</span>
+    </div>
+    <div class="tools-row">
+      <a href="#" class="tcard">
+        <div class="ico">📊</div>
+        <h4>Canvas Sequenciador</h4>
+        <p>Priorização · Ondas de ação</p>
+      </a>
+      <a href="#" class="tcard">
+        <div class="ico">🎤</div>
+        <h4>Pitch de PI</h4>
+        <p>5 min/grupo · Avaliação</p>
+      </a>
+      <a href="#" class="tcard">
+        <div class="ico">🏆</div>
+        <h4>Quiz Final</h4>
+        <p>Evolução D-X → F-X</p>
+      </a>
+    </div>
+  </div>
+  <div class="split-vis" style="background:var(--f5)">
+    <span class="big-num">05</span>
+    <span class="big-icon">📈</span>
+  </div>
+</section>
+
+<!-- ═══════════ FERRAMENTAS DIGITAIS ═══════════ -->
+<section class="sec dark" id="ferramentas">
+  <div class="sec-inner">
+    <span class="overline rv">Interatividade</span>
+    <h2 class="sec-title rv rv-d1">Ferramentas Digitais</h2>
+    <p class="sec-desc rv rv-d2">Funcionam diretamente no navegador, sem instalação. Use durante a oficina ou como consulta permanente.</p>
+    <div class="digi-grid">
+      <div class="digi-card rv">
+        <div class="ico">🌳</div>
+        <h4>Árvore de Decisão</h4>
+        <p>Wizard que identifica o tipo de proteção ideal entre 10 modalidades de PI.</p>
+        <a href="arvore.html" class="btn">Usar Agora →</a>
+      </div>
+      <div class="digi-card rv rv-d1">
+        <div class="ico">📅</div>
+        <h4>Calculadora de Vigência</h4>
+        <p>Calcule quando sua proteção cai em domínio público, com alertas visuais.</p>
+        <a href="calculadora.html" class="btn">Usar Agora →</a>
+      </div>
+      <div class="digi-card rv rv-d2">
+        <div class="ico">📖</div>
+        <h4>Glossário Dinâmico</h4>
+        <p>30+ termos essenciais de PI com busca instantânea e definições interativas.</p>
+        <a href="glossario.html" class="btn">Consultar →</a>
+      </div>
+      <div class="digi-card rv rv-d3">
+        <div class="ico">🔍</div>
+        <h4>Painel de Busca Guiada</h4>
+        <p>Links diretos + mini-tutoriais para INPI, PatentScope (OMPI) e SNPC.</p>
+        <a href="busca.html" class="btn">Acessar →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ DOWNLOADS ═══════════ -->
+<section class="sec" id="downloads">
+  <div class="sec-inner">
+    <span class="overline rv">Materiais</span>
+    <h2 class="sec-title rv rv-d1">Downloads</h2>
+    <p class="sec-desc rv rv-d2">Todos os materiais prontos para uso — abra no navegador ou imprima para a oficina presencial.</p>
+
+    <div class="dl-grid">
+
+      <div class="dl-card rv">
+        <div class="ico">📖</div>
+        <div>
+          <h4>Guia do Facilitador (Interativo)</h4>
+          <p>Manual completo da oficina com navegação e links para ferramentas</p>
+          <a href="guia-facilitador.html" class="link">Acessar online →</a>
+        </div>
+      </div>
+
+      <div class="dl-card rv">
+        <div class="ico">📘</div>
+        <div>
+          <h4>Guia do Facilitador (PDF)</h4>
+          <p>Roteiro completo da oficina de 4h — 20 páginas, A5</p>
+          <a href="download/Escape-Room-completo.pdf" class="link" download>Baixar PDF →</a>
+        </div>
+      </div>
+
+      <div class="dl-card rv"><div class="ico">📋</div><div><h4>Quiz Diagnóstico</h4><p>10 questões com gabarito comentado e código D-X</p><a href="quiz-diagnostico.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🃏</div><div><h4>Cartas Personas (10)</h4><p>10 personas do ecossistema de PI com dilemas reais</p><a href="cartas-personas.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🗺️</div><div><h4>Mapa de Empatia do Inventor</h4><p>Canvas interativo com 6 quadrantes — digital + impressão A2</p><a href="mapa-empatia.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📐</div><div><h4>Canvas de Diagnóstico de PI</h4><p>8 campos interativos com slider TRL e seletor de proteção</p><a href="canvas-diagnostico.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📅</div><div><h4>Linha do Tempo da PI no Brasil</h4><p>16 marcos históricos de 1809 a 2023 — filtrável e expandível</p><a href="linha-do-tempo.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🌳</div><div><h4>Árvore de Decisão</h4><p>Wizard de 6 perguntas — identifica o tipo de proteção ideal</p><a href="arvore.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📐</div><div><h4>Canvas de Estratégia de PI</h4><p>10 blocos com custos INPI 2025, base legal e plano de ação</p><a href="canvas-estrategia.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">⚡</div><div><h4>Crazy 8s da PI</h4><p>8 ideias em 8 min — 8 cenários de personas com cronômetro</p><a href="crazy8s.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🎬</div><div><h4>Storyboard de Proteção</h4><p>Narrativa visual em 6 cenas — da ideia ao registro</p><a href="storyboard.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📝</div><div><h4>Simulador de Depósito</h4><p>7 etapas do INPI — patente, MU ou marca — custos 2025 e score</p><a href="simulador-deposito.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🔐</div><div><h4>Escape Room da PI</h4><p>"A Invenção Perdida do Monte Roraima" — 5 desafios com timer</p><a href="escape-room.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🃏</div><div><h4>Baralho de Dilemas</h4><p>12 dilemas éticos — saúde, biodiversidade, academia, tech, agro, cultura</p><a href="baralho-dilemas.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📅</div><div><h4>Calculadora de Vigência</h4><p>Calcule quando a proteção expira com alertas e calendário</p><a href="calculadora.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📖</div><div><h4>Glossário Dinâmico</h4><p>30+ termos de PI com busca instantânea</p><a href="glossario.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">🔍</div><div><h4>Painel de Busca Guiada</h4><p>Links + tutoriais para INPI, PatentScope e SNPC</p><a href="busca.html" class="link">Acessar →</a></div></div>
+
+      <div class="dl-card rv"><div class="ico">📐</div><div><h4>Canvas A2 (6 modelos)</h4><p>Diagnóstico, Empatia, É/Não É, MVP, Sequenciador, Storyboard</p><span class="badge-soon">Em breve</span></div></div>
+
+      <div class="dl-card rv"><div class="ico">🎲</div><div><h4>PI Quest — Jogo de Tabuleiro</h4><p>Tabuleiro + cartas de desafio + regras</p><span class="badge-soon">Em breve</span></div></div>
+
+      <div class="dl-card rv"><div class="ico">📅</div><div><h4>Pôster Linha do Tempo</h4><p>Banner 3m × 0,9m com marcos da PI no Brasil</p><span class="badge-soon">Em breve</span></div></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ REFERÊNCIAS ═══════════ -->
+<section class="sec alt" id="referencias">
+  <div class="sec-inner">
+    <span class="overline rv">Fundamentação</span>
+    <h2 class="sec-title rv rv-d1">Referências e Legislação</h2>
+    <div class="ref-grid rv rv-d2">
+      <div class="ref-card">
+        <h4>Legislação Brasileira</h4>
+        <ul>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/1996 — Propriedade Industrial</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank">Lei 9.456/1997 — Proteção de Cultivares</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank">Lei 9.609/1998 — Proteção de Software</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">Lei 9.610/1998 — Direitos Autorais</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">Lei 13.123/2015 — Marco da Biodiversidade</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2016/lei/l13243.htm" target="_blank">Lei 13.243/2016 — Marco Legal de CT&I</a></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/decreto/d10886.htm" target="_blank">Decreto 10.886/2021 — ENPI 2021-2030</a></li>
+        </ul>
+      </div>
+      <div class="ref-card">
+        <h4>Referências Institucionais</h4>
+        <ul>
+          <li><a href="https://www.gov.br/propriedade-intelectual/pt-br/assuntos/estrategia-nacional-de-propriedade-intelectual" target="_blank">ENPI — Estratégia Nacional de PI</a></li>
+          <li><a href="https://www.gov.br/inpi/pt-br" target="_blank">INPI — Instituto Nacional da Propriedade Industrial</a></li>
+          <li><a href="https://welc.wipo.int/ipedu" target="_blank">OMPI — IP4Youth & Teachers</a></li>
+          <li><a href="https://ufrr.br/nit/" target="_blank">NIT / INOVARR — UFRR</a></li>
+          <li><a href="https://ufrr.br/profnit/" target="_blank">PROFNIT — Ponto Focal UFRR</a></li>
+          <li>CAROLI, Paulo. <em>Lean Inception.</em> 2018.</li>
+          <li><a href="https://sites.tcu.gov.br/design_thinking/" target="_blank">TCU — Toolkit de Design Thinking</a></li>
+          <li><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0 — Licença de uso</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FAQ ═══════════ -->
+<section class="sec" id="faq">
+  <div class="sec-inner">
+    <span class="overline rv">Dúvidas Comuns</span>
+    <h2 class="sec-title rv rv-d1">Perguntas Frequentes</h2>
+    <div class="faq-list rv rv-d2">
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>Preciso de conhecimento prévio em PI para usar o toolkit?</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="faq-a"><p>Não. O PI Thinking foi projetado para ser autônomo. O Guia do Facilitador contém todas as instruções, e as ferramentas digitais possuem explicações integradas.</p></div>
+
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>Posso adaptar as personas para outra região do Brasil?</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="faq-a"><p>Sim! As personas foram contextualizadas para a realidade amazônica, mas você pode adaptar nomes e contextos mantendo a diversidade de tipos de PI.</p></div>
+
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>As ferramentas digitais funcionam offline?</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="faq-a"><p>Sim. Após carregar a página uma vez, as ferramentas funcionam no navegador sem necessidade de conexão contínua com a internet.</p></div>
+
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>Qual a licença de uso dos materiais?</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="faq-a"><p>Todo o conteúdo é licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a>. Você pode usar, adaptar e compartilhar para fins não comerciais, desde que atribua os créditos.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="inner">
+    <div>
+      <h5>PI Thinking</h5>
+      <p>Toolkit de Propriedade Intelectual com Mindset Ágil e Experimental. Produto do Mestrado Profissional PROFNIT — Ponto Focal UFRR.</p>
+      <div class="f-logos">
+        <img src="https://www.genspark.ai/api/files/s/taKPWhWo" alt="UFRR">
+        <img src="https://www.genspark.ai/api/files/s/KUCrUPzb" alt="INOVARR">
+        <img src="https://www.genspark.ai/api/files/s/oDpq4enz" alt="PROFNIT">
+      </div>
+    </div>
+    <div class="f-links">
+      <h5>Links Rápidos</h5>
+      <a href="#sobre">Sobre</a>
+      <a href="#guia">Guia do Facilitador</a>
+      <a href="#fases">Fases</a>
+      <a href="#ferramentas">Ferramentas Digitais</a>
+      <a href="#downloads">Downloads</a>
+    </div>
+    <div class="f-links">
+      <h5>Institucional</h5>
+      <a href="https://ufrr.br" target="_blank">ufrr.br</a>
+      <a href="https://ufrr.br/profnit/" target="_blank">PROFNIT UFRR</a>
+      <a href="https://ufrr.br/nit/" target="_blank">NIT INOVARR</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="bar">
+      <p>© 2025 PI Thinking — PROFNIT / UFRR. Conteúdo licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a>.</p>
+    </div>
+  </div>
 </footer>
 
-<script src="script.js" defer></script>
+<!-- ═══════════ BACK TO TOP ═══════════ -->
+<button class="btt" id="btt" aria-label="Voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
+<script>
+/* Reveal on scroll */
+const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+
+/* Navbar sticky */
+const tb=document.getElementById('topbar');
+window.addEventListener('scroll',()=>{
+  tb.classList.toggle('stuck',scrollY>20);
+  document.getElementById('btt').classList.toggle('show',scrollY>600);
+},{passive:true});
+
+/* Mobile menu */
+document.getElementById('burger').addEventListener('click',()=>{
+  document.getElementById('nav').classList.toggle('open');
+});
+document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',()=>{
+  document.getElementById('nav').classList.remove('open');
+}));
+
+/* Smooth scroll */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    const t=document.querySelector(this.getAttribute('href'));
+    if(t){window.scrollTo({top:t.offsetTop-64,behavior:'smooth'})}
+  });
+});
+</script>
 </body>
 </html>

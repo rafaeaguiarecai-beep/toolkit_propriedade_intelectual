@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crazy 8s da PI — PI Thinking</title>
+  <meta name="description" content="Exercício rápido de geração de 8 estratégias de proteção de PI em 8 minutos. Técnica adaptada do Design Sprint do Google.">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --c8-bg: #FFFDE7;
+      --c8-surface: #FFFFFF;
+      --c8-accent: #FFC107;
+      --c8-accent-dark: #FF8F00;
+      --c8-text: #212121;
+      --c8-text-light: #757575;
+      --c8-border: #FFF59D;
+      --c8-red: #EF5350;
+      --c8-green: #4CAF50;
+      --c8-radius: 16px;
+      --c8-shadow: 0 2px 12px rgba(255,193,7,.15);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --c8-bg: #1a1a0e;
+        --c8-surface: #2a2a1a;
+        --c8-text: #f5f5f0;
+        --c8-text-light: #bdb8a0;
+        --c8-border: #4a4520;
+        --c8-shadow: 0 2px 12px rgba(0,0,0,.4);
+      }
+    }
+
+    body.c8-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--c8-bg);
+      color: var(--c8-text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.7;
+    }
+
+    .c8-cover {
+      background: linear-gradient(135deg, #FFD54F 0%, #FFC107 50%, #FFA000 100%);
+      color: #fff;
+      padding: 4rem 2rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .c8-cover::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-conic-gradient(rgba(255,255,255,.04) 0% 25%, transparent 0% 50%) 0 0 / 40px 40px;
+    }
+    .c8-cover__overline {
+      font-family: 'Poppins', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      opacity: .9;
+    }
+    .c8-cover__title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      margin: .5rem 0;
+    }
+    .c8-cover__sub {
+      font-size: 1.1rem;
+      opacity: .92;
+      max-width: 640px;
+      margin: .5rem auto 0;
+    }
+    .c8-cover__meta {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+      font-size: .9rem;
+    }
+    .c8-cover__meta span {
+      background: rgba(255,255,255,.2);
+      padding: .35rem .8rem;
+      border-radius: 20px;
+    }
+
+    .c8-container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* === INTRO === */
+    .c8-intro {
+      background: var(--c8-surface);
+      border: 2px solid var(--c8-border);
+      border-radius: var(--c8-radius);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--c8-shadow);
+    }
+    .c8-intro h2 { font-family: 'Poppins', sans-serif; color: var(--c8-accent-dark); margin-top: 0; }
+
+    /* === SCENARIO SELECTOR === */
+    .c8-scenario {
+      background: var(--c8-surface);
+      border-radius: var(--c8-radius);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--c8-shadow);
+    }
+    .c8-scenario h3 { font-family: 'Poppins', sans-serif; color: var(--c8-accent-dark); margin-top: 0; }
+    .c8-scenario select {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      padding: .6rem;
+      border: 2px solid var(--c8-border);
+      border-radius: 8px;
+      background: var(--c8-bg);
+      color: var(--c8-text);
+      cursor: pointer;
+    }
+    .c8-scenario__desc {
+      margin-top: .8rem;
+      padding: 1rem;
+      background: rgba(255,193,7,.08);
+      border-radius: 8px;
+      font-size: .92rem;
+      display: none;
+    }
+
+    /* === TIMER === */
+    .c8-timer-wrap {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .c8-timer {
+      font-family: 'Poppins', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--c8-accent-dark);
+      margin: .5rem 0;
+      transition: color .3s;
+    }
+    .c8-timer.warning { color: #FF9800; }
+    .c8-timer.danger { color: var(--c8-red); animation: pulse .5s ease-in-out infinite alternate; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+    .c8-timer-controls { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; }
+    .c8-timer-btn {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: .9rem;
+      padding: .5rem 1.2rem;
+      border: 2px solid var(--c8-accent);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--c8-accent-dark);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .c8-timer-btn:hover { background: var(--c8-accent); color: #fff; }
+    .c8-timer-btn.active { background: var(--c8-accent); color: #fff; }
+
+    /* === GRID OF 8 === */
+    .c8-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 800px) { .c8-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .c8-grid { grid-template-columns: 1fr; } }
+
+    .c8-card {
+      background: var(--c8-surface);
+      border: 2px solid var(--c8-border);
+      border-radius: var(--c8-radius);
+      padding: 1.2rem;
+      box-shadow: var(--c8-shadow);
+      position: relative;
+      transition: border-color .3s, transform .3s;
+      min-height: 200px;
+    }
+    .c8-card:hover { border-color: var(--c8-accent); transform: translateY(-2px); }
+    .c8-card.active { border-color: var(--c8-accent-dark); box-shadow: 0 0 0 3px rgba(255,193,7,.3); }
+    .c8-card.completed { border-color: var(--c8-green); }
+
+    .c8-card__num {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      background: var(--c8-accent);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .9rem;
+    }
+    .c8-card__prompt {
+      font-size: .78rem;
+      color: var(--c8-text-light);
+      margin-bottom: .5rem;
+      font-style: italic;
+    }
+    .c8-card textarea {
+      width: 100%;
+      min-height: 100px;
+      font-family: 'Inter', sans-serif;
+      font-size: .88rem;
+      border: 1px solid var(--c8-border);
+      border-radius: 8px;
+      padding: .5rem;
+      background: var(--c8-bg);
+      color: var(--c8-text);
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .c8-card__vote {
+      margin-top: .5rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .c8-card__vote button {
+      background: none;
+      border: 1px solid var(--c8-border);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all .2s;
+    }
+    .c8-card__vote button:hover { background: var(--c8-accent); border-color: var(--c8-accent); }
+    .c8-card__vote span { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .9rem; }
+
+    /* === VOTE RESULTS === */
+    .c8-results {
+      background: var(--c8-surface);
+      border-radius: var(--c8-radius);
+      padding: 2rem;
+      margin: 2rem 0;
+      box-shadow: var(--c8-shadow);
+      display: none;
+    }
+    .c8-results h2 { font-family: 'Poppins', sans-serif; color: var(--c8-accent-dark); margin-top: 0; }
+    .c8-results__bar {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      margin-bottom: .8rem;
+    }
+    .c8-results__label { font-weight: 600; min-width: 80px; font-size: .9rem; }
+    .c8-results__fill {
+      height: 24px;
+      background: linear-gradient(90deg, var(--c8-accent), var(--c8-accent-dark));
+      border-radius: 12px;
+      transition: width .5s;
+      min-width: 4px;
+    }
+    .c8-results__count { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: .9rem; }
+
+    /* === BUTTONS === */
+    .c8-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    .c8-btn {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: .95rem;
+      padding: .7rem 1.5rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .c8-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .c8-btn--primary { background: var(--c8-accent); color: #fff; }
+    .c8-btn--outline { background: transparent; border: 2px solid var(--c8-accent); color: var(--c8-accent-dark); }
+    .c8-btn--danger { background: var(--c8-red); color: #fff; }
+
+    /* === HOW-TO === */
+    .c8-howto {
+      background: var(--c8-surface);
+      border-left: 4px solid var(--c8-accent);
+      border-radius: 0 var(--c8-radius) var(--c8-radius) 0;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+    }
+    .c8-howto h2 { font-family: 'Poppins', sans-serif; color: var(--c8-accent-dark); margin-top: 0; font-size: 1.2rem; }
+    .c8-howto p { margin: .4rem 0; font-size: .9rem; }
+
+    /* === FOOTER === */
+    .c8-footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: .82rem;
+      color: var(--c8-text-light);
+      border-top: 1px solid var(--c8-border);
+      margin-top: 2rem;
+    }
+    .c8-footer a { color: var(--c8-accent-dark); }
+
+    /* === PRINT === */
+    @media print {
+      .c8-cover { padding: 1.5rem 1rem; break-after: avoid; }
+      .c8-grid { grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+      .c8-card { border: 1px solid #ccc; min-height: auto; break-inside: avoid; }
+      .c8-card textarea { border: 1px solid #aaa; min-height: 80px; }
+      .c8-timer-wrap, .c8-actions, .c8-card__vote { display: none !important; }
+      @page { size: A3 landscape; margin: 1cm; }
+    }
+  </style>
+</head>
+<body class="c8-page">
+
+  <header class="c8-cover">
+    <div class="c8-cover__overline">Fase 3 — Estrategar</div>
+    <h1 class="c8-cover__title">Crazy 8s da PI</h1>
+    <p class="c8-cover__sub">8 ideias de proteção em 8 minutos. Gere estratégias criativas antes de escolher a melhor.</p>
+    <div class="c8-cover__meta">
+      <span>⚡ 8 ideias</span>
+      <span>⏱ 8 min + 5 votação</span>
+      <span>👥 Individual → Grupo</span>
+      <span>💻 Digital + Papel</span>
+    </div>
+  </header>
+
+  <main class="c8-container">
+
+    <section class="c8-intro">
+      <h2>🎯 O que é o Crazy 8s?</h2>
+      <p>O <strong>Crazy 8s</strong> é uma técnica do <em>Design Sprint</em> (Google Ventures) que força a geração rápida de ideias. Adaptamos para a PI: dado um cenário de proteção, o participante deve gerar <strong>8 estratégias diferentes</strong> em <strong>8 minutos</strong> (1 minuto por quadro).</p>
+      <p>O objetivo não é encontrar a resposta perfeita, mas <strong>explorar possibilidades</strong>: tipos de proteção, combinações (patente + marca + segredo), estratégias de custo, rotas alternativas (registro nacional vs. PCT), prazos, parcerias com NIT, licenciamento, etc.</p>
+      <p>Ao final, o grupo vota nas 2 melhores ideias para levar ao Canvas de Estratégia (Material 3.1).</p>
+    </section>
+
+    <!-- SCENARIO SELECTOR -->
+    <section class="c8-scenario">
+      <h3>📋 Escolha o Cenário</h3>
+      <select id="scenarioSelect" onchange="selectScenario()">
+        <option value="">Selecione um cenário ou use a persona atual...</option>
+        <option value="0">🔬 Dr. Apressado — Publicou artigo sobre nova molécula, quer patentear</option>
+        <option value="1">👩‍🔬 Ana Inventora — Criou dispositivo médico na universidade com aluna de IC</option>
+        <option value="2">👨‍🍳 Chef Raízes — Receita amazônica original, quer marca e proteção do segredo</option>
+        <option value="3">💻 Kayla Maker — Desenvolveu app de monitoramento ambiental</option>
+        <option value="4">🌿 Dona Floresta — Comunidade indígena com fitoterápico tradicional</option>
+        <option value="5">🚀 Startup Roraima — Produto inovador de biocosmético com ingrediente amazônico</option>
+        <option value="6">🧑‍🌾 Produtor Rural — Nova variedade de café adaptada ao clima de Roraima</option>
+        <option value="7">🎨 Lia Artista — Criou técnica de pintura com pigmentos naturais amazônicos</option>
+        <option value="custom">✍️ Cenário personalizado (use sua própria criação)</option>
+      </select>
+      <div class="c8-scenario__desc" id="scenarioDesc"></div>
+    </section>
+
+    <!-- TIMER -->
+    <div class="c8-timer-wrap">
+      <div style="font-family:'Poppins';font-size:.9rem;font-weight:600;color:var(--c8-text-light)">⏱ CRONÔMETRO — 1 minuto por quadro</div>
+      <div class="c8-timer" id="timer">08:00</div>
+      <div style="font-size:.85rem;color:var(--c8-text-light);margin-bottom:.8rem;" id="timerHint">Quadro atual: —</div>
+      <div class="c8-timer-controls">
+        <button class="c8-timer-btn" onclick="startTimer()" id="btnStart">▶ Iniciar</button>
+        <button class="c8-timer-btn" onclick="pauseTimer()">⏸ Pausar</button>
+        <button class="c8-timer-btn" onclick="resetTimer()">↺ Reiniciar</button>
+      </div>
+    </div>
+
+    <!-- 8 CARDS -->
+    <div class="c8-grid" id="crazy8Grid">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- VOTE RESULTS -->
+    <section class="c8-results" id="voteResults">
+      <h2>🏆 Resultado da Votação</h2>
+      <div id="voteChart"></div>
+      <p style="font-size:.88rem;color:var(--c8-text-light);margin-top:1rem;">As 2 ideias mais votadas devem ser desenvolvidas no <strong>Canvas de Estratégia</strong> (Material 3.1).</p>
+    </section>
+
+    <div class="c8-actions">
+      <button class="c8-btn ce-btn--primary" onclick="showResults()">🏆 Ver Votação</button>
+      <button class="c8-btn ce-btn--primary" onclick="window.print()">🖨️ Imprimir</button>
+      <button class="c8-btn c8-btn--danger" onclick="clearAll()">🗑️ Limpar Tudo</button>
+      <a href="canvas-estrategia.html" class="c8-btn c8-btn--outline">📐 Canvas de Estratégia</a>
+      <a href="index.html" class="c8-btn c8-btn--outline">🏠 Toolkit</a>
+    </div>
+
+    <!-- HOW-TO -->
+    <section class="c8-howto">
+      <h2>📝 Regras do Crazy 8s da PI</h2>
+      <p><strong>1.</strong> Escolha o cenário (ou use a persona da Fase 1).</p>
+      <p><strong>2.</strong> Inicie o cronômetro — você tem <strong>1 minuto por quadro</strong>, 8 minutos no total.</p>
+      <p><strong>3.</strong> Em cada quadro, escreva uma estratégia de proteção <em>diferente</em>. Vale: tipo de PI, combinação de proteções, estratégia de custo, rota internacional, parceria, licenciamento, segredo, etc.</p>
+      <p><strong>4.</strong> <strong>Quantidade > qualidade.</strong> Não se autocensure. Ideias "ruins" podem inspirar boas.</p>
+      <p><strong>5.</strong> Quando o timer acabar, cada participante apresenta suas 8 ideias ao grupo (1 min por pessoa).</p>
+      <p><strong>6.</strong> O grupo vota (3 votos por pessoa) nas melhores ideias usando os botões ⭐.</p>
+      <p><strong>7.</strong> As 2 ideias mais votadas seguem para o Canvas de Estratégia (Material 3.1).</p>
+    </section>
+
+  </main>
+
+  <footer class="c8-footer">
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+    <p>Técnica adaptada do Design Sprint Kit (Google) · Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96</a></p>
+  </footer>
+
+  <script>
+    // ========== SCENARIOS ==========
+    const scenarios = [
+      {
+        title: 'Dr. Apressado',
+        desc: 'O pesquisador publicou um artigo sobre uma nova molécula anti-inflamatória derivada de planta amazônica em revista científica há 8 meses. Agora quer patentear. Desafio: está dentro do período de graça (12 meses, art. 12 da LPI), mas precisa agir rápido. Como proteger a invenção considerando custo, tempo, parceria com NIT, e potencial internacional?',
+        prompts: [
+          'Tipo de PI principal para a molécula',
+          'Estratégia de custo mínimo (com desconto ICT)',
+          'Rota para proteção internacional (PCT?)',
+          'Como envolver o NIT da universidade?',
+          'Proteção complementar (marca do produto?)',
+          'E se o prazo de graça expirasse? Alternativa?',
+          'Estratégia de licenciamento para indústria farmacêutica',
+          'Ideia radical / fora da caixa'
+        ]
+      },
+      {
+        title: 'Ana Inventora',
+        desc: 'Professora universitária criou um dispositivo médico portátil com uma aluna de iniciação científica. O financiamento veio da FAPEAM. O dispositivo tem forma diferenciada e funcionalidade nova. Desafio: múltiplos inventores, titular ICT, coinvenção, e potencial para patente + desenho industrial.',
+        prompts: [
+          'Tipo de PI para funcionalidade do dispositivo',
+          'Tipo de PI para a forma/design do dispositivo',
+          'Como resolver a cotitularidade (ICT + aluna)?',
+          'Estratégia de custo com desconto para ICT',
+          'Rota de depósito (nacional primeiro ou PCT?)',
+          'Proteção de marca para o produto',
+          'Modelo de licenciamento para fabricante',
+          'Ideia criativa para monetização'
+        ]
+      },
+      {
+        title: 'Chef Raízes',
+        desc: 'Chef de Boa Vista criou uma receita original usando ingredientes amazônicos (tucumã, farinha de uarini). Quer abrir um restaurante e vender o molho envasado. Desafio: receita não é patenteável, mas pode proteger marca, embalagem, segredo industrial.',
+        prompts: [
+          'Proteger a marca do restaurante',
+          'Proteger a marca do molho envasado',
+          'Segredo industrial para a receita — como?',
+          'Desenho industrial da embalagem',
+          'Indicação Geográfica (farinha de Uarini)?',
+          'Direito autoral do livro de receitas',
+          'Estratégia de defesa contra imitadores',
+          'Ideia ousada de proteção combinada'
+        ]
+      },
+      {
+        title: 'Kayla Maker',
+        desc: 'Desenvolvedora criou um aplicativo de monitoramento ambiental para comunidades ribeirinhas de Roraima. O app usa dados de satélite e IA. Desafio: software protegido por direito autoral (Lei 9.609/98), mas pode haver elementos patenteáveis no algoritmo.',
+        prompts: [
+          'Registro de software no INPI',
+          'Proteção por direito autoral (automática)',
+          'A interface gráfica é patenteável? Alternativas',
+          'Marca do aplicativo (nome + logo)',
+          'Licença open source vs. proprietária',
+          'Proteção da base de dados (Lei 9.610/98, art. 87)',
+          'Estratégia para atrair investimento com PI',
+          'Modelo de monetização + proteção'
+        ]
+      },
+      {
+        title: 'Dona Floresta',
+        desc: 'Comunidade indígena Macuxi desenvolveu fitoterápico ancestral com planta nativa. Uma universidade quer pesquisar os princípios ativos. Desafio: patrimônio genético (Lei 13.123/2015), consentimento prévio, repartição de benefícios, proteção do conhecimento tradicional.',
+        prompts: [
+          'Cadastro no SisGen — passo a passo',
+          'Consentimento prévio informado da comunidade',
+          'Repartição de benefícios (monetária vs. não monetária)',
+          'Quem deve ser titular da patente (se houver)?',
+          'Indicação Geográfica para o fitoterápico?',
+          'Proteção contra biopirataria — medidas práticas',
+          'Marca coletiva da comunidade',
+          'Ideia para empoderamento da comunidade'
+        ]
+      },
+      {
+        title: 'Startup Roraima',
+        desc: 'Startup de biocosmético com ingrediente amazônico (óleo de murmuru). Produto inovador com processo de extração diferenciado. Quer escalar para mercado nacional. Desafio: combinar patente de processo + marca + patrimônio genético + estratégia comercial.',
+        prompts: [
+          'Patente de processo de extração',
+          'Marca do produto cosmético',
+          'Cadastro SisGen (murmuru = patrimônio genético)',
+          'Desenho industrial da embalagem',
+          'Segredo industrial vs. patente — trade-off',
+          'Rota internacional (PCT + Protocolo de Madri)',
+          'Estratégia de investimento com portfolio de PI',
+          'Como usar PI para valuation da startup?'
+        ]
+      },
+      {
+        title: 'Produtor Rural',
+        desc: 'Agricultor de Pacaraima desenvolveu, por seleção natural ao longo de 10 anos, uma variedade de café robusta adaptada ao clima quente de Roraima. Desafio: proteção de cultivar (Lei 9.456/97) + indicação geográfica + marca.',
+        prompts: [
+          'Proteção de Cultivar (SNPC/MAPA)',
+          'Testes DHE — como se preparar?',
+          'Indicação Geográfica para café de Roraima',
+          'Marca do café (nome + identidade visual)',
+          'Associação de produtores para IG coletiva',
+          'Licenciamento da cultivar para outros produtores',
+          'Estratégia de custo — priorizar o quê?',
+          'Ideia para agregar valor com selo de PI'
+        ]
+      },
+      {
+        title: 'Lia Artista',
+        desc: 'Artista plástica de Boa Vista criou técnica de pintura com pigmentos naturais extraídos de argilas de Roraima. Quer comercializar as tintas e licenciar a técnica para escolas. Desafio: proteção de processo artístico, marca das tintas, direito autoral.',
+        prompts: [
+          'Direito autoral das obras (proteção automática)',
+          'Marca da linha de tintas naturais',
+          'A técnica é patenteável? Análise',
+          'Segredo industrial do processo de extração',
+          'Licenciamento da técnica para escolas',
+          'Indicação Geográfica (argilas de Roraima)?',
+          'Proteção contra reprodução não autorizada',
+          'Modelo de negócio baseado em PI'
+        ]
+      }
+    ];
+
+    // ========== RENDER 8 CARDS ==========
+    const votes = [0,0,0,0,0,0,0,0];
+    function renderGrid(prompts) {
+      const grid = document.getElementById('crazy8Grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const prompt = prompts ? prompts[i] : `Ideia ${i+1} — escreva uma estratégia de proteção diferente`;
+        grid.innerHTML += `
+          <div class="c8-card" id="card-${i}">
+            <span class="c8-card__num">${i+1}</span>
+            <div class="c8-card__prompt">${prompt}</div>
+            <textarea placeholder="Sua ideia aqui..." id="idea-${i}"></textarea>
+            <div class="c8-card__vote">
+              <button onclick="vote(${i})" title="Votar nesta ideia">⭐</button>
+              <span id="votes-${i}">${votes[i]}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+    renderGrid(null);
+
+    function selectScenario() {
+      const val = document.getElementById('scenarioSelect').value;
+      const descEl = document.getElementById('scenarioDesc');
+      if (val === '' || val === 'custom') {
+        descEl.style.display = val === 'custom' ? 'block' : 'none';
+        descEl.innerHTML = val === 'custom' ? '<em>Use a criação que você descreveu no Canvas de Diagnóstico (Material 2.1). Gere 8 estratégias diferentes para protegê-la.</em>' : '';
+        renderGrid(null);
+        return;
+      }
+      const s = scenarios[parseInt(val)];
+      descEl.style.display = 'block';
+      descEl.innerHTML = `<strong>${s.title}:</strong> ${s.desc}`;
+      renderGrid(s.prompts);
+    }
+
+    function vote(idx) {
+      votes[idx]++;
+      document.getElementById(`votes-${idx}`).textContent = votes[idx];
+    }
+
+    function showResults() {
+      const resultsEl = document.getElementById('voteResults');
+      const chartEl = document.getElementById('voteChart');
+      const maxVotes = Math.max(...votes, 1);
+      let html = '';
+      const sorted = votes.map((v, i) => ({idx: i, votes: v})).sort((a,b) => b.votes - a.votes);
+      sorted.forEach((item, rank) => {
+        const pct = (item.votes / maxVotes) * 100;
+        const medal = rank === 0 ? '🥇' : rank === 1 ? '🥈' : '';
+        html += `
+          <div class="c8-results__bar">
+            <span class="c8-results__label">${medal} Ideia ${item.idx + 1}</span>
+            <div style="flex:1;background:var(--c8-bg);border-radius:12px;overflow:hidden;">
+              <div class="c8-results__fill" style="width:${pct}%"></div>
+            </div>
+            <span class="c8-results__count">${item.votes} votos</span>
+          </div>
+        `;
+      });
+      chartEl.innerHTML = html;
+      resultsEl.style.display = 'block';
+      resultsEl.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ========== TIMER ==========
+    let totalSeconds = 480; // 8 min
+    let timerInterval = null;
+    let running = false;
+
+    function updateTimerDisplay() {
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      const display = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      const timerEl = document.getElementById('timer');
+      timerEl.textContent = display;
+
+      // Current card highlight
+      const elapsed = 480 - totalSeconds;
+      const currentCard = Math.min(Math.floor(elapsed / 60), 7);
+      document.getElementById('timerHint').textContent = totalSeconds > 0
+        ? `Quadro atual: ${currentCard + 1} de 8`
+        : '⏰ Tempo esgotado! Hora de votar!';
+
+      // Color coding
+      timerEl.classList.remove('warning', 'danger');
+      if (totalSeconds <= 60) timerEl.classList.add('danger');
+      else if (totalSeconds <= 180) timerEl.classList.add('warning');
+
+      // Highlight active card
+      document.querySelectorAll('.c8-card').forEach((c, i) => {
+        c.classList.toggle('active', i === currentCard && totalSeconds > 0);
+      });
+    }
+
+    function startTimer() {
+      if (running) return;
+      running = true;
+      document.getElementById('btnStart').classList.add('active');
+      timerInterval = setInterval(() => {
+        if (totalSeconds <= 0) {
+          clearInterval(timerInterval);
+          running = false;
+          document.getElementById('btnStart').classList.remove('active');
+          return;
+        }
+        totalSeconds--;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      running = false;
+      document.getElementById('btnStart').classList.remove('active');
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      totalSeconds = 480;
+      updateTimerDisplay();
+    }
+
+    function clearAll() {
+      if (!confirm('Limpar todas as ideias e votos?')) return;
+      resetTimer();
+      for (let i = 0; i < 8; i++) {
+        votes[i] = 0;
+        const ideaEl = document.getElementById(`idea-${i}`);
+        if (ideaEl) ideaEl.value = '';
+        const voteEl = document.getElementById(`votes-${i}`);
+        if (voteEl) voteEl.textContent = '0';
+      }
+      document.getElementById('voteResults').style.display = 'none';
+      document.getElementById('scenarioSelect').value = '';
+      document.getElementById('scenarioDesc').style.display = 'none';
+      renderGrid(null);
+    }
+
+    updateTimerDisplay();
+  </script>
+
+</body>
+</html>
