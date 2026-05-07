@@ -1,306 +1,663 @@
+<!--
+  Arquivo: canvas-avaliacao.html
+  Correções:
+    1. Persistência localStorage (PIThinking.saveProgress/loadProgress)
+    2. clearCanvas() limpa localStorage
+    3. aria-label em selects, botões e controles
+    4. aria-live="polite" no container do canvas
+    5. Rating com role="radiogroup", role="radio", aria-checked, keyboard
+    6. Autoavaliação por fase (5 fases)
+    7. Avaliação geral (4 campos)
+    8. Resumo visual com barras
+    9. Exportar como texto
+   10. Classe .sr-only
+   11. lang="pt-BR" confirmado
+  Dependências: style.css, script.js
+-->
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Canvas de Avaliação — PI Thinking</title>
-  <meta name="description" content="Avalie a oficina PI Thinking: o que gostou, o que aprendeu, o que faltou, NPS e sugestões.">
+  <meta name="description" content="Canvas de avaliação final do processo PI Thinking. Autoavalie cada fase, identifique pontos fortes, melhorias e próximos passos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --ca-bg:#F3E5F5;--ca-surface:#FFFFFF;--ca-accent:#9C27B0;--ca-accent-dark:#6A1B9A;
-      --ca-text:#212121;--ca-text-light:#757575;--ca-border:#CE93D8;--ca-radius:16px;
-      --ca-shadow:0 2px 12px rgba(156,39,176,.12);--ca-green:#4CAF50;--ca-yellow:#FFC107;--ca-red:#EF5350;
+    :root {
+      --ca-bg: #F0FFF4;
+      --ca-surface: #FFFFFF;
+      --ca-accent: #2E7D32;
+      --ca-accent-light: #43A047;
+      --ca-accent-bg: rgba(46,125,50,.08);
+      --ca-text: #212121;
+      --ca-text-light: #616161;
+      --ca-border: #C8E6C9;
+      --ca-gold: #F9A825;
+      --ca-gold-bg: #FFFDE7;
+      --ca-red: #C62828;
+      --ca-red-bg: #FFEBEE;
+      --ca-blue: #1565C0;
+      --ca-blue-bg: #E3F2FD;
+      --ca-purple: #6A1B9A;
+      --ca-purple-bg: #F3E5F5;
+      --ca-orange: #E65100;
+      --ca-orange-bg: #FFF3E0;
+      --ca-radius: 16px;
+      --ca-shadow: 0 2px 12px rgba(46,125,50,.10);
     }
-    @media(prefers-color-scheme:dark){:root{--ca-bg:#1a0e1a;--ca-surface:#2a1a2a;--ca-text:#f5f0f5;--ca-text-light:#b8a0b8;--ca-border:#3a1e3a;--ca-shadow:0 2px 12px rgba(0,0,0,.4);}}
-    body.ca-page{font-family:'Inter',sans-serif;background:var(--ca-bg);color:var(--ca-text);margin:0;padding:0;line-height:1.7;}
-    .ca-cover{background:linear-gradient(135deg,#CE93D8 0%,#9C27B0 50%,#6A1B9A 100%);color:#fff;padding:3.5rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden;}
-    .ca-cover::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 80%,rgba(255,255,255,.08) 0%,transparent 50%);}
-    .ca-cover__overline{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;opacity:.9;}
-    .ca-cover__title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);margin:.5rem 0;}
-    .ca-cover__sub{font-size:1.05rem;opacity:.92;max-width:600px;margin:.5rem auto 0;}
-    .ca-container{max-width:900px;margin:0 auto;padding:2rem 1.5rem;}
+    [data-theme="dark"] {
+      --ca-bg: #0a1a0d;
+      --ca-surface: #142218;
+      --ca-accent: #66BB6A;
+      --ca-accent-light: #81C784;
+      --ca-accent-bg: rgba(102,187,106,.1);
+      --ca-text: #e0f0e4;
+      --ca-text-light: #8faa94;
+      --ca-border: #1e3a22;
+      --ca-gold: #FFD54F;
+      --ca-gold-bg: rgba(255,213,79,.08);
+      --ca-red: #EF5350;
+      --ca-red-bg: rgba(239,83,80,.1);
+      --ca-blue: #64B5F6;
+      --ca-blue-bg: rgba(100,181,246,.1);
+      --ca-purple: #CE93D8;
+      --ca-purple-bg: rgba(206,147,216,.1);
+      --ca-orange: #FFB74D;
+      --ca-orange-bg: rgba(255,183,77,.1);
+      --ca-shadow: 0 2px 12px rgba(0,0,0,.4);
+    }
 
-    /* GAF GRID */
-    .ca-gaf{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem;}
-    @media(max-width:700px){.ca-gaf{grid-template-columns:1fr;}}
-    .ca-gaf__col{background:var(--ca-surface);border-radius:var(--ca-radius);padding:1.5rem;box-shadow:var(--ca-shadow);border-top:4px solid var(--ca-green);}
-    .ca-gaf__col:nth-child(2){border-top-color:var(--ca-yellow);}
-    .ca-gaf__col:nth-child(3){border-top-color:var(--ca-red);}
-    .ca-gaf__col h3{font-family:'Poppins',sans-serif;margin-top:0;display:flex;align-items:center;gap:.5rem;}
-    .ca-gaf__notes{min-height:100px;}
-    .ca-gaf__note{background:var(--ca-bg);border-radius:8px;padding:.5rem .8rem;margin:.4rem 0;display:flex;justify-content:space-between;align-items:center;font-size:.88rem;animation:fadeIn .3s;}
-    .ca-gaf__note button{background:none;border:none;font-size:1rem;cursor:pointer;opacity:.5;}
-    .ca-gaf__note button:hover{opacity:1;}
-    .ca-gaf__add{display:flex;gap:.5rem;margin-top:.5rem;}
-    .ca-gaf__add input{flex:1;font-family:'Inter',sans-serif;font-size:.88rem;padding:.5rem;border:1px solid var(--ca-border);border-radius:8px;background:var(--ca-bg);color:var(--ca-text);}
-    .ca-gaf__add button{font-family:'Poppins',sans-serif;font-weight:600;padding:.5rem 1rem;border:none;border-radius:8px;background:var(--ca-accent);color:#fff;cursor:pointer;font-size:.85rem;}
+    body.ca-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--ca-bg); color: var(--ca-text);
+      margin: 0; padding: 0; line-height: 1.7;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
 
-    /* STARS RATING */
-    .ca-rating{background:var(--ca-surface);border-radius:var(--ca-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--ca-shadow);}
-    .ca-rating h3{font-family:'Poppins',sans-serif;color:var(--ca-accent-dark);margin-top:0;}
-    .ca-rating__row{display:flex;align-items:center;gap:1rem;margin:.8rem 0;flex-wrap:wrap;}
-    .ca-rating__label{min-width:200px;font-weight:500;font-size:.92rem;}
-    .ca-rating__stars{display:flex;gap:4px;}
-    .ca-rating__star{font-size:1.8rem;cursor:pointer;transition:transform .15s;filter:grayscale(100%);opacity:.4;}
-    .ca-rating__star:hover{transform:scale(1.2);}
-    .ca-rating__star.active{filter:grayscale(0);opacity:1;}
+    /* ── Cover ── */
+    .ca-cover {
+      background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 50%, #004D40 100%);
+      color: #fff; padding: 4rem 2rem 3rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .ca-cover::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 25% 45%, rgba(255,255,255,.06) 0%, transparent 50%),
+                  radial-gradient(circle at 75% 55%, rgba(249,168,37,.05) 0%, transparent 50%);
+    }
+    .ca-cover__overline {
+      font-family: 'Poppins', sans-serif; font-size: .85rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 3px; opacity: .9; position: relative;
+    }
+    .ca-cover__title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem); margin: .5rem 0; position: relative;
+    }
+    .ca-cover__sub {
+      font-size: 1.1rem; opacity: .92; max-width: 640px; margin: .5rem auto 0; position: relative;
+    }
+    .ca-cover__meta {
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 1.5rem; font-size: .9rem; position: relative;
+    }
+    .ca-cover__meta span {
+      background: rgba(255,255,255,.15); padding: .35rem .8rem; border-radius: 20px;
+    }
 
-    /* NPS */
-    .ca-nps{background:var(--ca-surface);border-radius:var(--ca-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--ca-shadow);}
-    .ca-nps h3{font-family:'Poppins',sans-serif;color:var(--ca-accent-dark);margin-top:0;}
-    .ca-nps__scale{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:1rem 0;}
-    .ca-nps__num{width:40px;height:40px;border-radius:8px;border:2px solid var(--ca-border);display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;transition:all .2s;font-size:.9rem;background:var(--ca-bg);}
-    .ca-nps__num:hover{border-color:var(--ca-accent);transform:scale(1.1);}
-    .ca-nps__num.selected{color:#fff;border-color:transparent;}
-    .ca-nps__labels{display:flex;justify-content:space-between;font-size:.75rem;color:var(--ca-text-light);margin-top:.3rem;}
+    /* ── Container ── */
+    .ca-container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    /* FREE TEXT */
-    .ca-free{background:var(--ca-surface);border-radius:var(--ca-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--ca-shadow);}
-    .ca-free h3{font-family:'Poppins',sans-serif;color:var(--ca-accent-dark);margin-top:0;}
-    .ca-free textarea{width:100%;font-family:'Inter',sans-serif;font-size:.92rem;border:2px solid var(--ca-border);border-radius:8px;padding:.6rem;background:var(--ca-bg);color:var(--ca-text);min-height:80px;resize:vertical;box-sizing:border-box;}
-    .ca-free label{display:block;font-weight:600;font-size:.9rem;margin:.8rem 0 .3rem;}
+    /* ── Section ── */
+    .ca-section {
+      background: var(--ca-surface); border: 2px solid var(--ca-border);
+      border-radius: var(--ca-radius); padding: 2rem; margin-bottom: 1.5rem;
+      box-shadow: var(--ca-shadow);
+    }
+    .ca-section h2 {
+      font-family: 'Poppins', sans-serif; color: var(--ca-accent);
+      margin-top: 0; font-size: 1.2rem;
+    }
+    .ca-section h3 {
+      font-family: 'Poppins', sans-serif; color: var(--ca-accent);
+      font-size: 1rem; margin-top: 1.5rem;
+    }
 
-    /* SUMMARY */
-    .ca-summary{background:linear-gradient(135deg,#E1BEE7,#CE93D8);border-radius:var(--ca-radius);padding:2rem;margin:2rem 0;text-align:center;display:none;}
-    .ca-summary.show{display:block;animation:fadeIn .5s;}
-    .ca-summary h2{font-family:'Playfair Display',serif;color:#4A148C;}
-    .ca-summary__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1rem 0;}
-    @media(max-width:600px){.ca-summary__grid{grid-template-columns:1fr;}}
-    .ca-summary__item{background:rgba(255,255,255,.6);border-radius:12px;padding:1rem;}
-    .ca-summary__value{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;color:var(--ca-accent-dark);}
-    .ca-summary__label{font-size:.85rem;color:#4A148C;}
+    /* ── Phase card ── */
+    .ca-phase {
+      border: 1px solid var(--ca-border); border-radius: 12px;
+      padding: 1.2rem; margin-bottom: 1rem; transition: border-color .3s;
+    }
+    .ca-phase:hover { border-color: var(--ca-accent); }
+    .ca-phase__header {
+      display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem;
+    }
+    .ca-phase__icon { font-size: 1.5rem; }
+    .ca-phase__name {
+      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: .95rem;
+    }
+    .ca-phase__tag {
+      font-size: .72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1px; padding: .15rem .5rem; border-radius: 10px;
+    }
+    .ca-phase__tag--sentir { background: var(--ca-red-bg); color: var(--ca-red); }
+    .ca-phase__tag--diagnosticar { background: var(--ca-blue-bg); color: var(--ca-blue); }
+    .ca-phase__tag--estrategar { background: var(--ca-orange-bg); color: var(--ca-orange); }
+    .ca-phase__tag--proteger { background: var(--ca-purple-bg); color: var(--ca-purple); }
+    .ca-phase__tag--refletir { background: var(--ca-accent-bg); color: var(--ca-accent); }
 
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .ca-phase__tools {
+      font-size: .82rem; color: var(--ca-text-light); margin-bottom: .8rem;
+    }
+    .ca-phase__tools a { color: var(--ca-accent); text-decoration: none; font-weight: 500; }
+    .ca-phase__tools a:hover { text-decoration: underline; }
 
-    .ca-btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;padding:.7rem 1.5rem;border:none;border-radius:30px;cursor:pointer;transition:transform .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
-    .ca-btn:hover{transform:translateY(-2px);}
-    .ca-btn--primary{background:var(--ca-accent);color:#fff;}
-    .ca-btn--outline{background:transparent;border:2px solid var(--ca-accent);color:var(--ca-accent-dark);}
-    .ca-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin:2rem 0;}
+    /* ── Rating ── */
+    .ca-rating {
+      display: inline-flex; gap: .3rem; margin: .4rem 0;
+    }
+    .ca-rating__star {
+      font-size: 1.5rem; cursor: pointer; transition: transform .15s;
+      background: none; border: none; padding: 0; line-height: 1;
+    }
+    .ca-rating__star:hover { transform: scale(1.2); }
+    .ca-rating__star:focus-visible { outline: 3px solid var(--ca-accent); outline-offset: 2px; border-radius: 4px; }
+    .ca-rating__star.active { filter: none; }
+    .ca-rating__star.inactive { filter: grayscale(1); opacity: .4; }
+    .ca-rating__label {
+      font-size: .82rem; color: var(--ca-text-light); margin-left: .5rem;
+      font-weight: 600; display: inline-block; vertical-align: middle; line-height: 1.5rem;
+    }
 
-    .ca-footer{text-align:center;padding:2rem;font-size:.82rem;color:var(--ca-text-light);border-top:1px solid var(--ca-border);margin-top:2rem;}
-    .ca-footer a{color:var(--ca-accent-dark);}
+    /* ── Textarea ── */
+    .ca-textarea {
+      width: 100%; min-height: 70px; font-family: 'Inter', sans-serif;
+      font-size: .88rem; border: 1px solid var(--ca-border); border-radius: 8px;
+      padding: .5rem; background: var(--ca-bg); color: var(--ca-text);
+      resize: vertical; box-sizing: border-box; margin-top: .3rem;
+    }
+    .ca-textarea:focus-visible { outline: 2px solid var(--ca-accent); outline-offset: 1px; }
 
-    @media print{
-      .ca-gaf__add,.ca-actions{display:none!important;}
-      .ca-gaf__col,.ca-rating,.ca-nps,.ca-free{break-inside:avoid;border:1px solid #ccc;}
-      @page{size:A4 portrait;margin:1.5cm;}
+    /* ── General fields ── */
+    .ca-field { margin-bottom: 1.2rem; }
+    .ca-field label {
+      display: block; font-weight: 600; font-size: .9rem; margin-bottom: .3rem;
+    }
+
+    /* ── Summary chart ── */
+    .ca-chart { margin: 1.5rem 0; }
+    .ca-chart__bar {
+      display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem;
+    }
+    .ca-chart__label {
+      font-size: .82rem; font-weight: 600; min-width: 110px; text-align: right;
+    }
+    .ca-chart__track {
+      flex: 1; background: var(--ca-border); border-radius: 8px; height: 24px;
+      overflow: hidden; position: relative;
+    }
+    .ca-chart__fill {
+      height: 100%; border-radius: 8px; transition: width .5s ease;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: .5rem; font-family: 'Poppins', sans-serif;
+      font-size: .75rem; font-weight: 700; color: #fff;
+    }
+    .ca-chart__fill--sentir { background: linear-gradient(90deg, #EF5350, #E53935); }
+    .ca-chart__fill--diagnosticar { background: linear-gradient(90deg, #42A5F5, #1E88E5); }
+    .ca-chart__fill--estrategar { background: linear-gradient(90deg, #FFA726, #F57C00); }
+    .ca-chart__fill--proteger { background: linear-gradient(90deg, #AB47BC, #7B1FA2); }
+    .ca-chart__fill--refletir { background: linear-gradient(90deg, #66BB6A, #388E3C); }
+    .ca-chart__value {
+      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: .85rem;
+      min-width: 40px;
+    }
+
+    /* ── Average badge ── */
+    .ca-average {
+      text-align: center; padding: 1.5rem; background: var(--ca-accent-bg);
+      border-radius: 12px; margin: 1rem 0;
+    }
+    .ca-average__value {
+      font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 800;
+      color: var(--ca-accent);
+    }
+    .ca-average__label {
+      font-size: .9rem; color: var(--ca-text-light); font-weight: 600;
+    }
+
+    /* ── Buttons ── */
+    .ca-btn {
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .95rem;
+      padding: .7rem 1.5rem; border: none; border-radius: 30px;
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .ca-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .ca-btn:focus-visible { outline: 3px solid var(--ca-accent); outline-offset: 2px; }
+    .ca-btn--primary { background: var(--ca-accent); color: #fff; }
+    .ca-btn--gold { background: var(--ca-gold); color: #1a1a2e; }
+    .ca-btn--outline { background: transparent; border: 2px solid var(--ca-accent); color: var(--ca-accent); }
+    .ca-btn--danger { background: var(--ca-red); color: #fff; }
+
+    .ca-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 2rem 0;
+    }
+
+    /* ── Export notification ── */
+    .ca-toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--ca-accent); color: #fff; padding: .7rem 1.5rem;
+      border-radius: 25px; font-family: 'Poppins', sans-serif; font-weight: 600;
+      font-size: .9rem; box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999;
+    }
+    .ca-toast.show { opacity: 1; }
+
+    /* ── Footer ── */
+    .ca-footer {
+      text-align: center; padding: 2rem; font-size: .82rem;
+      color: var(--ca-text-light); border-top: 1px solid var(--ca-border); margin-top: 2rem;
+    }
+    .ca-footer a { color: var(--ca-accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .ca-cover { padding: 2.5rem 1rem 2rem; }
+      .ca-section { padding: 1.2rem; }
+      .ca-chart__label { min-width: 80px; font-size: .75rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      .ca-cover { padding: 1.5rem 1rem; break-after: avoid; }
+      .ca-actions, .ca-toast { display: none !important; }
+      .ca-phase { break-inside: avoid; }
+      .ca-section { box-shadow: none; border: 1px solid #ccc; }
+      @page { size: A4 portrait; margin: 1.5cm; }
     }
   </style>
 </head>
 <body class="ca-page">
 
+  <!-- Theme toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro"
+    style="position:fixed;top:1rem;right:1rem;z-index:999;background:var(--ca-surface);border:2px solid var(--ca-border);border-radius:50%;width:44px;height:44px;font-size:1.3rem;cursor:pointer;">
+    🌗
+  </button>
+
+  <!-- Cover -->
   <header class="ca-cover">
-    <div class="ca-cover__overline">Fase 5 — Avaliar</div>
+    <div class="ca-cover__overline">Fase 5 — Refletir</div>
     <h1 class="ca-cover__title">Canvas de Avaliação</h1>
-    <p class="ca-cover__sub">Avalie a oficina PI Thinking: o que gostou, o que aprendeu, o que faltou — e ajude a melhorar!</p>
+    <p class="ca-cover__sub">Avalie seu percurso nas 5 fases do PI Thinking. Identifique pontos fortes, oportunidades de melhoria e defina próximos passos.</p>
+    <div class="ca-cover__meta">
+      <span>📊 5 fases avaliadas</span>
+      <span>⏱ 15–20 min</span>
+      <span>👤 Individual</span>
+      <span>📋 Exportável</span>
+    </div>
   </header>
 
-  <main class="ca-container">
+  <main class="ca-container" aria-live="polite">
 
-    <!-- GAF: Gostei, Aprendi, Faltou -->
-    <section class="ca-gaf">
-      <div class="ca-gaf__col">
-        <h3>😊 Gostei</h3>
-        <p style="font-size:.82rem;color:var(--ca-text-light);">O que mais gostou na oficina?</p>
-        <div class="ca-gaf__notes" id="gaf-gostei"></div>
-        <div class="ca-gaf__add">
-          <input type="text" id="input-gostei" placeholder="Adicionar..." onkeypress="if(event.key==='Enter')addGaf('gostei')">
-          <button onclick="addGaf('gostei')">+</button>
-        </div>
+    <!-- Intro -->
+    <section class="ca-section">
+      <h2>🎯 Como preencher</h2>
+      <p>Para cada fase do toolkit, avalie de <strong>1 a 5 estrelas</strong> o quanto você dominou o conteúdo e aproveitou as ferramentas. Depois, escreva um comentário breve sobre o que funcionou e o que pode melhorar. Ao final, preencha a avaliação geral e visualize o resumo.</p>
+    </section>
+
+    <!-- Phase evaluations -->
+    <section class="ca-section" id="phasesSection">
+      <h2>📊 Avaliação por Fase</h2>
+      <div id="phasesContainer"></div>
+    </section>
+
+    <!-- General evaluation -->
+    <section class="ca-section">
+      <h2>📝 Avaliação Geral</h2>
+
+      <div class="ca-field">
+        <label for="genStrengths">💪 Pontos fortes do processo</label>
+        <textarea class="ca-textarea" id="genStrengths" placeholder="O que funcionou bem? Quais ferramentas foram mais úteis?" aria-label="Pontos fortes do processo PI Thinking" oninput="autoSave()"></textarea>
       </div>
-      <div class="ca-gaf__col">
-        <h3>💡 Aprendi</h3>
-        <p style="font-size:.82rem;color:var(--ca-text-light);">O que aprendeu de novo?</p>
-        <div class="ca-gaf__notes" id="gaf-aprendi"></div>
-        <div class="ca-gaf__add">
-          <input type="text" id="input-aprendi" placeholder="Adicionar..." onkeypress="if(event.key==='Enter')addGaf('aprendi')">
-          <button onclick="addGaf('aprendi')">+</button>
-        </div>
+
+      <div class="ca-field">
+        <label for="genImprovements">🔧 Pontos de melhoria</label>
+        <textarea class="ca-textarea" id="genImprovements" placeholder="O que poderia ser melhorado? Onde sentiu dificuldade?" aria-label="Pontos de melhoria do processo" oninput="autoSave()"></textarea>
       </div>
-      <div class="ca-gaf__col">
-        <h3>🔍 Faltou</h3>
-        <p style="font-size:.82rem;color:var(--ca-text-light);">O que faltou ou poderia melhorar?</p>
-        <div class="ca-gaf__notes" id="gaf-faltou"></div>
-        <div class="ca-gaf__add">
-          <input type="text" id="input-faltou" placeholder="Adicionar..." onkeypress="if(event.key==='Enter')addGaf('faltou')">
-          <button onclick="addGaf('faltou')">+</button>
-        </div>
+
+      <div class="ca-field">
+        <label for="genLearning">🎓 Principal aprendizado</label>
+        <textarea class="ca-textarea" id="genLearning" placeholder="Qual foi o aprendizado mais importante sobre PI?" aria-label="Principal aprendizado sobre Propriedade Intelectual" oninput="autoSave()"></textarea>
+      </div>
+
+      <div class="ca-field">
+        <label for="genNextSteps">🚀 Próximos passos</label>
+        <textarea class="ca-textarea" id="genNextSteps" placeholder="O que pretende fazer a seguir? Depositar patente? Registrar marca? Consultar NIT?" aria-label="Próximos passos após o processo PI Thinking" oninput="autoSave()"></textarea>
       </div>
     </section>
 
-    <!-- STAR RATINGS -->
-    <section class="ca-rating">
-      <h3>⭐ Avalie cada aspecto (1–5 estrelas)</h3>
-      <div id="ratingsArea"></div>
+    <!-- Summary -->
+    <section class="ca-section" id="summarySection">
+      <h2>📈 Resumo Visual</h2>
+      <div class="ca-chart" id="summaryChart"></div>
+      <div class="ca-average" id="averageBlock">
+        <div class="ca-average__value" id="averageValue">—</div>
+        <div class="ca-average__label">Média geral (de 5)</div>
+      </div>
     </section>
 
-    <!-- NPS -->
-    <section class="ca-nps">
-      <h3>📊 NPS — Recomendação</h3>
-      <p>De 0 a 10, qual a probabilidade de você recomendar esta oficina a um colega?</p>
-      <div class="ca-nps__scale" id="npsScale"></div>
-      <div class="ca-nps__labels"><span>Nada provável</span><span>Neutro</span><span>Muito provável</span></div>
-    </section>
-
-    <!-- FREE TEXT -->
-    <section class="ca-free">
-      <h3>✍️ Comentários Livres</h3>
-      <label>O que você faria diferente na próxima edição?</label>
-      <textarea id="free-diferente" placeholder="Suas sugestões..."></textarea>
-      <label>Qual ferramenta do toolkit foi mais útil para você?</label>
-      <textarea id="free-ferramenta" placeholder="Ex.: A Árvore de Decisão me ajudou a..."></textarea>
-      <label>Mensagem para o facilitador:</label>
-      <textarea id="free-mensagem" placeholder="Feedback aberto..."></textarea>
-    </section>
-
+    <!-- Actions -->
     <div class="ca-actions">
-      <button class="ca-btn ca-btn--primary" onclick="generateSummary()">📊 Gerar Resumo</button>
-      <button class="ca-btn ca-btn--primary" onclick="window.print()">🖨️ Imprimir</button>
+      <button class="ca-btn ca-btn--primary" onclick="updateSummary()" aria-label="Atualizar resumo visual das avaliações">📊 Atualizar Resumo</button>
+      <button class="ca-btn ca-btn--gold" onclick="exportText()" aria-label="Exportar avaliação como texto">📋 Exportar Texto</button>
+      <button class="ca-btn ca-btn--outline" onclick="window.print()" aria-label="Imprimir canvas de avaliação">🖨️ Imprimir</button>
+      <button class="ca-btn ca-btn--danger" onclick="clearCanvas()" aria-label="Limpar todo o canvas de avaliação">🗑️ Limpar</button>
+      <a href="quiz-final.html" class="ca-btn ca-btn--outline">🏆 Quiz Final</a>
+      <a href="pi-quest.html" class="ca-btn ca-btn--outline">🎮 PI Quest</a>
       <a href="index.html" class="ca-btn ca-btn--outline">🏠 Toolkit</a>
     </div>
 
-    <!-- SUMMARY -->
-    <section class="ca-summary" id="summaryScreen">
-      <h2>📊 Resumo da Avaliação</h2>
-      <div class="ca-summary__grid" id="summaryGrid"></div>
-      <p style="font-size:.85rem;color:#4A148C;margin-top:1rem;">Obrigado pela sua avaliação! Ela é fundamental para melhorar o Toolkit PI Thinking.</p>
-    </section>
-
   </main>
 
+  <!-- Toast -->
+  <div class="ca-toast" id="toast">Texto copiado!</div>
+
+  <!-- Footer -->
   <footer class="ca-footer">
-    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY‑NC‑SA 4.0</a></p>
+    <p>Metodologia: <a href="guia-facilitador.html">Guia do Facilitador PI Thinking</a></p>
   </footer>
 
+  <!-- Scripts -->
+  <script src="script.js"></script>
   <script>
-    // ============================================================
-    //  GAF
-    // ============================================================
-    const gafData = {gostei:[], aprendi:[], faltou:[]};
+    /* ================================================================
+       CANVAS DE AVALIAÇÃO — PI Thinking
+       ================================================================ */
 
-    function addGaf(type) {
-      const input = document.getElementById('input-'+type);
-      const val = input.value.trim();
-      if (!val) return;
-      gafData[type].push(val);
-      input.value = '';
-      renderGaf(type);
-    }
-
-    function removeGaf(type, idx) {
-      gafData[type].splice(idx, 1);
-      renderGaf(type);
-    }
-
-    function renderGaf(type) {
-      const container = document.getElementById('gaf-'+type);
-      container.innerHTML = '';
-      gafData[type].forEach((note, i) => {
-        container.innerHTML += `<div class="ca-gaf__note"><span>${note}</span><button onclick="removeGaf('${type}',${i})">✕</button></div>`;
-      });
-    }
-
-    // ============================================================
-    //  STAR RATINGS
-    // ============================================================
-    const ratingItems = [
-      {id:'conteudo', label:'Conteúdo e profundidade técnica'},
-      {id:'materiais', label:'Qualidade dos materiais/ferramentas'},
-      {id:'interatividade', label:'Interatividade e dinâmicas'},
-      {id:'facilitador', label:'Didática do facilitador'},
-      {id:'tempo', label:'Gestão do tempo'},
-      {id:'aplicabilidade', label:'Aplicabilidade no dia a dia'},
-      {id:'visual', label:'Design visual e usabilidade'}
+    var phases = [
+      {
+        id: 'sentir', name: 'Fase 1 — Sentir', icon: '❤️', tag: 'sentir',
+        desc: 'Empatia com criadores e suas dores de PI.',
+        tools: [
+          { name: 'Cartas Personas', url: 'cartas-personas.html' },
+          { name: 'Mapa de Empatia', url: 'mapa-empatia.html' },
+          { name: 'Quiz Diagnóstico', url: 'quiz-diagnostico.html' }
+        ]
+      },
+      {
+        id: 'diagnosticar', name: 'Fase 2 — Diagnosticar', icon: '🔍', tag: 'diagnosticar',
+        desc: 'Mapeamento da situação atual da criação e tipo de PI.',
+        tools: [
+          { name: 'Canvas de Diagnóstico', url: 'canvas-diagnostico.html' },
+          { name: 'Árvore de Decisão', url: 'arvore.html' },
+          { name: 'Calculadora de Vigência', url: 'calculadora.html' },
+          { name: 'Linha do Tempo', url: 'linha-do-tempo.html' },
+          { name: 'Glossário', url: 'glossario.html' },
+          { name: 'Busca de Anterioridade', url: 'busca.html' }
+        ]
+      },
+      {
+        id: 'estrategar', name: 'Fase 3 — Estrategar', icon: '⚡', tag: 'estrategar',
+        desc: 'Geração e seleção de estratégias de proteção.',
+        tools: [
+          { name: 'Crazy 8s', url: 'crazy8s.html' },
+          { name: 'Storyboard', url: 'storyboard.html' },
+          { name: 'Canvas de Estratégia', url: 'canvas-estrategia.html' }
+        ]
+      },
+      {
+        id: 'proteger', name: 'Fase 4 — Proteger', icon: '🛡️', tag: 'proteger',
+        desc: 'Simulação e planejamento do depósito real.',
+        tools: [
+          { name: 'Simulador de Depósito', url: 'simulador-deposito.html' }
+        ]
+      },
+      {
+        id: 'refletir', name: 'Fase 5 — Refletir', icon: '🪞', tag: 'refletir',
+        desc: 'Debate ético, avaliação e consolidação de conhecimentos.',
+        tools: [
+          { name: 'Baralho de Dilemas', url: 'baralho-dilemas.html' },
+          { name: 'Escape Room', url: 'escape-room.html' },
+          { name: 'Quiz Final', url: 'quiz-final.html' },
+          { name: 'PI Quest', url: 'pi-quest.html' }
+        ]
+      }
     ];
 
-    const ratings = {};
+    var ratings = {};
+    var comments = {};
 
-    function renderRatings() {
-      const area = document.getElementById('ratingsArea');
-      area.innerHTML = '';
-      ratingItems.forEach(item => {
-        ratings[item.id] = ratings[item.id] || 0;
-        let starsHtml = '';
-        for (let s = 1; s <= 5; s++) {
-          starsHtml += `<span class="ca-rating__star ${s <= ratings[item.id] ? 'active' : ''}" onclick="setRating('${item.id}',${s})">⭐</span>`;
+    // ── Render phases ──
+    function renderPhases() {
+      var container = document.getElementById('phasesContainer');
+      var html = '';
+
+      phases.forEach(function(phase) {
+        var r = ratings[phase.id] || 0;
+        var c = comments[phase.id] || '';
+
+        html += '<div class="ca-phase">';
+        html += '<div class="ca-phase__header">';
+        html += '<span class="ca-phase__icon">' + phase.icon + '</span>';
+        html += '<span class="ca-phase__name">' + phase.name + '</span>';
+        html += '<span class="ca-phase__tag ca-phase__tag--' + phase.tag + '">' + phase.tag + '</span>';
+        html += '</div>';
+        html += '<p style="font-size:.88rem;color:var(--ca-text-light);margin:.2rem 0 .6rem;">' + phase.desc + '</p>';
+
+        // Tools
+        html += '<div class="ca-phase__tools">Ferramentas: ';
+        phase.tools.forEach(function(tool, i) {
+          html += '<a href="' + tool.url + '">' + tool.name + '</a>';
+          if (i < phase.tools.length - 1) html += ', ';
+        });
+        html += '</div>';
+
+        // Rating
+        html += '<div style="margin-bottom:.5rem;">';
+        html += '<span style="font-size:.85rem;font-weight:600;">Avaliação:</span> ';
+        html += '<div class="ca-rating" role="radiogroup" aria-label="Avaliação da ' + phase.name + '">';
+        for (var s = 1; s <= 5; s++) {
+          var isActive = s <= r;
+          html += '<button class="ca-rating__star ' + (isActive ? 'active' : 'inactive') + '" ';
+          html += 'role="radio" aria-checked="' + (s === r ? 'true' : 'false') + '" ';
+          html += 'tabindex="' + (s === 1 || s === r ? '0' : '-1') + '" ';
+          html += 'aria-label="' + s + ' de 5 estrelas para ' + phase.name + '" ';
+          html += 'onclick="setRating(\'' + phase.id + '\',' + s + ')" ';
+          html += 'onkeydown="handleRatingKey(event,\'' + phase.id + '\',' + s + ')">';
+          html += isActive ? '⭐' : '☆';
+          html += '</button>';
         }
-        area.innerHTML += `<div class="ca-rating__row"><span class="ca-rating__label">${item.label}</span><div class="ca-rating__stars">${starsHtml}</div></div>`;
+        html += '</div>';
+        html += '<span class="ca-rating__label" id="ratingLabel-' + phase.id + '">' + (r > 0 ? r + '/5' : 'Não avaliado') + '</span>';
+        html += '</div>';
+
+        // Comment
+        html += '<label for="comment-' + phase.id + '" class="sr-only">Comentário sobre ' + phase.name + '</label>';
+        html += '<textarea class="ca-textarea" id="comment-' + phase.id + '" ';
+        html += 'placeholder="Comentário: o que funcionou? O que pode melhorar nesta fase?" ';
+        html += 'aria-label="Comentário sobre ' + phase.name + '" ';
+        html += 'oninput="saveComment(\'' + phase.id + '\', this.value)">' + c + '</textarea>';
+
+        html += '</div>';
       });
+
+      container.innerHTML = html;
     }
 
-    function setRating(id, val) {
-      ratings[id] = val;
-      renderRatings();
+    // ── Rating ──
+    function setRating(phaseId, value) {
+      ratings[phaseId] = value;
+      renderPhases();
+      updateSummary();
+      autoSave();
     }
 
-    renderRatings();
-
-    // ============================================================
-    //  NPS
-    // ============================================================
-    let npsValue = -1;
-
-    function renderNps() {
-      const scale = document.getElementById('npsScale');
-      scale.innerHTML = '';
-      for (let i = 0; i <= 10; i++) {
-        let bg = '#EF5350'; // 0-6 detractor
-        if (i >= 7 && i <= 8) bg = '#FFC107'; // passive
-        if (i >= 9) bg = '#4CAF50'; // promoter
-        scale.innerHTML += `<div class="ca-nps__num ${npsValue === i ? 'selected' : ''}" style="${npsValue === i ? 'background:'+bg+';' : ''}" onclick="setNps(${i})">${i}</div>`;
+    function handleRatingKey(e, phaseId, current) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setRating(phaseId, current);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        var next = Math.min(5, current + 1);
+        setRating(phaseId, next);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        var prev = Math.max(1, current - 1);
+        setRating(phaseId, prev);
       }
     }
 
-    function setNps(val) {
-      npsValue = val;
-      renderNps();
+    function saveComment(phaseId, value) {
+      comments[phaseId] = value;
+      autoSave();
     }
 
-    renderNps();
+    // ── Summary chart ──
+    function updateSummary() {
+      var chart = document.getElementById('summaryChart');
+      var html = '';
+      var total = 0, count = 0;
 
-    // ============================================================
-    //  SUMMARY
-    // ============================================================
-    function generateSummary() {
-      const summary = document.getElementById('summaryScreen');
-      const grid = document.getElementById('summaryGrid');
+      phases.forEach(function(phase) {
+        var r = ratings[phase.id] || 0;
+        var pct = (r / 5) * 100;
+        if (r > 0) { total += r; count++; }
 
-      // Average rating
-      const ratingValues = Object.values(ratings).filter(v => v > 0);
-      const avgRating = ratingValues.length > 0 ? (ratingValues.reduce((a,b) => a+b, 0) / ratingValues.length).toFixed(1) : '—';
+        html += '<div class="ca-chart__bar">';
+        html += '<div class="ca-chart__label">' + phase.icon + ' ' + phase.tag.charAt(0).toUpperCase() + phase.tag.slice(1) + '</div>';
+        html += '<div class="ca-chart__track">';
+        html += '<div class="ca-chart__fill ca-chart__fill--' + phase.tag + '" style="width:' + pct + '%">';
+        html += r > 0 ? r + '/5' : '';
+        html += '</div></div>';
+        html += '<div class="ca-chart__value">' + (r > 0 ? r + '/5' : '—') + '</div>';
+        html += '</div>';
+      });
 
-      // NPS category
-      let npsLabel = '—';
-      if (npsValue >= 0) {
-        if (npsValue >= 9) npsLabel = '🟢 Promotor';
-        else if (npsValue >= 7) npsLabel = '🟡 Neutro';
-        else npsLabel = '🔴 Detrator';
+      chart.innerHTML = html;
+
+      var avg = count > 0 ? (total / count).toFixed(1) : '—';
+      document.getElementById('averageValue').textContent = avg;
+    }
+
+    // ── Export ──
+    function exportText() {
+      var text = '=== CANVAS DE AVALIAÇÃO — PI THINKING ===\n';
+      text += 'Data: ' + new Date().toLocaleDateString('pt-BR') + '\n\n';
+
+      text += '--- AVALIAÇÃO POR FASE ---\n\n';
+      phases.forEach(function(phase) {
+        var r = ratings[phase.id] || 0;
+        var c = comments[phase.id] || '';
+        text += phase.name + '\n';
+        text += 'Avaliação: ' + (r > 0 ? r + '/5 ' + '⭐'.repeat(r) : 'Não avaliado') + '\n';
+        text += 'Comentário: ' + (c || '(vazio)') + '\n\n';
+      });
+
+      text += '--- AVALIAÇÃO GERAL ---\n\n';
+      text += 'Pontos fortes: ' + (document.getElementById('genStrengths').value || '(vazio)') + '\n\n';
+      text += 'Pontos de melhoria: ' + (document.getElementById('genImprovements').value || '(vazio)') + '\n\n';
+      text += 'Principal aprendizado: ' + (document.getElementById('genLearning').value || '(vazio)') + '\n\n';
+      text += 'Próximos passos: ' + (document.getElementById('genNextSteps').value || '(vazio)') + '\n\n';
+
+      var total = 0, count = 0;
+      phases.forEach(function(p) { var r = ratings[p.id] || 0; if (r > 0) { total += r; count++; } });
+      text += 'Média geral: ' + (count > 0 ? (total / count).toFixed(1) + '/5' : 'Não calculada') + '\n';
+      text += '\n© 2025 PI Thinking — PROFNIT/UFRR\n';
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showToast('Texto copiado para a área de transferência!');
+        }).catch(function() {
+          fallbackExport(text);
+        });
+      } else {
+        fallbackExport(text);
       }
-
-      // GAF counts
-      const totalNotes = gafData.gostei.length + gafData.aprendi.length + gafData.faltou.length;
-
-      grid.innerHTML = `
-        <div class="ca-summary__item">
-          <div class="ca-summary__value">${avgRating}/5</div>
-          <div class="ca-summary__label">Nota média (${ratingValues.length} critérios)</div>
-        </div>
-        <div class="ca-summary__item">
-          <div class="ca-summary__value">${npsValue >= 0 ? npsValue+'/10' : '—'}</div>
-          <div class="ca-summary__label">NPS ${npsLabel}</div>
-        </div>
-        <div class="ca-summary__item">
-          <div class="ca-summary__value">${totalNotes}</div>
-          <div class="ca-summary__label">Notas GAF (${gafData.gostei.length}G + ${gafData.aprendi.length}A + ${gafData.faltou.length}F)</div>
-        </div>
-      `;
-
-      summary.classList.add('show');
-      summary.scrollIntoView({behavior:'smooth'});
     }
+
+    function fallbackExport(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast('Texto copiado!'); }
+      catch (e) { showToast('Não foi possível copiar. Selecione manualmente.'); }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(function() { el.classList.remove('show'); }, 2500);
+    }
+
+    // ── Clear ──
+    function clearCanvas() {
+      if (!confirm('Limpar todo o canvas de avaliação e dados salvos?')) return;
+      ratings = {};
+      comments = {};
+      document.getElementById('genStrengths').value = '';
+      document.getElementById('genImprovements').value = '';
+      document.getElementById('genLearning').value = '';
+      document.getElementById('genNextSteps').value = '';
+      renderPhases();
+      updateSummary();
+      if (typeof PIThinking !== 'undefined' && PIThinking.clearProgress) {
+        PIThinking.clearProgress('canvas-avaliacao');
+      }
+    }
+
+    // ── Persistence ──
+    function autoSave() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
+        PIThinking.saveProgress('canvas-avaliacao', {
+          ratings: ratings,
+          comments: comments,
+          genStrengths: document.getElementById('genStrengths').value,
+          genImprovements: document.getElementById('genImprovements').value,
+          genLearning: document.getElementById('genLearning').value,
+          genNextSteps: document.getElementById('genNextSteps').value
+        });
+      }
+    }
+
+    function loadSaved() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.loadProgress) {
+        var saved = PIThinking.loadProgress('canvas-avaliacao');
+        if (saved) {
+          ratings = saved.ratings || {};
+          comments = saved.comments || {};
+          var gs = document.getElementById('genStrengths');
+          if (gs && saved.genStrengths) gs.value = saved.genStrengths;
+          var gi = document.getElementById('genImprovements');
+          if (gi && saved.genImprovements) gi.value = saved.genImprovements;
+          var gl = document.getElementById('genLearning');
+          if (gl && saved.genLearning) gl.value = saved.genLearning;
+          var gn = document.getElementById('genNextSteps');
+          if (gn && saved.genNextSteps) gn.value = saved.genNextSteps;
+        }
+      }
+    }
+
+    // ── Theme ──
+    function toggleTheme() {
+      var html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    // ── Init ──
+    loadSaved();
+    renderPhases();
+    updateSummary();
   </script>
 </body>
 </html>

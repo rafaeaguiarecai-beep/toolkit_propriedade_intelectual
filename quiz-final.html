@@ -1,275 +1,948 @@
+<!--
+  Arquivo: quiz-final.html
+  Correções:
+    1. role="button", tabindex="0", keyboard handler nas opções
+    2. aria-live="polite" no container de questão
+    3. aria-label em botões com emoji
+    4. Persistência localStorage (PIThinking.saveProgress/loadProgress)
+    5. clearQuiz() limpa localStorage
+    6. Barra de progresso visual
+    7. Feedback com fundamentação legal e link para ferramenta
+    8. Resultado final com classificação e recomendações
+    9. Revisão de respostas ao final
+   10. Timer opcional (cronometrado ou livre)
+   11. Classe .sr-only
+   12. lang="pt-BR" confirmado
+  Dependências: style.css, script.js
+-->
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quiz Final — PI Thinking</title>
-  <meta name="description" content="Quiz final de PI com 10 questões avançadas. Compare com o Quiz Diagnóstico e meça sua evolução.">
+  <meta name="description" content="Quiz final de avaliação de conhecimentos em Propriedade Intelectual. 20 questões cobrindo todas as fases do toolkit PI Thinking.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --qf-bg:#F3E5F5;--qf-surface:#FFFFFF;--qf-accent:#9C27B0;--qf-accent-dark:#6A1B9A;
-      --qf-text:#212121;--qf-text-light:#757575;--qf-border:#CE93D8;--qf-radius:16px;
-      --qf-shadow:0 2px 12px rgba(156,39,176,.12);--qf-green:#4CAF50;--qf-red:#EF5350;
+    :root {
+      --qf-bg: #F5F0FF;
+      --qf-surface: #FFFFFF;
+      --qf-accent: #6C63FF;
+      --qf-accent-light: #8B83FF;
+      --qf-accent-bg: rgba(108,99,255,.08);
+      --qf-text: #212121;
+      --qf-text-light: #616161;
+      --qf-border: #D1C4E9;
+      --qf-green: #00C853;
+      --qf-green-bg: #E8F5E9;
+      --qf-red: #D50000;
+      --qf-red-bg: #FFEBEE;
+      --qf-gold: #FFD600;
+      --qf-gold-bg: #FFFDE7;
+      --qf-radius: 16px;
+      --qf-shadow: 0 2px 12px rgba(108,99,255,.10);
     }
-    @media(prefers-color-scheme:dark){:root{--qf-bg:#1a0e1a;--qf-surface:#2a1a2a;--qf-text:#f5f0f5;--qf-text-light:#b8a0b8;--qf-border:#3a1e3a;--qf-shadow:0 2px 12px rgba(0,0,0,.4);}}
-    body.qf-page{font-family:'Inter',sans-serif;background:var(--qf-bg);color:var(--qf-text);margin:0;padding:0;line-height:1.7;}
-    .qf-cover{background:linear-gradient(135deg,#BA68C8 0%,#9C27B0 50%,#6A1B9A 100%);color:#fff;padding:3.5rem 2rem 2.5rem;text-align:center;}
-    .qf-cover__overline{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;opacity:.9;}
-    .qf-cover__title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);margin:.5rem 0;}
-    .qf-cover__sub{font-size:1.05rem;opacity:.92;max-width:600px;margin:.5rem auto 0;}
-    .qf-container{max-width:800px;margin:0 auto;padding:2rem 1.5rem;}
+    [data-theme="dark"] {
+      --qf-bg: #0d0b1a;
+      --qf-surface: #1a1530;
+      --qf-accent: #8B83FF;
+      --qf-accent-light: #A59BFF;
+      --qf-accent-bg: rgba(139,131,255,.12);
+      --qf-text: #e8e6f0;
+      --qf-text-light: #9e99b8;
+      --qf-border: #2d2650;
+      --qf-green: #69F0AE;
+      --qf-green-bg: rgba(105,240,174,.1);
+      --qf-red: #FF5252;
+      --qf-red-bg: rgba(255,82,82,.1);
+      --qf-gold: #FFD740;
+      --qf-gold-bg: rgba(255,215,64,.1);
+      --qf-shadow: 0 2px 12px rgba(0,0,0,.4);
+    }
 
-    /* PROGRESS */
-    .qf-progress{background:var(--qf-border);height:8px;border-radius:4px;margin-bottom:1rem;overflow:hidden;}
-    .qf-progress__fill{height:100%;background:linear-gradient(90deg,var(--qf-accent),#E040FB);border-radius:4px;transition:width .5s;}
-    .qf-progress__label{text-align:center;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--qf-accent-dark);margin-bottom:1.5rem;}
+    body.qf-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--qf-bg); color: var(--qf-text);
+      margin: 0; padding: 0; line-height: 1.7;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
 
-    /* QUESTION */
-    .qf-question{background:var(--qf-surface);border:2px solid var(--qf-border);border-radius:var(--qf-radius);padding:2rem;box-shadow:var(--qf-shadow);margin-bottom:1.5rem;display:none;}
-    .qf-question.active{display:block;animation:fadeIn .4s;}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .qf-question__cat{font-family:'Poppins',sans-serif;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:.2rem .6rem;border-radius:10px;color:#fff;display:inline-block;margin-bottom:.5rem;}
-    .qf-question__text{font-family:'Poppins',sans-serif;font-size:1.1rem;font-weight:600;margin:.5rem 0 1rem;}
-    .qf-question__opts{display:flex;flex-direction:column;gap:.5rem;}
-    .qf-opt{padding:.7rem 1rem;border:2px solid var(--qf-border);border-radius:10px;cursor:pointer;font-size:.92rem;transition:all .2s;background:var(--qf-bg);}
-    .qf-opt:hover{border-color:var(--qf-accent);background:rgba(156,39,176,.05);}
-    .qf-opt.correct{border-color:var(--qf-green);background:rgba(76,175,80,.12);}
-    .qf-opt.wrong{border-color:var(--qf-red);background:rgba(239,83,80,.08);}
-    .qf-opt.disabled{pointer-events:none;opacity:.7;}
-    .qf-feedback{margin-top:1rem;padding:1rem;border-radius:8px;font-size:.88rem;display:none;}
-    .qf-feedback.show{display:block;}
-    .qf-feedback.success{background:rgba(76,175,80,.1);border:1px solid var(--qf-green);}
-    .qf-feedback.fail{background:rgba(239,83,80,.1);border:1px solid var(--qf-red);}
-    .qf-legal{margin-top:.5rem;font-size:.8rem;color:var(--qf-text-light);background:var(--qf-bg);padding:.5rem .8rem;border-radius:6px;}
-    .qf-next{margin-top:1rem;font-family:'Poppins',sans-serif;font-weight:600;padding:.6rem 1.5rem;border:none;border-radius:20px;background:var(--qf-accent);color:#fff;cursor:pointer;display:none;}
+    /* ── Cover ── */
+    .qf-cover {
+      background: linear-gradient(135deg, #6C63FF 0%, #5A4FCF 50%, #4527A0 100%);
+      color: #fff; padding: 4rem 2rem 3rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .qf-cover::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 30% 40%, rgba(255,255,255,.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 60%, rgba(255,214,0,.06) 0%, transparent 50%);
+    }
+    .qf-cover__overline {
+      font-family: 'Poppins', sans-serif; font-size: .85rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 3px; opacity: .9; position: relative;
+    }
+    .qf-cover__title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem); margin: .5rem 0; position: relative;
+    }
+    .qf-cover__sub {
+      font-size: 1.1rem; opacity: .92; max-width: 640px; margin: .5rem auto 0; position: relative;
+    }
+    .qf-cover__meta {
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 1.5rem; font-size: .9rem; position: relative;
+    }
+    .qf-cover__meta span {
+      background: rgba(255,255,255,.15); padding: .35rem .8rem; border-radius: 20px;
+    }
 
-    /* RESULT */
-    .qf-result{background:var(--qf-surface);border:3px solid var(--qf-accent);border-radius:var(--qf-radius);padding:2.5rem;text-align:center;display:none;}
-    .qf-result.show{display:block;animation:fadeIn .5s;}
-    .qf-result h2{font-family:'Playfair Display',serif;color:var(--qf-accent-dark);}
-    .qf-result__score{font-family:'Poppins',sans-serif;font-size:3.5rem;font-weight:800;color:var(--qf-accent);}
+    /* ── Container ── */
+    .qf-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    /* COMPARATOR */
-    .qf-comparator{background:var(--qf-surface);border-radius:var(--qf-radius);padding:2rem;margin-top:2rem;box-shadow:var(--qf-shadow);}
-    .qf-comparator h3{font-family:'Poppins',sans-serif;color:var(--qf-accent-dark);margin-top:0;}
-    .qf-comparator__input{display:flex;gap:.8rem;align-items:center;margin:1rem 0;flex-wrap:wrap;}
-    .qf-comparator__input label{font-weight:600;font-size:.9rem;}
-    .qf-comparator__input input{font-family:'Inter',sans-serif;font-size:1rem;padding:.5rem;border:2px solid var(--qf-border);border-radius:8px;width:80px;text-align:center;background:var(--qf-bg);color:var(--qf-text);}
-    .qf-comparator__result{text-align:center;padding:1.5rem;border-radius:12px;margin-top:1rem;display:none;}
-    .qf-comparator__result.show{display:block;}
-    .qf-comparator__bars{display:flex;gap:2rem;justify-content:center;align-items:flex-end;margin:1rem 0;}
-    .qf-comparator__bar{text-align:center;}
-    .qf-comparator__bar-fill{width:80px;border-radius:8px 8px 0 0;transition:height .5s;margin:0 auto;}
-    .qf-comparator__bar-label{font-family:'Poppins',sans-serif;font-weight:700;font-size:.85rem;margin-top:.3rem;}
+    /* ── Progress ── */
+    .qf-progress { background: var(--qf-border); border-radius: 12px; height: 10px; margin-bottom: .5rem; overflow: hidden; }
+    .qf-progress__fill {
+      background: linear-gradient(90deg, var(--qf-accent), var(--qf-gold));
+      height: 100%; border-radius: 12px; transition: width .4s ease;
+    }
+    .qf-progress__label {
+      font-family: 'Poppins', sans-serif; font-size: .8rem; font-weight: 600;
+      color: var(--qf-text-light); text-align: center; margin-bottom: 1rem;
+    }
 
-    .qf-btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;padding:.7rem 1.5rem;border:none;border-radius:30px;cursor:pointer;transition:transform .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
-    .qf-btn:hover{transform:translateY(-2px);}
-    .qf-btn--primary{background:var(--qf-accent);color:#fff;}
-    .qf-btn--outline{background:transparent;border:2px solid var(--qf-accent);color:var(--qf-accent-dark);}
-    .qf-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin:2rem 0;}
-    .qf-footer{text-align:center;padding:2rem;font-size:.82rem;color:var(--qf-text-light);border-top:1px solid var(--qf-border);margin-top:2rem;}
-    .qf-footer a{color:var(--qf-accent-dark);}
+    /* ── Stats ── */
+    .qf-stats {
+      display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem;
+    }
+    .qf-stat {
+      background: var(--qf-surface); border: 1px solid var(--qf-border);
+      border-radius: 12px; padding: .4rem .8rem; text-align: center; min-width: 80px;
+    }
+    .qf-stat__value {
+      font-family: 'Poppins', sans-serif; font-weight: 800;
+      font-size: 1.1rem; color: var(--qf-accent);
+    }
+    .qf-stat__label {
+      font-size: .7rem; color: var(--qf-text-light); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
 
-    @media print{.qf-question{display:block!important;break-inside:avoid;}.qf-next,.qf-actions{display:none!important;}@page{size:A4;margin:1.5cm;}}
+    /* ── Setup section ── */
+    .qf-setup {
+      background: var(--qf-surface); border: 2px solid var(--qf-border);
+      border-radius: var(--qf-radius); padding: 2rem; text-align: center;
+      box-shadow: var(--qf-shadow); margin-bottom: 1.5rem;
+    }
+    .qf-setup h2 { font-family: 'Poppins', sans-serif; color: var(--qf-accent); margin-top: 0; }
+    .qf-setup input, .qf-setup select {
+      font-family: 'Inter', sans-serif; font-size: 1rem; padding: .6rem 1rem;
+      border: 2px solid var(--qf-border); border-radius: 8px;
+      background: var(--qf-bg); color: var(--qf-text); box-sizing: border-box;
+    }
+    .qf-setup input:focus-visible, .qf-setup select:focus-visible {
+      outline: 3px solid var(--qf-accent); outline-offset: 2px;
+    }
+    .qf-setup__row { margin: 1rem 0; }
+    .qf-setup__row label { display: block; font-weight: 600; margin-bottom: .3rem; font-size: .9rem; }
+
+    /* ── Question card ── */
+    .qf-question {
+      background: var(--qf-surface); border: 2px solid var(--qf-border);
+      border-radius: var(--qf-radius); padding: 2rem;
+      box-shadow: var(--qf-shadow); margin-bottom: 1.5rem;
+    }
+    .qf-question__header {
+      display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem;
+    }
+    .qf-question__phase {
+      font-family: 'Poppins', sans-serif; font-size: .75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2px; color: var(--qf-accent);
+      background: var(--qf-accent-bg); padding: .2rem .7rem; border-radius: 12px;
+    }
+    .qf-question__num {
+      font-family: 'Poppins', sans-serif; font-size: .75rem; font-weight: 700;
+      color: var(--qf-text-light);
+    }
+    .qf-question__text {
+      font-size: 1.05rem; font-weight: 600; margin-bottom: 1.2rem; line-height: 1.6;
+    }
+
+    /* ── Options ── */
+    .qf-options { display: flex; flex-direction: column; gap: .5rem; }
+    .qf-option {
+      background: var(--qf-bg); border: 2px solid var(--qf-border);
+      border-radius: 12px; padding: .7rem 1rem; cursor: pointer;
+      transition: all .2s; font-size: .92rem;
+      display: flex; align-items: flex-start; gap: .6rem;
+    }
+    .qf-option:hover { border-color: var(--qf-accent); background: var(--qf-accent-bg); }
+    .qf-option:focus-visible { outline: 3px solid var(--qf-accent); outline-offset: 2px; }
+    .qf-option__letter {
+      font-family: 'Poppins', sans-serif; font-weight: 800; color: var(--qf-accent);
+      font-size: .85rem; flex-shrink: 0; min-width: 22px;
+    }
+    .qf-option.correct { border-color: var(--qf-green); background: var(--qf-green-bg); }
+    .qf-option.correct .qf-option__letter { color: var(--qf-green); }
+    .qf-option.wrong { border-color: var(--qf-red); background: var(--qf-red-bg); }
+    .qf-option.wrong .qf-option__letter { color: var(--qf-red); }
+    .qf-option.disabled { pointer-events: none; opacity: .5; }
+
+    /* ── Feedback ── */
+    .qf-feedback {
+      margin-top: 1rem; padding: 1rem; border-radius: 12px; font-size: .9rem; display: none;
+    }
+    .qf-feedback.show { display: block; animation: qfFadeIn .3s ease; }
+    .qf-feedback--correct { background: var(--qf-green-bg); color: var(--qf-green); border: 1px solid var(--qf-green); }
+    .qf-feedback--wrong { background: var(--qf-red-bg); color: var(--qf-red); border: 1px solid var(--qf-red); }
+    .qf-feedback a { color: inherit; text-decoration: underline; font-weight: 600; }
+    @keyframes qfFadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Buttons ── */
+    .qf-btn {
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .95rem;
+      padding: .7rem 1.5rem; border: none; border-radius: 30px;
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .qf-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .qf-btn:focus-visible { outline: 3px solid var(--qf-accent); outline-offset: 2px; }
+    .qf-btn--primary { background: var(--qf-accent); color: #fff; }
+    .qf-btn--gold { background: var(--qf-gold); color: #1a1a2e; }
+    .qf-btn--outline { background: transparent; border: 2px solid var(--qf-accent); color: var(--qf-accent); }
+    .qf-btn--danger { background: var(--qf-red); color: #fff; }
+
+    .qf-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 1.5rem 0; }
+
+    /* ── Result ── */
+    .qf-result {
+      background: var(--qf-surface); border: 2px solid var(--qf-border);
+      border-radius: var(--qf-radius); padding: 2.5rem; text-align: center;
+      box-shadow: var(--qf-shadow); display: none;
+    }
+    .qf-result.show { display: block; animation: qfFadeIn .5s ease; }
+    .qf-result__badge { font-size: 4rem; margin-bottom: .5rem; }
+    .qf-result__title {
+      font-family: 'Playfair Display', serif; font-size: 1.6rem;
+      color: var(--qf-accent); margin-bottom: .3rem;
+    }
+    .qf-result__score {
+      font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 800;
+      color: var(--qf-accent);
+    }
+    .qf-result__details {
+      font-size: .95rem; color: var(--qf-text-light); margin: 1rem 0;
+    }
+    .qf-result__details span {
+      display: inline-block; background: var(--qf-accent-bg);
+      padding: .3rem .8rem; border-radius: 15px; margin: .3rem;
+    }
+    .qf-result__classification {
+      background: var(--qf-accent-bg); border-radius: 12px;
+      padding: 1.2rem; margin: 1.5rem 0; text-align: left; font-size: .9rem;
+    }
+    .qf-result__classification strong { color: var(--qf-accent); }
+    .qf-result__recs {
+      text-align: left; margin: 1rem 0; font-size: .88rem;
+    }
+    .qf-result__recs p { margin: .4rem 0; }
+    .qf-result__recs a { color: var(--qf-accent); font-weight: 600; }
+
+    /* ── Review ── */
+    .qf-review { margin: 2rem 0; text-align: left; display: none; }
+    .qf-review.show { display: block; }
+    .qf-review h3 { font-family: 'Poppins', sans-serif; color: var(--qf-accent); }
+    .qf-review__item {
+      background: var(--qf-surface); border: 1px solid var(--qf-border);
+      border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: .8rem;
+    }
+    .qf-review__item--correct { border-left: 4px solid var(--qf-green); }
+    .qf-review__item--wrong { border-left: 4px solid var(--qf-red); }
+    .qf-review__q { font-weight: 600; font-size: .9rem; margin-bottom: .3rem; }
+    .qf-review__a { font-size: .85rem; color: var(--qf-text-light); }
+    .qf-review__a strong { color: var(--qf-green); }
+    .qf-review__a em { color: var(--qf-red); }
+
+    /* ── Footer ── */
+    .qf-footer {
+      text-align: center; padding: 2rem; font-size: .82rem;
+      color: var(--qf-text-light); border-top: 1px solid var(--qf-border); margin-top: 2rem;
+    }
+    .qf-footer a { color: var(--qf-accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .qf-cover { padding: 2.5rem 1rem 2rem; }
+      .qf-question, .qf-result { padding: 1.2rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      .qf-cover, .qf-stats, .qf-progress, .qf-actions, .qf-setup { display: none !important; }
+      .qf-result { border: 2px solid #6C63FF; box-shadow: none; }
+      .qf-review__item { break-inside: avoid; }
+      @page { size: A4 portrait; margin: 1.5cm; }
+    }
   </style>
 </head>
 <body class="qf-page">
 
+  <!-- Theme toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro"
+    style="position:fixed;top:1rem;right:1rem;z-index:999;background:var(--qf-surface);border:2px solid var(--qf-border);border-radius:50%;width:44px;height:44px;font-size:1.3rem;cursor:pointer;">
+    🌗
+  </button>
+
+  <!-- Cover -->
   <header class="qf-cover">
-    <div class="qf-cover__overline">Fase 5 — Avaliar</div>
+    <div class="qf-cover__overline">Fase 5 — Refletir</div>
     <h1 class="qf-cover__title">Quiz Final</h1>
-    <p class="qf-cover__sub">10 questões avançadas de PI. Compare seu resultado com o Quiz Diagnóstico e meça sua evolução!</p>
+    <p class="qf-cover__sub">20 questões para avaliar seus conhecimentos em Propriedade Intelectual após completar o toolkit PI Thinking.</p>
+    <div class="qf-cover__meta">
+      <span>📝 20 questões</span>
+      <span>⏱ 20–30 min</span>
+      <span>👤 Individual</span>
+      <span>🏆 Certificado ao final</span>
+    </div>
   </header>
 
   <main class="qf-container">
-    <div class="qf-progress"><div class="qf-progress__fill" id="progressFill" style="width:0%"></div></div>
-    <div class="qf-progress__label" id="progressLabel">Questão 1 de 10</div>
 
-    <div id="quizArea"></div>
+    <!-- Setup -->
+    <section class="qf-setup" id="setupSection">
+      <h2>🎓 Configuração do Quiz</h2>
+      <div class="qf-setup__row">
+        <label for="quizName">Seu nome</label>
+        <input type="text" id="quizName" placeholder="Nome completo" maxlength="60" style="width:100%;max-width:400px;" aria-label="Digite seu nome para o resultado">
+      </div>
+      <div class="qf-setup__row">
+        <label for="quizMode">Modo</label>
+        <select id="quizMode" aria-label="Selecione modo cronometrado ou livre">
+          <option value="timed">⏱ Cronometrado (30 minutos)</option>
+          <option value="free">📖 Livre (sem limite de tempo)</option>
+        </select>
+      </div>
+      <br>
+      <button class="qf-btn qf-btn--primary" onclick="startQuiz()" aria-label="Iniciar o quiz final">🚀 Iniciar Quiz</button>
+    </section>
 
-    <!-- RESULT -->
-    <div class="qf-result" id="resultScreen">
-      <h2>🎓 Resultado Final</h2>
-      <div class="qf-result__score" id="finalScore"></div>
-      <p id="finalMessage"></p>
-      <p style="font-size:.9rem;">Seu código de resultado: <strong id="finalCode"></strong></p>
+    <!-- Game area -->
+    <div id="quizArea" style="display:none;">
+      <div class="qf-progress">
+        <div class="qf-progress__fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="qf-progress__label" id="progressLabel">Questão 0 / 20</div>
 
-      <!-- COMPARATOR -->
-      <div class="qf-comparator">
-        <h3>📊 Compare com o Quiz Diagnóstico</h3>
-        <p style="font-size:.9rem;">Informe sua nota do Quiz Diagnóstico (código D-X) para visualizar a evolução.</p>
-        <div class="qf-comparator__input">
-          <label>Nota Diagnóstico (D-):</label>
-          <input type="number" id="diagScore" min="0" max="10" placeholder="0-10">
-          <button class="qf-btn qf-btn--primary" onclick="compareScores()" style="font-size:.85rem;padding:.4rem 1rem;">Comparar</button>
+      <div class="qf-stats">
+        <div class="qf-stat">
+          <div class="qf-stat__value" id="timerDisplay" role="timer" aria-live="off">30:00</div>
+          <div class="qf-stat__label">Tempo</div>
         </div>
-        <div class="qf-comparator__result" id="compareResult">
-          <div class="qf-comparator__bars" id="compareBars"></div>
-          <p id="compareMessage" style="font-family:'Poppins',sans-serif;font-weight:600;font-size:1.1rem;"></p>
+        <div class="qf-stat">
+          <div class="qf-stat__value" id="correctDisplay">0</div>
+          <div class="qf-stat__label">Acertos</div>
+        </div>
+        <div class="qf-stat">
+          <div class="qf-stat__value" id="wrongDisplay">0</div>
+          <div class="qf-stat__label">Erros</div>
         </div>
       </div>
 
-      <div class="qf-actions" style="margin-top:2rem;">
-        <button class="qf-btn qf-btn--primary" onclick="window.print()">🖨️ Imprimir</button>
-        <button class="qf-btn qf-btn--outline" onclick="resetQuiz()">↺ Refazer</button>
-        <a href="canvas-avaliacao.html" class="qf-btn qf-btn--outline">📝 Canvas de Avaliação</a>
+      <div id="questionContainer" aria-live="polite"></div>
+
+      <div class="qf-actions" id="quizActions">
+        <button class="qf-btn qf-btn--danger" onclick="restartQuiz()" aria-label="Reiniciar o quiz">🔄 Reiniciar</button>
         <a href="index.html" class="qf-btn qf-btn--outline">🏠 Toolkit</a>
       </div>
     </div>
+
+    <!-- Result -->
+    <div class="qf-result" id="resultSection">
+      <div class="qf-result__badge" id="resultBadge">🏆</div>
+      <div class="qf-result__title" id="resultTitle">Resultado</div>
+      <div class="qf-result__score" id="resultScore">0%</div>
+      <div id="resultName" style="font-family:'Poppins';font-weight:700;font-size:1.1rem;margin:.5rem 0;"></div>
+      <div class="qf-result__details" id="resultDetails"></div>
+      <div class="qf-result__classification" id="resultClass"></div>
+      <div class="qf-result__recs" id="resultRecs"></div>
+      <br>
+      <div class="qf-actions">
+        <button class="qf-btn qf-btn--primary" onclick="toggleReview()" aria-label="Ver revisão de todas as respostas">📋 Revisar Respostas</button>
+        <button class="qf-btn qf-btn--gold" onclick="window.print()" aria-label="Imprimir resultado">🖨️ Imprimir</button>
+        <button class="qf-btn qf-btn--outline" onclick="restartQuiz()" aria-label="Refazer o quiz">🔄 Refazer</button>
+        <a href="canvas-avaliacao.html" class="qf-btn qf-btn--outline">📋 Canvas de Avaliação</a>
+        <a href="pi-quest.html" class="qf-btn qf-btn--outline">🎮 PI Quest</a>
+        <a href="index.html" class="qf-btn qf-btn--outline">🏠 Toolkit</a>
+      </div>
+    </div>
+
+    <!-- Review -->
+    <div class="qf-review" id="reviewSection"></div>
+
   </main>
 
+  <!-- Footer -->
   <footer class="qf-footer">
-    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY‑NC‑SA 4.0</a></p>
+    <p>Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener noreferrer">Lei 9.279/96</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank" rel="noopener noreferrer">Lei 9.610/98</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank" rel="noopener noreferrer">Lei 9.609/98</a></p>
   </footer>
 
+  <!-- Scripts -->
+  <script src="script.js"></script>
   <script>
-    const quizData = [
-      {cat:'Patentes',catColor:'#2196F3',q:'Uma pesquisadora publicou artigo sobre nova molécula em março de 2026. Até quando ela pode depositar patente no Brasil sem perder a novidade?',opts:['Setembro de 2026','Março de 2027','Março de 2028','Já perdeu a novidade'],correct:1,legal:'Art. 12, Lei 9.279/96: período de graça de 12 meses. Publicação em março/2026 → pode depositar até março/2027.'},
-      {cat:'Marcas',catColor:'#FF9800',q:'Uma empresa registrou a marca "AmazonFresh" na classe 29 (alimentos). Outra empresa pode registrar "AmazonFresh" na classe 25 (vestuário)?',opts:['Não, a marca é protegida em todas as classes','Sim, desde que não haja confusão entre consumidores e a marca não seja de alto renome','Depende do faturamento da empresa','Apenas se for multinacional'],correct:1,legal:'Art. 124, XIX, LPI: a proteção de marca é limitada à classe registrada (princípio da especialidade), salvo marcas de alto renome (art. 125).'},
-      {cat:'Direito Autoral',catColor:'#4CAF50',q:'Um professor criou um material didático durante o expediente na universidade. De quem são os direitos patrimoniais?',opts:['Do professor (autor)','Da universidade (empregadora)','Compartilhados igualmente','Do MEC'],correct:1,legal:'Art. 4º, Lei 9.609/98 e art. 11, Lei 10.973/2004: obras criadas em relação de emprego/vínculo com ICT — titularidade patrimonial é do empregador/ICT, salvo disposição contratual em contrário.'},
-      {cat:'Biodiversidade',catColor:'#1B5E20',q:'Um laboratório quer usar óleo de murmuru (planta amazônica) para desenvolver cosmético. O que deve fazer ANTES de iniciar a pesquisa?',opts:['Registrar patente no INPI','Cadastrar o acesso no SisGen','Consultar o IBAMA','Nada — plantas são de domínio público'],correct:1,legal:'Art. 12, Lei 13.123/2015: o acesso a patrimônio genético deve ser cadastrado no SisGen. Se envolver CTA de origem identificável, exige consentimento prévio informado.'},
-      {cat:'Estratégia',catColor:'#FFC107',q:'Qual a vigência de proteção de um programa de computador (software) no Brasil?',opts:['20 anos do depósito','50 anos da criação/publicação','70 anos post-mortem','Indefinida'],correct:1,legal:'Art. 2º, §2º, Lei 9.609/98: vigência de 50 anos a partir de 1º de janeiro do ano seguinte à publicação ou, na ausência desta, da criação.'},
-      {cat:'Patentes',catColor:'#2196F3',q:'Um inventor criou um novo formato ergonômico de mouse. Qual tipo de proteção é mais adequado para a FORMA do objeto?',opts:['Patente de Invenção','Modelo de Utilidade','Desenho Industrial','Direito Autoral'],correct:2,legal:'Art. 95, Lei 9.279/96: Desenho Industrial protege a forma plástica ornamental de objeto com resultado visual novo e original. A funcionalidade seria protegida por patente/MU.'},
-      {cat:'Biodiversidade',catColor:'#1B5E20',q:'Qual a primeira Indicação Geográfica de Roraima, reconhecida pelo INPI em 2024?',opts:['Café de Pacaraima','Panela de Barro da Raposa','Farinha de mandioca de Normandia','Mel de abelha do Lavrado'],correct:1,legal:'IG "Raposa" (Indicação de Procedência) — panela de barro produzida na Comunidade Indígena Raposa I, Normandia/RR. Publicada na RPI em agosto de 2024.'},
-      {cat:'Estratégia',catColor:'#FFC107',q:'Uma ICT pública do Norte pretende depositar patente. Qual o desconto sobre as taxas do INPI?',opts:['25%','50%','75%','Isenção total'],correct:1,legal:'Portaria INPI/PR nº 10/2025: desconto de 50% para ICTs, pessoas físicas, MEIs, ME/EPPs, cooperativas, instituições de ensino e pesquisa, entidades sem fins lucrativos.'},
-      {cat:'Marcas',catColor:'#FF9800',q:'Qual foi o resultado do caso da marca "cupuaçu" registrada pela Asahi Foods no Japão?',opts:['O registro foi mantido','O registro foi cancelado após pressão internacional','O Brasil comprou a marca','A Asahi Foods licenciou para o Brasil'],correct:1,legal:'Em 2004, o escritório japonês cancelou o registro da marca "cupuaçu" após campanha de ONGs brasileiras e internacionais (GTA, IPAAM, entre outros).'},
-      {cat:'Desafio',catColor:'#E53935',q:'Qual instrumento legal permite a um governo autorizar a produção de medicamento patenteado sem consentimento do titular, em casos de emergência de saúde pública?',opts:['Nulidade administrativa','Licença compulsória','Caducidade','Extensão de vigência'],correct:1,legal:'Arts. 68–74, Lei 9.279/96 e art. 31 do TRIPS: licença compulsória por interesse público, emergência nacional ou dependência. Ex.: Decreto 6.108/2007 (Efavirenz).'}
+    /* ================================================================
+       QUIZ FINAL — PI Thinking
+       ================================================================ */
+
+    const questions = [
+      {
+        id:1, phase:'Fase 1 — Sentir', icon:'👤',
+        text:'No Mapa de Empatia, o quadrante "O que PENSA e SENTE" refere-se a:',
+        options:[
+          {letter:'A',text:'O que a persona fala em público sobre PI.'},
+          {letter:'B',text:'Preocupações internas, medos e aspirações da persona em relação à proteção da sua criação.'},
+          {letter:'C',text:'Os dados demográficos da persona.'},
+          {letter:'D',text:'As ferramentas digitais que a persona usa.'}
+        ],
+        correct:'B',
+        feedback:'O quadrante "Pensa e Sente" captura os <strong>pensamentos internos, medos e desejos</strong> da persona — o que ela não necessariamente expressa publicamente.',
+        legal:'Metodologia Design Thinking — Mapa de Empatia',
+        tool:{name:'Mapa de Empatia',url:'mapa-empatia.html'}
+      },
+      {
+        id:2, phase:'Fase 1 — Sentir', icon:'🎴',
+        text:'Qual é o principal objetivo das Cartas Personas no toolkit PI Thinking?',
+        options:[
+          {letter:'A',text:'Definir os tipos de proteção de PI disponíveis.'},
+          {letter:'B',text:'Criar empatia com diferentes perfis de criadores e seus dilemas de PI.'},
+          {letter:'C',text:'Calcular custos de registro.'},
+          {letter:'D',text:'Listar a legislação brasileira de PI.'}
+        ],
+        correct:'B',
+        feedback:'As Cartas Personas criam <strong>empatia</strong> com perfis diversos de criadores, ajudando a entender suas dores, contextos e necessidades de proteção.',
+        legal:'Metodologia PI Thinking — Fase Sentir',
+        tool:{name:'Cartas Personas',url:'cartas-personas.html'}
+      },
+      {
+        id:3, phase:'Fase 2 — Diagnosticar', icon:'🔍',
+        text:'O Canvas de Diagnóstico serve para:',
+        options:[
+          {letter:'A',text:'Registrar a patente junto ao INPI.'},
+          {letter:'B',text:'Mapear a situação atual da criação: tipo de PI, maturidade (TRL), contexto, ameaças e oportunidades.'},
+          {letter:'C',text:'Calcular o tempo de vigência da proteção.'},
+          {letter:'D',text:'Gerar o certificado de registro.'}
+        ],
+        correct:'B',
+        feedback:'O Canvas de Diagnóstico é uma ferramenta de <strong>mapeamento situacional</strong> que identifica tipo de PI, maturidade tecnológica, contexto, ameaças e oportunidades.',
+        legal:'Metodologia PI Thinking — Fase Diagnosticar',
+        tool:{name:'Canvas de Diagnóstico',url:'canvas-diagnostico.html'}
+      },
+      {
+        id:4, phase:'Fase 2 — Diagnosticar', icon:'🌳',
+        text:'Na Árvore de Decisão, se a criação é um "sinal visualmente perceptível que identifica produtos ou serviços", o resultado mais provável é:',
+        options:[
+          {letter:'A',text:'Patente de Invenção.'},
+          {letter:'B',text:'Direito Autoral.'},
+          {letter:'C',text:'Marca.'},
+          {letter:'D',text:'Indicação Geográfica.'}
+        ],
+        correct:'C',
+        feedback:'A definição de <strong>marca</strong> no Art. 122 da LPI é exatamente um "sinal visualmente perceptível" que distingue produtos ou serviços.',
+        legal:'Lei 9.279/96, Art. 122',
+        tool:{name:'Árvore de Decisão',url:'arvore.html'}
+      },
+      {
+        id:5, phase:'Fase 2 — Diagnosticar', icon:'⏳',
+        text:'Uma patente de invenção no Brasil tem vigência de:',
+        options:[
+          {letter:'A',text:'10 anos a partir do depósito.'},
+          {letter:'B',text:'15 anos a partir do depósito.'},
+          {letter:'C',text:'20 anos a partir do depósito.'},
+          {letter:'D',text:'25 anos a partir da concessão.'}
+        ],
+        correct:'C',
+        feedback:'A patente de invenção tem vigência de <strong>20 anos a partir do depósito</strong> (Art. 40, LPI).',
+        legal:'Lei 9.279/96, Art. 40',
+        tool:{name:'Calculadora de Vigência',url:'calculadora.html'}
+      },
+      {
+        id:6, phase:'Fase 2 — Diagnosticar', icon:'📖',
+        text:'O que significa "período de graça" na legislação de patentes brasileira?',
+        options:[
+          {letter:'A',text:'Período de desconto nas taxas do INPI.'},
+          {letter:'B',text:'12 meses em que a divulgação pelo inventor não destrói a novidade da invenção.'},
+          {letter:'C',text:'Período de tramitação acelerada (PPH).'},
+          {letter:'D',text:'Prazo para pagar anuidades atrasadas.'}
+        ],
+        correct:'B',
+        feedback:'O período de graça (Art. 11 §1, LPI) são <strong>12 meses</strong> em que a divulgação feita pelo inventor ou por terceiros com base em informações do inventor não prejudica a novidade.',
+        legal:'Lei 9.279/96, Art. 11 §1',
+        tool:{name:'Glossário',url:'glossario.html'}
+      },
+      {
+        id:7, phase:'Fase 2 — Diagnosticar', icon:'⏱️',
+        text:'Na Linha do Tempo da PI no Brasil, a Lei 9.279 (LPI) foi promulgada em:',
+        options:[
+          {letter:'A',text:'1883.'},
+          {letter:'B',text:'1970.'},
+          {letter:'C',text:'1996.'},
+          {letter:'D',text:'2004.'}
+        ],
+        correct:'C',
+        feedback:'A Lei 9.279 (Lei da Propriedade Industrial) foi promulgada em <strong>14 de maio de 1996</strong>.',
+        legal:'Lei 9.279/1996',
+        tool:{name:'Linha do Tempo',url:'linha-do-tempo.html'}
+      },
+      {
+        id:8, phase:'Fase 3 — Estrategar', icon:'⚡',
+        text:'No Crazy 8s da PI, o objetivo principal é:',
+        options:[
+          {letter:'A',text:'Escrever 8 páginas de relatório de patente.'},
+          {letter:'B',text:'Gerar 8 estratégias diferentes de proteção em 8 minutos, priorizando quantidade sobre qualidade.'},
+          {letter:'C',text:'Avaliar 8 tipos de proteção de PI.'},
+          {letter:'D',text:'Registrar 8 marcas diferentes.'}
+        ],
+        correct:'B',
+        feedback:'O Crazy 8s força a <strong>geração rápida de ideias</strong> — 8 estratégias em 8 minutos — priorizando quantidade e criatividade antes da avaliação.',
+        legal:'Técnica adaptada do Design Sprint (Google)',
+        tool:{name:'Crazy 8s',url:'crazy8s.html'}
+      },
+      {
+        id:9, phase:'Fase 3 — Estrategar', icon:'📐',
+        text:'O Canvas de Estratégia de PI integra informações sobre:',
+        options:[
+          {letter:'A',text:'Apenas os custos de registro.'},
+          {letter:'B',text:'Tipo de proteção, custos, prazos, rota de depósito, plano de ação e fundamentação legal.'},
+          {letter:'C',text:'Apenas a legislação aplicável.'},
+          {letter:'D',text:'Apenas o fluxo de depósito no INPI.'}
+        ],
+        correct:'B',
+        feedback:'O Canvas de Estratégia é uma ferramenta <strong>integradora</strong> que reúne tipo de proteção, custos, prazos, rota, plano de ação e base legal em um único documento.',
+        legal:'Metodologia PI Thinking — Fase Estrategar',
+        tool:{name:'Canvas de Estratégia',url:'canvas-estrategia.html'}
+      },
+      {
+        id:10, phase:'Fase 3 — Estrategar', icon:'🎬',
+        text:'O Storyboard de Proteção serve para:',
+        options:[
+          {letter:'A',text:'Criar animações sobre PI.'},
+          {letter:'B',text:'Construir uma narrativa visual passo a passo do processo de proteção, da ideia ao registro.'},
+          {letter:'C',text:'Desenhar logotipos para marcas.'},
+          {letter:'D',text:'Filmar o processo de depósito.'}
+        ],
+        correct:'B',
+        feedback:'O Storyboard cria uma <strong>narrativa visual sequencial</strong> do processo de proteção, facilitando a compreensão e o planejamento das etapas.',
+        legal:'Metodologia PI Thinking — Fase Estrategar',
+        tool:{name:'Storyboard',url:'storyboard.html'}
+      },
+      {
+        id:11, phase:'Fase 4 — Proteger', icon:'📋',
+        text:'No Simulador de Depósito, qual tipo de proteção tem vigência indeterminada?',
+        options:[
+          {letter:'A',text:'Patente de Invenção.'},
+          {letter:'B',text:'Marca (com prorrogações).'},
+          {letter:'C',text:'Indicação Geográfica.'},
+          {letter:'D',text:'Desenho Industrial.'}
+        ],
+        correct:'C',
+        feedback:'A <strong>Indicação Geográfica</strong> tem vigência indeterminada, enquanto mantidas as condições de qualidade e o conselho regulador ativo. A marca, embora prorrogável indefinidamente, tem prazo de 10 anos por ciclo.',
+        legal:'Lei 9.279/96, Arts. 176–182',
+        tool:{name:'Simulador de Depósito',url:'simulador-deposito.html'}
+      },
+      {
+        id:12, phase:'Fase 4 — Proteger', icon:'💻',
+        text:'O registro de software no INPI protege:',
+        options:[
+          {letter:'A',text:'A funcionalidade e a ideia do programa.'},
+          {letter:'B',text:'O código-fonte como obra autoral (expressão), não a funcionalidade.'},
+          {letter:'C',text:'O hardware necessário para executar o programa.'},
+          {letter:'D',text:'O nome do software (que seria marca).'}
+        ],
+        correct:'B',
+        feedback:'O registro de software (Lei 9.609/98) protege o <strong>código-fonte como expressão autoral</strong>. A funcionalidade/ideia não é protegida pelo registro — seria necessário avaliar patente de invenção implementada por computador.',
+        legal:'Lei 9.609/98, Art. 2º; Lei 9.610/98, Art. 8 (VII)',
+        tool:{name:'Glossário',url:'glossario.html'}
+      },
+      {
+        id:13, phase:'Fase 4 — Proteger', icon:'💰',
+        text:'Quem tem direito ao desconto de 50% nas taxas do INPI (Portaria GM/MDIC nº 110/2025)?',
+        options:[
+          {letter:'A',text:'Qualquer empresa brasileira.'},
+          {letter:'B',text:'MEI, microempresas, ICTs, pessoas físicas e entidades sem fins lucrativos.'},
+          {letter:'C',text:'Apenas universidades públicas.'},
+          {letter:'D',text:'Apenas pessoas físicas com renda inferior a 3 salários mínimos.'}
+        ],
+        correct:'B',
+        feedback:'O desconto de 50% é concedido a <strong>MEI, microempresas, ICTs, pessoas físicas e entidades sem fins lucrativos</strong>, conforme a Portaria GM/MDIC nº 110/2025.',
+        legal:'Portaria GM/MDIC nº 110/2025',
+        tool:{name:'Simulador de Depósito',url:'simulador-deposito.html'}
+      },
+      {
+        id:14, phase:'Fase 4 — Proteger', icon:'🔒',
+        text:'O segredo industrial (trade secret) se diferencia da patente porque:',
+        options:[
+          {letter:'A',text:'Tem prazo definido de 20 anos.'},
+          {letter:'B',text:'Não exige registro, tem duração indefinida, mas pode ser perdido se descoberto independentemente.'},
+          {letter:'C',text:'É mais caro que a patente.'},
+          {letter:'D',text:'Só protege marcas, não invenções.'}
+        ],
+        correct:'B',
+        feedback:'O segredo industrial <strong>não requer registro</strong>, dura indefinidamente enquanto mantido confidencial, mas não impede que terceiros descubram a mesma informação de forma independente (ex.: engenharia reversa).',
+        legal:'Lei 9.279/96, Art. 195 (XI, XII)',
+        tool:{name:'Baralho de Dilemas',url:'baralho-dilemas.html'}
+      },
+      {
+        id:15, phase:'Fase 5 — Refletir', icon:'🌿',
+        text:'A Lei 13.123/2015 (Marco Legal da Biodiversidade) exige, para acesso a conhecimento tradicional associado:',
+        options:[
+          {letter:'A',text:'Apenas pagamento de royalties ao governo federal.'},
+          {letter:'B',text:'Consentimento prévio informado (CPI) da comunidade e repartição de benefícios.'},
+          {letter:'C',text:'Autorização do INPI.'},
+          {letter:'D',text:'Publicação em periódico científico.'}
+        ],
+        correct:'B',
+        feedback:'A Lei 13.123/2015 exige <strong>consentimento prévio informado (CPI)</strong> das comunidades tradicionais e <strong>repartição justa de benefícios</strong>. O CGEN é o órgão regulador.',
+        legal:'Lei 13.123/2015; Decreto 8.772/2016',
+        tool:{name:'Baralho de Dilemas',url:'baralho-dilemas.html'}
+      },
+      {
+        id:16, phase:'Fase 5 — Refletir', icon:'⚖️',
+        text:'A licença compulsória (Art. 71, LPI) pode ser concedida quando:',
+        options:[
+          {letter:'A',text:'O titular não paga as anuidades.'},
+          {letter:'B',text:'Há emergência nacional ou interesse público e o titular não atende à demanda.'},
+          {letter:'C',text:'O produto protegido é exportado.'},
+          {letter:'D',text:'A patente completa 10 anos.'}
+        ],
+        correct:'B',
+        feedback:'O Art. 71 da LPI permite licença compulsória em caso de <strong>emergência nacional ou interesse público</strong>, declarados por ato do Poder Executivo Federal.',
+        legal:'Lei 9.279/96, Art. 71; TRIPS, Art. 31',
+        tool:{name:'Escape Room',url:'escape-room.html'}
+      },
+      {
+        id:17, phase:'Fase 2 — Diagnosticar', icon:'🌱',
+        text:'A proteção de cultivar (Lei 9.456/97) exige que a nova variedade vegetal seja:',
+        options:[
+          {letter:'A',text:'Patenteada no INPI.'},
+          {letter:'B',text:'Distinta, homogênea e estável (DHE).'},
+          {letter:'C',text:'Registrada como marca.'},
+          {letter:'D',text:'Publicada em revista científica.'}
+        ],
+        correct:'B',
+        feedback:'A Lei 9.456/97 exige que a cultivar atenda aos requisitos de <strong>DHE: Distinguibilidade, Homogeneidade e Estabilidade</strong>.',
+        legal:'Lei 9.456/1997, Art. 3º',
+        tool:{name:'Calculadora de Vigência',url:'calculadora.html'}
+      },
+      {
+        id:18, phase:'Fase 3 — Estrategar', icon:'🔍',
+        text:'A busca de anterioridade é importante antes do depósito porque:',
+        options:[
+          {letter:'A',text:'É obrigatória por lei para todos os tipos de PI.'},
+          {letter:'B',text:'Evita gastos com pedidos que seriam indeferidos por falta de novidade e permite ajustar a estratégia.'},
+          {letter:'C',text:'Substitui o exame técnico do INPI.'},
+          {letter:'D',text:'É necessária apenas para marcas.'}
+        ],
+        correct:'B',
+        feedback:'A busca não é legalmente obrigatória, mas é <strong>altamente recomendada</strong> para evitar custos desnecessários e ajustar a estratégia de proteção antes do depósito.',
+        legal:'Boas práticas de PI; bases: SINPI, Espacenet, PatentScope',
+        tool:{name:'Busca de Anterioridade',url:'busca.html'}
+      },
+      {
+        id:19, phase:'Fase 2 — Diagnosticar', icon:'™️',
+        text:'Uma marca registrada no Brasil tem vigência de:',
+        options:[
+          {letter:'A',text:'5 anos, não prorrogáveis.'},
+          {letter:'B',text:'10 anos a partir da concessão, prorrogável indefinidamente por períodos iguais.'},
+          {letter:'C',text:'20 anos a partir do depósito.'},
+          {letter:'D',text:'Vitalícia, sem necessidade de prorrogação.'}
+        ],
+        correct:'B',
+        feedback:'A marca tem vigência de <strong>10 anos a partir da concessão</strong>, prorrogável indefinidamente por períodos iguais de 10 anos (Art. 133, LPI).',
+        legal:'Lei 9.279/96, Art. 133',
+        tool:{name:'Calculadora de Vigência',url:'calculadora.html'}
+      },
+      {
+        id:20, phase:'Fase 5 — Refletir', icon:'🎓',
+        text:'O PI Thinking toolkit é baseado em qual abordagem metodológica?',
+        options:[
+          {letter:'A',text:'Lean Startup.'},
+          {letter:'B',text:'Design Thinking aplicado à Propriedade Intelectual.'},
+          {letter:'C',text:'Scrum e metodologias ágeis.'},
+          {letter:'D',text:'Análise SWOT tradicional.'}
+        ],
+        correct:'B',
+        feedback:'O PI Thinking é baseado em <strong>Design Thinking aplicado à Propriedade Intelectual</strong>, com 5 fases: Sentir, Diagnosticar, Estrategar, Proteger e Refletir.',
+        legal:'Metodologia PI Thinking — PROFNIT/UFRR',
+        tool:{name:'Guia do Facilitador',url:'guia-facilitador.html'}
+      }
     ];
 
-    let currentQ = 0;
-    let score = 0;
-    let answered = [];
+    // ── State ──
+    var quizName = '';
+    var quizMode = 'timed';
+    var currentQ = 0;
+    var correctCount = 0;
+    var wrongCount = 0;
+    var answers = {};
+    var timerSeconds = 1800;
+    var timerInterval = null;
+    var quizStarted = false;
 
-    function renderQuiz() {
-      const area = document.getElementById('quizArea');
-      area.innerHTML = '';
-      quizData.forEach((q, i) => {
-        let optsHtml = '';
-        q.opts.forEach((opt, j) => {
-          optsHtml += `<div class="qf-opt" id="opt-${i}-${j}" onclick="answerQ(${i},${j})">${String.fromCharCode(65+j)}) ${opt}</div>`;
+    // ── Start ──
+    function startQuiz() {
+      var nameInput = document.getElementById('quizName');
+      quizName = (nameInput.value || '').trim();
+      if (!quizName) { nameInput.style.borderColor = 'var(--qf-red)'; nameInput.focus(); return; }
+      quizMode = document.getElementById('quizMode').value;
+      currentQ = 0; correctCount = 0; wrongCount = 0; answers = {};
+      timerSeconds = quizMode === 'timed' ? 1800 : 0;
+      quizStarted = true;
+
+      document.getElementById('setupSection').style.display = 'none';
+      document.getElementById('quizArea').style.display = 'block';
+      document.getElementById('resultSection').classList.remove('show');
+      document.getElementById('reviewSection').classList.remove('show');
+      document.getElementById('reviewSection').innerHTML = '';
+
+      if (quizMode === 'timed') startTimer(); else document.getElementById('timerDisplay').textContent = '∞';
+      renderQuestion();
+      autoSave();
+    }
+
+    // ── Timer ──
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(function() {
+        if (timerSeconds <= 0) { clearInterval(timerInterval); endQuiz(); return; }
+        timerSeconds--;
+        updateTimerDisplay();
+      }, 1000);
+    }
+    function updateTimerDisplay() {
+      if (quizMode !== 'timed') return;
+      var m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
+      var el = document.getElementById('timerDisplay');
+      if (el) {
+        el.textContent = (m<10?'0'+m:m) + ':' + (s<10?'0'+s:s);
+        el.style.color = timerSeconds <= 60 ? 'var(--qf-red)' : timerSeconds <= 300 ? 'var(--qf-gold)' : '';
+        el.setAttribute('aria-live', timerSeconds <= 60 ? 'assertive' : 'off');
+      }
+    }
+
+    // ── Render question ──
+    function renderQuestion() {
+      if (currentQ >= questions.length) { endQuiz(); return; }
+      var q = questions[currentQ];
+      var answered = answers[q.id];
+
+      var pct = (currentQ / questions.length) * 100;
+      var fill = document.getElementById('progressFill');
+      if (fill) fill.style.width = pct + '%';
+      var label = document.getElementById('progressLabel');
+      if (label) label.textContent = 'Questão ' + (currentQ+1) + ' / ' + questions.length;
+      var cEl = document.getElementById('correctDisplay'); if (cEl) cEl.textContent = correctCount;
+      var wEl = document.getElementById('wrongDisplay'); if (wEl) wEl.textContent = wrongCount;
+
+      var html = '<div class="qf-question">';
+      html += '<div class="qf-question__header">';
+      html += '<span class="qf-question__phase">' + q.phase + '</span>';
+      html += '<span class="qf-question__num">' + q.icon + ' Questão ' + (currentQ+1) + '</span></div>';
+      html += '<div class="qf-question__text">' + q.text + '</div>';
+      html += '<div class="qf-options">';
+
+      q.options.forEach(function(opt) {
+        var cls = '', dis = '';
+        if (answered) {
+          dis = ' disabled';
+          if (opt.letter === q.correct) cls = ' correct';
+          else if (opt.letter === answered.selected && answered.selected !== q.correct) cls = ' wrong';
+          else cls = ' disabled';
+        }
+        html += '<div class="qf-option' + cls + dis + '" role="button" tabindex="0" ';
+        html += 'onclick="selectAnswer(\'' + opt.letter + '\')" ';
+        html += 'onkeydown="handleKey(event,\'' + opt.letter + '\')" ';
+        html += 'aria-label="Opção ' + opt.letter + ': ' + opt.text.replace(/"/g,'&quot;') + '">';
+        html += '<span class="qf-option__letter">' + opt.letter + ')</span>';
+        html += '<span>' + opt.text + '</span></div>';
+      });
+      html += '</div>';
+
+      if (answered) {
+        var isCorrect = answered.selected === q.correct;
+        html += '<div class="qf-feedback show qf-feedback--' + (isCorrect ? 'correct' : 'wrong') + '">';
+        html += '<strong>' + (isCorrect ? '✅ Correto!' : '❌ Incorreto — resposta: ' + q.correct + ')') + '</strong> ';
+        html += q.feedback;
+        html += '<br><small>📖 ' + q.legal + '</small>';
+        if (q.tool) html += ' · <a href="' + q.tool.url + '">' + q.tool.name + '</a>';
+        html += '</div>';
+        html += '<div class="qf-actions" style="margin-top:1rem;">';
+        if (currentQ < questions.length - 1) {
+          html += '<button class="qf-btn qf-btn--primary" onclick="nextQuestion()" aria-label="Próxima questão">➡️ Próxima</button>';
+        } else {
+          html += '<button class="qf-btn qf-btn--gold" onclick="endQuiz()" aria-label="Ver resultado final">🏆 Ver Resultado</button>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+
+      var container = document.getElementById('questionContainer');
+      if (container) container.innerHTML = html;
+    }
+
+    // ── Answer ──
+    function selectAnswer(letter) {
+      var q = questions[currentQ];
+      if (answers[q.id]) return;
+      var isCorrect = letter === q.correct;
+      answers[q.id] = { selected: letter, correct: isCorrect };
+      if (isCorrect) correctCount++; else wrongCount++;
+      renderQuestion();
+      autoSave();
+    }
+    function handleKey(e, letter) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectAnswer(letter); }
+    }
+    function nextQuestion() {
+      currentQ++;
+      renderQuestion();
+      autoSave();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── End quiz ──
+    function endQuiz() {
+      clearInterval(timerInterval);
+      quizStarted = false;
+      document.getElementById('quizArea').style.display = 'none';
+
+      var pct = Math.round((correctCount / questions.length) * 100);
+      var timeUsed = quizMode === 'timed' ? (1800 - timerSeconds) : 0;
+      var mins = Math.floor(timeUsed / 60), secs = timeUsed % 60;
+
+      var badge, title, classText, recs;
+      if (pct >= 90) {
+        badge = '🏆'; title = 'Excelente!';
+        classText = 'Você demonstrou <strong>domínio avançado</strong> em Propriedade Intelectual. Está pronto para aplicar os conhecimentos na prática e auxiliar outros.';
+        recs = '<p>🎯 <strong>Próximos passos:</strong> Use o <a href="canvas-estrategia.html">Canvas de Estratégia</a> para um caso real. Explore o <a href="simulador-deposito.html">Simulador de Depósito</a> para praticar o processo.</p>';
+      } else if (pct >= 70) {
+        badge = '🥈'; title = 'Muito Bom!';
+        classText = 'Você tem <strong>bom conhecimento</strong> em PI, com alguns pontos para reforçar. Revise as questões erradas e aprofunde nos temas indicados.';
+        recs = '<p>🎯 <strong>Reforce:</strong> Revise as respostas abaixo e use as ferramentas indicadas. O <a href="glossario.html">Glossário</a> e a <a href="linha-do-tempo.html">Linha do Tempo</a> são ótimos para consolidar conceitos.</p>';
+      } else if (pct >= 50) {
+        badge = '🥉'; title = 'Bom Começo!';
+        classText = 'Você está no caminho certo, mas precisa <strong>reforçar vários conceitos</strong>. Revise as fases do toolkit e refaça os exercícios práticos.';
+        recs = '<p>🎯 <strong>Sugestão:</strong> Refaça o <a href="quiz-diagnostico.html">Quiz Diagnóstico</a>, revise o <a href="guia-facilitador.html">Guia do Facilitador</a> e pratique com o <a href="escape-room.html">Escape Room</a>.</p>';
+      } else {
+        badge = '📚'; title = 'Continue Estudando!';
+        classText = 'Você precisa <strong>revisar os fundamentos</strong> de Propriedade Intelectual. Não desanime — o toolkit tem todas as ferramentas para ajudá-lo.';
+        recs = '<p>🎯 <strong>Comece por:</strong> <a href="guia-facilitador.html">Guia do Facilitador</a> → <a href="cartas-personas.html">Cartas Personas</a> → <a href="glossario.html">Glossário</a> → <a href="arvore.html">Árvore de Decisão</a>. Depois refaça este quiz.</p>';
+      }
+
+      document.getElementById('resultSection').classList.add('show');
+      document.getElementById('resultBadge').textContent = badge;
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultScore').textContent = pct + '%';
+      document.getElementById('resultName').textContent = quizName;
+      document.getElementById('resultDetails').innerHTML =
+        '<span>✅ ' + correctCount + ' acertos</span>' +
+        '<span>❌ ' + wrongCount + ' erros</span>' +
+        '<span>📝 ' + questions.length + ' questões</span>' +
+        (quizMode === 'timed' ? '<span>⏱ ' + mins + 'min ' + secs + 's</span>' : '<span>📖 Modo livre</span>');
+      document.getElementById('resultClass').innerHTML = classText;
+      document.getElementById('resultRecs').innerHTML = recs;
+
+      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
+        PIThinking.saveProgress('quiz-final-result', {
+          name: quizName, score: pct, correct: correctCount, wrong: wrongCount,
+          total: questions.length, date: new Date().toISOString()
         });
-        area.innerHTML += `
-          <div class="qf-question ${i===0?'active':''}" id="q-${i}">
-            <span class="qf-question__cat" style="background:${q.catColor};">${q.cat}</span>
-            <div class="qf-question__text">${q.q}</div>
-            <div class="qf-question__opts">${optsHtml}</div>
-            <div class="qf-feedback" id="fb-${i}"></div>
-            <div class="qf-legal" id="legal-${i}" style="display:none;"></div>
-            <button class="qf-next" id="next-${i}" onclick="nextQ(${i})">${i < quizData.length - 1 ? 'Próxima →' : '📊 Ver Resultado'}</button>
-          </div>
-        `;
+      }
+    }
+
+    // ── Review ──
+    function toggleReview() {
+      var sec = document.getElementById('reviewSection');
+      if (sec.classList.contains('show')) { sec.classList.remove('show'); return; }
+
+      var html = '<h3>📋 Revisão Completa</h3>';
+      questions.forEach(function(q, i) {
+        var a = answers[q.id];
+        var isCorrect = a && a.correct;
+        var cls = a ? (isCorrect ? 'qf-review__item--correct' : 'qf-review__item--wrong') : '';
+        html += '<div class="qf-review__item ' + cls + '">';
+        html += '<div class="qf-review__q">' + (i+1) + '. ' + q.text + '</div>';
+        html += '<div class="qf-review__a">';
+        if (a) {
+          html += 'Sua resposta: ' + (isCorrect ? '<strong>' + a.selected + ') ✅</strong>' : '<em>' + a.selected + ') ❌</em> — Correta: <strong>' + q.correct + ')</strong>');
+          html += '<br><small>' + q.feedback + '</small>';
+        } else {
+          html += '<em>Não respondida</em> — Correta: <strong>' + q.correct + ')</strong>';
+        }
+        html += '</div></div>';
       });
+      sec.innerHTML = html;
+      sec.classList.add('show');
+      sec.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function answerQ(qi, selected) {
-      if (answered[qi] !== undefined) return;
-      answered[qi] = selected;
-      const q = quizData[qi];
-      const opts = document.querySelectorAll(`#q-${qi} .qf-opt`);
-      opts.forEach((o, j) => {
-        o.classList.add('disabled');
-        if (j === q.correct) o.classList.add('correct');
-        if (j === selected && j !== q.correct) o.classList.add('wrong');
-      });
-
-      const fb = document.getElementById(`fb-${qi}`);
-      if (selected === q.correct) {
-        score++;
-        fb.className = 'qf-feedback show success';
-        fb.innerHTML = '✅ <strong>Correto!</strong>';
-      } else {
-        fb.className = 'qf-feedback show fail';
-        fb.innerHTML = `❌ <strong>Errado.</strong> Resposta correta: <strong>${String.fromCharCode(65+q.correct)}</strong>.`;
-      }
-
-      document.getElementById(`legal-${qi}`).innerHTML = `<strong>📚</strong> ${q.legal}`;
-      document.getElementById(`legal-${qi}`).style.display = 'block';
-      document.getElementById(`next-${qi}`).style.display = 'inline-block';
-    }
-
-    function nextQ(qi) {
-      document.getElementById(`q-${qi}`).classList.remove('active');
-      if (qi < quizData.length - 1) {
-        currentQ = qi + 1;
-        document.getElementById(`q-${currentQ}`).classList.add('active');
-        const pct = Math.round(((currentQ) / quizData.length) * 100);
-        document.getElementById('progressFill').style.width = pct + '%';
-        document.getElementById('progressLabel').textContent = `Questão ${currentQ + 1} de ${quizData.length}`;
-        window.scrollTo({top:document.querySelector('.qf-progress').offsetTop - 20, behavior:'smooth'});
-      } else {
-        showResult();
+    // ── Restart ──
+    function restartQuiz() {
+      if (!confirm('Reiniciar o quiz? Todo o progresso será perdido.')) return;
+      clearInterval(timerInterval);
+      document.getElementById('quizArea').style.display = 'none';
+      document.getElementById('resultSection').classList.remove('show');
+      document.getElementById('reviewSection').classList.remove('show');
+      document.getElementById('reviewSection').innerHTML = '';
+      document.getElementById('setupSection').style.display = 'block';
+      if (typeof PIThinking !== 'undefined' && PIThinking.clearProgress) {
+        PIThinking.clearProgress('quiz-final');
       }
     }
 
-    function showResult() {
-      document.getElementById('progressFill').style.width = '100%';
-      document.getElementById('progressLabel').textContent = 'Quiz concluído!';
-      const result = document.getElementById('resultScreen');
-      result.classList.add('show');
-      document.getElementById('finalScore').textContent = `${score}/10`;
-      document.getElementById('finalCode').textContent = `F-${score}`;
-
-      let msg = '';
-      if (score >= 9) msg = '🏆 Excelente! Você domina os conceitos de PI.';
-      else if (score >= 7) msg = '👍 Muito bom! Você tem sólida base em PI.';
-      else if (score >= 5) msg = '📝 Bom progresso! Revise os temas com mais atenção.';
-      else msg = '🔄 Há espaço para crescer. Revise os materiais das fases anteriores.';
-      document.getElementById('finalMessage').textContent = msg;
-
-      result.scrollIntoView({behavior:'smooth'});
-    }
-
-    function compareScores() {
-      const diagInput = document.getElementById('diagScore').value;
-      if (diagInput === '') return;
-      const diagVal = parseInt(diagInput);
-      const finalVal = score;
-      const diff = finalVal - diagVal;
-
-      const bars = document.getElementById('compareBars');
-      const maxH = 150;
-      const diagH = (diagVal / 10) * maxH;
-      const finalH = (finalVal / 10) * maxH;
-
-      bars.innerHTML = `
-        <div class="qf-comparator__bar">
-          <div class="qf-comparator__bar-fill" style="height:${diagH}px;background:#2196F3;"></div>
-          <div class="qf-comparator__bar-label" style="color:#2196F3;">D-${diagVal}<br>Diagnóstico</div>
-        </div>
-        <div class="qf-comparator__bar">
-          <div class="qf-comparator__bar-fill" style="height:${finalH}px;background:#9C27B0;"></div>
-          <div class="qf-comparator__bar-label" style="color:#9C27B0;">F-${finalVal}<br>Final</div>
-        </div>
-      `;
-
-      const msg = document.getElementById('compareMessage');
-      if (diff > 0) {
-        msg.innerHTML = `📈 Evolução de <span style="color:var(--qf-green);font-size:1.4rem;">+${diff} pontos</span>! A oficina fez diferença.`;
-        msg.style.color = 'var(--qf-green)';
-      } else if (diff === 0) {
-        msg.textContent = '➡️ Mesma pontuação. Você já tinha boa base — revise os erros para crescer.';
-        msg.style.color = 'var(--qf-accent)';
-      } else {
-        msg.textContent = `📉 Variação de ${diff} pontos. As questões finais são mais avançadas — não desanime!`;
-        msg.style.color = 'var(--qf-red)';
+    // ── Persistence ──
+    function autoSave() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
+        PIThinking.saveProgress('quiz-final', {
+          quizName: quizName, quizMode: quizMode, currentQ: currentQ,
+          correctCount: correctCount, wrongCount: wrongCount,
+          answers: answers, timerSeconds: timerSeconds, quizStarted: quizStarted
+        });
       }
-
-      document.getElementById('compareResult').classList.add('show');
+    }
+    function loadSaved() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.loadProgress) {
+        var saved = PIThinking.loadProgress('quiz-final');
+        if (saved && saved.quizStarted) {
+          quizName = saved.quizName || '';
+          quizMode = saved.quizMode || 'timed';
+          currentQ = saved.currentQ || 0;
+          correctCount = saved.correctCount || 0;
+          wrongCount = saved.wrongCount || 0;
+          answers = saved.answers || {};
+          timerSeconds = saved.timerSeconds || 1800;
+          quizStarted = true;
+          document.getElementById('setupSection').style.display = 'none';
+          document.getElementById('quizArea').style.display = 'block';
+          if (quizMode === 'timed') startTimer(); else document.getElementById('timerDisplay').textContent = '∞';
+          renderQuestion();
+          return;
+        }
+      }
     }
 
-    function resetQuiz() {
-      currentQ = 0; score = 0; answered = [];
-      document.getElementById('resultScreen').classList.remove('show');
-      document.getElementById('compareResult').classList.remove('show');
-      document.getElementById('progressFill').style.width = '0%';
-      document.getElementById('progressLabel').textContent = 'Questão 1 de 10';
-      renderQuiz();
-      window.scrollTo({top:0, behavior:'smooth'});
+    // ── Theme ──
+    function toggleTheme() {
+      var html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     }
 
-    renderQuiz();
+    // ── Init ──
+    loadSaved();
   </script>
 </body>
 </html>

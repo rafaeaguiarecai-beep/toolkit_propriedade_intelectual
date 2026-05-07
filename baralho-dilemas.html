@@ -1,317 +1,682 @@
+<!--
+  Arquivo: baralho-dilemas.html
+  Correções:
+    1. role="button", tabindex="0", keyboard handler nos cards
+    2. aria-label descritivo em cada card
+    3. aria-label em botões com emoji
+    4. aria-live="polite" no grid
+    5. Persistência localStorage (PIThinking.saveProgress/loadProgress)
+    6. Campo de anotação no verso do card
+    7. Filtro por categoria de dilema
+    8. Contador de dilemas discutidos
+    9. Classe .sr-only
+   10. lang="pt-BR" confirmado
+  Dependências: style.css, script.js
+-->
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Baralho de Dilemas — PI Thinking</title>
-  <meta name="description" content="12 cartas com dilemas éticos reais de Propriedade Intelectual para debate em grupo. Casos reais adaptados para a realidade amazônica.">
+  <meta name="description" content="Cartas com dilemas reais de Propriedade Intelectual para discussão em grupo. Estimule o debate ético e estratégico sobre proteção de criações.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bd-bg:#E8F5E9;--bd-surface:#FFFFFF;--bd-accent:#4CAF50;--bd-accent-dark:#2E7D32;
-      --bd-text:#212121;--bd-text-light:#757575;--bd-border:#C8E6C9;--bd-radius:16px;
-      --bd-shadow:0 2px 12px rgba(76,175,80,.12);
+    :root {
+      --bd-bg: #FFF8E1;
+      --bd-surface: #FFFFFF;
+      --bd-accent: #FF6F00;
+      --bd-accent-light: #FFA726;
+      --bd-accent-bg: rgba(255,111,0,.08);
+      --bd-text: #212121;
+      --bd-text-light: #757575;
+      --bd-border: #FFE0B2;
+      --bd-green: #2E7D32;
+      --bd-green-bg: #E8F5E9;
+      --bd-red: #C62828;
+      --bd-red-bg: #FFEBEE;
+      --bd-purple: #6A1B9A;
+      --bd-purple-bg: #F3E5F5;
+      --bd-blue: #1565C0;
+      --bd-blue-bg: #E3F2FD;
+      --bd-radius: 16px;
+      --bd-shadow: 0 2px 12px rgba(255,111,0,.10);
     }
-    @media (prefers-color-scheme:dark){
-      :root{--bd-bg:#0e1a0e;--bd-surface:#1a2a1a;--bd-text:#f0f5f0;--bd-text-light:#a0b8a0;--bd-border:#1e3a1e;--bd-shadow:0 2px 12px rgba(0,0,0,.4);}
+    [data-theme="dark"] {
+      --bd-bg: #1a1408;
+      --bd-surface: #2a2010;
+      --bd-accent: #FFA726;
+      --bd-accent-light: #FFB74D;
+      --bd-accent-bg: rgba(255,167,38,.1);
+      --bd-text: #f5f0e0;
+      --bd-text-light: #bdb49a;
+      --bd-border: #3d3520;
+      --bd-green: #66BB6A;
+      --bd-green-bg: rgba(102,187,106,.1);
+      --bd-red: #EF5350;
+      --bd-red-bg: rgba(239,83,80,.1);
+      --bd-purple: #CE93D8;
+      --bd-purple-bg: rgba(206,147,216,.1);
+      --bd-blue: #64B5F6;
+      --bd-blue-bg: rgba(100,181,246,.1);
+      --bd-shadow: 0 2px 12px rgba(0,0,0,.4);
     }
-    body.bd-page{font-family:'Inter',sans-serif;background:var(--bd-bg);color:var(--bd-text);margin:0;padding:0;line-height:1.7;}
 
-    .bd-cover{background:linear-gradient(135deg,#81C784 0%,#4CAF50 50%,#1B5E20 100%);color:#fff;padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;}
-    .bd-cover::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,.03) 20px,rgba(255,255,255,.03) 40px);}
-    .bd-cover__overline{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;opacity:.9;}
-    .bd-cover__title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.2rem);margin:.5rem 0;}
-    .bd-cover__sub{font-size:1.1rem;opacity:.92;max-width:640px;margin:.5rem auto 0;}
-    .bd-cover__meta{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;font-size:.9rem;}
-    .bd-cover__meta span{background:rgba(255,255,255,.2);padding:.35rem .8rem;border-radius:20px;}
+    body.bd-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--bd-bg);
+      color: var(--bd-text);
+      margin: 0; padding: 0; line-height: 1.7;
+    }
 
-    .bd-container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
 
-    .bd-intro{background:var(--bd-surface);border:2px solid var(--bd-border);border-radius:var(--bd-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--bd-shadow);}
-    .bd-intro h2{font-family:'Poppins',sans-serif;color:var(--bd-accent-dark);margin-top:0;}
+    /* ── Cover ── */
+    .bd-cover {
+      background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 50%, #E65100 100%);
+      color: #fff; padding: 4rem 2rem 3rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .bd-cover::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-conic-gradient(rgba(255,255,255,.04) 0% 25%, transparent 0% 50%) 0 0 / 40px 40px;
+    }
+    .bd-cover__overline {
+      font-family: 'Poppins', sans-serif; font-size: .85rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 3px; opacity: .9;
+    }
+    .bd-cover__title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem); margin: .5rem 0;
+    }
+    .bd-cover__sub {
+      font-size: 1.1rem; opacity: .92; max-width: 640px; margin: .5rem auto 0;
+    }
+    .bd-cover__meta {
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 1.5rem; font-size: .9rem;
+    }
+    .bd-cover__meta span {
+      background: rgba(255,255,255,.2); padding: .35rem .8rem; border-radius: 20px;
+    }
 
-    .bd-filters{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;}
-    .bd-filter{font-family:'Poppins',sans-serif;font-weight:600;font-size:.82rem;padding:.4rem 1rem;border:2px solid var(--bd-border);border-radius:20px;background:var(--bd-surface);color:var(--bd-text-light);cursor:pointer;transition:all .2s;}
-    .bd-filter:hover{border-color:var(--bd-accent);}
-    .bd-filter.active{background:var(--bd-accent);color:#fff;border-color:var(--bd-accent);}
+    /* ── Container ── */
+    .bd-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    .bd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;margin-bottom:2rem;}
+    /* ── Controls bar ── */
+    .bd-controls {
+      display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center;
+      align-items: center; margin-bottom: 1.5rem;
+    }
+    .bd-controls__counter {
+      font-family: 'Poppins', sans-serif; font-weight: 700;
+      font-size: .95rem; color: var(--bd-accent);
+      background: var(--bd-accent-bg); padding: .4rem 1rem;
+      border-radius: 20px; white-space: nowrap;
+    }
 
-    .bd-card{background:var(--bd-surface);border-radius:var(--bd-radius);box-shadow:var(--bd-shadow);overflow:hidden;transition:transform .3s,box-shadow .3s;cursor:pointer;position:relative;}
-    .bd-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(76,175,80,.2);}
-    .bd-card.hidden{display:none;}
+    /* ── Filter buttons ── */
+    .bd-filters {
+      display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .bd-filter-btn {
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .8rem;
+      padding: .4rem .9rem; border: 2px solid var(--bd-border); border-radius: 20px;
+      background: var(--bd-surface); color: var(--bd-text-light); cursor: pointer;
+      transition: all .2s;
+    }
+    .bd-filter-btn:hover { border-color: var(--bd-accent); color: var(--bd-accent); }
+    .bd-filter-btn:focus-visible { outline: 3px solid var(--bd-accent); outline-offset: 2px; }
+    .bd-filter-btn.active {
+      background: var(--bd-accent); color: #fff; border-color: var(--bd-accent);
+    }
 
-    .bd-card__header{padding:1.2rem 1.5rem .8rem;position:relative;}
-    .bd-card__category{font-family:'Poppins',sans-serif;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:.2rem .6rem;border-radius:10px;display:inline-block;color:#fff;}
-    .bd-card__num{position:absolute;top:1rem;right:1.2rem;font-family:'Poppins',sans-serif;font-weight:800;font-size:1.8rem;opacity:.12;}
-    .bd-card__icon{font-size:2.5rem;margin:.5rem 0;}
-    .bd-card__title{font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:700;color:var(--bd-text);margin:.3rem 0;}
+    /* ── Buttons ── */
+    .bd-btn {
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .9rem;
+      padding: .55rem 1.2rem; border: none; border-radius: 25px;
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .bd-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .bd-btn:focus-visible { outline: 3px solid var(--bd-accent); outline-offset: 2px; }
+    .bd-btn--primary { background: var(--bd-accent); color: #fff; }
+    .bd-btn--outline { background: transparent; border: 2px solid var(--bd-accent); color: var(--bd-accent); }
+    .bd-btn--danger { background: var(--bd-red); color: #fff; }
 
-    .bd-card__body{padding:0 1.5rem 1.5rem;}
-    .bd-card__scenario{font-size:.9rem;margin-bottom:.8rem;line-height:1.6;}
-    .bd-card__dilemma{background:rgba(76,175,80,.08);border-left:3px solid var(--bd-accent);padding:.6rem 1rem;border-radius:0 8px 8px 0;font-size:.88rem;font-weight:500;margin-bottom:.8rem;}
-    .bd-card__legal{font-size:.8rem;color:var(--bd-text-light);background:var(--bd-bg);padding:.5rem .8rem;border-radius:6px;margin-bottom:.8rem;}
-    .bd-card__legal strong{color:var(--bd-accent-dark);}
+    /* ── Card grid ── */
+    .bd-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem; margin-bottom: 2rem;
+    }
+    @media (max-width: 480px) { .bd-grid { grid-template-columns: 1fr; } }
 
-    .bd-card__debate{display:none;padding:0 1.5rem 1.5rem;}
-    .bd-card__debate h4{font-family:'Poppins',sans-serif;font-size:.9rem;color:var(--bd-accent-dark);margin:0 0 .3rem;}
-    .bd-card__debate p{font-size:.85rem;margin:.3rem 0;}
+    /* ── Card ── */
+    .bd-card-wrapper {
+      perspective: 1000px; height: 420px;
+    }
+    .bd-card {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d; transition: transform .6s;
+      cursor: pointer;
+    }
+    .bd-card.flipped { transform: rotateY(180deg); }
+    .bd-card__front, .bd-card__back {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      backface-visibility: hidden; border-radius: var(--bd-radius);
+      box-shadow: var(--bd-shadow); overflow: hidden;
+      display: flex; flex-direction: column; box-sizing: border-box;
+    }
 
-    .bd-card__toggle{display:block;width:100%;padding:.6rem;background:var(--bd-accent);color:#fff;border:none;font-family:'Poppins',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:background .2s;}
-    .bd-card__toggle:hover{background:var(--bd-accent-dark);}
+    /* Front */
+    .bd-card__front {
+      background: var(--bd-surface); border: 2px solid var(--bd-border);
+      padding: 1.5rem;
+    }
+    .bd-card__category {
+      font-family: 'Poppins', sans-serif; font-size: .75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2px; padding: .25rem .7rem;
+      border-radius: 12px; display: inline-block; margin-bottom: .8rem;
+    }
+    .bd-card__category--patente { background: var(--bd-blue-bg); color: var(--bd-blue); }
+    .bd-card__category--marca { background: var(--bd-green-bg); color: var(--bd-green); }
+    .bd-card__category--autoral { background: var(--bd-purple-bg); color: var(--bd-purple); }
+    .bd-card__category--segredo { background: var(--bd-red-bg); color: var(--bd-red); }
+    .bd-card__category--software { background: var(--bd-blue-bg); color: var(--bd-blue); }
+    .bd-card__category--ig { background: var(--bd-green-bg); color: var(--bd-green); }
+    .bd-card__category--etica { background: var(--bd-accent-bg); color: var(--bd-accent); }
+    .bd-card__category--geral { background: var(--bd-accent-bg); color: var(--bd-accent); }
 
-    .bd-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin:2rem 0;}
-    .bd-btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;padding:.7rem 1.5rem;border:none;border-radius:30px;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
-    .bd-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.15);}
-    .bd-btn--primary{background:var(--bd-accent);color:#fff;}
-    .bd-btn--outline{background:transparent;border:2px solid var(--bd-accent);color:var(--bd-accent-dark);}
+    .bd-card__icon { font-size: 2.5rem; margin-bottom: .5rem; }
+    .bd-card__title {
+      font-family: 'Poppins', sans-serif; font-weight: 700;
+      font-size: 1.05rem; color: var(--bd-text); margin-bottom: .6rem;
+    }
+    .bd-card__dilemma {
+      font-size: .9rem; color: var(--bd-text); line-height: 1.6;
+      flex: 1; overflow-y: auto;
+    }
+    .bd-card__hint {
+      font-size: .78rem; color: var(--bd-text-light);
+      margin-top: .8rem; font-style: italic;
+    }
 
-    .bd-guide{background:var(--bd-surface);border-left:4px solid var(--bd-accent);border-radius:0 var(--bd-radius) var(--bd-radius) 0;padding:1.5rem 2rem;margin:2rem 0;}
-    .bd-guide h2{font-family:'Poppins',sans-serif;color:var(--bd-accent-dark);margin-top:0;font-size:1.2rem;}
+    /* Back */
+    .bd-card__back {
+      background: var(--bd-surface); border: 2px solid var(--bd-accent);
+      transform: rotateY(180deg); padding: 1.2rem;
+    }
+    .bd-card__back-title {
+      font-family: 'Poppins', sans-serif; font-weight: 700;
+      font-size: .95rem; color: var(--bd-accent); margin-bottom: .6rem;
+    }
+    .bd-card__back-body {
+      font-size: .85rem; line-height: 1.6; flex: 1; overflow-y: auto;
+    }
+    .bd-card__back-body strong { color: var(--bd-accent); }
+    .bd-card__back-note {
+      margin-top: .8rem;
+    }
+    .bd-card__back-note label {
+      font-family: 'Poppins', sans-serif; font-size: .78rem;
+      font-weight: 600; color: var(--bd-text-light); display: block; margin-bottom: .3rem;
+    }
+    .bd-card__back-note textarea {
+      width: 100%; min-height: 50px; font-family: 'Inter', sans-serif;
+      font-size: .82rem; border: 1px solid var(--bd-border); border-radius: 8px;
+      padding: .4rem; background: var(--bd-bg); color: var(--bd-text);
+      resize: vertical; box-sizing: border-box;
+    }
+    .bd-card__back-note textarea:focus-visible {
+      outline: 2px solid var(--bd-accent); outline-offset: 1px;
+    }
+    .bd-card__discussed-btn {
+      margin-top: .6rem; font-family: 'Poppins', sans-serif; font-size: .8rem;
+      font-weight: 600; padding: .35rem .8rem; border-radius: 15px;
+      border: 2px solid var(--bd-green); background: transparent;
+      color: var(--bd-green); cursor: pointer; transition: all .2s;
+    }
+    .bd-card__discussed-btn:hover,
+    .bd-card__discussed-btn.done {
+      background: var(--bd-green); color: #fff;
+    }
+    .bd-card__discussed-btn:focus-visible {
+      outline: 3px solid var(--bd-green); outline-offset: 2px;
+    }
 
-    .bd-footer{text-align:center;padding:2rem;font-size:.82rem;color:var(--bd-text-light);border-top:1px solid var(--bd-border);margin-top:2rem;}
-    .bd-footer a{color:var(--bd-accent-dark);}
+    /* ── Actions ── */
+    .bd-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 2rem 0;
+    }
 
-    @media print{
-      .bd-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
-      .bd-card{break-inside:avoid;border:1px solid #ccc;box-shadow:none;}
-      .bd-card__debate{display:block!important;}
-      .bd-card__toggle,.bd-actions,.bd-filters{display:none!important;}
-      @page{size:A3 landscape;margin:1cm;}
+    /* ── How-to ── */
+    .bd-howto {
+      background: var(--bd-surface); border-left: 4px solid var(--bd-accent);
+      border-radius: 0 var(--bd-radius) var(--bd-radius) 0;
+      padding: 1.5rem 2rem; margin: 2rem 0;
+    }
+    .bd-howto h2 {
+      font-family: 'Poppins', sans-serif; color: var(--bd-accent);
+      margin-top: 0; font-size: 1.2rem;
+    }
+    .bd-howto p { margin: .4rem 0; font-size: .9rem; }
+
+    /* ── Footer ── */
+    .bd-footer {
+      text-align: center; padding: 2rem; font-size: .82rem;
+      color: var(--bd-text-light); border-top: 1px solid var(--bd-border); margin-top: 2rem;
+    }
+    .bd-footer a { color: var(--bd-accent); }
+
+    /* ── Print ── */
+    @media print {
+      .bd-cover { padding: 1.5rem 1rem; break-after: avoid; }
+      .bd-controls, .bd-filters, .bd-actions { display: none !important; }
+      .bd-card-wrapper { height: auto; break-inside: avoid; }
+      .bd-card { transform: none !important; }
+      .bd-card__back { display: none; }
+      .bd-card__front { position: relative; box-shadow: none; border: 1px solid #ccc; }
+      @page { size: A4 portrait; margin: 1.5cm; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .bd-cover { padding: 2.5rem 1rem 2rem; }
+      .bd-card-wrapper { height: 460px; }
     }
   </style>
 </head>
 <body class="bd-page">
 
+  <!-- Theme toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro"
+    style="position:fixed;top:1rem;right:1rem;z-index:999;background:var(--bd-surface);border:2px solid var(--bd-border);border-radius:50%;width:44px;height:44px;font-size:1.3rem;cursor:pointer;">
+    🌗
+  </button>
+
+  <!-- Cover -->
   <header class="bd-cover">
-    <div class="bd-cover__overline">Fase 4 — Prototipar</div>
-    <h1 class="bd-cover__title">Baralho de Dilemas da PI</h1>
-    <p class="bd-cover__sub">12 dilemas éticos reais de Propriedade Intelectual para debater, refletir e decidir em grupo.</p>
+    <div class="bd-cover__overline">Fase 5 — Refletir</div>
+    <h1 class="bd-cover__title">Baralho de Dilemas</h1>
+    <p class="bd-cover__sub">Cartas com dilemas reais de Propriedade Intelectual para provocar debate ético e estratégico em grupo.</p>
     <div class="bd-cover__meta">
-      <span>🃏 12 cartas</span>
-      <span>⏱ 3–5 min por carta</span>
-      <span>👥 Grupos de 3–5</span>
+      <span>🃏 16 dilemas</span>
+      <span>⏱ 45–60 min</span>
+      <span>👥 3–8 pessoas</span>
       <span>💻 Digital + Impressão</span>
     </div>
   </header>
 
   <main class="bd-container">
 
-    <section class="bd-intro">
-      <h2>🎯 Como Usar</h2>
-      <p>O Baralho de Dilemas apresenta situações reais (ou baseadas em casos reais) em que a Propriedade Intelectual envolve <strong>conflitos éticos</strong>: lucro vs. acesso, inovação vs. tradição, proteção vs. compartilhamento, universidade vs. mercado. Não há resposta certa — o objetivo é provocar debate, argumentação e pensamento crítico.</p>
-      <p>Cada carta inclui: cenário, dilema, fundamentação legal e perguntas para debate. O facilitador sorteia ou deixa o grupo escolher. Tempo sugerido: 3–5 minutos por carta.</p>
-    </section>
-
-    <div class="bd-filters">
-      <button class="bd-filter active" data-filter="all">Todos</button>
-      <button class="bd-filter" data-filter="saude">💊 Saúde</button>
-      <button class="bd-filter" data-filter="biodiversidade">🌿 Biodiversidade</button>
-      <button class="bd-filter" data-filter="academia">🎓 Academia</button>
-      <button class="bd-filter" data-filter="tecnologia">💻 Tecnologia</button>
-      <button class="bd-filter" data-filter="agro">🌾 Agronegócio</button>
-      <button class="bd-filter" data-filter="cultura">🎨 Cultura</button>
+    <!-- Controls -->
+    <div class="bd-controls">
+      <span class="bd-controls__counter" id="discussedCounter">✅ 0 / 16 discutidos</span>
+      <button class="bd-btn bd-btn--primary" onclick="shuffleOne()" aria-label="Sortear um dilema aleatório">🎲 Sortear</button>
+      <button class="bd-btn bd-btn--outline" onclick="showAll()" aria-label="Mostrar todos os dilemas">👁️ Ver Todas</button>
+      <button class="bd-btn bd-btn--outline" onclick="flipAll()" aria-label="Virar todas as cartas">🔄 Virar Todas</button>
+      <button class="bd-btn bd-btn--outline" onclick="window.print()" aria-label="Imprimir as cartas de dilemas">🖨️ Imprimir</button>
+      <button class="bd-btn bd-btn--danger" onclick="clearAll()" aria-label="Limpar anotações e progresso">🗑️ Limpar</button>
     </div>
 
-    <div class="bd-grid" id="dilemmaGrid"></div>
+    <!-- Filters -->
+    <div class="bd-filters">
+      <button class="bd-filter-btn active" onclick="filterCards('todos', this)" aria-label="Filtrar: todos os dilemas">Todos</button>
+      <button class="bd-filter-btn" onclick="filterCards('patente', this)" aria-label="Filtrar: dilemas de patente">🔬 Patente</button>
+      <button class="bd-filter-btn" onclick="filterCards('marca', this)" aria-label="Filtrar: dilemas de marca">™️ Marca</button>
+      <button class="bd-filter-btn" onclick="filterCards('autoral', this)" aria-label="Filtrar: dilemas de direito autoral">©️ Autoral</button>
+      <button class="bd-filter-btn" onclick="filterCards('segredo', this)" aria-label="Filtrar: dilemas de segredo industrial">🔒 Segredo</button>
+      <button class="bd-filter-btn" onclick="filterCards('software', this)" aria-label="Filtrar: dilemas de software">💻 Software</button>
+      <button class="bd-filter-btn" onclick="filterCards('ig', this)" aria-label="Filtrar: dilemas de indicação geográfica">🌿 IG</button>
+      <button class="bd-filter-btn" onclick="filterCards('etica', this)" aria-label="Filtrar: dilemas éticos">⚖️ Ética</button>
+    </div>
 
+    <!-- Card grid -->
+    <div class="bd-grid" id="dilemmaGrid" aria-live="polite"></div>
+
+    <!-- Actions -->
     <div class="bd-actions">
-      <button class="bd-btn bd-btn--primary" id="shuffleBtn">🔀 Embaralhar</button>
-      <button class="bd-btn bd-btn--primary" id="drawBtn">🎲 Sortear Carta</button>
-      <button class="bd-btn bd-btn--primary" onclick="window.print()">🖨️ Imprimir Baralho</button>
+      <a href="canvas-avaliacao.html" class="bd-btn bd-btn--outline">📋 Canvas de Avaliação</a>
+      <a href="quiz-final.html" class="bd-btn bd-btn--outline">🏆 Quiz Final</a>
       <a href="index.html" class="bd-btn bd-btn--outline">🏠 Toolkit</a>
     </div>
 
-    <section class="bd-guide">
-      <h2>📝 Guia do Facilitador</h2>
-      <p><strong>Dinâmica sugerida (20–30 min):</strong></p>
-      <p><strong>1. Sorteio (1 min):</strong> O facilitador clica em "Sortear Carta" ou distribui cartas impressas. Cada grupo recebe 2–3 cartas.</p>
-      <p><strong>2. Leitura e Debate (3–5 min por carta):</strong> O grupo lê o cenário, discute o dilema e tenta alcançar consenso (ou registrar posições divergentes).</p>
-      <p><strong>3. Apresentação (2 min por grupo):</strong> Cada grupo apresenta seu dilema e posição para a turma.</p>
-      <p><strong>4. Síntese (5 min):</strong> O facilitador conecta os dilemas aos conceitos da oficina: período de graça, licença compulsória, patrimônio genético, direito autoral, segredo industrial, etc.</p>
-      <p><strong>Regras de ouro:</strong> Respeitar todas as opiniões. Argumentar com base legal, não apenas opinião. Não há resposta certa — há argumentos melhores.</p>
+    <!-- How-to -->
+    <section class="bd-howto">
+      <h2>📝 Como usar o Baralho de Dilemas</h2>
+      <p><strong>1.</strong> O facilitador sorteia uma carta (ou deixa o grupo escolher).</p>
+      <p><strong>2.</strong> Leia o dilema em voz alta para o grupo.</p>
+      <p><strong>3.</strong> Cada participante tem <strong>2 minutos</strong> para pensar individualmente.</p>
+      <p><strong>4.</strong> Abra a discussão em grupo por <strong>5–8 minutos</strong>. Incentive posições diferentes.</p>
+      <p><strong>5.</strong> Vire a carta para ver os pontos de reflexão e a fundamentação legal.</p>
+      <p><strong>6.</strong> Registre a decisão ou consenso do grupo no campo de anotação.</p>
+      <p><strong>7.</strong> Marque como "Discutido" e passe para o próximo dilema.</p>
+      <p><strong>8.</strong> Ao final, revise as decisões tomadas e conecte com o Canvas de Avaliação.</p>
     </section>
 
   </main>
 
+  <!-- Footer -->
   <footer class="bd-footer">
-    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
-    <p>Casos baseados em situações reais. Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96</a> · <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">Lei 13.123/2015</a></p>
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY‑NC‑SA 4.0</a></p>
+    <p>Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener noreferrer">Lei 9.279/96</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank" rel="noopener noreferrer">Lei 9.610/98</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank" rel="noopener noreferrer">Lei 9.609/98</a></p>
   </footer>
 
+  <!-- Scripts -->
+  <script src="script.js"></script>
   <script>
-    // Dados dos dilemas (objeto JavaScript puro, sem sintaxe problemática)
+    /* ================================================================
+       BARALHO DE DILEMAS — PI Thinking
+       ================================================================ */
+
     const dilemmas = [
-      { id:1, category:'saude', catLabel:'Saúde Pública', catColor:'#E53935', icon:'💊', title:'O Remédio que Salva vs. A Patente que Protege',
-        scenario:'Uma farmacêutica desenvolveu um antirretroviral essencial para o tratamento de HIV/AIDS. A patente garante exclusividade de 20 anos. O medicamento custa R$ 580/paciente/ano. O genérico indiano custa R$ 170. O SUS atende 200 mil pacientes.',
-        dilemma:'O governo deve decretar licença compulsória para importar genéricos mais baratos, mesmo violando a patente?',
-        legal:'Art. 71, Lei 9.279/96: licença compulsória por interesse público. Decreto nº 6.108/2007: licença compulsória do Efavirenz (caso real). Acordo TRIPS, art. 31: flexibilidades para saúde pública. Declaração de Doha (2001).',
-        debate:{ favor:'A vida tem prioridade sobre o lucro. O TRIPS permite flexibilidades em emergências de saúde. O Brasil já usou a licença compulsória em 2007 e economizou R$ 237 milhões/ano.', contra:'Sem proteção patentária, as farmacêuticas não terão incentivo para investir bilhões em P&D. A licença compulsória desestimula investimento estrangeiro no Brasil.', perguntas:'1. Onde traçar a linha entre lucro legítimo e preço abusivo? 2. Se fosse a sua empresa que investiu 12 anos em P&D, como se sentiria? 3. A licença compulsória é exceção ou deveria ser regra?' } },
-      { id:2, category:'biodiversidade', catLabel:'Biodiversidade', catColor:'#2E7D32', icon:'🌿', title:'O Cupuaçu Roubado',
-        scenario:'Em 2000, a empresa japonesa Asahi Foods registrou a marca "Cupuaçu" no Japão e a patente do processo de fabricação do "cupulate" (chocolate de cupuaçu). Comunidades amazônicas usam o fruto há séculos. Em 2004, após mobilização internacional, o registro foi cancelado.',
-        dilemma:'Como proteger nomes de frutas e processos tradicionais amazônicos contra apropriação internacional?',
-        legal:'Lei 13.123/2015 (Marco da Biodiversidade): acesso e repartição de benefícios. Convenção sobre Diversidade Biológica (CDB, 1992). Protocolo de Nagoia (2014). Arts. 176–182, LPI: Indicação Geográfica.',
-        debate:{ favor:'Registros defensivos de marcas e IGs protegem nomes de frutas brasileiras. A Lei 13.123 prevê repartição de benefícios para comunidades tradicionais.', contra:'É difícil monitorar registros em todos os escritórios de patentes do mundo. Pequenas comunidades não têm recursos para litígios internacionais.', perguntas:'1. O Brasil deveria registrar preventivamente nomes de frutas amazônicas? 2. Quem deveria ser titular: a comunidade, o estado ou a União? 3. O caso do açaí (2026) pode repetir o do cupuaçu?' } },
-      { id:3, category:'academia', catLabel:'Academia', catColor:'#1565C0', icon:'📝', title:'Publicar ou Patentear?',
-        scenario:'Dr. Apressado descobriu uma molécula anti-inflamatória promissora na UFRR. Seu orientador pressiona para publicar logo (o Lattes e a avaliação CAPES dependem de artigos). Se publicar antes do depósito de patente, perde a novidade em quase todos os países — exceto no Brasil, que tem 12 meses de período de graça.',
-        dilemma:'O pesquisador deve publicar para garantir o Lattes ou esperar o depósito de patente — arriscando que outro pesquisador publique primeiro?',
-        legal:'Art. 12, Lei 9.279/96: período de graça de 12 meses (divulgação → depósito). Art. 11: requisito de novidade. Lei 10.973/2004: obrigação da ICT de proteger PI.',
-        debate:{ favor:'A publicação antecipada garante prioridade acadêmica e alimenta o Lattes. O período de graça brasileiro permite patentear depois (12 meses).', contra:'A publicação mata a novidade para patentes internacionais (maioria dos países NÃO tem período de graça). A ICT perde receita de licenciamento. O NIT deveria ser consultado ANTES da publicação.', perguntas:'1. O sistema de avaliação acadêmico (Lattes/CAPES) é incompatível com a proteção de PI? 2. Como mudar a cultura "publicar ou perecer"? 3. O NIT deveria ter poder de veto sobre publicações?' } },
-      { id:4, category:'tecnologia', catLabel:'Tecnologia', catColor:'#7B1FA2', icon:'💻', title:'Código Aberto vs. Código Protegido',
-        scenario:'Kayla Maker, desenvolvedora de Boa Vista, criou um app de monitoramento ambiental para comunidades ribeirinhas. Ela quer compartilhar o código como open source (MIT License) para que outros estados repliquem. Porém, um investidor oferece R$ 500 mil em troca de manter o código proprietário e a patente do algoritmo.',
-        dilemma:'Liberar o código aberto para impacto social máximo ou fechar o código para garantir sustentabilidade financeira da startup?',
-        legal:'Lei 9.609/98: software protegido por direito autoral. Lei 9.279/96: algoritmos em si não são patenteáveis no Brasil (art. 10), mas processos técnicos envolvendo software podem ser. Licenças open source (MIT, GPL) são contratos de licenciamento.',
-        debate:{ favor:'Open source permite replicação em toda a Amazônia, gerando mais impacto social. A comunidade de desenvolvedores contribui com melhorias gratuitamente.', contra:'Sem proteção proprietária, a startup não consegue atrair investimento e pode fechar. Open source não impede que grandes empresas peguem o código e comercializem sem retribuir.', perguntas:'1. É possível um modelo híbrido (core open source + features premium proprietárias)? 2. O impacto social justifica abrir mão de receita? 3. O investidor tem razão em exigir exclusividade?' } },
-      { id:5, category:'biodiversidade', catLabel:'Biodiversidade', catColor:'#2E7D32', icon:'🧪', title:'O Fitoterápico da Comunidade',
-        scenario:'Uma universidade quer pesquisar os princípios ativos de um fitoterápico ancestral da comunidade indígena Macuxi (Dona Floresta). A pesquisa pode gerar uma patente milionária. A comunidade não tem advogado nem entende de PI. A universidade oferece "apoio técnico" em troca do acesso ao conhecimento tradicional.',
-        dilemma:'Quem deve ser titular da patente? A universidade que fez a pesquisa ou a comunidade que detém o conhecimento ancestral?',
-        legal:'Lei 13.123/2015: consentimento prévio informado obrigatório. Art. 10: repartição de benefícios (monetária ou não monetária). Protocolo de Nagoia. Convenção 169 da OIT (direitos dos povos indígenas).',
-        debate:{ favor:'A universidade investiu equipamentos, pesquisadores e anos de trabalho. Sem a pesquisa científica, o conhecimento tradicional não se tornaria medicamento. Cotitularidade é uma opção justa.', contra:'O conhecimento é ancestral e pertence à comunidade. A relação de poder é desigual. Já existem muitos casos de biopirataria na Amazônia. A comunidade deveria ser titular única, com a universidade como licenciada.', perguntas:'1. "Apoio técnico" é compensação justa por séculos de conhecimento? 2. Como garantir consentimento informado genuíno? 3. A repartição de benefícios da Lei 13.123 é suficiente?' } },
-      { id:6, category:'agro', catLabel:'Agronegócio', catColor:'#E65100', icon:'🌱', title:'A Semente Patenteada',
-        scenario:'Uma multinacional de biotecnologia obteve patente de soja transgênica no Brasil. Produtores rurais de Roraima plantaram a soja sem saber que era patenteada (sementes chegaram por troca entre agricultores). A empresa cobra royalties retroativos. Os produtores alegam "privilégio do agricultor".',
-        dilemma:'O produtor rural que planta sementes patenteadas obtidas por troca deve pagar royalties?',
-        legal:'Lei 9.456/97, art. 10: "privilégio do agricultor" — pode reservar e plantar sementes para uso próprio. Lei 9.279/96: patentes de biotecnologia. Caso real: Monsanto vs. produtores rurais do RS (STJ).',
-        debate:{ favor:'A patente protege anos de investimento em P&D. Sem royalties, não haverá novas cultivares transgênicas. O agricultor usou tecnologia patenteada mesmo que indiretamente.', contra:'O "privilégio do agricultor" é um direito fundamental de soberania alimentar. Pequenos produtores não têm como rastrear a origem genética das sementes. A cobrança retroativa é desproporcional.', perguntas:'1. Até que ponto uma empresa pode "rastrear" sementes plantadas por pequenos agricultores? 2. O direito de propriedade intelectual pode se sobrepor à segurança alimentar? 3. O sistema de royalties funciona para a realidade de Roraima?' } },
-      { id:7, category:'academia', catLabel:'Academia', catColor:'#1565C0', icon:'📋', title:'O Plágio Involuntário',
-        scenario:'Uma pesquisadora da UFRR descobriu que trechos do seu artigo publicado em 2022 aparecem, sem citação, em uma patente depositada no INPI por um pesquisador de outra universidade. O texto do relatório descritivo reproduz parágrafos inteiros do artigo dela. O pesquisador alega que usou como "estado da técnica".',
-        dilemma:'Reproduzir trechos de um artigo científico no relatório descritivo de uma patente, sem citar, é plágio ou uso legítimo do estado da técnica?',
-        legal:'Lei 9.610/98: direito autoral protege a expressão (texto), não as ideias. Art. 46, III: citação parcial para fins didáticos/científicos é permitida com indicação de autoria. Lei 9.279/96, art. 24: relatório descritivo deve descrever o estado da técnica.',
-        debate:{ favor:'O estado da técnica deve ser descrito no pedido de patente — é obrigação legal. O conteúdo científico (ideias, dados) não é protegido por direito autoral, apenas a expressão.', contra:'Copiar parágrafos inteiros sem citação é violação de direito autoral, independente do contexto. O pesquisador deveria ter reescrito com suas próprias palavras e citado a fonte.', perguntas:'1. Onde está a linha entre "descrever o estado da técnica" e plagiar? 2. O INPI deveria verificar plágio nos relatórios descritivos? 3. Como proteger pesquisadores que têm seu trabalho incorporado em patentes alheias?' } },
-      { id:8, category:'cultura', catLabel:'Cultura', catColor:'#AD1457', icon:'🎨', title:'A Arte Indígena na Camiseta',
-        scenario:'Uma marca de moda de São Paulo lançou uma coleção de camisetas estampadas com grafismos tradicionais dos povos Yanomami e Macuxi de Roraima. Os grafismos foram "adaptados" por um designer. A marca não consultou nem creditou as comunidades. As camisetas custam R$ 189 cada.',
-        dilemma:'Grafismos indígenas tradicionais podem ser registrados como desenho industrial ou marca por empresas não-indígenas?',
-        legal:'Constituição Federal, art. 231: direitos originários dos povos indígenas. Lei 9.279/96, art. 124, I: não registrável como marca sinal que ofenda "culturas de qualquer comunidade". Convenção 169 OIT. Patrimônio cultural imaterial (Decreto 3.551/2000).',
-        debate:{ favor:'Os grafismos são patrimônio cultural público, não propriedade individual. O designer fez uma "releitura" criativa, não uma cópia. Nenhuma lei brasileira proíbe expressamente o uso de grafismos indígenas.', contra:'Usar grafismos sagrados sem autorização é apropriação cultural e violação de direitos coletivos. Lucrar sem compartilhar os ganhos com a comunidade é exploração. As comunidades deveriam ter direito de veto.', perguntas:'1. Existe diferença entre "inspiração cultural" e "apropriação cultural" em termos legais? 2. Como proteger patrimônio cultural coletivo dentro do sistema de PI (que é individual)? 3. A marca deveria ser obrigada a consultar a comunidade e repartir lucros?' } },
-      { id:9, category:'tecnologia', catLabel:'Tecnologia', catColor:'#7B1FA2', icon:'🤖', title:'A IA que Inventa',
-        scenario:'Um pesquisador de Roraima usou uma ferramenta de inteligência artificial para gerar a estrutura molecular de um novo composto. O pesquisador definiu os parâmetros de entrada e selecionou o resultado mais promissor, mas a "criação" foi feita pela IA. Ele quer depositar uma patente.',
-        dilemma:'Uma invenção gerada por IA pode ser patenteada? Quem é o "inventor" — o pesquisador que deu os comandos ou a IA que gerou a solução?',
-        legal:'Lei 9.279/96, art. 6º: "Ao autor de invenção..." — pressupõe autor humano. Caso DABUS (2020–2023): escritórios de patentes de EUA, UE e UK negaram inventoria a IA. Austrália e África do Sul aceitaram temporariamente.',
-        debate:{ favor:'O pesquisador definiu o problema, os parâmetros e selecionou o resultado — ele é o autor intelectual. A IA é apenas uma ferramenta, como um microscópio eletrônico. Sem o pesquisador, a IA não geraria nada útil.', contra:'A IA fez o trabalho criativo — gerou milhares de combinações e encontrou a solução. O pesquisador não poderia ter chegado ao mesmo resultado sozinho. Reconhecer inventoria humana em criações de IA é desonesto.', perguntas:'1. Se a IA é "apenas ferramenta", qual o limite? E se o pesquisador apenas apertou um botão? 2. Devemos criar uma nova categoria de "inventoria assistida por IA"? 3. O que acontece com os direitos se a IA for de uma empresa americana e o pesquisador for brasileiro?' } },
-      { id:10, category:'saude', catLabel:'Saúde Pública', catColor:'#E53935', icon:'🧬', title:'A Vacina Patenteada na Pandemia',
-        scenario:'Durante uma pandemia, uma farmacêutica desenvolveu a única vacina eficaz. Ela cobra U$ 30/dose. Países pobres não conseguem comprar. A OMS propõe um "pool de patentes" para licenciar a tecnologia a fabricantes globais. A empresa recusa, alegando direitos de PI.',
-        dilemma:'Em uma pandemia global, a proteção patentária deve ser suspensa para garantir acesso universal à vacina?',
-        legal:'Acordo TRIPS, arts. 31 e 31bis: licenças compulsórias em emergência sanitária. Declaração de Doha (2001): "O TRIPS não impede medidas de proteção da saúde pública." Proposta de waiver de PI na OMC (2020–2022).',
-        debate:{ favor:'Milhões de vidas dependem do acesso. A pesquisa foi parcialmente financiada com dinheiro público. O lucro não pode prevalecer sobre a sobrevivência humana.', contra:'O investimento em P&D é enorme e arriscado. Sem retorno financeiro, empresas não investirão na próxima vacina. O pool de patentes pode comprometer a qualidade.', perguntas:'1. Existe um ponto em que o lucro se torna "imoral"? 2. O financiamento público de pesquisa deveria automaticamente gerar licenciamento aberto? 3. Como equilibrar incentivo à inovação e acesso universal?' } },
-      { id:11, category:'agro', catLabel:'Agronegócio', catColor:'#E65100', icon:'☕', title:'O Café que Todos Querem Copiar',
-        scenario:'Produtores de café de Pacaraima, Roraima, conseguiram Indicação Geográfica (IG) para seu café. O produto ganhou fama nacional. Agora, torrefadoras de outros estados vendem café rotulado como "tipo Pacaraima" ou "estilo Roraima", sem usar grãos da região.',
-        dilemma:'A IG protege apenas o nome exato ou deveria impedir qualquer referência geográfica que confunda o consumidor?',
-        legal:'Arts. 176–182, LPI: proteção contra uso indevido de IG. Art. 192: uso de indicação falsa de procedência é crime. IN INPI nº 095/2018.',
-        debate:{ favor:'A IG protege o nome registrado. "Tipo Pacaraima" e "estilo Roraima" não são o nome exato — criam confusão no consumidor. A proteção deveria ser ampla.', contra:'"Tipo Pacaraima" é descritivo, não uso da IG. O consumidor sabe que não é o produto original. Ampliar a proteção demais engessa o mercado.', perguntas:'1. "Tipo Champagne" é proibido na UE. "Tipo Pacaraima" deveria ser proibido no Brasil? 2. Quem deveria fiscalizar o uso indevido de IGs? 3. A IG beneficia mais os produtores ou os intermediários?' } },
-      { id:12, category:'cultura', catLabel:'Cultura', catColor:'#AD1457', icon:'🎵', title:'O Ritmo que Ninguém Registrou',
-        scenario:'Um músico de Roraima compôs uma música usando ritmos e melodias tradicionais do povo Wapixana. A música viralizou no streaming, gerando milhares de reais em royalties. A comunidade Wapixana questiona: "Esse ritmo é nosso, mas nunca foi registrado".',
-        dilemma:'Quem tem direito autoral sobre uma composição que utiliza elementos musicais de tradição oral coletiva?',
-        legal:'Lei 9.610/98: direito autoral protege a criação individual, não expressões folclóricas. Art. 45: obras de domínio público (autoria desconhecida ou tradição oral). Convenção para a Salvaguarda do Patrimônio Cultural Imaterial (UNESCO, 2003).',
-        debate:{ favor:'O músico criou uma obra derivada original — ele arranjou, compôs letras e produziu. Tradição oral é domínio público. O direito autoral protege a expressão individual.', contra:'O "domínio público" não deveria se aplicar a tradições de povos vivos que nunca consentiram a classificação. O músico lucra com patrimônio alheio sem retribuição.', perguntas:'1. Obras folclóricas de povos vivos deveriam ser tratadas como "domínio público"? 2. Deveria existir um "direito autoral coletivo" para comunidades tradicionais? 3. O músico tem obrigação moral (ou legal) de repartir os royalties?' } }
+      {
+        id: 1, icon: '🔬', category: 'patente',
+        title: 'Publicar ou Patentear?',
+        dilemma: 'Dr. Apressado descobriu uma nova molécula com potencial farmacêutico. O congresso internacional é em 3 semanas e ele quer publicar o artigo. O NIT diz que publicar antes de depositar a patente destruirá a novidade. O que ele deve fazer?',
+        hint: 'Pense no Art. 11 §1 da LPI (período de graça) e no impacto da publicação prévia.',
+        reflection: '<strong>Pontos de reflexão:</strong> A LPI (Art. 11 §1) prevê um período de graça de 12 meses, mas apenas em situações específicas (divulgação pelo inventor). No entanto, em muitos países esta exceção não existe. A melhor prática é depositar o pedido de patente ANTES de qualquer publicação. Alternativa: solicitar depósito provisório ou usar o mecanismo PCT.',
+        legal: 'Lei 9.279/96, Art. 11 §1 (período de graça); Art. 24 (depósito provisório)'
+      },
+      {
+        id: 2, icon: '👩‍🔬', category: 'patente',
+        title: 'Cotitularidade Universidade-Aluno',
+        dilemma: 'Ana, aluna de IC, desenvolveu um dispositivo médico no laboratório da universidade usando equipamentos e orientação do professor. A universidade quer registrar a patente sozinha. Ana quer ser cotitular. Quem tem razão?',
+        hint: 'Considere a Lei de Inovação (10.973/04) e o marco legal de CT&I.',
+        reflection: '<strong>Pontos de reflexão:</strong> A Lei de Inovação (Art. 11) e políticas de PI das ICTs geralmente definem que inventos criados com recursos da instituição pertencem à ICT. Porém, Ana é inventora e deve ser reconhecida como tal (direito moral). A titularidade pode ser exclusiva da ICT ou compartilhada, conforme a política institucional. O inventor sempre tem direito a participação nos ganhos econômicos (Art. 13).',
+        legal: 'Lei 10.973/04 (Arts. 11, 13); Lei 9.279/96 (Arts. 6, 88–93)'
+      },
+      {
+        id: 3, icon: '™️', category: 'marca',
+        title: 'Marca Genérica x Distintiva',
+        dilemma: 'Uma startup quer registrar a marca "AçaíPuro" para sua linha de cosméticos amazônicos. O examinador do INPI indeferiu por considerar a marca descritiva/genérica. A startup discorda. Quem tem razão?',
+        hint: 'Analise os Arts. 122 e 124 da LPI sobre registrabilidade de marcas.',
+        reflection: '<strong>Pontos de reflexão:</strong> O Art. 124, VI da LPI proíbe o registro de sinais de caráter genérico ou descritivo. "AçaíPuro" pode ser considerado descritivo do produto. A startup poderia: (a) agregar elemento figurativo distintivo; (b) provar secondary meaning (significado secundário); ou (c) escolher marca fantasia mais forte.',
+        legal: 'Lei 9.279/96, Arts. 122, 124 (inciso VI)'
+      },
+      {
+        id: 4, icon: '🔒', category: 'segredo',
+        title: 'Ex-funcionário e Segredo Industrial',
+        dilemma: 'O engenheiro-chefe de uma empresa de biocosmético pediu demissão e abriu uma concorrente usando o know-how adquirido. A empresa original não tinha NDA (acordo de confidencialidade). Pode fazer algo?',
+        hint: 'Considere o Art. 195 da LPI (concorrência desleal) e a importância de NDAs.',
+        reflection: '<strong>Pontos de reflexão:</strong> Mesmo sem NDA, o Art. 195, XI-XII da LPI tipifica como crime de concorrência desleal a divulgação ou uso de informações confidenciais obtidas em relação de emprego. No entanto, a prova é mais difícil sem contrato. Lição: sempre formalize NDAs e cláusulas de não-competição com funcionários que acessam informações sensíveis.',
+        legal: 'Lei 9.279/96, Art. 195 (XI, XII); CLT (cláusulas contratuais)'
+      },
+      {
+        id: 5, icon: '©️', category: 'autoral',
+        title: 'IA e Autoria',
+        dilemma: 'Um pesquisador usou uma IA generativa para criar ilustrações do seu livro didático. Ele quer registrar direito autoral sobre as imagens. A IA pode ser considerada autora? O pesquisador é o autor?',
+        hint: 'Pense no conceito de autoria na Lei 9.610/98 e nas discussões internacionais.',
+        reflection: '<strong>Pontos de reflexão:</strong> A Lei 9.610/98 exige que o autor seja pessoa física (Art. 11). IAs não são sujeitos de direito. Há discussão global: US Copyright Office rejeitou registro de obras puramente geradas por IA. O pesquisador pode ter direitos se houve contribuição criativa substancial (seleção, arranjo, curadoria). A questão permanece em debate jurídico.',
+        legal: 'Lei 9.610/98, Art. 11; USCO, "Copyright Registration Guidance" (2023)'
+      },
+      {
+        id: 6, icon: '💻', category: 'software',
+        title: 'Software: Patente ou Registro?',
+        dilemma: 'Kayla criou um app que usa um algoritmo inovador de monitoramento ambiental. O NIT sugere patentear. O advogado diz que software não é patenteável. Quem tem razão?',
+        hint: 'Analise o Art. 10 da LPI e as Diretrizes de Exame do INPI para software.',
+        reflection: '<strong>Pontos de reflexão:</strong> O Art. 10 da LPI exclui "programas de computador em si" da patenteabilidade. Porém, o INPI permite patentear "invenções implementadas por computador" — quando o software resolve um problema técnico de forma nova. O algoritmo de Kayla pode ser patenteável se gera um efeito técnico (ex.: melhoria no sensor). Alternativamente, ela pode registrar como software (Lei 9.609/98) e proteger o código-fonte.',
+        legal: 'Lei 9.279/96, Art. 10 (VIII); Lei 9.609/98; Resolução INPI 411/2020'
+      },
+      {
+        id: 7, icon: '🌿', category: 'ig',
+        title: 'IG e Qualidade Decadente',
+        dilemma: 'Uma Indicação Geográfica foi concedida para o mel de uma região. Nos últimos anos, alguns produtores reduziram a qualidade. O conselho regulador não está fiscalizando. Consumidores reclamam. O que fazer?',
+        hint: 'Considere o papel do conselho regulador e a manutenção da IG.',
+        reflection: '<strong>Pontos de reflexão:</strong> A IG exige manutenção contínua das condições de qualidade. O conselho regulador tem a obrigação de fiscalizar e pode excluir produtores que não atendam ao caderno de especificações. Se o conselho não atua, produtores ou consumidores podem acionar o INPI ou o Judiciário. A perda de qualidade pode levar à anulação da IG.',
+        legal: 'Lei 9.279/96, Arts. 176–182; IN INPI 095/2018'
+      },
+      {
+        id: 8, icon: '⚖️', category: 'etica',
+        title: 'Biopirataria e Conhecimento Tradicional',
+        dilemma: 'Uma empresa farmacêutica pesquisou um fitoterápico usado há séculos por uma comunidade indígena e depositou patente sem consultar a comunidade. É legal? É ético?',
+        hint: 'Pense no CDB, Protocolo de Nagoya, Lei da Biodiversidade e TRIPS.',
+        reflection: '<strong>Pontos de reflexão:</strong> A Lei 13.123/2015 (Marco Legal da Biodiversidade) exige consentimento prévio informado (CPI) e repartição de benefícios com comunidades tradicionais. O CGEN é o órgão regulador. Depositar patente sem CPI viola a legislação brasileira e pode configurar biopirataria. A patente pode ser anulada por vício de consentimento.',
+        legal: 'Lei 13.123/2015; Decreto 8.772/2016; CDB; Protocolo de Nagoya'
+      },
+      {
+        id: 9, icon: '🔬', category: 'patente',
+        title: 'PCT ou Depósito Nacional?',
+        dilemma: 'Uma universidade tem uma invenção com potencial global. O orçamento é limitado. Depositar via PCT custa mais, mas dá 30 meses para decidir em quais países entrar. O depósito nacional custa menos, mas limita a proteção ao Brasil. Qual estratégia seguir?',
+        hint: 'Analise custos do PCT vs. prioridade unionista (Convenção de Paris).',
+        reflection: '<strong>Pontos de reflexão:</strong> O PCT oferece 30 meses de prazo para decidir (fase nacional), com relatório de busca internacional (ISR) que ajuda a avaliar a viabilidade. A prioridade unionista (Convenção de Paris) dá 12 meses. Para orçamento limitado, estratégia possível: depositar nacional, usar os 12 meses para buscar parceiros/licenciantes, depois decidir se entra via PCT. Custo PCT (via INPI como RO): ~R$ 800.',
+        legal: 'PCT (Tratado de Cooperação em Matéria de Patentes); Convenção de Paris, Art. 4'
+      },
+      {
+        id: 10, icon: '™️', category: 'marca',
+        title: 'Trade Dress e Concorrência',
+        dilemma: 'Um concorrente lançou um produto com embalagem quase idêntica ao seu — mesmas cores, layout similar, tipografia parecida — mas com nome diferente. O consumidor confunde os produtos. Como proteger?',
+        hint: 'Pense em trade dress, concorrência desleal e proteção cumulativa.',
+        reflection: '<strong>Pontos de reflexão:</strong> O trade dress (conjunto-imagem) não tem registro específico no Brasil, mas é protegido pela repressão à concorrência desleal (Art. 195, III e IV da LPI) e pelo CDC. Para proteção mais sólida: (a) registrar marca figurativa/mista; (b) registrar desenho industrial da embalagem; (c) ação de concorrência desleal. A prova de confusão do consumidor é essencial.',
+        legal: 'Lei 9.279/96, Art. 195 (III, IV); CDC, Art. 37; Lei 9.279/96, Arts. 94–121 (DI)'
+      },
+      {
+        id: 11, icon: '©️', category: 'autoral',
+        title: 'Fair Use Acadêmico',
+        dilemma: 'Um professor copiou um capítulo inteiro de um livro técnico para distribuir à turma (50 alunos). A editora enviou uma notificação exigindo pagamento. O professor alega uso educacional. Quem tem razão?',
+        hint: 'Analise o Art. 46 da Lei 9.610/98 (limitações ao direito autoral).',
+        reflection: '<strong>Pontos de reflexão:</strong> O Art. 46, II da Lei 9.610/98 permite a reprodução de "pequenos trechos" para uso privado do copista, sem intuito de lucro. Um capítulo inteiro pode exceder "pequenos trechos". A cópia para 50 alunos tem escala comercial implícita. O professor pode: (a) usar apenas trechos; (b) recomendar a compra; (c) usar repositório institucional com licença.',
+        legal: 'Lei 9.610/98, Art. 46 (II, VIII); Art. 104 (sanções)'
+      },
+      {
+        id: 12, icon: '🔒', category: 'segredo',
+        title: 'Segredo vs. Patente',
+        dilemma: 'A fórmula do seu produto é o diferencial competitivo. Se patentear, será publicada e concorrentes podem contornar. Se mantiver como segredo, não tem prazo de proteção, mas se alguém descobrir independentemente, não pode impedir. Qual caminho?',
+        hint: 'Compare patente (20 anos, publicação) vs. segredo (indefinido, risco de perda).',
+        reflection: '<strong>Pontos de reflexão:</strong> A patente dá exclusividade por 20 anos mas exige publicação completa. O segredo dura indefinidamente mas pode ser perdido (engenharia reversa, ex-funcionário). Considere: (a) o produto pode ser facilmente revertido? Se sim, patente é melhor; (b) o segredo pode ser mantido com controles internos? Se sim, segredo pode ser estratégico. Exemplos clássicos: Coca-Cola (segredo), indústria farmacêutica (patente).',
+        legal: 'Lei 9.279/96, Art. 195 (segredo); Arts. 40–44 (vigência patente)'
+      },
+      {
+        id: 13, icon: '💻', category: 'software',
+        title: 'Open Source e Propriedade',
+        dilemma: 'Um aluno de mestrado usou bibliotecas open source (licença GPL) no desenvolvimento do software do projeto de pesquisa. A universidade quer comercializar. A licença GPL obriga a distribuir o código-fonte. O que fazer?',
+        hint: 'Analise as obrigações da licença GPL e alternativas (LGPL, MIT, Apache).',
+        reflection: '<strong>Pontos de reflexão:</strong> A licença GPL (copyleft) exige que obras derivadas sejam distribuídas sob a mesma licença, incluindo código-fonte. Se o software usou GPL, a universidade não pode comercializá-lo como proprietário. Opções: (a) reescrever os componentes GPL com código próprio; (b) usar bibliotecas com licença permissiva (MIT, Apache); (c) adotar modelo de negócio open-source (SaaS, suporte, personalização).',
+        legal: 'GPL v3; Lei 9.609/98; Lei 9.610/98 (licenciamento)'
+      },
+      {
+        id: 14, icon: '🌿', category: 'ig',
+        title: 'IG e Mudança Climática',
+        dilemma: 'Uma IG foi registrada para um café de determinada altitude e microclima. Com a mudança climática, as condições da região estão se alterando e a qualidade do café mudou. A IG ainda é válida?',
+        hint: 'Considere a relação entre terroir, condições geográficas e a manutenção da IG.',
+        reflection: '<strong>Pontos de reflexão:</strong> A IG é vinculada ao terroir — conjunto de fatores geográficos, climáticos e humanos. Se as condições mudaram significativamente, pode ser necessário: (a) atualizar o caderno de especificações; (b) redefinir a área geográfica; (c) em caso extremo, questionar a manutenção da IG. Esta é uma questão emergente no direito de PI, sem jurisprudência consolidada no Brasil.',
+        legal: 'Lei 9.279/96, Arts. 176–182; IN INPI 095/2018'
+      },
+      {
+        id: 15, icon: '⚖️', category: 'etica',
+        title: 'Patente de Medicamento e Saúde Pública',
+        dilemma: 'Uma empresa detém patente de um medicamento essencial para doença endêmica no Brasil. O preço é inacessível para o SUS. O governo cogita licença compulsória. A empresa ameaça retirar investimentos do país. O que deve prevalecer?',
+        hint: 'Analise o Art. 71 da LPI (licença compulsória) e o Acordo TRIPS.',
+        reflection: '<strong>Pontos de reflexão:</strong> O Art. 71 da LPI permite licença compulsória em casos de emergência nacional ou interesse público. O TRIPS (Art. 31) também prevê esta possibilidade. O Brasil já usou este mecanismo (efavirenz, 2007). O debate envolve: equilíbrio entre incentivo à inovação (patente) e acesso à saúde (direito fundamental). Não há resposta simples — é um dilema genuíno de política pública.',
+        legal: 'Lei 9.279/96, Art. 71; TRIPS, Art. 31; Declaração de Doha (2001)'
+      },
+      {
+        id: 16, icon: '⚖️', category: 'etica',
+        title: 'PI e Acesso ao Conhecimento',
+        dilemma: 'Uma pesquisa financiada 100% com recursos públicos gerou uma patente. A universidade licenciou com exclusividade para uma empresa que cobra preços altos. A sociedade que financiou a pesquisa não tem acesso ao resultado. É justo?',
+        hint: 'Considere a Lei de Inovação, função social da PI e modelos alternativos de licenciamento.',
+        reflection: '<strong>Pontos de reflexão:</strong> A Lei de Inovação (Art. 6) permite que ICTs celebrem contratos de licenciamento. A questão é: licença exclusiva é sempre a melhor opção? Alternativas: (a) licença não-exclusiva para garantir concorrência; (b) cláusula de preço acessível; (c) licenciamento social para uso em saúde/educação. A função social da propriedade (CF, Art. 5º, XXIII) deve ser considerada.',
+        legal: 'Lei 10.973/04, Arts. 6, 11, 13; CF/88, Art. 5º (XXIII, XXIX); Lei 9.279/96'
+      }
     ];
 
-    // Funções globais
-    function renderCards(cards) {
-      const grid = document.getElementById('dilemmaGrid');
+    // ── State ──
+    let discussed = {};
+    let notes = {};
+    let currentFilter = 'todos';
+
+    // ── Render ──
+    function renderCards(list) {
+      var grid = document.getElementById('dilemmaGrid');
       grid.innerHTML = '';
-      cards.forEach(d => {
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'bd-card';
-        cardDiv.setAttribute('data-category', d.category);
-        cardDiv.id = `card-${d.id}`;
-        cardDiv.innerHTML = `
-          <div class="bd-card__header">
-            <span class="bd-card__category" style="background:${d.catColor};">${d.catLabel}</span>
-            <span class="bd-card__num">#${d.id}</span>
-            <div class="bd-card__icon">${d.icon}</div>
-            <div class="bd-card__title">${escapeHtml(d.title)}</div>
-          </div>
-          <div class="bd-card__body">
-            <div class="bd-card__scenario">${escapeHtml(d.scenario)}</div>
-            <div class="bd-card__dilemma">⚖️ <strong>Dilema:</strong> ${escapeHtml(d.dilemma)}</div>
-            <div class="bd-card__legal"><strong>📚 Base Legal:</strong> ${escapeHtml(d.legal)}</div>
-          </div>
-          <div class="bd-card__debate" id="debate-${d.id}">
-            <h4>👍 Argumentos a favor:</h4>
-            <p>${escapeHtml(d.debate.favor)}</p>
-            <h4>👎 Argumentos contra:</h4>
-            <p>${escapeHtml(d.debate.contra)}</p>
-            <h4>❓ Perguntas para debate:</h4>
-            <p>${escapeHtml(d.debate.perguntas)}</p>
-          </div>
-          <button class="bd-card__toggle" onclick="toggleDebate(${d.id})">💬 Ver Argumentos e Perguntas</button>
-        `;
-        grid.appendChild(cardDiv);
+      list.forEach(function(d) {
+        var isDiscussed = discussed[d.id] || false;
+        var noteText = notes[d.id] || '';
+        grid.innerHTML +=
+          '<div class="bd-card-wrapper" data-category="' + d.category + '">' +
+            '<div class="bd-card" id="card-' + d.id + '" role="button" tabindex="0" ' +
+              'aria-label="Carta de dilema: ' + d.title + '. Clique para virar." ' +
+              'onclick="toggleCard(' + d.id + ')" onkeydown="handleCardKey(event,' + d.id + ')">' +
+              '<div class="bd-card__front">' +
+                '<span class="bd-card__category bd-card__category--' + d.category + '">' + d.category.toUpperCase() + '</span>' +
+                '<div class="bd-card__icon">' + d.icon + '</div>' +
+                '<div class="bd-card__title">' + d.title + '</div>' +
+                '<div class="bd-card__dilemma">' + d.dilemma + '</div>' +
+                '<div class="bd-card__hint">💡 ' + d.hint + '</div>' +
+              '</div>' +
+              '<div class="bd-card__back">' +
+                '<div class="bd-card__back-title">🔎 Reflexão — ' + d.title + '</div>' +
+                '<div class="bd-card__back-body">' +
+                  '<p>' + d.reflection + '</p>' +
+                  '<p style="margin-top:.6rem;font-size:.82rem;color:var(--bd-text-light)"><strong>📖 Base legal:</strong> ' + d.legal + '</p>' +
+                '</div>' +
+                '<div class="bd-card__back-note">' +
+                  '<label for="note-' + d.id + '">📝 Anotação do grupo:</label>' +
+                  '<textarea id="note-' + d.id + '" placeholder="Registre a decisão ou consenso do grupo…" ' +
+                    'oninput="saveNote(' + d.id + ', this.value)">' + noteText + '</textarea>' +
+                '</div>' +
+                '<button class="bd-card__discussed-btn' + (isDiscussed ? ' done' : '') + '" ' +
+                  'onclick="event.stopPropagation(); toggleDiscussed(' + d.id + ')" ' +
+                  'aria-label="Marcar dilema ' + d.title + ' como discutido">' +
+                  (isDiscussed ? '✅ Discutido' : '☐ Marcar como discutido') +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
       });
+      updateCounter();
     }
 
-    function escapeHtml(str) {
-      return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-      }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-        return c;
-      });
+    function toggleCard(id) {
+      var card = document.getElementById('card-' + id);
+      if (card) card.classList.toggle('flipped');
     }
 
-    function toggleDebate(id) {
-      const debateDiv = document.getElementById(`debate-${id}`);
-      const btn = debateDiv.nextElementSibling;
-      if (debateDiv.style.display === 'block') {
-        debateDiv.style.display = 'none';
-        btn.textContent = '💬 Ver Argumentos e Perguntas';
-      } else {
-        debateDiv.style.display = 'block';
-        btn.textContent = '🔼 Ocultar';
+    function handleCardKey(e, id) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleCard(id);
       }
     }
 
-    function filterCards(category) {
-      const cards = document.querySelectorAll('.bd-card');
-      cards.forEach(card => {
-        if (category === 'all' || card.getAttribute('data-category') === category) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
+    function toggleDiscussed(id) {
+      discussed[id] = !discussed[id];
+      var btn = document.querySelector('#card-' + id + ' .bd-card__discussed-btn');
+      if (btn) {
+        btn.classList.toggle('done', discussed[id]);
+        btn.textContent = discussed[id] ? '✅ Discutido' : '☐ Marcar como discutido';
+      }
+      updateCounter();
+      autoSave();
+    }
+
+    function saveNote(id, value) {
+      notes[id] = value;
+      autoSave();
+    }
+
+    function updateCounter() {
+      var count = 0;
+      for (var k in discussed) { if (discussed[k]) count++; }
+      var el = document.getElementById('discussedCounter');
+      if (el) el.textContent = '✅ ' + count + ' / ' + dilemmas.length + ' discutidos';
+    }
+
+    // ── Filter ──
+    function filterCards(category, element) {
+      currentFilter = category;
+      var btns = document.querySelectorAll('.bd-filter-btn');
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      if (element) element.classList.add('active');
+
+      var filtered = category === 'todos'
+        ? dilemmas
+        : dilemmas.filter(function(d) { return d.category === category; });
+      renderCards(filtered);
+    }
+
+    // ── Controls ──
+    function shuffleOne() {
+      var filtered = currentFilter === 'todos'
+        ? dilemmas
+        : dilemmas.filter(function(d) { return d.category === currentFilter; });
+      var random = filtered[Math.floor(Math.random() * filtered.length)];
+      renderCards([random]);
+    }
+
+    function showAll() {
+      filterCards(currentFilter, document.querySelector('.bd-filter-btn.active'));
+    }
+
+    function flipAll() {
+      var cards = document.querySelectorAll('.bd-card');
+      var anyFlipped = false;
+      cards.forEach(function(c) { if (c.classList.contains('flipped')) anyFlipped = true; });
+      cards.forEach(function(c) {
+        if (anyFlipped) c.classList.remove('flipped');
+        else c.classList.add('flipped');
       });
     }
 
-    function shuffleDeck() {
-      const shuffled = [...dilemmas];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    function clearAll() {
+      if (!confirm('Limpar todas as anotações e progresso?')) return;
+      discussed = {};
+      notes = {};
+      if (typeof PIThinking !== 'undefined' && PIThinking.clearProgress) {
+        PIThinking.clearProgress('baralho-dilemas');
       }
-      renderCards(shuffled);
+      filterCards('todos', document.querySelector('.bd-filter-btn'));
     }
 
-    function drawRandom() {
-      const visibleCards = Array.from(document.querySelectorAll('.bd-card:not(.hidden)'));
-      if (visibleCards.length === 0) return;
-      visibleCards.forEach(c => c.style.outline = 'none');
-      const randomCard = visibleCards[Math.floor(Math.random() * visibleCards.length)];
-      randomCard.style.outline = '4px solid var(--bd-accent)';
-      randomCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const id = randomCard.id.replace('card-', '');
-      const debateDiv = document.getElementById(`debate-${id}`);
-      if (debateDiv && debateDiv.style.display !== 'block') {
-        debateDiv.style.display = 'block';
-        const btn = debateDiv.nextElementSibling;
-        if (btn) btn.textContent = '🔼 Ocultar';
-      }
-    }
-
-    // Event listeners e inicialização
-    document.addEventListener('DOMContentLoaded', () => {
-      renderCards(dilemmas);
-      document.getElementById('shuffleBtn').addEventListener('click', shuffleDeck);
-      document.getElementById('drawBtn').addEventListener('click', drawRandom);
-      document.querySelectorAll('.bd-filter').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          document.querySelectorAll('.bd-filter').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          filterCards(btn.getAttribute('data-filter'));
+    // ── Persistence ──
+    function autoSave() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
+        PIThinking.saveProgress('baralho-dilemas', {
+          discussed: discussed,
+          notes: notes,
+          filter: currentFilter
         });
+      }
+    }
+
+    function loadSaved() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.loadProgress) {
+        var saved = PIThinking.loadProgress('baralho-dilemas');
+        if (saved) {
+          if (saved.discussed) discussed = saved.discussed;
+          if (saved.notes) notes = saved.notes;
+          if (saved.filter) currentFilter = saved.filter;
+        }
+      }
+    }
+
+    // ── Theme toggle ──
+    function toggleTheme() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    // ── Init ──
+    loadSaved();
+    renderCards(currentFilter === 'todos'
+      ? dilemmas
+      : dilemmas.filter(function(d) { return d.category === currentFilter; })
+    );
+    // Activate correct filter button
+    if (currentFilter !== 'todos') {
+      var btns = document.querySelectorAll('.bd-filter-btn');
+      btns.forEach(function(b) {
+        b.classList.remove('active');
+        if (b.textContent.toLowerCase().indexOf(currentFilter) > -1) b.classList.add('active');
       });
-    });
+    }
   </script>
 </body>
 </html>

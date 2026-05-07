@@ -1,2282 +1,868 @@
+<!--
+  Arquivo: escape-room.html
+  Correções:
+    1. role="button", tabindex="0", keyboard handler nas opções
+    2. aria-live="polite" no container de puzzle/feedback
+    3. aria-label em botões com emoji
+    4. Persistência localStorage (PIThinking.saveProgress/loadProgress)
+    5. clearEscape() limpa localStorage
+    6. Timer com role="timer" e aria-live dinâmico
+    7. Certificado de conclusão
+    8. Sistema de dicas com limite e penalidade
+    9. Barra de progresso visual
+   10. Classe .sr-only
+   11. lang="pt-BR" confirmado
+  Dependências: style.css, script.js
+-->
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escape Room da PI — A Invenção Perdida do Monte Roraima</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <style>
-    /* =============================================
-       ESCAPE ROOM — DESIGN SYSTEM (IDEO-inspired)
-       ============================================= */
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escape Room da PI — PI Thinking</title>
+  <meta name="description" content="Escape Room educacional sobre Propriedade Intelectual. Resolva 8 puzzles temáticos para escapar antes que o tempo acabe.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
     :root {
-        --er-bg: #FAFAF7;
-        --er-surface: #FFFFFF;
-        --er-text: #1A1A1A;
-        --er-text-secondary: #5A5A5A;
-        --er-text-muted: #8A8A8A;
-        --er-border: #E8E5E0;
-        --er-accent: #FF6B4A;
-        --er-accent-dark: #E5553A;
-        --er-success: #2D9F6F;
-        --er-warning: #E8A825;
-        --er-danger: #D94848;
-        --er-envelope-1: #4361EE;
-        --er-envelope-2: #7209B7;
-        --er-envelope-3: #F72585;
-        --er-envelope-4: #FF6D00;
-        --er-envelope-5: #06D6A0;
-        --er-font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
-        --er-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        --er-font-heading: 'Poppins', sans-serif;
-        --er-radius: 4px;
-        --er-radius-lg: 8px;
-        --er-radius-xl: 16px;
-        --er-shadow-subtle: 0 1px 3px rgba(0,0,0,0.04);
-        --er-shadow-card: 0 2px 8px rgba(0,0,0,0.06);
-        --er-shadow-lifted: 0 8px 24px rgba(0,0,0,0.08);
-        --er-shadow-envelope: 0 12px 40px rgba(0,0,0,0.12);
-        --er-transition: all 0.3s ease;
-        --er-max-width: 820px;
+      --er-bg: #1a1a2e;
+      --er-surface: #16213e;
+      --er-surface-light: #1c2a4a;
+      --er-accent: #e94560;
+      --er-accent-light: #ff6b81;
+      --er-accent-bg: rgba(233,69,96,.12);
+      --er-gold: #f5c518;
+      --er-gold-bg: rgba(245,197,24,.12);
+      --er-text: #eaeaea;
+      --er-text-light: #a0a0b8;
+      --er-border: #2a2a4a;
+      --er-green: #00b894;
+      --er-green-bg: rgba(0,184,148,.12);
+      --er-red: #ff6b6b;
+      --er-red-bg: rgba(255,107,107,.12);
+      --er-radius: 16px;
+      --er-shadow: 0 4px 20px rgba(0,0,0,.3);
+    }
+    [data-theme="light"] {
+      --er-bg: #f0f0f5;
+      --er-surface: #ffffff;
+      --er-surface-light: #f8f8fc;
+      --er-accent: #d63031;
+      --er-accent-light: #e17055;
+      --er-accent-bg: rgba(214,48,49,.08);
+      --er-gold: #d4a017;
+      --er-gold-bg: rgba(212,160,23,.08);
+      --er-text: #2d3436;
+      --er-text-light: #636e72;
+      --er-border: #dfe6e9;
+      --er-green: #00b894;
+      --er-green-bg: rgba(0,184,148,.08);
+      --er-red: #d63031;
+      --er-red-bg: rgba(214,48,49,.08);
+      --er-shadow: 0 2px 12px rgba(0,0,0,.08);
     }
 
-    [data-theme="dark"] {
-        --er-bg: #111111;
-        --er-surface: #1A1A1A;
-        --er-text: #EAEAEA;
-        --er-text-secondary: #AAAAAA;
-        --er-text-muted: #666666;
-        --er-border: #2A2A2A;
-        --er-shadow-card: 0 2px 8px rgba(0,0,0,0.2);
-        --er-shadow-lifted: 0 8px 24px rgba(0,0,0,0.3);
-        --er-shadow-envelope: 0 12px 40px rgba(0,0,0,0.4);
+    body.er-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--er-bg);
+      color: var(--er-text);
+      margin: 0; padding: 0; line-height: 1.7;
     }
 
-    /* ---- Base Layout ---- */
-    .er-page {
-        background: var(--er-bg);
-        min-height: 100vh;
-        padding-top: 100px;
-        padding-bottom: 80px;
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
     }
 
-    .er-container {
-        max-width: var(--er-max-width);
-        margin: 0 auto;
-        padding: 0 24px;
-    }
-
-    /* ---- Hero / Cover ---- */
+    /* ── Cover ── */
     .er-cover {
-        position: relative;
-        background: var(--er-text);
-        color: white;
-        padding: 80px 40px;
-        margin-bottom: 60px;
-        overflow: hidden;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+      color: #fff; padding: 4rem 2rem 3rem; text-align: center;
+      position: relative; overflow: hidden;
     }
-
     .er-cover::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background:
-            radial-gradient(ellipse at 20% 80%, rgba(67,97,238,0.15) 0%, transparent 60%),
-            radial-gradient(ellipse at 80% 20%, rgba(247,37,133,0.1) 0%, transparent 60%),
-            radial-gradient(ellipse at 50% 50%, rgba(6,214,160,0.08) 0%, transparent 70%);
-        pointer-events: none;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(233,69,96,.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 50%, rgba(245,197,24,.10) 0%, transparent 50%);
     }
-
-    .er-cover::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 120px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 Q150,0 300,40 T600,60 T900,30 T1200,60 L1200,120 L0,120Z' fill='rgba(255,255,255,0.03)'/%3E%3Cpath d='M0,80 Q200,40 400,70 T800,50 T1200,80 L1200,120 L0,120Z' fill='rgba(255,255,255,0.02)'/%3E%3C/svg%3E") no-repeat bottom / cover;
-        pointer-events: none;
-    }
-
     .er-cover__overline {
-        font-family: var(--er-font-sans);
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-        color: var(--er-accent);
-        margin-bottom: 20px;
-        position: relative;
-        z-index: 1;
+      font-family: 'Poppins', sans-serif; font-size: .85rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 3px; opacity: .9;
+      position: relative;
     }
-
     .er-cover__title {
-        font-family: var(--er-font-serif);
-        font-size: clamp(2.4rem, 5vw, 3.8rem);
-        font-weight: 800;
-        line-height: 1.1;
-        margin-bottom: 16px;
-        position: relative;
-        z-index: 1;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem); margin: .5rem 0;
+      position: relative;
     }
-
-    .er-cover__title em {
-        font-style: italic;
-        font-weight: 600;
-        color: var(--er-accent);
+    .er-cover__sub {
+      font-size: 1.1rem; opacity: .92; max-width: 640px; margin: .5rem auto 0;
+      position: relative;
     }
-
-    .er-cover__subtitle {
-        font-family: var(--er-font-sans);
-        font-size: 1.15rem;
-        font-weight: 300;
-        line-height: 1.7;
-        max-width: 560px;
-        opacity: 0.8;
-        position: relative;
-        z-index: 1;
-    }
-
     .er-cover__meta {
-        display: flex;
-        gap: 32px;
-        margin-top: 40px;
-        padding-top: 24px;
-        border-top: 1px solid rgba(255,255,255,0.12);
-        position: relative;
-        z-index: 1;
-        flex-wrap: wrap;
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 1.5rem; font-size: .9rem;
+      position: relative;
+    }
+    .er-cover__meta span {
+      background: rgba(255,255,255,.12); padding: .35rem .8rem; border-radius: 20px;
     }
 
-    .er-cover__meta-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
+    /* ── Container ── */
+    .er-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    .er-cover__meta-label {
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        opacity: 0.5;
-    }
-
-    .er-cover__meta-value {
-        font-family: var(--er-font-serif);
-        font-size: 1.1rem;
-        font-weight: 700;
-    }
-
-    /* ---- Section Blocks (editorial) ---- */
-    .er-section {
-        margin-bottom: 64px;
-    }
-
-    .er-section__label {
-        font-family: var(--er-font-sans);
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 2.5px;
-        text-transform: uppercase;
-        color: var(--er-text-muted);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .er-section__label::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: var(--er-border);
-    }
-
-    .er-section__title {
-        font-family: var(--er-font-serif);
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--er-text);
-        line-height: 1.2;
-        margin-bottom: 16px;
-    }
-
-    .er-section__body {
-        font-family: var(--er-font-sans);
-        font-size: 1.05rem;
-        line-height: 1.8;
-        color: var(--er-text-secondary);
-    }
-
-    .er-section__body p {
-        margin-bottom: 16px;
-    }
-
-    .er-section__body strong {
-        color: var(--er-text);
-        font-weight: 600;
-    }
-
-    /* ---- Narrative Box ---- */
-    .er-narrative {
-        background: var(--er-surface);
-        border: 1px solid var(--er-border);
-        padding: 40px;
-        margin: 40px 0;
-        position: relative;
-    }
-
-    .er-narrative::before {
-        content: '"';
-        position: absolute;
-        top: -10px;
-        left: 24px;
-        font-family: var(--er-font-serif);
-        font-size: 6rem;
-        color: var(--er-accent);
-        line-height: 1;
-        opacity: 0.2;
-    }
-
-    .er-narrative__text {
-        font-family: var(--er-font-serif);
-        font-size: 1.2rem;
-        font-style: italic;
-        line-height: 1.8;
-        color: var(--er-text);
-    }
-
-    .er-narrative__author {
-        margin-top: 20px;
-        font-family: var(--er-font-sans);
-        font-size: 0.85rem;
-        color: var(--er-text-muted);
-        font-style: normal;
-    }
-
-    /* ---- Checklist ---- */
-    .er-checklist {
-        background: var(--er-surface);
-        border: 1px solid var(--er-border);
-        padding: 32px;
-        margin: 32px 0;
-    }
-
-    .er-checklist__title {
-        font-family: var(--er-font-heading);
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--er-text);
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .er-checklist__grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .er-checklist__item {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-size: 0.9rem;
-        color: var(--er-text-secondary);
-        line-height: 1.5;
-    }
-
-    .er-checklist__check {
-        width: 20px;
-        height: 20px;
-        border: 2px solid var(--er-border);
-        border-radius: 3px;
-        flex-shrink: 0;
-        margin-top: 1px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: var(--er-transition);
-        background: var(--er-surface);
-    }
-
-    .er-checklist__check.checked {
-        background: var(--er-success);
-        border-color: var(--er-success);
-    }
-
-    .er-checklist__check.checked::after {
-        content: '✓';
-        color: white;
-        font-size: 0.7rem;
-        font-weight: 700;
-    }
-
-    /* ---- Progress Tracker ---- */
+    /* ── Progress bar ── */
     .er-progress {
-        position: sticky;
-        top: 72px;
-        z-index: 50;
-        background: var(--er-surface);
-        border-bottom: 1px solid var(--er-border);
-        padding: 16px 0;
-        margin-bottom: 48px;
-        transition: var(--er-transition);
+      background: var(--er-border); border-radius: 12px; height: 12px;
+      margin-bottom: 1.5rem; overflow: hidden; position: relative;
     }
-
-    .er-progress__inner {
-        max-width: var(--er-max-width);
-        margin: 0 auto;
-        padding: 0 24px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .er-progress__step {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        transition: var(--er-transition);
-    }
-
-    .er-progress__dot {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--er-font-heading);
-        font-weight: 700;
-        font-size: 0.85rem;
-        border: 2px solid var(--er-border);
-        background: var(--er-surface);
-        color: var(--er-text-muted);
-        transition: var(--er-transition);
-    }
-
-    .er-progress__step--active .er-progress__dot {
-        border-color: var(--er-accent);
-        background: var(--er-accent);
-        color: white;
-        box-shadow: 0 0 0 4px rgba(255,107,74,0.15);
-    }
-
-    .er-progress__step--completed .er-progress__dot {
-        border-color: var(--er-success);
-        background: var(--er-success);
-        color: white;
-    }
-
-    .er-progress__step-label {
-        font-size: 0.65rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        color: var(--er-text-muted);
-        text-align: center;
-        transition: var(--er-transition);
-    }
-
-    .er-progress__step--active .er-progress__step-label {
-        color: var(--er-accent);
-    }
-
-    .er-progress__step--completed .er-progress__step-label {
-        color: var(--er-success);
-    }
-
-    .er-progress__line {
-        height: 2px;
-        flex: 0.5;
-        background: var(--er-border);
-        align-self: flex-start;
-        margin-top: 18px;
-    }
-
-    .er-progress__line--filled {
-        background: var(--er-success);
-    }
-
-    /* ---- Timer ---- */
-    .er-timer {
-        text-align: center;
-        margin-bottom: 40px;
-    }
-
-    .er-timer__display {
-        font-family: var(--er-font-heading);
-        font-size: 3.5rem;
-        font-weight: 800;
-        color: var(--er-text);
-        letter-spacing: 4px;
-        margin-bottom: 8px;
-    }
-
-    .er-timer__display--warning { color: var(--er-warning); }
-    .er-timer__display--danger { color: var(--er-danger); animation: timerPulse 1s ease infinite; }
-
-    @keyframes timerPulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-
-    .er-timer__label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: var(--er-text-muted);
-    }
-
-    .er-timer__controls {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        margin-top: 16px;
-    }
-
-    .er-timer__btn {
-        padding: 8px 20px;
-        border: 1px solid var(--er-border);
-        background: var(--er-surface);
-        color: var(--er-text);
-        font-family: var(--er-font-sans);
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: var(--er-transition);
-    }
-
-    .er-timer__btn:hover {
-        background: var(--er-text);
-        color: var(--er-surface);
-        border-color: var(--er-text);
-    }
-
-    .er-timer__btn--primary {
-        background: var(--er-accent);
-        border-color: var(--er-accent);
-        color: white;
-    }
-
-    .er-timer__btn--primary:hover {
-        background: var(--er-accent-dark);
-    }
-
-    /* ---- Envelope / Challenge Cards ---- */
-    .er-envelope {
-        background: var(--er-surface);
-        border: 1px solid var(--er-border);
-        margin-bottom: 48px;
-        overflow: hidden;
-        transition: var(--er-transition);
-    }
-
-    .er-envelope:hover {
-        box-shadow: var(--er-shadow-lifted);
-    }
-
-    .er-envelope__header {
-        padding: 32px 40px;
-        display: flex;
-        align-items: flex-start;
-        gap: 20px;
-        border-bottom: 1px solid var(--er-border);
-        cursor: pointer;
-        transition: var(--er-transition);
-    }
-
-    .er-envelope__header:hover {
-        background: rgba(0,0,0,0.01);
-    }
-
-    .er-envelope__seal {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        flex-shrink: 0;
-        color: white;
-        font-weight: 700;
-        position: relative;
-    }
-
-    .er-envelope__seal::after {
-        content: '';
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        border: 2px dashed rgba(255,255,255,0.3);
-    }
-
-    .er-envelope--1 .er-envelope__seal { background: var(--er-envelope-1); }
-    .er-envelope--2 .er-envelope__seal { background: var(--er-envelope-2); }
-    .er-envelope--3 .er-envelope__seal { background: var(--er-envelope-3); }
-    .er-envelope--4 .er-envelope__seal { background: var(--er-envelope-4); }
-    .er-envelope--5 .er-envelope__seal { background: var(--er-envelope-5); }
-
-    .er-envelope__header-content { flex: 1; }
-
-    .er-envelope__number {
-        font-family: var(--er-font-sans);
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: var(--er-text-muted);
-        margin-bottom: 6px;
-    }
-
-    .er-envelope__title {
-        font-family: var(--er-font-serif);
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--er-text);
-        margin-bottom: 6px;
-    }
-
-    .er-envelope__desc {
-        font-size: 0.9rem;
-        color: var(--er-text-muted);
-        line-height: 1.5;
-    }
-
-    .er-envelope__toggle {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--er-text-muted);
-        transition: transform 0.3s ease;
-        flex-shrink: 0;
-        margin-top: 12px;
-    }
-
-    .er-envelope.open .er-envelope__toggle {
-        transform: rotate(180deg);
-    }
-
-    .er-envelope__body {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .er-envelope.open .er-envelope__body {
-        max-height: 3000px;
-    }
-
-    .er-envelope__content {
-        padding: 40px;
-    }
-
-    /* ---- Challenge inner elements ---- */
-    .er-context {
-        background: var(--er-bg);
-        padding: 24px;
-        margin-bottom: 24px;
-        border-left: 3px solid var(--er-accent);
-    }
-
-    .er-context p {
-        font-family: var(--er-font-serif);
-        font-style: italic;
-        font-size: 0.95rem;
-        line-height: 1.7;
-        color: var(--er-text-secondary);
-    }
-
-    .er-task {
-        margin-bottom: 32px;
-    }
-
-    .er-task__label {
-        font-family: var(--er-font-heading);
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: var(--er-accent);
-        margin-bottom: 8px;
-    }
-
-    .er-task__text {
-        font-size: 1rem;
-        color: var(--er-text);
-        line-height: 1.6;
-        font-weight: 500;
-    }
-
-    /* ---- Fichas (cards within challenges) ---- */
-    .er-fichas {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin: 24px 0;
-    }
-
-    .er-ficha {
-        background: var(--er-surface);
-        border: 2px solid var(--er-border);
-        padding: 20px;
-        cursor: pointer;
-        transition: var(--er-transition);
-        position: relative;
-    }
-
-    .er-ficha:hover {
-        border-color: var(--er-text-muted);
-        box-shadow: var(--er-shadow-card);
-    }
-
-    .er-ficha.selected {
-        border-color: var(--er-accent);
-        background: rgba(255,107,74,0.03);
-    }
-
-    .er-ficha.correct {
-        border-color: var(--er-success);
-        background: rgba(45,159,111,0.05);
-    }
-
-    .er-ficha.wrong {
-        border-color: var(--er-danger);
-        background: rgba(217,72,72,0.05);
-    }
-
-    .er-ficha__letter {
-        font-family: var(--er-font-heading);
-        font-size: 0.75rem;
-        font-weight: 800;
-        color: var(--er-text-muted);
-        margin-bottom: 8px;
-        width: 28px;
-        height: 28px;
-        border: 2px solid var(--er-border);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .er-ficha.selected .er-ficha__letter {
-        background: var(--er-accent);
-        color: white;
-        border-color: var(--er-accent);
-    }
-
-    .er-ficha__title {
-        font-family: var(--er-font-heading);
-        font-weight: 700;
-        font-size: 0.95rem;
-        color: var(--er-text);
-        margin-bottom: 6px;
-    }
-
-    .er-ficha__details {
-        font-size: 0.85rem;
-        color: var(--er-text-secondary);
-        line-height: 1.5;
-    }
-
-    .er-ficha__result {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        font-size: 1.2rem;
-    }
-
-    /* ---- Classification challenge ---- */
-    .er-classification {
-        margin: 24px 0;
-    }
-
-    .er-classification__items {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .er-classification__item {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 16px;
-        align-items: center;
-        padding: 16px 20px;
-        background: var(--er-surface);
-        border: 1px solid var(--er-border);
-        transition: var(--er-transition);
-    }
-
-    .er-classification__item-desc {
-        font-size: 0.9rem;
-        color: var(--er-text);
-        line-height: 1.5;
-    }
-
-    .er-classification__item-desc strong {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 2px;
-    }
-
-    .er-classification__select {
-        padding: 8px 12px;
-        border: 2px solid var(--er-border);
-        background: var(--er-surface);
-        color: var(--er-text);
-        font-family: var(--er-font-sans);
-        font-size: 0.85rem;
-        font-weight: 600;
-        min-width: 160px;
-        cursor: pointer;
-        transition: var(--er-transition);
-    }
-
-    .er-classification__select:focus {
-        border-color: var(--er-accent);
-        outline: none;
-    }
-
-    .er-classification__select.correct-answer { border-color: var(--er-success); background: rgba(45,159,111,0.05); }
-    .er-classification__select.wrong-answer { border-color: var(--er-danger); background: rgba(217,72,72,0.05); }
-
-    /* ---- Calculation ---- */
-    .er-calc-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 16px;
-        margin: 24px 0;
-    }
-
-    .er-calc-card {
-        background: var(--er-surface);
-        border: 1px solid var(--er-border);
-        padding: 20px;
-        text-align: center;
-    }
-
-    .er-calc-card__label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        color: var(--er-text-muted);
-        margin-bottom: 8px;
-    }
-
-    .er-calc-card__value {
-        font-family: var(--er-font-serif);
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--er-text);
-        margin-bottom: 4px;
-    }
-
-    .er-calc-card__detail {
-        font-size: 0.8rem;
-        color: var(--er-text-muted);
-    }
-
-    .er-calc-input {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 24px 0;
-        flex-wrap: wrap;
-    }
-
-    .er-calc-input label {
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: var(--er-text);
-    }
-
-    .er-calc-input input {
-        width: 120px;
-        padding: 10px 16px;
-        border: 2px solid var(--er-border);
-        background: var(--er-surface);
-        font-family: var(--er-font-heading);
-        font-size: 1.2rem;
-        font-weight: 700;
-        text-align: center;
-        color: var(--er-text);
-        transition: var(--er-transition);
-    }
-
-    .er-calc-input input:focus {
-        border-color: var(--er-accent);
-        outline: none;
-    }
-
-    /* ---- Marca Analysis ---- */
-    .er-marcas {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin: 24px 0;
-    }
-
-    .er-marca {
-        background: var(--er-surface);
-        border: 2px solid var(--er-border);
-        padding: 24px;
-        cursor: pointer;
-        transition: var(--er-transition);
-        text-align: center;
-    }
-
-    .er-marca:hover {
-        border-color: var(--er-text-muted);
-    }
-
-    .er-marca.selected {
-        border-color: var(--er-accent);
-    }
-
-    .er-marca.correct {
-        border-color: var(--er-success);
-        background: rgba(45,159,111,0.05);
-    }
-
-    .er-marca.wrong {
-        border-color: var(--er-danger);
-        background: rgba(217,72,72,0.05);
-    }
-
-    .er-marca__name {
-        font-family: var(--er-font-heading);
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--er-text);
-        margin-bottom: 8px;
-    }
-
-    .er-marca__reason {
-        font-size: 0.8rem;
-        color: var(--er-text-muted);
-        line-height: 1.5;
-        display: none;
-    }
-
-    .er-marca.correct .er-marca__reason,
-    .er-marca.wrong .er-marca__reason {
-        display: block;
-        margin-top: 8px;
-    }
-
-    /* ---- Flow ordering ---- */
-    .er-flow {
-        margin: 24px 0;
-    }
-
-    .er-flow__items {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .er-flow__item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 20px;
-        background: var(--er-surface);
-        border: 1px solid var(--er-border);
-        cursor: grab;
-        transition: var(--er-transition);
-        user-select: none;
-    }
-
-    .er-flow__item:hover {
-        background: var(--er-bg);
-    }
-
-    .er-flow__item.dragging {
-        opacity: 0.5;
-        box-shadow: var(--er-shadow-lifted);
-    }
-
-    .er-flow__item-num {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: var(--er-bg);
-        border: 1px solid var(--er-border);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--er-font-heading);
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--er-text-muted);
-        flex-shrink: 0;
+    .er-progress__fill {
+      background: linear-gradient(90deg, var(--er-accent), var(--er-gold));
+      height: 100%; border-radius: 12px; transition: width .5s ease;
     }
-
-    .er-flow__item-text {
-        font-size: 0.9rem;
-        color: var(--er-text);
-        font-weight: 500;
-    }
-
-    .er-flow__item-handle {
-        margin-left: auto;
-        color: var(--er-text-muted);
-        font-size: 1.2rem;
-    }
-
-    /* ---- Code Input ---- */
-    .er-code-input {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        margin: 24px 0;
-    }
-
-    .er-code-digit {
-        width: 56px;
-        height: 64px;
-        border: 2px solid var(--er-border);
-        background: var(--er-surface);
-        text-align: center;
-        font-family: var(--er-font-heading);
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: var(--er-text);
-        transition: var(--er-transition);
-    }
-
-    .er-code-digit:focus {
-        border-color: var(--er-accent);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(255,107,74,0.1);
-    }
-
-    .er-code-separator {
-        display: flex;
-        align-items: center;
-        font-family: var(--er-font-heading);
-        font-size: 1.5rem;
-        color: var(--er-text-muted);
-    }
-
-    /* ---- Buttons ---- */
-    .er-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 28px;
-        font-family: var(--er-font-sans);
-        font-size: 0.9rem;
-        font-weight: 600;
-        border: 2px solid transparent;
-        cursor: pointer;
-        transition: var(--er-transition);
-        text-decoration: none;
+    .er-progress__label {
+      font-family: 'Poppins', sans-serif; font-size: .8rem; font-weight: 600;
+      color: var(--er-text-light); text-align: center; margin-top: .4rem;
     }
 
-    .er-btn--primary {
-        background: var(--er-accent);
-        color: white;
-        border-color: var(--er-accent);
+    /* ── Stats bar ── */
+    .er-stats {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
     }
-
-    .er-btn--primary:hover {
-        background: var(--er-accent-dark);
-        border-color: var(--er-accent-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--er-shadow-card);
+    .er-stat {
+      background: var(--er-surface); border: 1px solid var(--er-border);
+      border-radius: 12px; padding: .5rem 1rem; text-align: center;
+      min-width: 100px;
     }
-
-    .er-btn--outline {
-        background: transparent;
-        color: var(--er-text);
-        border-color: var(--er-border);
+    .er-stat__value {
+      font-family: 'Poppins', sans-serif; font-weight: 800;
+      font-size: 1.3rem; color: var(--er-accent);
     }
-
-    .er-btn--outline:hover {
-        border-color: var(--er-text);
-        background: var(--er-text);
-        color: var(--er-surface);
+    .er-stat__label {
+      font-size: .75rem; color: var(--er-text-light); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
     }
 
-    .er-btn--success {
-        background: var(--er-success);
-        color: white;
-        border-color: var(--er-success);
+    /* ── Puzzle card ── */
+    .er-puzzle {
+      background: var(--er-surface); border: 2px solid var(--er-border);
+      border-radius: var(--er-radius); padding: 2rem;
+      box-shadow: var(--er-shadow); margin-bottom: 1.5rem;
     }
-
-    .er-btn--block {
-        width: 100%;
+    .er-puzzle__header {
+      display: flex; align-items: center; gap: .8rem; margin-bottom: 1rem;
     }
-
-    /* ---- Hint System ---- */
-    .er-hints {
-        margin-top: 24px;
-        padding-top: 24px;
-        border-top: 1px solid var(--er-border);
+    .er-puzzle__icon { font-size: 2rem; }
+    .er-puzzle__num {
+      font-family: 'Poppins', sans-serif; font-weight: 800;
+      font-size: .8rem; color: var(--er-accent); text-transform: uppercase;
+      letter-spacing: 2px;
     }
-
-    .er-hints__title {
-        font-size: 0.8rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        color: var(--er-text-muted);
-        margin-bottom: 12px;
+    .er-puzzle__title {
+      font-family: 'Poppins', sans-serif; font-weight: 700;
+      font-size: 1.2rem; color: var(--er-text); margin-bottom: .5rem;
     }
-
-    .er-hints__levels {
-        display: flex;
-        gap: 8px;
+    .er-puzzle__context {
+      font-size: .92rem; color: var(--er-text-light); line-height: 1.7;
+      margin-bottom: 1.2rem; padding: 1rem; background: var(--er-surface-light);
+      border-radius: 8px; border-left: 3px solid var(--er-accent);
     }
-
-    .er-hint-btn {
-        padding: 6px 14px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        border: 1px solid var(--er-border);
-        background: var(--er-surface);
-        color: var(--er-text-muted);
-        cursor: pointer;
-        transition: var(--er-transition);
-        font-family: var(--er-font-sans);
+    .er-puzzle__question {
+      font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
     }
 
-    .er-hint-btn:hover {
-        background: var(--er-bg);
-        border-color: var(--er-text-muted);
+    /* ── Options ── */
+    .er-options { display: flex; flex-direction: column; gap: .6rem; }
+    .er-option {
+      background: var(--er-surface-light); border: 2px solid var(--er-border);
+      border-radius: 12px; padding: .8rem 1.2rem; cursor: pointer;
+      transition: all .2s; font-size: .92rem; display: flex; align-items: flex-start; gap: .6rem;
     }
-
-    .er-hint-btn.revealed {
-        background: var(--er-warning);
-        border-color: var(--er-warning);
-        color: white;
+    .er-option:hover { border-color: var(--er-accent); background: var(--er-accent-bg); }
+    .er-option:focus-visible { outline: 3px solid var(--er-accent); outline-offset: 2px; }
+    .er-option__letter {
+      font-family: 'Poppins', sans-serif; font-weight: 800;
+      color: var(--er-accent); font-size: .9rem; flex-shrink: 0; min-width: 24px;
     }
-
-    .er-hint-text {
-        margin-top: 12px;
-        padding: 16px;
-        background: rgba(232,168,37,0.06);
-        border-left: 3px solid var(--er-warning);
-        font-size: 0.9rem;
-        color: var(--er-text-secondary);
-        line-height: 1.6;
-        display: none;
+    .er-option.correct {
+      border-color: var(--er-green); background: var(--er-green-bg);
     }
-
-    .er-hint-text.visible {
-        display: block;
-        animation: fadeIn 0.3s ease;
+    .er-option.correct .er-option__letter { color: var(--er-green); }
+    .er-option.wrong {
+      border-color: var(--er-red); background: var(--er-red-bg);
     }
+    .er-option.wrong .er-option__letter { color: var(--er-red); }
+    .er-option.disabled { pointer-events: none; opacity: .6; }
 
-    /* ---- Feedback ---- */
+    /* ── Feedback ── */
     .er-feedback {
-        padding: 20px 24px;
-        margin: 16px 0;
-        font-size: 0.9rem;
-        font-weight: 500;
-        line-height: 1.6;
-        display: none;
-        animation: fadeIn 0.4s ease;
+      margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 12px;
+      font-size: .9rem; display: none;
+    }
+    .er-feedback.show { display: block; animation: fadeIn .3s ease; }
+    .er-feedback--correct { background: var(--er-green-bg); color: var(--er-green); border: 1px solid var(--er-green); }
+    .er-feedback--wrong { background: var(--er-red-bg); color: var(--er-red); border: 1px solid var(--er-red); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Hint ── */
+    .er-hint-btn {
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .85rem;
+      padding: .45rem 1rem; border: 2px solid var(--er-gold); border-radius: 20px;
+      background: transparent; color: var(--er-gold); cursor: pointer;
+      transition: all .2s; margin-top: .8rem;
+    }
+    .er-hint-btn:hover { background: var(--er-gold); color: #1a1a2e; }
+    .er-hint-btn:focus-visible { outline: 3px solid var(--er-gold); outline-offset: 2px; }
+    .er-hint-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .er-hint-text {
+      margin-top: .5rem; padding: .8rem; background: var(--er-gold-bg);
+      border-radius: 8px; font-size: .85rem; color: var(--er-gold);
+      font-style: italic; display: none;
+    }
+    .er-hint-text.show { display: block; animation: fadeIn .3s ease; }
+
+    /* ── Buttons ── */
+    .er-btn {
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .95rem;
+      padding: .7rem 1.5rem; border: none; border-radius: 30px;
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .er-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+    .er-btn:focus-visible { outline: 3px solid var(--er-accent); outline-offset: 2px; }
+    .er-btn--primary { background: var(--er-accent); color: #fff; }
+    .er-btn--gold { background: var(--er-gold); color: #1a1a2e; }
+    .er-btn--outline { background: transparent; border: 2px solid var(--er-accent); color: var(--er-accent); }
+    .er-btn--danger { background: var(--er-red); color: #fff; }
+
+    .er-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 1.5rem 0;
     }
 
-    .er-feedback.visible { display: block; }
-    .er-feedback--success { background: rgba(45,159,111,0.08); border-left: 3px solid var(--er-success); color: var(--er-success); }
-    .er-feedback--error { background: rgba(217,72,72,0.08); border-left: 3px solid var(--er-danger); color: var(--er-danger); }
-    .er-feedback--info { background: rgba(67,97,238,0.08); border-left: 3px solid var(--er-envelope-1); color: var(--er-envelope-1); }
-
-    /* ---- Final Code Panel ---- */
-    .er-final {
-        background: var(--er-text);
-        color: white;
-        padding: 60px 40px;
-        text-align: center;
-        margin-top: 40px;
+    /* ── Name input section ── */
+    .er-name-section {
+      background: var(--er-surface); border: 2px solid var(--er-border);
+      border-radius: var(--er-radius); padding: 2rem; text-align: center;
+      box-shadow: var(--er-shadow); margin-bottom: 1.5rem;
+    }
+    .er-name-section h2 {
+      font-family: 'Poppins', sans-serif; color: var(--er-accent); margin-top: 0;
+    }
+    .er-name-section input {
+      font-family: 'Inter', sans-serif; font-size: 1.1rem; padding: .7rem 1rem;
+      border: 2px solid var(--er-border); border-radius: 8px;
+      background: var(--er-surface-light); color: var(--er-text);
+      width: 100%; max-width: 400px; box-sizing: border-box; text-align: center;
+    }
+    .er-name-section input:focus-visible {
+      outline: 3px solid var(--er-accent); outline-offset: 2px;
     }
 
-    .er-final__icon {
-        font-size: 4rem;
-        margin-bottom: 16px;
+    /* ── Certificate ── */
+    .er-certificate {
+      background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      border: 3px solid var(--er-gold); border-radius: var(--er-radius);
+      padding: 3rem 2rem; text-align: center; color: #fff;
+      box-shadow: 0 8px 32px rgba(245,197,24,.2); display: none;
+    }
+    .er-certificate.show { display: block; animation: fadeIn .5s ease; }
+    .er-certificate__badge { font-size: 4rem; margin-bottom: 1rem; }
+    .er-certificate__title {
+      font-family: 'Playfair Display', serif; font-size: 1.8rem;
+      color: var(--er-gold); margin-bottom: .5rem;
+    }
+    .er-certificate__name {
+      font-family: 'Poppins', sans-serif; font-size: 1.4rem; font-weight: 700;
+      margin: .5rem 0;
+    }
+    .er-certificate__details {
+      font-size: .95rem; color: var(--er-text-light); margin: 1rem 0;
+    }
+    .er-certificate__details span {
+      display: inline-block; background: rgba(255,255,255,.08);
+      padding: .3rem .8rem; border-radius: 15px; margin: .3rem;
     }
 
-    .er-final__title {
-        font-family: var(--er-font-serif);
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 12px;
+    /* ── Footer ── */
+    .er-footer {
+      text-align: center; padding: 2rem; font-size: .82rem;
+      color: var(--er-text-light); border-top: 1px solid var(--er-border); margin-top: 2rem;
+    }
+    .er-footer a { color: var(--er-accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .er-cover { padding: 2.5rem 1rem 2rem; }
+      .er-puzzle { padding: 1.2rem; }
+      .er-certificate { padding: 2rem 1rem; }
     }
 
-    .er-final__subtitle {
-        font-size: 1rem;
-        opacity: 0.7;
-        margin-bottom: 32px;
-    }
-
-    .er-final__result {
-        margin-top: 24px;
-        padding: 24px;
-        background: rgba(255,255,255,0.05);
-        display: none;
-    }
-
-    .er-final__result.visible { display: block; animation: fadeIn 0.5s ease; }
-
-    .er-final__result--success {
-        border: 2px solid var(--er-success);
-    }
-
-    .er-final__result--fail {
-        border: 2px solid var(--er-danger);
-    }
-
-    /* ---- Legal Reference ---- */
-    .er-legal {
-        background: var(--er-bg);
-        border: 1px solid var(--er-border);
-        padding: 24px;
-        margin-top: 16px;
-        font-size: 0.85rem;
-        color: var(--er-text-muted);
-        line-height: 1.7;
-    }
-
-    .er-legal strong {
-        color: var(--er-text-secondary);
-        display: block;
-        margin-bottom: 6px;
-        font-size: 0.75rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-    }
-
-    /* ---- Debrief ---- */
-    .er-debrief {
-        background: var(--er-surface);
-        border: 1px solid var(--er-border);
-        padding: 40px;
-        margin: 40px 0;
-    }
-
-    .er-debrief__questions {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-top: 20px;
-    }
-
-    .er-debrief__q {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-    }
-
-    .er-debrief__q-num {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: var(--er-accent);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--er-font-heading);
-        font-size: 0.75rem;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-
-    .er-debrief__q-text {
-        font-size: 0.95rem;
-        color: var(--er-text);
-        line-height: 1.6;
-        padding-top: 3px;
-    }
-
-    /* ---- Print Styles ---- */
-    .er-print-only { display: none; }
-
+    /* ── Print ── */
     @media print {
-        .er-page { padding-top: 0; }
-        .header, .footer, .reading-progress, .theme-toggle, .back-to-top,
-        .er-progress, .er-timer__controls, .er-hints, .er-print-hide { display: none !important; }
-        .er-cover { break-after: page; }
-        .er-envelope { break-inside: avoid; }
-        .er-envelope__body { max-height: none !important; overflow: visible !important; }
-        .er-print-only { display: block; }
-        body { background: white; color: black; }
-        .er-cover { background: #1A1A1A; }
+      body.er-page { background: #fff; color: #000; }
+      .er-cover, .er-stats, .er-progress, .er-puzzle, .er-actions, .er-name-section, .er-footer { display: none !important; }
+      .er-certificate { display: block !important; border: 2px solid #d4a017; color: #000; background: #fff; box-shadow: none; }
+      .er-certificate__title { color: #b8860b; }
+      .er-certificate__details span { border: 1px solid #ccc; }
+      @page { size: A4 landscape; margin: 2cm; }
     }
-
-    /* ---- Animations ---- */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(-20px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-
-    @keyframes successPop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-
-    /* ---- Responsive ---- */
-    @media (max-width: 768px) {
-        .er-cover { padding: 48px 24px; }
-        .er-cover__meta { gap: 20px; }
-        .er-envelope__header { padding: 20px 24px; }
-        .er-envelope__content { padding: 24px; }
-        .er-fichas, .er-marcas { grid-template-columns: 1fr; }
-        .er-calc-grid { grid-template-columns: 1fr; }
-        .er-checklist__grid { grid-template-columns: 1fr; }
-        .er-code-digit { width: 44px; height: 52px; font-size: 1.4rem; }
-        .er-progress__step-label { font-size: 0.55rem; }
-        .er-progress__dot { width: 28px; height: 28px; font-size: 0.7rem; }
-        .er-narrative { padding: 24px; }
-    }
-
-    @media (max-width: 480px) {
-        .er-cover__title { font-size: 2rem; }
-        .er-progress__step-label { display: none; }
-        .er-code-input { gap: 6px; }
-    }
-    </style>
+  </style>
 </head>
-<body>
-    <div class="reading-progress" id="readingProgress"></div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
-        <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
-        <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
-    </button>
+<body class="er-page">
 
-    <header class="header" id="header">
-        <div class="header__container">
-            <a href="index.html" class="header__logo">
-                <span class="header__logo-icon">💡</span>
-                <div>
-                    <strong class="header__logo-title">PI Thinking</strong>
-                    <span class="header__logo-sub">Escape Room da PI</span>
-                </div>
-            </a>
-            <nav class="nav" id="nav">
-                <ul class="nav__list">
-                    <li><a href="index.html" class="nav__link">← Voltar ao Início</a></li>
-                </ul>
-            </nav>
-            <button class="header__toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+  <!-- Theme toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro"
+    style="position:fixed;top:1rem;right:1rem;z-index:999;background:var(--er-surface);border:2px solid var(--er-border);border-radius:50%;width:44px;height:44px;font-size:1.3rem;cursor:pointer;">
+    🌗
+  </button>
+
+  <!-- Cover -->
+  <header class="er-cover">
+    <div class="er-cover__overline">Fase 5 — Refletir</div>
+    <h1 class="er-cover__title">Escape Room da PI</h1>
+    <p class="er-cover__sub">Resolva 8 puzzles sobre Propriedade Intelectual para escapar a tempo. Teste seus conhecimentos em legislação, estratégia e ética da PI.</p>
+    <div class="er-cover__meta">
+      <span>🧩 8 puzzles</span>
+      <span>⏱ 30 min</span>
+      <span>👥 Individual ou Grupo</span>
+      <span>💡 3 dicas por puzzle</span>
+    </div>
+  </header>
+
+  <main class="er-container">
+
+    <!-- Name input -->
+    <section class="er-name-section" id="nameSection">
+      <h2>🔑 Identifique-se para entrar</h2>
+      <p>Digite seu nome para o certificado de conclusão.</p>
+      <label for="playerName" class="sr-only">Nome do jogador</label>
+      <input type="text" id="playerName" placeholder="Seu nome completo" aria-label="Digite seu nome para o certificado" maxlength="60">
+      <br><br>
+      <button class="er-btn er-btn--primary" onclick="startGame()" aria-label="Iniciar o Escape Room">🚀 Entrar na Sala</button>
+    </section>
+
+    <!-- Progress -->
+    <div id="gameArea" style="display:none;">
+      <div class="er-progress">
+        <div class="er-progress__fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="er-progress__label" id="progressLabel">Puzzle 0 / 8</div>
+
+      <!-- Stats -->
+      <div class="er-stats">
+        <div class="er-stat">
+          <div class="er-stat__value" id="timerDisplay" role="timer" aria-live="off" aria-label="Tempo restante">30:00</div>
+          <div class="er-stat__label">Tempo</div>
         </div>
-    </header>
-
-    <main class="er-page">
-        <!-- ====== COVER ====== -->
-        <div class="er-container">
-            <div class="er-cover">
-                <div class="er-cover__overline">Material 4.2 — Fase Prototipar</div>
-                <h1 class="er-cover__title">A Invenção Perdida<br>do <em>Monte Roraima</em></h1>
-                <p class="er-cover__subtitle">Uma experiência gamificada de Propriedade Intelectual. Resolva 5 desafios encadeados, desvende o código secreto e salve a invenção da Dra. Iara Tepui.</p>
-                <div class="er-cover__meta">
-                    <div class="er-cover__meta-item">
-                        <span class="er-cover__meta-label">Duração</span>
-                        <span class="er-cover__meta-value">45 min</span>
-                    </div>
-                    <div class="er-cover__meta-item">
-                        <span class="er-cover__meta-label">Participantes</span>
-                        <span class="er-cover__meta-value">4–6 por grupo</span>
-                    </div>
-                    <div class="er-cover__meta-item">
-                        <span class="er-cover__meta-label">Dificuldade</span>
-                        <span class="er-cover__meta-value">Moderada</span>
-                    </div>
-                    <div class="er-cover__meta-item">
-                        <span class="er-cover__meta-label">Envelopes</span>
-                        <span class="er-cover__meta-value">5 desafios</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== NARRATIVE ====== -->
-            <div class="er-section">
-                <div class="er-section__label">A história</div>
-                <h2 class="er-section__title">A missão</h2>
-                <div class="er-narrative">
-                    <div class="er-narrative__text">
-                        A Dra. Iara Tepui, pesquisadora da Universidade Federal de Roraima, desenvolveu um revolucionário filtro de água que combina areia do lavrado roraimense com nanotecnologia — capaz de purificar água contaminada com mercúrio do garimpo ilegal. Antes de concluir o depósito de sua patente, ela desapareceu durante uma expedição ao Monte Roraima, deixando para trás apenas 5 envelopes lacrados com desafios. Somente quem resolver todos os desafios terá o código que protege a documentação completa da invenção.
-                    </div>
-                    <div class="er-narrative__author">
-                        — Anotação encontrada no laboratório do NIT/InovaRR, UFRR
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== CHECKLIST ====== -->
-            <div class="er-checklist">
-                <div class="er-checklist__title">📋 Checklist do facilitador</div>
-                <div class="er-checklist__grid">
-                    <label class="er-checklist__item">
-                        <span class="er-checklist__check" onclick="this.classList.toggle('checked')"></span>
-                        <span>Projetor ou tela compartilhada</span>
-                    </label>
-                    <label class="er-checklist__item">
-                        <span class="er-checklist__check" onclick="this.classList.toggle('checked')"></span>
-                        <span>Dispositivos com acesso à internet</span>
-                    </label>
-                    <label class="er-checklist__item">
-                        <span class="er-checklist__check" onclick="this.classList.toggle('checked')"></span>
-                        <span>Papel e caneta para anotações</span>
-                    </label>
-                    <label class="er-checklist__item">
-                        <span class="er-checklist__check" onclick="this.classList.toggle('checked')"></span>
-                        <span>Cronômetro (use o timer digital abaixo)</span>
-                    </label>
-                    <label class="er-checklist__item">
-                        <span class="er-checklist__check" onclick="this.classList.toggle('checked')"></span>
-                        <span>Grupos formados (4–6 pessoas)</span>
-                    </label>
-                    <label class="er-checklist__item">
-                        <span class="er-checklist__check" onclick="this.classList.toggle('checked')"></span>
-                        <span>Narrativa lida em voz alta</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- ====== TIMER ====== -->
-            <div class="er-timer">
-                <div class="er-timer__display" id="timerDisplay">45:00</div>
-                <div class="er-timer__label">Tempo restante</div>
-                <div class="er-timer__controls">
-                    <button class="er-timer__btn er-timer__btn--primary" id="timerStart" onclick="startTimer()">Iniciar</button>
-                    <button class="er-timer__btn" onclick="pauseTimer()">Pausar</button>
-                    <button class="er-timer__btn" onclick="resetTimer()">Reiniciar</button>
-                </div>
-            </div>
+        <div class="er-stat">
+          <div class="er-stat__value" id="scoreDisplay">0</div>
+          <div class="er-stat__label">Pontos</div>
         </div>
-
-        <!-- ====== PROGRESS ====== -->
-        <div class="er-progress" id="progressBar">
-            <div class="er-progress__inner">
-                <div class="er-progress__step er-progress__step--active" data-step="1" onclick="scrollToEnvelope(1)">
-                    <div class="er-progress__dot">1</div>
-                    <span class="er-progress__step-label">Anterioridade</span>
-                </div>
-                <div class="er-progress__line"></div>
-                <div class="er-progress__step" data-step="2" onclick="scrollToEnvelope(2)">
-                    <div class="er-progress__dot">2</div>
-                    <span class="er-progress__step-label">Classificação</span>
-                </div>
-                <div class="er-progress__line"></div>
-                <div class="er-progress__step" data-step="3" onclick="scrollToEnvelope(3)">
-                    <div class="er-progress__dot">3</div>
-                    <span class="er-progress__step-label">Vigência</span>
-                </div>
-                <div class="er-progress__line"></div>
-                <div class="er-progress__step" data-step="4" onclick="scrollToEnvelope(4)">
-                    <div class="er-progress__dot">4</div>
-                    <span class="er-progress__step-label">Marca</span>
-                </div>
-                <div class="er-progress__line"></div>
-                <div class="er-progress__step" data-step="5" onclick="scrollToEnvelope(5)">
-                    <div class="er-progress__dot">5</div>
-                    <span class="er-progress__step-label">Depósito</span>
-                </div>
-            </div>
+        <div class="er-stat">
+          <div class="er-stat__value" id="hintsDisplay">0</div>
+          <div class="er-stat__label">Dicas usadas</div>
         </div>
+      </div>
 
-        <div class="er-container">
-            <!-- ====== ENVELOPE 1 — BUSCA DE ANTERIORIDADE ====== -->
-            <div class="er-envelope er-envelope--1 open" id="envelope1">
-                <div class="er-envelope__header" onclick="toggleEnvelope(1)">
-                    <div class="er-envelope__seal">🔍</div>
-                    <div class="er-envelope__header-content">
-                        <div class="er-envelope__number">Envelope 1 de 5</div>
-                        <div class="er-envelope__title">Busca de Anterioridade</div>
-                        <div class="er-envelope__desc">Analise os resultados da busca e identifique a tecnologia anterior relevante.</div>
-                    </div>
-                    <div class="er-envelope__toggle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                </div>
-                <div class="er-envelope__body">
-                    <div class="er-envelope__content">
-                        <div class="er-context">
-                            <p>No primeiro envelope, a Dra. Iara deixou os resultados de uma busca no PatentScope. Quatro documentos foram encontrados. Apenas UM é realmente relevante como anterioridade para o filtro dela. Identifique qual.</p>
-                        </div>
+      <!-- Puzzle container -->
+      <div id="puzzleContainer" aria-live="polite"></div>
 
-                        <div class="er-task">
-                            <div class="er-task__label">Tarefa</div>
-                            <div class="er-task__text">Analise as 4 fichas de patentes abaixo e selecione aquela que constitui anterioridade relevante para o "Filtro de água com areia do lavrado e nanotecnologia para remoção de mercúrio".</div>
-                        </div>
+      <!-- Actions -->
+      <div class="er-actions" id="gameActions">
+        <button class="er-btn er-btn--danger" onclick="restartGame()" aria-label="Reiniciar o Escape Room">🔄 Reiniciar</button>
+        <a href="baralho-dilemas.html" class="er-btn er-btn--outline">🃏 Baralho de Dilemas</a>
+        <a href="index.html" class="er-btn er-btn--outline">🏠 Toolkit</a>
+      </div>
+    </div>
 
-                        <div class="er-fichas" id="fichas1">
-                            <div class="er-ficha" data-answer="wrong" onclick="selectFicha(this, 'fichas1')">
-                                <div class="er-ficha__letter">A</div>
-                                <div class="er-ficha__title">WO2018/033001</div>
-                                <div class="er-ficha__details">Filtro cerâmico para remoção de flúor em águas subterrâneas. Utiliza cerâmica porosa com prata coloidal. <strong>Não envolve mercúrio nem nanotecnologia.</strong></div>
-                                <span class="er-ficha__result"></span>
-                            </div>
-                            <div class="er-ficha" data-answer="wrong" onclick="selectFicha(this, 'fichas1')">
-                                <div class="er-ficha__letter">B</div>
-                                <div class="er-ficha__title">BR102019008742</div>
-                                <div class="er-ficha__details">Sistema de irrigação por gotejamento com filtros de areia para agricultura familiar. <strong>Área técnica totalmente distinta.</strong></div>
-                                <span class="er-ficha__result"></span>
-                            </div>
-                            <div class="er-ficha" data-answer="correct" onclick="selectFicha(this, 'fichas1')">
-                                <div class="er-ficha__letter">C</div>
-                                <div class="er-ficha__title">US2020/0198967</div>
-                                <div class="er-ficha__details">Nanopartículas de óxido de ferro imobilizadas em areia quartzosa para adsorção de metais pesados em água, incluindo mercúrio (Hg). <strong>Mesma base técnica: areia + nano + mercúrio.</strong></div>
-                                <span class="er-ficha__result"></span>
-                            </div>
-                            <div class="er-ficha" data-answer="wrong" onclick="selectFicha(this, 'fichas1')">
-                                <div class="er-ficha__letter">D</div>
-                                <div class="er-ficha__title">EP3112320A1</div>
-                                <div class="er-ficha__details">Membrana polimérica para dessalinização por osmose reversa. <strong>Tecnologia de membrana, sem areia nem adsorção.</strong></div>
-                                <span class="er-ficha__result"></span>
-                            </div>
-                        </div>
+    <!-- Certificate -->
+    <div class="er-certificate" id="certificate">
+      <div class="er-certificate__badge">🏆</div>
+      <div class="er-certificate__title">Certificado de Conclusão</div>
+      <p style="opacity:.8;font-size:.9rem;">Escape Room da PI — PI Thinking</p>
+      <div class="er-certificate__name" id="certName"></div>
+      <p>completou com sucesso o Escape Room da PI</p>
+      <div class="er-certificate__details" id="certDetails"></div>
+      <p style="margin-top:1.5rem;font-size:.82rem;opacity:.6;">PROFNIT/UFRR · PI Thinking Toolkit · <span id="certDate"></span></p>
+      <br>
+      <button class="er-btn er-btn--gold" onclick="window.print()" aria-label="Imprimir certificado">🖨️ Imprimir Certificado</button>
+      <br><br>
+      <div class="er-actions">
+        <button class="er-btn er-btn--primary" onclick="restartGame()" aria-label="Jogar novamente">🔄 Jogar Novamente</button>
+        <a href="quiz-final.html" class="er-btn er-btn--outline">🏆 Quiz Final</a>
+        <a href="canvas-avaliacao.html" class="er-btn er-btn--outline">📋 Canvas de Avaliação</a>
+        <a href="index.html" class="er-btn er-btn--outline">🏠 Toolkit</a>
+      </div>
+    </div>
 
-                        <button class="er-btn er-btn--primary er-btn--block" onclick="checkChallenge1()">Confirmar resposta</button>
+  </main>
 
-                        <div class="er-feedback" id="feedback1"></div>
+  <!-- Footer -->
+  <footer class="er-footer">
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY‑NC‑SA 4.0</a></p>
+    <p>Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener noreferrer">Lei 9.279/96</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank" rel="noopener noreferrer">Lei 9.610/98</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank" rel="noopener noreferrer">Lei 9.609/98</a></p>
+  </footer>
 
-                        <div class="er-legal">
-                            <strong>Fundamentação legal</strong>
-                            Lei 9.279/1996, Art. 11 — "A invenção e o modelo de utilidade são considerados novos quando não compreendidos no estado da técnica." A busca de anterioridade é o passo fundamental para verificar a novidade antes do depósito.
-                        </div>
+  <!-- Scripts -->
+  <script src="script.js"></script>
+  <script>
+    /* ================================================================
+       ESCAPE ROOM DA PI — PI Thinking
+       ================================================================ */
 
-                        <div class="er-hints">
-                            <div class="er-hints__title">Precisa de ajuda?</div>
-                            <div class="er-hints__levels">
-                                <button class="er-hint-btn" onclick="revealHint(1,1)">Pista Nível 1</button>
-                                <button class="er-hint-btn" onclick="revealHint(1,2)">Pista Nível 2</button>
-                                <button class="er-hint-btn" onclick="revealHint(1,3)">Pista Nível 3</button>
-                            </div>
-                            <div class="er-hint-text" id="hint1-1">Pense: qual documento usa a mesma classe de materiais (areia) E a mesma finalidade (remover mercúrio)?</div>
-                            <div class="er-hint-text" id="hint1-2">A anterioridade precisa ter sobreposição técnica significativa. Busque o documento que menciona "nanopartículas" + "areia" + "metais pesados".</div>
-                            <div class="er-hint-text" id="hint1-3">A resposta é a Ficha C — é o único documento que combina nanotecnologia com areia para remoção de mercúrio, a mesma base técnica do filtro da Dra. Iara.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    const puzzles = [
+      {
+        id: 1, icon: '🔐', theme: 'Patenteabilidade',
+        title: 'A Porta da Novidade',
+        context: 'Você está preso em um laboratório. Na porta há um painel que exige a resposta correta. Um pesquisador publicou um artigo descrevendo sua invenção em uma revista científica há 14 meses. Agora ele quer depositar uma patente.',
+        question: 'O depósito de patente será aceito considerando a novidade?',
+        options: [
+          { letter: 'A', text: 'Sim, pois o período de graça no Brasil é de 18 meses.' },
+          { letter: 'B', text: 'Sim, o período de graça é de 12 meses, mas ele perdeu a novidade pois já se passaram 14 meses.' },
+          { letter: 'C', text: 'Não, porque publicação científica nunca destrói novidade.' },
+          { letter: 'D', text: 'Sim, porque patentes e publicações são sistemas independentes.' }
+        ],
+        correct: 'B',
+        feedback: 'O período de graça no Brasil (Art. 11 §1, LPI) é de <strong>12 meses</strong>. Como se passaram 14 meses desde a publicação, a novidade foi destruída. O pedido seria indeferido por falta de novidade.',
+        legal: 'Lei 9.279/96, Art. 11 §1',
+        hints: [
+          'O período de graça no Brasil tem um prazo específico definido na LPI.',
+          'Verifique o Art. 11 §1 da Lei 9.279/96 — quantos meses são permitidos?',
+          'O prazo é de 12 meses. 14 meses > 12 meses = novidade destruída.'
+        ],
+        points: 100
+      },
+      {
+        id: 2, icon: '🗝️', theme: 'Tipos de Proteção',
+        title: 'A Chave da Classificação',
+        context: 'Há uma gaveta trancada com um código. Para abri-la, identifique o tipo correto de proteção. Uma chef criou uma receita culinária inédita com ingredientes amazônicos e quer protegê-la legalmente.',
+        question: 'Qual é a melhor forma de proteção para uma receita culinária?',
+        options: [
+          { letter: 'A', text: 'Patente de invenção, pois a receita é uma criação nova.' },
+          { letter: 'B', text: 'Direito autoral, pois a receita é uma obra intelectual.' },
+          { letter: 'C', text: 'Segredo industrial (segredo de negócio), mantendo a receita confidencial.' },
+          { letter: 'D', text: 'Marca, registrando o nome da receita no INPI.' }
+        ],
+        correct: 'C',
+        feedback: 'Receitas culinárias em si <strong>não são patenteáveis</strong> (não há atividade inventiva técnica) e não se enquadram em direito autoral (a ideia subjacente não é protegida, apenas a expressão). A melhor estratégia é o <strong>segredo industrial</strong>, complementado por marca para o nome comercial e eventuais NDAs.',
+        legal: 'Lei 9.279/96, Arts. 10, 195; Lei 9.610/98, Art. 8',
+        hints: [
+          'Pense: uma receita é uma ideia ou uma expressão? E o que a LPI exclui de patenteabilidade?',
+          'O Art. 10 da LPI lista o que não é considerado invenção. A Lei de Direitos Autorais protege a expressão, não a ideia.',
+          'A resposta está no Art. 195 da LPI — segredo industrial protege informações confidenciais com valor econômico.'
+        ],
+        points: 100
+      },
+      {
+        id: 3, icon: '🔓', theme: 'Marcas',
+        title: 'O Cofre das Marcas',
+        context: 'Um cofre digital exige conhecimento sobre marcas. Uma empresa quer registrar como marca a cor roxa específica (Pantone 2685C) para seus chocolates premium.',
+        question: 'É possível registrar uma cor isolada como marca no Brasil?',
+        options: [
+          { letter: 'A', text: 'Sim, qualquer cor pode ser registrada como marca sem restrições.' },
+          { letter: 'B', text: 'Não, cores nunca podem ser registradas como marca no Brasil.' },
+          { letter: 'C', text: 'Em princípio não, pois o INPI não aceita marca de cor isolada, exceto se comprovado caráter distintivo excepcional (secondary meaning).' },
+          { letter: 'D', text: 'Sim, desde que seja uma cor Pantone específica.' }
+        ],
+        correct: 'C',
+        feedback: 'O INPI, em regra, <strong>não aceita o registro de cor isolada</strong> como marca. No entanto, a jurisprudência brasileira e a doutrina reconhecem a possibilidade excepcional se a cor adquiriu <strong>secondary meaning</strong> (significado secundário) — ou seja, o público associa automaticamente aquela cor ao produto/empresa.',
+        legal: 'Lei 9.279/96, Art. 122, Art. 124 (VIII); Manual de Marcas INPI',
+        hints: [
+          'O Art. 122 da LPI define marca como sinal visualmente perceptível. Mas há limitações no Art. 124.',
+          'O conceito de "secondary meaning" é relevante aqui — quando o público associa a cor à marca.',
+          'Em regra não é aceita, mas com prova de caráter distintivo excepcional, pode haver exceção.'
+        ],
+        points: 100
+      },
+      {
+        id: 4, icon: '🧩', theme: 'Software',
+        title: 'O Puzzle do Código',
+        context: 'Uma tela de computador pede a resposta para desbloquear. Um desenvolvedor registrou seu software no INPI. Agora um concorrente criou um programa com funcionalidades idênticas, mas código-fonte totalmente diferente.',
+        question: 'O registro de software protege contra programas com as mesmas funcionalidades?',
+        options: [
+          { letter: 'A', text: 'Sim, o registro protege a funcionalidade e a ideia do software.' },
+          { letter: 'B', text: 'Não, o registro de software protege apenas o código-fonte (expressão), não a funcionalidade (ideia). O concorrente pode criar funcionalidades similares com código próprio.' },
+          { letter: 'C', text: 'Sim, porque o INPI examina a originalidade funcional.' },
+          { letter: 'D', text: 'Depende — se o software foi patenteado, sim; se apenas registrado, não.' }
+        ],
+        correct: 'B',
+        feedback: 'O registro de software (Lei 9.609/98) protege o <strong>código-fonte</strong> como obra autoral, não as funcionalidades ou ideias. Um concorrente pode criar programa com funcionalidades idênticas desde que o <strong>código seja original</strong>. Para proteger funcionalidades, seria necessário buscar patente de invenção implementada por computador (quando aplicável).',
+        legal: 'Lei 9.609/98, Art. 2º; Lei 9.610/98, Art. 8 (VII)',
+        hints: [
+          'Lembre-se: direito autoral protege a expressão, não a ideia.',
+          'A Lei 9.609/98 protege o programa como obra intelectual — ou seja, o código.',
+          'O concorrente tem código diferente. Mesma funcionalidade + código diferente = não há violação.'
+        ],
+        points: 100
+      },
+      {
+        id: 5, icon: '🔍', theme: 'Vigência',
+        title: 'O Relógio da Vigência',
+        context: 'Um relógio na parede gira ao contrário. Para pará-lo, responda: uma patente de invenção foi depositada em 2005 e concedida em 2020 (15 anos de tramitação).',
+        question: 'Quando essa patente expira?',
+        options: [
+          { letter: 'A', text: '2025 — são 20 anos a partir do depósito (2005 + 20).' },
+          { letter: 'B', text: '2040 — são 20 anos a partir da concessão (2020 + 20).' },
+          { letter: 'C', text: '2030 — o Art. 40, parágrafo único, garante mínimo de 10 anos a partir da concessão (2020 + 10).' },
+          { letter: 'D', text: '2035 — são 15 anos a partir da concessão.' }
+        ],
+        correct: 'C',
+        feedback: 'A patente de invenção tem vigência de <strong>20 anos a partir do depósito</strong> (Art. 40, caput). Porém, o parágrafo único garantia um <strong>mínimo de 10 anos a partir da concessão</strong>. Como 2005 + 20 = 2025 e 2020 + 10 = 2030, prevalece a data mais favorável ao titular: <strong>2030</strong>. Nota: o STF julgou a ADI 5529 limitando este dispositivo para novos casos, mas o exemplo ilustra a regra histórica.',
+        legal: 'Lei 9.279/96, Art. 40 e parágrafo único; ADI 5529/STF',
+        hints: [
+          'O Art. 40 da LPI prevê 20 anos do depósito, mas havia uma garantia mínima a partir da concessão.',
+          'O parágrafo único do Art. 40 garantia mínimo de 10 anos da concessão.',
+          '2005 + 20 = 2025. Mas 2020 + 10 = 2030. Qual é mais favorável ao titular?'
+        ],
+        points: 100
+      },
+      {
+        id: 6, icon: '🗺️', theme: 'Indicação Geográfica',
+        title: 'O Mapa do Terroir',
+        context: 'Um mapa na parede mostra uma região produtora de café. A legenda está parcialmente apagada. Produtores de café de uma região específica querem proteger o nome da região como IG.',
+        question: 'Quem pode solicitar o registro de Indicação Geográfica ao INPI?',
+        options: [
+          { letter: 'A', text: 'Qualquer produtor individual da região.' },
+          { letter: 'B', text: 'Apenas o governo do estado onde a região se localiza.' },
+          { letter: 'C', text: 'Uma entidade representativa da coletividade (associação, sindicato, cooperativa, etc.) dos produtores da região.' },
+          { letter: 'D', text: 'Apenas empresas com CNPJ registrado na região.' }
+        ],
+        correct: 'C',
+        feedback: 'O pedido de IG deve ser feito por uma <strong>entidade representativa da coletividade</strong> — como associação, sindicato, cooperativa ou conselho regulador — que represente os produtores ou prestadores de serviço da região (IN INPI 095/2018). Não é pedido individual nem governamental.',
+        legal: 'Lei 9.279/96, Arts. 176–182; IN INPI 095/2018',
+        hints: [
+          'IG é uma proteção coletiva. Quem representa a coletividade?',
+          'Pense em associações, sindicatos ou cooperativas da região.',
+          'A IN INPI 095/2018 define: entidade representativa da coletividade.'
+        ],
+        points: 100
+      },
+      {
+        id: 7, icon: '⚖️', theme: 'Ética e Biodiversidade',
+        title: 'O Tribunal da Biodiversidade',
+        context: 'Uma sala de tribunal simulada. Uma empresa farmacêutica europeia coletou amostras de planta amazônica com propriedades medicinais conhecidas por comunidade indígena e depositou patente na Europa sem consentimento da comunidade.',
+        question: 'Segundo a legislação brasileira, isso configura:',
+        options: [
+          { letter: 'A', text: 'Prática legal, pois a patente foi depositada no exterior.' },
+          { letter: 'B', text: 'Biopirataria — violação da Lei 13.123/2015 que exige consentimento prévio informado e repartição de benefícios.' },
+          { letter: 'C', text: 'Prática legal desde que a empresa pague royalties à comunidade.' },
+          { letter: 'D', text: 'Irrelevante, pois conhecimentos tradicionais não são protegidos por lei.' }
+        ],
+        correct: 'B',
+        feedback: 'A <strong>Lei 13.123/2015</strong> (Marco Legal da Biodiversidade) exige <strong>consentimento prévio informado (CPI)</strong> da comunidade tradicional e <strong>repartição de benefícios</strong>. O acesso ao patrimônio genético e ao conhecimento tradicional associado sem CPI viola a legislação brasileira, podendo configurar <strong>biopirataria</strong>. O CGEN é o órgão regulador.',
+        legal: 'Lei 13.123/2015; Decreto 8.772/2016; Protocolo de Nagoya; CDB',
+        hints: [
+          'Existe uma lei específica no Brasil sobre acesso a patrimônio genético e conhecimento tradicional.',
+          'A Lei 13.123/2015 exige dois requisitos principais: consentimento e repartição.',
+          'Sem consentimento prévio informado (CPI) = biopirataria.'
+        ],
+        points: 100
+      },
+      {
+        id: 8, icon: '🚪', theme: 'Estratégia de PI',
+        title: 'A Porta Final',
+        context: 'A última porta exige pensamento estratégico. Uma startup tem: (a) um nome criativo para o produto, (b) um design inovador da embalagem, (c) um algoritmo proprietário no app, e (d) a fórmula do produto. O orçamento é limitado.',
+        question: 'Qual seria a ordem de prioridade de proteção mais estratégica?',
+        options: [
+          { letter: 'A', text: '1º Patente do algoritmo → 2º Registro da marca → 3º Registro do design → 4º Segredo da fórmula.' },
+          { letter: 'B', text: '1º Registro da marca → 2º Segredo da fórmula → 3º Registro do software → 4º Desenho industrial.' },
+          { letter: 'C', text: '1º Segredo da fórmula (imediato, sem custo) → 2º Marca (identidade no mercado) → 3º Registro de software (declaratório, custo baixo) → 4º Desenho industrial da embalagem.' },
+          { letter: 'D', text: 'Registrar tudo simultaneamente, independente do orçamento.' }
+        ],
+        correct: 'C',
+        feedback: 'A estratégia mais eficiente com orçamento limitado é: <strong>1º Segredo</strong> (proteção imediata, sem custo, apenas NDAs), <strong>2º Marca</strong> (identidade de mercado, prioridade competitiva), <strong>3º Software</strong> (registro declaratório, custo baixo ~R$185), <strong>4º Desenho industrial</strong> (pode esperar, mas atenção ao prazo de novidade). A patente de algoritmo seria complexa e cara — avaliar se o efeito técnico justifica.',
+        legal: 'Lei 9.279/96 (marca, DI, patente); Lei 9.609/98 (software); Art. 195 (segredo)',
+        hints: [
+          'Pense em custo-benefício: o que pode ser protegido imediatamente sem custo?',
+          'O segredo é imediato e gratuito. A marca é a identidade no mercado.',
+          'Priorize: gratuito/imediato → baixo custo → investimento maior.'
+        ],
+        points: 150
+      }
+    ];
 
-            <!-- ====== ENVELOPE 2 — CLASSIFICAÇÃO DE PROTEÇÃO ====== -->
-            <div class="er-envelope er-envelope--2" id="envelope2">
-                <div class="er-envelope__header" onclick="toggleEnvelope(2)">
-                    <div class="er-envelope__seal">📋</div>
-                    <div class="er-envelope__header-content">
-                        <div class="er-envelope__number">Envelope 2 de 5</div>
-                        <div class="er-envelope__title">Classificação de Proteção</div>
-                        <div class="er-envelope__desc">Associe cada criação da Dra. Iara ao tipo correto de proteção de PI.</div>
-                    </div>
-                    <div class="er-envelope__toggle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                </div>
-                <div class="er-envelope__body">
-                    <div class="er-envelope__content">
-                        <div class="er-context">
-                            <p>A Dra. Iara desenvolveu diversas criações ao longo de sua pesquisa. Cada uma exige um tipo diferente de proteção. Classifique corretamente para obter as 5 letras que formam o código.</p>
-                        </div>
+    // ── Game state ──
+    var playerName = '';
+    var currentPuzzle = 0;
+    var score = 0;
+    var totalHints = 0;
+    var hintsUsedPerPuzzle = {};
+    var answeredPuzzles = {};
+    var timerSeconds = 1800; // 30 min
+    var timerInterval = null;
+    var gameStarted = false;
 
-                        <div class="er-task">
-                            <div class="er-task__label">Tarefa</div>
-                            <div class="er-task__text">Para cada criação, selecione o tipo de proteção adequado. A primeira letra de cada resposta correta forma o código deste desafio.</div>
-                        </div>
-
-                        <div class="er-classification" id="classification2">
-                            <div class="er-classification__items">
-                                <div class="er-classification__item">
-                                    <div class="er-classification__item-desc">
-                                        <strong>1. Nome "TEPUÍ AQUA" para o produto</strong>
-                                        Sinal distintivo para identificar o filtro no mercado.
-                                    </div>
-                                    <select class="er-classification__select" data-correct="Marca">
-                                        <option value="">Selecione...</option>
-                                        <option value="Patente">Patente</option>
-                                        <option value="Marca">Marca</option>
-                                        <option value="Autoral">Direito Autoral</option>
-                                        <option value="Software">Software</option>
-                                    </select>
-                                </div>
-                                <div class="er-classification__item">
-                                    <div class="er-classification__item-desc">
-                                        <strong>2. Artigo científico sobre os resultados</strong>
-                                        Publicação acadêmica com dados da pesquisa.
-                                    </div>
-                                    <select class="er-classification__select" data-correct="Autoral">
-                                        <option value="">Selecione...</option>
-                                        <option value="Patente">Patente</option>
-                                        <option value="Marca">Marca</option>
-                                        <option value="Autoral">Direito Autoral</option>
-                                        <option value="Software">Software</option>
-                                    </select>
-                                </div>
-                                <div class="er-classification__item">
-                                    <div class="er-classification__item-desc">
-                                        <strong>3. O filtro em si (processo + produto)</strong>
-                                        Invenção nova com atividade inventiva e aplicação industrial.
-                                    </div>
-                                    <select class="er-classification__select" data-correct="Patente">
-                                        <option value="">Selecione...</option>
-                                        <option value="Patente">Patente</option>
-                                        <option value="Marca">Marca</option>
-                                        <option value="Autoral">Direito Autoral</option>
-                                        <option value="Software">Software</option>
-                                    </select>
-                                </div>
-                                <div class="er-classification__item">
-                                    <div class="er-classification__item-desc">
-                                        <strong>4. Programa que monitora a qualidade da água</strong>
-                                        Código-fonte do sistema de monitoramento em tempo real.
-                                    </div>
-                                    <select class="er-classification__select" data-correct="Software">
-                                        <option value="">Selecione...</option>
-                                        <option value="Patente">Patente</option>
-                                        <option value="Marca">Marca</option>
-                                        <option value="Autoral">Direito Autoral</option>
-                                        <option value="Software">Software</option>
-                                    </select>
-                                </div>
-                                <div class="er-classification__item">
-                                    <div class="er-classification__item-desc">
-                                        <strong>5. Manual técnico ilustrado do filtro</strong>
-                                        Obra com textos e ilustrações técnicas originais.
-                                    </div>
-                                    <select class="er-classification__select" data-correct="Autoral">
-                                        <option value="">Selecione...</option>
-                                        <option value="Patente">Patente</option>
-                                        <option value="Marca">Marca</option>
-                                        <option value="Autoral">Direito Autoral</option>
-                                        <option value="Software">Software</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="er-btn er-btn--primary er-btn--block" onclick="checkChallenge2()">Confirmar respostas</button>
-
-                        <div class="er-feedback" id="feedback2"></div>
-
-                        <div class="er-legal">
-                            <strong>Fundamentação legal</strong>
-                            Marcas: Lei 9.279/96, Art. 122. Direito Autoral: Lei 9.610/98, Art. 7º. Patentes: Lei 9.279/96, Art. 8º. Software: Lei 9.609/98, Art. 1º.
-                        </div>
-
-                        <div class="er-hints">
-                            <div class="er-hints__title">Precisa de ajuda?</div>
-                            <div class="er-hints__levels">
-                                <button class="er-hint-btn" onclick="revealHint(2,1)">Pista Nível 1</button>
-                                <button class="er-hint-btn" onclick="revealHint(2,2)">Pista Nível 2</button>
-                                <button class="er-hint-btn" onclick="revealHint(2,3)">Pista Nível 3</button>
-                            </div>
-                            <div class="er-hint-text" id="hint2-1">Lembre-se: nome de produto = marca. Textos e obras = direito autoral. Invenção técnica = patente. Código-fonte = software.</div>
-                            <div class="er-hint-text" id="hint2-2">A sequência de respostas é: M-A-P-S-A. A primeira letra de cada tipo forma o código.</div>
-                            <div class="er-hint-text" id="hint2-3">Resposta completa: 1=Marca, 2=Autoral, 3=Patente, 4=Software, 5=Autoral. São 5 letras → código = 5.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== ENVELOPE 3 — CÁLCULO DE VIGÊNCIA ====== -->
-            <div class="er-envelope er-envelope--3" id="envelope3">
-                <div class="er-envelope__header" onclick="toggleEnvelope(3)">
-                    <div class="er-envelope__seal">📅</div>
-                    <div class="er-envelope__header-content">
-                        <div class="er-envelope__number">Envelope 3 de 5</div>
-                        <div class="er-envelope__title">Cálculo de Vigência</div>
-                        <div class="er-envelope__desc">Calcule o tempo restante de proteção e descubra o dígito oculto.</div>
-                    </div>
-                    <div class="er-envelope__toggle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                </div>
-                <div class="er-envelope__body">
-                    <div class="er-envelope__content">
-                        <div class="er-context">
-                            <p>A Dra. Iara deixou três registros de PI com datas diferentes. Calcule o ano de expiração de cada um, some os três últimos dígitos, reduza a um único algarismo (soma iterativa) e multiplique por 3.</p>
-                        </div>
-
-                        <div class="er-task">
-                            <div class="er-task__label">Tarefa</div>
-                            <div class="er-task__text">Calcule o ano de expiração de cada proteção, some os últimos dois dígitos de cada ano, reduza a soma a um dígito e multiplique por 3.</div>
-                        </div>
-
-                        <div class="er-calc-grid">
-                            <div class="er-calc-card">
-                                <div class="er-calc-card__label">Patente de Invenção</div>
-                                <div class="er-calc-card__value">2022</div>
-                                <div class="er-calc-card__detail">Depósito → +20 anos<br>Expira: <strong>2042</strong> → dígitos: 42</div>
-                            </div>
-                            <div class="er-calc-card">
-                                <div class="er-calc-card__label">Direito Autoral (artigo)</div>
-                                <div class="er-calc-card__value">2005</div>
-                                <div class="er-calc-card__detail">Publicação → faleceu 2010 → +70 anos<br>Expira: <strong>2075</strong> → dígitos: 75</div>
-                            </div>
-                            <div class="er-calc-card">
-                                <div class="er-calc-card__label">Software</div>
-                                <div class="er-calc-card__value">1996</div>
-                                <div class="er-calc-card__detail">Publicação → +50 anos<br>Expira: <strong>2046</strong> → dígitos: 46</div>
-                            </div>
-                        </div>
-
-                        <div class="er-calc-input">
-                            <label>42 + 75 + 46 = 163 → 1+6+3 = 10 → 1+0 = 1 → ×3 =</label>
-                            <input type="number" id="calcAnswer" placeholder="?" min="0" max="99">
-                        </div>
-
-                        <button class="er-btn er-btn--primary er-btn--block" onclick="checkChallenge3()">Confirmar resposta</button>
-
-                        <div class="er-feedback" id="feedback3"></div>
-
-                        <div class="er-legal">
-                            <strong>Fundamentação legal</strong>
-                            Patente: Lei 9.279/96, Art. 40 — 20 anos do depósito. Direito Autoral: Lei 9.610/98, Art. 41 — vida + 70 anos. Software: Lei 9.609/98, Art. 2º, §2º — 50 anos de 1º de janeiro do ano seguinte à publicação.
-                        </div>
-
-                        <div class="er-hints">
-                            <div class="er-hints__title">Precisa de ajuda?</div>
-                            <div class="er-hints__levels">
-                                <button class="er-hint-btn" onclick="revealHint(3,1)">Pista Nível 1</button>
-                                <button class="er-hint-btn" onclick="revealHint(3,2)">Pista Nível 2</button>
-                                <button class="er-hint-btn" onclick="revealHint(3,3)">Pista Nível 3</button>
-                            </div>
-                            <div class="er-hint-text" id="hint3-1">Some os dois últimos dígitos de cada ano de expiração: 42 + 75 + 46.</div>
-                            <div class="er-hint-text" id="hint3-2">163 → 1+6+3 = 10 → 1+0 = 1. Agora multiplique por 3.</div>
-                            <div class="er-hint-text" id="hint3-3">A resposta é 3. (1 × 3 = 3)</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== ENVELOPE 4 — ANÁLISE DE MARCA ====== -->
-            <div class="er-envelope er-envelope--4" id="envelope4">
-                <div class="er-envelope__header" onclick="toggleEnvelope(4)">
-                    <div class="er-envelope__seal">™️</div>
-                    <div class="er-envelope__header-content">
-                        <div class="er-envelope__number">Envelope 4 de 5</div>
-                        <div class="er-envelope__title">Análise de Marca</div>
-                        <div class="er-envelope__desc">Identifique qual marca é registrável dentre as opções apresentadas.</div>
-                    </div>
-                    <div class="er-envelope__toggle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                </div>
-                <div class="er-envelope__body">
-                    <div class="er-envelope__content">
-                        <div class="er-context">
-                            <p>A Dra. Iara precisava registrar uma marca para seu filtro. Ela pesquisou 4 opções no INPI. Apenas UMA é registrável — as outras violam impedimentos legais. Qual é a marca viável?</p>
-                        </div>
-
-                        <div class="er-task">
-                            <div class="er-task__label">Tarefa</div>
-                            <div class="er-task__text">Analise as 4 marcas candidatas e selecione a única que pode ser registrada no INPI.</div>
-                        </div>
-
-                        <div class="er-marcas" id="marcas4">
-                            <div class="er-marca" data-answer="wrong" onclick="selectMarca(this)">
-                                <div class="er-marca__name">FILTRO PURO</div>
-                                <div class="er-marca__reason">❌ Termo genérico/descritivo — Art. 124, VI da LPI. Descreve diretamente o produto.</div>
-                            </div>
-                            <div class="er-marca" data-answer="wrong" onclick="selectMarca(this)">
-                                <div class="er-marca__name">RORAIMA WATER</div>
-                                <div class="er-marca__reason">❌ Contém nome geográfico — Art. 124, IX da LPI. Não pode usar o nome do estado isoladamente.</div>
-                            </div>
-                            <div class="er-marca" data-answer="correct" onclick="selectMarca(this)">
-                                <div class="er-marca__name">TEPUÍ AQUA</div>
-                                <div class="er-marca__reason">✅ Marca fantasiosa e distintiva. "Tepuí" remete à geografia sem ser descritivo do produto. Registrável!</div>
-                            </div>
-                            <div class="er-marca" data-answer="wrong" onclick="selectMarca(this)">
-                                <div class="er-marca__name">CRUZ VERMELHA H₂O</div>
-                                <div class="er-marca__reason">❌ Reproduz símbolo oficial protegido — Art. 124, I da LPI. Cruz Vermelha é marca notória protegida por convenção internacional.</div>
-                            </div>
-                        </div>
-
-                        <button class="er-btn er-btn--primary er-btn--block" onclick="checkChallenge4()">Confirmar resposta</button>
-
-                        <div class="er-feedback" id="feedback4"></div>
-
-                        <div class="er-legal">
-                            <strong>Fundamentação legal</strong>
-                            Lei 9.279/1996, Art. 124 — São irregistráveis como marca: designações genéricas (VI), nomes geográficos (IX), sinais oficiais (I), entre outros 23 impedimentos.
-                        </div>
-
-                        <div class="er-hints">
-                            <div class="er-hints__title">Precisa de ajuda?</div>
-                            <div class="er-hints__levels">
-                                <button class="er-hint-btn" onclick="revealHint(4,1)">Pista Nível 1</button>
-                                <button class="er-hint-btn" onclick="revealHint(4,2)">Pista Nível 2</button>
-                                <button class="er-hint-btn" onclick="revealHint(4,3)">Pista Nível 3</button>
-                            </div>
-                            <div class="er-hint-text" id="hint4-1">Elimine termos genéricos ("Filtro Puro"), nomes geográficos isolados e símbolos oficiais.</div>
-                            <div class="er-hint-text" id="hint4-2">A marca registrável deve ser distintiva e fantasiosa — não pode descrever o produto diretamente.</div>
-                            <div class="er-hint-text" id="hint4-3">A resposta é "TEPUÍ AQUA" — nome fantasioso que remete à região sem ser genérico.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== ENVELOPE 5 — FLUXO DE DEPÓSITO ====== -->
-            <div class="er-envelope er-envelope--5" id="envelope5">
-                <div class="er-envelope__header" onclick="toggleEnvelope(5)">
-                    <div class="er-envelope__seal">📄</div>
-                    <div class="er-envelope__header-content">
-                        <div class="er-envelope__number">Envelope 5 de 5</div>
-                        <div class="er-envelope__title">Fluxo de Depósito</div>
-                        <div class="er-envelope__desc">Ordene as etapas do depósito de patente na sequência correta.</div>
-                    </div>
-                    <div class="er-envelope__toggle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                </div>
-                <div class="er-envelope__body">
-                    <div class="er-envelope__content">
-                        <div class="er-context">
-                            <p>O último envelope contém as 8 etapas do depósito de patente no INPI, mas estão embaralhadas. Ordene-as corretamente. A letra da 3ª etapa na ordem correta, convertida em número (A=1), multiplicada por 3, é o código.</p>
-                        </div>
-
-                        <div class="er-task">
-                            <div class="er-task__label">Tarefa</div>
-                            <div class="er-task__text">Selecione a ordem correta das 8 etapas. Depois, identifique a letra da 3ª etapa (A=1, B=2, C=3...) e multiplique por 3.</div>
-                        </div>
-
-                        <div class="er-flow" id="flow5">
-                            <div class="er-flow__items" id="flowItems">
-                                <div class="er-flow__item" draggable="true" data-id="A">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>A.</strong> Redação do relatório descritivo e reivindicações</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                                <div class="er-flow__item" draggable="true" data-id="B">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>B.</strong> Busca de anterioridade</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                                <div class="er-flow__item" draggable="true" data-id="C">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>C.</strong> Consulta ao NIT da instituição</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                                <div class="er-flow__item" draggable="true" data-id="D">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>D.</strong> Pagamento da GRU e protocolo no e-INPI</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                                <div class="er-flow__item" draggable="true" data-id="E">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>E.</strong> Exame técnico (requerido em até 36 meses)</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                                <div class="er-flow__item" draggable="true" data-id="F">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>F.</strong> Preenchimento do formulário eletrônico (e-INPI)</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                                <div class="er-flow__item" draggable="true" data-id="G">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>G.</strong> Publicação na RPI (Revista da PI)</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                                <div class="er-flow__item" draggable="true" data-id="H">
-                                    <div class="er-flow__item-num">?</div>
-                                    <div class="er-flow__item-text"><strong>H.</strong> Concessão da carta patente</div>
-                                    <div class="er-flow__item-handle">⠿</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="er-calc-input">
-                            <label>3ª etapa na ordem correta é a letra ___. Convertida (A=1): ___ × 3 =</label>
-                            <input type="number" id="flowAnswer" placeholder="?" min="0" max="99">
-                        </div>
-
-                        <button class="er-btn er-btn--primary er-btn--block" onclick="checkChallenge5()">Confirmar resposta</button>
-
-                        <div class="er-feedback" id="feedback5"></div>
-
-                        <div class="er-legal">
-                            <strong>Fundamentação legal</strong>
-                            Lei 9.279/96, Art. 19 a 33 — Do depósito, do exame e da concessão. Resolução INPI nº 251/2019 — Procedimentos eletrônicos. Ordem correta: B→C→A→F→D→G→E→H.
-                        </div>
-
-                        <div class="er-hints">
-                            <div class="er-hints__title">Precisa de ajuda?</div>
-                            <div class="er-hints__levels">
-                                <button class="er-hint-btn" onclick="revealHint(5,1)">Pista Nível 1</button>
-                                <button class="er-hint-btn" onclick="revealHint(5,2)">Pista Nível 2</button>
-                                <button class="er-hint-btn" onclick="revealHint(5,3)">Pista Nível 3</button>
-                            </div>
-                            <div class="er-hint-text" id="hint5-1">Primeiro busca-se, depois consulta o NIT, depois redige. A concessão é sempre a última etapa.</div>
-                            <div class="er-hint-text" id="hint5-2">A ordem é: B→C→A→F→D→G→E→H. A 3ª etapa é a letra A.</div>
-                            <div class="er-hint-text" id="hint5-3">A = 1. 1 × 3 = 3. O código é 3.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== CÓDIGO FINAL ====== -->
-            <div class="er-final" id="finalPanel">
-                <div class="er-final__icon">🔐</div>
-                <h2 class="er-final__title">Código Final</h2>
-                <p class="er-final__subtitle">Insira os 5 dígitos obtidos nos envelopes para desbloquear a documentação da Dra. Iara Tepui.</p>
-
-                <div class="er-code-input">
-                    <input type="text" class="er-code-digit" id="code1" maxlength="1" oninput="moveToNext(this, 'code2')">
-                    <span class="er-code-separator">—</span>
-                    <input type="text" class="er-code-digit" id="code2" maxlength="1" oninput="moveToNext(this, 'code3')">
-                    <span class="er-code-separator">—</span>
-                    <input type="text" class="er-code-digit" id="code3" maxlength="1" oninput="moveToNext(this, 'code4')">
-                    <span class="er-code-separator">—</span>
-                    <input type="text" class="er-code-digit" id="code4" maxlength="1" oninput="moveToNext(this, 'code5')">
-                    <span class="er-code-separator">—</span>
-                    <input type="text" class="er-code-digit" id="code5" maxlength="1">
-                </div>
-
-                <button class="er-btn er-btn--primary" onclick="checkFinalCode()" style="margin-top: 16px;">Desbloquear</button>
-
-                <div class="er-final__result" id="finalResult"></div>
-            </div>
-
-            <!-- ====== DEBRIEF ====== -->
-            <div class="er-section" style="margin-top: 64px;">
-                <div class="er-section__label">Após o jogo</div>
-                <h2 class="er-section__title">Debrief — Reflexão guiada</h2>
-
-                <div class="er-debrief">
-                    <div class="er-section__body">
-                        <p>Após a revelação do código, conduza uma conversa de 10 minutos com os participantes usando as perguntas abaixo como guia.</p>
-                    </div>
-                    <div class="er-debrief__questions">
-                        <div class="er-debrief__q">
-                            <span class="er-debrief__q-num">1</span>
-                            <span class="er-debrief__q-text">O que teria acontecido se a Dra. Iara tivesse publicado o artigo <strong>antes</strong> de depositar a patente? Ela perderia a novidade?</span>
-                        </div>
-                        <div class="er-debrief__q">
-                            <span class="er-debrief__q-num">2</span>
-                            <span class="er-debrief__q-text">Qual foi o desafio mais difícil para seu grupo? O que vocês não sabiam antes?</span>
-                        </div>
-                        <div class="er-debrief__q">
-                            <span class="er-debrief__q-num">3</span>
-                            <span class="er-debrief__q-text">Na classificação de proteção, o artigo e o manual foram classificados como direito autoral. Mas e se o artigo contivesse dados experimentais inéditos — isso muda algo?</span>
-                        </div>
-                        <div class="er-debrief__q">
-                            <span class="er-debrief__q-num">4</span>
-                            <span class="er-debrief__q-text">A marca "TEPUÍ AQUA" usa um termo geográfico (tepui = formação rochosa). Por que ela é registrável, mas "RORAIMA WATER" não?</span>
-                        </div>
-                        <div class="er-debrief__q">
-                            <span class="er-debrief__q-num">5</span>
-                            <span class="er-debrief__q-text">Se vocês fossem pesquisadores na UFRR, qual seria o <strong>primeiro passo</strong> que fariam para proteger uma invenção? Qual órgão procurariam?</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ====== PRINT BUTTON ====== -->
-            <div style="text-align: center; margin-top: 48px;" class="er-print-hide">
-                <button class="er-btn er-btn--outline" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
-                <a href="index.html" class="er-btn er-btn--outline" style="margin-left: 8px;">← Voltar ao Toolkit</a>
-            </div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer__bottom" style="border:none; padding:0;">
-                <p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
-    <script>
-    /* =============================================
-       ESCAPE ROOM — GAME ENGINE
-       ============================================= */
-
-    // State
-    const state = {
-        codes: [null, null, null, null, null],
-        completed: [false, false, false, false, false],
-        timerInterval: null,
-        timerSeconds: 45 * 60,
-        timerRunning: false
-    };
-
-    // ---- Timer ----
-    function updateTimerDisplay() {
-        const m = Math.floor(state.timerSeconds / 60).toString().padStart(2, '0');
-        const s = (state.timerSeconds % 60).toString().padStart(2, '0');
-        const display = document.getElementById('timerDisplay');
-        display.textContent = `${m}:${s}`;
-        display.className = 'er-timer__display';
-        if (state.timerSeconds <= 300) display.classList.add('er-timer__display--danger');
-        else if (state.timerSeconds <= 900) display.classList.add('er-timer__display--warning');
+    // ── Start ──
+    function startGame() {
+      var nameInput = document.getElementById('playerName');
+      playerName = (nameInput.value || '').trim();
+      if (!playerName) {
+        nameInput.style.borderColor = 'var(--er-red)';
+        nameInput.focus();
+        return;
+      }
+      document.getElementById('nameSection').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'block';
+      document.getElementById('certificate').classList.remove('show');
+      currentPuzzle = 0;
+      score = 0;
+      totalHints = 0;
+      hintsUsedPerPuzzle = {};
+      answeredPuzzles = {};
+      timerSeconds = 1800;
+      gameStarted = true;
+      startTimer();
+      renderPuzzle();
+      autoSave();
     }
 
+    // ── Timer ──
     function startTimer() {
-        if (state.timerRunning) return;
-        state.timerRunning = true;
-        document.getElementById('timerStart').textContent = 'Em andamento...';
-        state.timerInterval = setInterval(() => {
-            state.timerSeconds--;
-            updateTimerDisplay();
-            if (state.timerSeconds <= 0) {
-                clearInterval(state.timerInterval);
-                state.timerRunning = false;
-                document.getElementById('timerDisplay').textContent = '00:00';
-            }
-        }, 1000);
-    }
-
-    function pauseTimer() {
-        clearInterval(state.timerInterval);
-        state.timerRunning = false;
-        document.getElementById('timerStart').textContent = 'Continuar';
-    }
-
-    function resetTimer() {
-        clearInterval(state.timerInterval);
-        state.timerRunning = false;
-        state.timerSeconds = 45 * 60;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(function() {
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          endGame(false);
+          return;
+        }
+        timerSeconds--;
         updateTimerDisplay();
-        document.getElementById('timerStart').textContent = 'Iniciar';
-    }
-
-    // ---- Envelope toggle ----
-    function toggleEnvelope(n) {
-        const el = document.getElementById('envelope' + n);
-        el.classList.toggle('open');
-    }
-
-    function scrollToEnvelope(n) {
-        const el = document.getElementById('envelope' + n);
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (!el.classList.contains('open')) el.classList.add('open');
-    }
-
-    // ---- Progress update ----
-    function updateProgress() {
-        document.querySelectorAll('.er-progress__step').forEach(step => {
-            const n = parseInt(step.dataset.step);
-            const lines = document.querySelectorAll('.er-progress__line');
-            if (state.completed[n - 1]) {
-                step.classList.remove('er-progress__step--active');
-                step.classList.add('er-progress__step--completed');
-                if (lines[n - 1]) lines[n - 1].classList.add('er-progress__line--filled');
-            }
-        });
-        // Set next active
-        const nextIncomplete = state.completed.indexOf(false);
-        if (nextIncomplete !== -1) {
-            const step = document.querySelector(`.er-progress__step[data-step="${nextIncomplete + 1}"]`);
-            if (step && !step.classList.contains('er-progress__step--completed')) {
-                step.classList.add('er-progress__step--active');
-            }
+        // aria-live assertive in last 60s
+        var timerEl = document.getElementById('timerDisplay');
+        if (timerEl) {
+          timerEl.setAttribute('aria-live', timerSeconds <= 60 ? 'assertive' : 'off');
         }
+        autoSave();
+      }, 1000);
     }
 
-    function completeChallenge(n, code) {
-        state.codes[n - 1] = code;
-        state.completed[n - 1] = true;
-        updateProgress();
-        // Auto open next
-        if (n < 5) {
-            setTimeout(() => {
-                const next = document.getElementById('envelope' + (n + 1));
-                if (!next.classList.contains('open')) next.classList.add('open');
-                next.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 1500);
+    function updateTimerDisplay() {
+      var m = Math.floor(timerSeconds / 60);
+      var s = timerSeconds % 60;
+      var display = (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+      var el = document.getElementById('timerDisplay');
+      if (el) {
+        el.textContent = display;
+        el.style.color = timerSeconds <= 60 ? 'var(--er-red)' : timerSeconds <= 300 ? 'var(--er-gold)' : '';
+      }
+    }
+
+    // ── Render puzzle ──
+    function renderPuzzle() {
+      if (currentPuzzle >= puzzles.length) {
+        endGame(true);
+        return;
+      }
+      var p = puzzles[currentPuzzle];
+      var hUsed = hintsUsedPerPuzzle[p.id] || 0;
+      var answered = answeredPuzzles[p.id];
+
+      // Progress
+      var pct = (currentPuzzle / puzzles.length) * 100;
+      var fillEl = document.getElementById('progressFill');
+      if (fillEl) fillEl.style.width = pct + '%';
+      var labelEl = document.getElementById('progressLabel');
+      if (labelEl) labelEl.textContent = 'Puzzle ' + (currentPuzzle + 1) + ' / ' + puzzles.length;
+
+      // Score
+      var scoreEl = document.getElementById('scoreDisplay');
+      if (scoreEl) scoreEl.textContent = score;
+      var hintsEl = document.getElementById('hintsDisplay');
+      if (hintsEl) hintsEl.textContent = totalHints;
+
+      var html = '<div class="er-puzzle">';
+      html += '<div class="er-puzzle__header"><span class="er-puzzle__icon">' + p.icon + '</span>';
+      html += '<span class="er-puzzle__num">Puzzle ' + (currentPuzzle + 1) + ' — ' + p.theme + '</span></div>';
+      html += '<div class="er-puzzle__title">' + p.title + '</div>';
+      html += '<div class="er-puzzle__context">' + p.context + '</div>';
+      html += '<div class="er-puzzle__question">' + p.question + '</div>';
+      html += '<div class="er-options">';
+      p.options.forEach(function(opt) {
+        var extraClass = '';
+        var disabled = '';
+        if (answered) {
+          disabled = ' disabled';
+          if (opt.letter === p.correct) extraClass = ' correct';
+          else if (opt.letter === answered && answered !== p.correct) extraClass = ' wrong';
+          else extraClass = ' disabled';
+        }
+        html += '<div class="er-option' + extraClass + disabled + '" role="button" tabindex="0" ';
+        html += 'onclick="selectAnswer(\'' + opt.letter + '\')" ';
+        html += 'onkeydown="handleOptionKey(event,\'' + opt.letter + '\')" ';
+        html += 'aria-label="Opção ' + opt.letter + ': ' + opt.text.replace(/"/g, '&quot;') + '">';
+        html += '<span class="er-option__letter">' + opt.letter + ')</span>';
+        html += '<span>' + opt.text + '</span></div>';
+      });
+      html += '</div>';
+
+      // Feedback
+      if (answered) {
+        var isCorrect = answered === p.correct;
+        html += '<div class="er-feedback show er-feedback--' + (isCorrect ? 'correct' : 'wrong') + '">';
+        html += '<strong>' + (isCorrect ? '✅ Correto!' : '❌ Incorreto!') + '</strong> ';
+        html += p.feedback + '<br><small style="opacity:.8">📖 ' + p.legal + '</small></div>';
+        html += '<div class="er-actions" style="margin-top:1rem;">';
+        if (currentPuzzle < puzzles.length - 1) {
+          html += '<button class="er-btn er-btn--primary" onclick="nextPuzzle()" aria-label="Ir para o próximo puzzle">➡️ Próximo Puzzle</button>';
         } else {
-            setTimeout(() => {
-                document.getElementById('finalPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 1500);
+          html += '<button class="er-btn er-btn--gold" onclick="endGame(true)" aria-label="Ver resultado final">🏆 Ver Resultado</button>';
         }
+        html += '</div>';
+      }
+
+      // Hints
+      if (!answered) {
+        var hintsLeft = 3 - hUsed;
+        html += '<button class="er-hint-btn" onclick="useHint()" ' + (hintsLeft <= 0 ? 'disabled' : '') + ' ';
+        html += 'aria-label="Usar dica (' + hintsLeft + ' restantes, penalidade de 30 segundos)">';
+        html += '💡 Dica (' + hintsLeft + ' restantes) — penalidade: -30s</button>';
+        for (var i = 0; i < hUsed; i++) {
+          html += '<div class="er-hint-text show">💡 ' + p.hints[i] + '</div>';
+        }
+      }
+
+      html += '</div>';
+
+      var container = document.getElementById('puzzleContainer');
+      if (container) container.innerHTML = html;
     }
 
-    // ---- Challenge 1: Fichas ----
-    function selectFicha(el, containerId) {
-        document.querySelectorAll(`#${containerId} .er-ficha`).forEach(f => f.classList.remove('selected'));
-        el.classList.add('selected');
+    // ── Answer ──
+    function selectAnswer(letter) {
+      var p = puzzles[currentPuzzle];
+      if (answeredPuzzles[p.id]) return;
+      answeredPuzzles[p.id] = letter;
+      if (letter === p.correct) {
+        score += p.points;
+      }
+      renderPuzzle();
+      autoSave();
     }
 
-    function checkChallenge1() {
-        const selected = document.querySelector('#fichas1 .er-ficha.selected');
-        const feedback = document.getElementById('feedback1');
-        if (!selected) {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.textContent = 'Selecione uma ficha antes de confirmar.';
-            return;
-        }
-        const fichas = document.querySelectorAll('#fichas1 .er-ficha');
-        fichas.forEach(f => {
-            f.style.pointerEvents = 'none';
-            if (f.dataset.answer === 'correct') {
-                f.classList.add('correct');
-                f.querySelector('.er-ficha__result').textContent = '✅';
-            } else {
-                f.classList.add('wrong');
-                f.querySelector('.er-ficha__result').textContent = '❌';
-            }
+    function handleOptionKey(e, letter) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectAnswer(letter);
+      }
+    }
+
+    // ── Next ──
+    function nextPuzzle() {
+      currentPuzzle++;
+      renderPuzzle();
+      autoSave();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── Hints ──
+    function useHint() {
+      var p = puzzles[currentPuzzle];
+      var hUsed = hintsUsedPerPuzzle[p.id] || 0;
+      if (hUsed >= 3) return;
+      hintsUsedPerPuzzle[p.id] = hUsed + 1;
+      totalHints++;
+      timerSeconds = Math.max(0, timerSeconds - 30); // penalty
+      updateTimerDisplay();
+      renderPuzzle();
+      autoSave();
+    }
+
+    // ── End game ──
+    function endGame(completed) {
+      clearInterval(timerInterval);
+      gameStarted = false;
+      document.getElementById('gameArea').style.display = 'none';
+
+      var maxScore = 0;
+      puzzles.forEach(function(p) { maxScore += p.points; });
+      var timeUsed = 1800 - timerSeconds;
+      var mins = Math.floor(timeUsed / 60);
+      var secs = timeUsed % 60;
+
+      var cert = document.getElementById('certificate');
+      cert.classList.add('show');
+
+      var nameEl = document.getElementById('certName');
+      if (nameEl) nameEl.textContent = playerName;
+
+      var detailsEl = document.getElementById('certDetails');
+      if (detailsEl) {
+        detailsEl.innerHTML =
+          '<span>🏆 ' + score + ' / ' + maxScore + ' pontos</span>' +
+          '<span>⏱ ' + mins + 'min ' + secs + 's</span>' +
+          '<span>💡 ' + totalHints + ' dicas usadas</span>' +
+          (completed ? '<span>✅ Concluído</span>' : '<span>⏰ Tempo esgotado</span>');
+      }
+
+      var dateEl = document.getElementById('certDate');
+      if (dateEl) dateEl.textContent = new Date().toLocaleDateString('pt-BR');
+
+      if (typeof PIThinking !== 'undefined' && PIThinking.clearProgress) {
+        PIThinking.clearProgress('escape-room');
+      }
+    }
+
+    // ── Restart ──
+    function restartGame() {
+      if (!confirm('Reiniciar o Escape Room? Todo o progresso será perdido.')) return;
+      clearInterval(timerInterval);
+      document.getElementById('certificate').classList.remove('show');
+      document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('nameSection').style.display = 'block';
+      if (typeof PIThinking !== 'undefined' && PIThinking.clearProgress) {
+        PIThinking.clearProgress('escape-room');
+      }
+    }
+
+    // ── Persistence ──
+    function autoSave() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
+        PIThinking.saveProgress('escape-room', {
+          playerName: playerName,
+          currentPuzzle: currentPuzzle,
+          score: score,
+          totalHints: totalHints,
+          hintsUsedPerPuzzle: hintsUsedPerPuzzle,
+          answeredPuzzles: answeredPuzzles,
+          timerSeconds: timerSeconds,
+          gameStarted: gameStarted
         });
-
-        if (selected.dataset.answer === 'correct') {
-            feedback.className = 'er-feedback er-feedback--success visible';
-            feedback.innerHTML = '<strong>Correto!</strong> A Ficha C é a anterioridade relevante. Ela usa a mesma base técnica: nanopartículas + areia + remoção de mercúrio. O código deste envelope é <strong>3</strong> (letra C = 3ª posição).';
-            completeChallenge(1, 3);
-        } else {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.innerHTML = '<strong>Incorreto.</strong> A resposta correta é a Ficha C — é o único documento com sobreposição técnica significativa. O código deste envelope é <strong>3</strong>.';
-            completeChallenge(1, 3);
-        }
+      }
     }
 
-    // ---- Challenge 2: Classification ----
-    function checkChallenge2() {
-        const selects = document.querySelectorAll('#classification2 select');
-        let allCorrect = true;
-        let allFilled = true;
-        let letters = '';
+    function loadSaved() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.loadProgress) {
+        var saved = PIThinking.loadProgress('escape-room');
+        if (saved && saved.gameStarted) {
+          playerName = saved.playerName || '';
+          currentPuzzle = saved.currentPuzzle || 0;
+          score = saved.score || 0;
+          totalHints = saved.totalHints || 0;
+          hintsUsedPerPuzzle = saved.hintsUsedPerPuzzle || {};
+          answeredPuzzles = saved.answeredPuzzles || {};
+          timerSeconds = saved.timerSeconds || 1800;
+          gameStarted = true;
 
-        selects.forEach(sel => {
-            if (!sel.value) { allFilled = false; return; }
-            sel.classList.remove('correct-answer', 'wrong-answer');
-            if (sel.value === sel.dataset.correct) {
-                sel.classList.add('correct-answer');
-                letters += sel.value[0];
-            } else {
-                sel.classList.add('wrong-answer');
-                allCorrect = false;
-                letters += sel.value[0];
-            }
-            sel.disabled = true;
-        });
-
-        const feedback = document.getElementById('feedback2');
-        if (!allFilled) {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.textContent = 'Preencha todas as classificações antes de confirmar.';
-            return;
+          document.getElementById('nameSection').style.display = 'none';
+          document.getElementById('gameArea').style.display = 'block';
+          startTimer();
+          renderPuzzle();
+          return;
         }
-
-        if (allCorrect) {
-            feedback.className = 'er-feedback er-feedback--success visible';
-            feedback.innerHTML = `<strong>Perfeito!</strong> Classificação correta: M-A-P-S-A. São 5 letras distintas de tipos de proteção. O código deste envelope é <strong>5</strong>.`;
-        } else {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.innerHTML = `<strong>Algumas respostas estão incorretas.</strong> A classificação correta é: Marca → Autoral → Patente → Software → Autoral (M-A-P-S-A). O código é <strong>5</strong>.`;
-        }
-        completeChallenge(2, 5);
+      }
     }
 
-    // ---- Challenge 3: Calculation ----
-    function checkChallenge3() {
-        const answer = parseInt(document.getElementById('calcAnswer').value);
-        const feedback = document.getElementById('feedback3');
-
-        if (isNaN(answer)) {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.textContent = 'Digite um número antes de confirmar.';
-            return;
-        }
-
-        document.getElementById('calcAnswer').disabled = true;
-
-        if (answer === 3) {
-            feedback.className = 'er-feedback er-feedback--success visible';
-            feedback.innerHTML = '<strong>Correto!</strong> 42 + 75 + 46 = 163 → 1+6+3 = 10 → 1+0 = 1 → 1 × 3 = <strong>3</strong>. Código do envelope: <strong>3</strong>.';
-        } else {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.innerHTML = `<strong>Resposta incorreta (${answer}).</strong> O cálculo correto: 42 + 75 + 46 = 163 → 1+6+3 = 10 → 1+0 = 1 → 1 × 3 = <strong>3</strong>.`;
-        }
-        completeChallenge(3, 3);
+    // ── Theme toggle ──
+    function toggleTheme() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
     }
 
-    // ---- Challenge 4: Marca ----
-    function selectMarca(el) {
-        document.querySelectorAll('#marcas4 .er-marca').forEach(m => m.classList.remove('selected'));
-        el.classList.add('selected');
-    }
-
-    function checkChallenge4() {
-        const selected = document.querySelector('#marcas4 .er-marca.selected');
-        const feedback = document.getElementById('feedback4');
-
-        if (!selected) {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.textContent = 'Selecione uma marca antes de confirmar.';
-            return;
-        }
-
-        document.querySelectorAll('#marcas4 .er-marca').forEach(m => {
-            m.style.pointerEvents = 'none';
-            if (m.dataset.answer === 'correct') m.classList.add('correct');
-            else m.classList.add('wrong');
-        });
-
-        if (selected.dataset.answer === 'correct') {
-            feedback.className = 'er-feedback er-feedback--success visible';
-            feedback.innerHTML = '<strong>Correto!</strong> "TEPUÍ AQUA" é a marca registrável — distintiva e fantasiosa. Código: <strong>3</strong> (3ª posição nas opções).';
-        } else {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.innerHTML = '<strong>Incorreto.</strong> A marca registrável é "TEPUÍ AQUA". As outras violam impedimentos do Art. 124 da LPI. Código: <strong>3</strong>.';
-        }
-        completeChallenge(4, 3);
-    }
-
-    // ---- Challenge 5: Flow ----
-    (function initDragDrop() {
-        const container = document.getElementById('flowItems');
-        if (!container) return;
-        let draggedItem = null;
-
-        container.addEventListener('dragstart', e => {
-            draggedItem = e.target.closest('.er-flow__item');
-            if (draggedItem) draggedItem.classList.add('dragging');
-        });
-
-        container.addEventListener('dragend', e => {
-            if (draggedItem) draggedItem.classList.remove('dragging');
-            draggedItem = null;
-            updateFlowNumbers();
-        });
-
-        container.addEventListener('dragover', e => {
-            e.preventDefault();
-            const afterElement = getDragAfterElement(container, e.clientY);
-            if (afterElement == null) container.appendChild(draggedItem);
-            else container.insertBefore(draggedItem, afterElement);
-        });
-
-        function getDragAfterElement(container, y) {
-            const elements = [...container.querySelectorAll('.er-flow__item:not(.dragging)')];
-            return elements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) return { offset, element: child };
-                return closest;
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        // Touch support
-        let touchStartY = 0;
-        container.addEventListener('touchstart', e => {
-            draggedItem = e.target.closest('.er-flow__item');
-            if (draggedItem) touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        container.addEventListener('touchmove', e => {
-            if (!draggedItem) return;
-            e.preventDefault();
-            const touchY = e.touches[0].clientY;
-            const afterElement = getDragAfterElement(container, touchY);
-            if (afterElement == null) container.appendChild(draggedItem);
-            else container.insertBefore(draggedItem, afterElement);
-        }, { passive: false });
-
-        container.addEventListener('touchend', () => {
-            draggedItem = null;
-            updateFlowNumbers();
-        });
-
-        updateFlowNumbers();
-    })();
-
-    function updateFlowNumbers() {
-        document.querySelectorAll('#flowItems .er-flow__item').forEach((item, i) => {
-            item.querySelector('.er-flow__item-num').textContent = i + 1;
-        });
-    }
-
-    function checkChallenge5() {
-        const answer = parseInt(document.getElementById('flowAnswer').value);
-        const feedback = document.getElementById('feedback5');
-
-        if (isNaN(answer)) {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.textContent = 'Digite o resultado do cálculo antes de confirmar.';
-            return;
-        }
-
-        document.getElementById('flowAnswer').disabled = true;
-
-        if (answer === 3) {
-            feedback.className = 'er-feedback er-feedback--success visible';
-            feedback.innerHTML = '<strong>Correto!</strong> Ordem: B→C→A→F→D→G→E→H. A 3ª etapa é A (Redação). A=1, 1×3 = <strong>3</strong>. Código do envelope: <strong>3</strong>.';
-        } else {
-            feedback.className = 'er-feedback er-feedback--error visible';
-            feedback.innerHTML = `<strong>Resposta incorreta (${answer}).</strong> Ordem correta: B→C→A→F→D→G→E→H. 3ª etapa = A = 1. 1 × 3 = <strong>3</strong>.`;
-        }
-        completeChallenge(5, 3);
-    }
-
-    // ---- Final Code ----
-    function moveToNext(current, nextId) {
-        if (current.value.length === 1) {
-            const next = document.getElementById(nextId);
-            if (next) next.focus();
-        }
-    }
-
-    function checkFinalCode() {
-        const code = [
-            document.getElementById('code1').value,
-            document.getElementById('code2').value,
-            document.getElementById('code3').value,
-            document.getElementById('code4').value,
-            document.getElementById('code5').value,
-        ].join('');
-
-        const resultDiv = document.getElementById('finalResult');
-
-        if (code === '35333') {
-            resultDiv.className = 'er-final__result er-final__result--success visible';
-            resultDiv.innerHTML = `
-                <div style="font-size:3rem; margin-bottom:16px;">🎉</div>
-                <h3 style="font-family:var(--er-font-serif); font-size:1.5rem; margin-bottom:12px;">Documentação desbloqueada!</h3>
-                <p style="opacity:0.8; margin-bottom:16px;">Parabéns! Vocês salvaram a invenção da Dra. Iara Tepui. O filtro de água com nanotecnologia poderá ser protegido e transformar a vida de comunidades afetadas pelo garimpo ilegal.</p>
-                <p style="opacity:0.6; font-size:0.9rem;">Código: 3-5-3-3-3 | Soma: 17 | Tempo: ${document.getElementById('timerDisplay').textContent}</p>
-            `;
-            pauseTimer();
-        } else {
-            resultDiv.className = 'er-final__result er-final__result--fail visible';
-            resultDiv.innerHTML = `
-                <div style="font-size:2rem; margin-bottom:12px;">🔒</div>
-                <h3 style="font-family:var(--er-font-serif); font-size:1.2rem; margin-bottom:8px;">Código incorreto</h3>
-                <p style="opacity:0.7; font-size:0.9rem;">Revise os códigos obtidos em cada envelope e tente novamente. O código tem 5 dígitos, um para cada desafio.</p>
-            `;
-        }
-    }
-
-    // ---- Hints ----
-    function revealHint(challenge, level) {
-        const hint = document.getElementById(`hint${challenge}-${level}`);
-        const btn = event.target;
-        hint.classList.add('visible');
-        btn.classList.add('revealed');
-    }
-
-    // ---- Init ----
-    updateTimerDisplay();
-    </script>
+    // ── Init ──
+    loadSaved();
+  </script>
 </body>
 </html>

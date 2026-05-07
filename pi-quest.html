@@ -1,465 +1,975 @@
+<!--
+  Arquivo: pi-quest.html
+  Correções:
+    1. role="button", tabindex="0", keyboard handler nas opções
+    2. aria-live="polite" no container de jogo
+    3. aria-label em botões com emoji
+    4. Persistência localStorage (PIThinking.saveProgress/loadProgress)
+    5. clearGame() limpa localStorage
+    6. Sistema de inventário de PI
+    7. Narrativa ramificada com 5 capítulos
+    8. Sistema de pontuação com feedback
+    9. Resultado final com classificação e recomendações
+   10. Mapa de progresso visual
+   11. Classe .sr-only
+   12. lang="pt-BR" confirmado
+  Dependências: style.css, script.js
+-->
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PI Quest — PI Thinking</title>
-  <meta name="description" content="Jogo de tabuleiro virtual de Propriedade Intelectual. 30 casas, 6 categorias, perguntas com fundamentação legal.">
+  <meta name="description" content="Jogo narrativo interativo sobre Propriedade Intelectual. Ajude um inventor a proteger sua criação em 5 capítulos baseados nas fases do PI Thinking.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --pq-bg:#F3E5F5;--pq-surface:#FFFFFF;--pq-accent:#9C27B0;--pq-accent-dark:#6A1B9A;
-      --pq-text:#212121;--pq-text-light:#757575;--pq-border:#CE93D8;--pq-radius:16px;
-      --pq-shadow:0 2px 12px rgba(156,39,176,.12);
-      --cat-patente:#2196F3;--cat-marca:#FF9800;--cat-autoral:#4CAF50;
-      --cat-biodiv:#1B5E20;--cat-estrategia:#FFC107;--cat-desafio:#E53935;
+    :root {
+      --pq-bg: #0f0c29;
+      --pq-surface: #1a1545;
+      --pq-surface-light: #221d5a;
+      --pq-accent: #00d2ff;
+      --pq-accent-dark: #0099cc;
+      --pq-accent-bg: rgba(0,210,255,.08);
+      --pq-gold: #ffd700;
+      --pq-gold-bg: rgba(255,215,0,.08);
+      --pq-text: #e8e6f0;
+      --pq-text-light: #9e99c0;
+      --pq-border: #2d2870;
+      --pq-green: #00e676;
+      --pq-green-bg: rgba(0,230,118,.08);
+      --pq-red: #ff5252;
+      --pq-red-bg: rgba(255,82,82,.08);
+      --pq-purple: #d500f9;
+      --pq-purple-bg: rgba(213,0,249,.08);
+      --pq-radius: 16px;
+      --pq-shadow: 0 4px 24px rgba(0,0,0,.4);
     }
-    @media(prefers-color-scheme:dark){
-      :root{--pq-bg:#1a0e1a;--pq-surface:#2a1a2a;--pq-text:#f5f0f5;--pq-text-light:#b8a0b8;--pq-border:#3a1e3a;--pq-shadow:0 2px 12px rgba(0,0,0,.4);}
+    [data-theme="light"] {
+      --pq-bg: #f0f4ff;
+      --pq-surface: #ffffff;
+      --pq-surface-light: #f8f9ff;
+      --pq-accent: #0066cc;
+      --pq-accent-dark: #004d99;
+      --pq-accent-bg: rgba(0,102,204,.06);
+      --pq-gold: #d4a017;
+      --pq-gold-bg: rgba(212,160,23,.06);
+      --pq-text: #1a1a2e;
+      --pq-text-light: #555580;
+      --pq-border: #d0d0e8;
+      --pq-green: #00a152;
+      --pq-green-bg: rgba(0,161,82,.06);
+      --pq-red: #c62828;
+      --pq-red-bg: rgba(198,40,40,.06);
+      --pq-purple: #9c27b0;
+      --pq-purple-bg: rgba(156,39,176,.06);
+      --pq-shadow: 0 2px 12px rgba(0,0,0,.08);
     }
-    body.pq-page{font-family:'Inter',sans-serif;background:var(--pq-bg);color:var(--pq-text);margin:0;padding:0;line-height:1.7;}
-    .pq-cover{background:linear-gradient(135deg,#CE93D8 0%,#9C27B0 50%,#6A1B9A 100%);color:#fff;padding:3.5rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden;}
-    .pq-cover::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3C/svg%3E");}
-    .pq-cover__overline{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;opacity:.9;}
-    .pq-cover__title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);margin:.5rem 0;}
-    .pq-cover__sub{font-size:1.05rem;opacity:.92;max-width:600px;margin:.5rem auto 0;}
-    .pq-cover__meta{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;font-size:.9rem;}
-    .pq-cover__meta span{background:rgba(255,255,255,.2);padding:.3rem .8rem;border-radius:20px;}
-    .pq-container{max-width:1000px;margin:0 auto;padding:2rem 1.5rem;}
 
-    /* SETUP */
-    .pq-setup{background:var(--pq-surface);border:2px solid var(--pq-border);border-radius:var(--pq-radius);padding:2rem;margin-bottom:2rem;box-shadow:var(--pq-shadow);}
-    .pq-setup h2{font-family:'Poppins',sans-serif;color:var(--pq-accent-dark);margin-top:0;}
-    .pq-setup label{display:block;font-weight:600;font-size:.9rem;margin:.8rem 0 .3rem;}
-    .pq-setup input,.pq-setup select{font-family:'Inter',sans-serif;font-size:.95rem;padding:.5rem;border:2px solid var(--pq-border);border-radius:8px;background:var(--pq-bg);color:var(--pq-text);width:100%;box-sizing:border-box;}
-    .pq-player-inputs{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
-    @media(max-width:600px){.pq-player-inputs{grid-template-columns:1fr;}}
+    body.pq-page {
+      font-family: 'Inter', sans-serif;
+      background: var(--pq-bg); color: var(--pq-text);
+      margin: 0; padding: 0; line-height: 1.7;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
 
-    /* BOARD */
-    .pq-board-wrap{position:relative;margin:2rem 0;}
-    .pq-board{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
-    @media(max-width:700px){.pq-board{grid-template-columns:repeat(5,1fr);}}
-    @media(max-width:500px){.pq-board{grid-template-columns:repeat(3,1fr);}}
+    /* ── Cover ── */
+    .pq-cover {
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      color: #fff; padding: 4rem 2rem 3rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .pq-cover::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(circle at 15% 50%, rgba(0,210,255,.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(213,0,249,.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(255,215,0,.06) 0%, transparent 40%);
+    }
+    .pq-cover__overline {
+      font-family: 'Poppins', sans-serif; font-size: .85rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 3px; opacity: .9; position: relative;
+    }
+    .pq-cover__title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem); margin: .5rem 0; position: relative;
+    }
+    .pq-cover__sub {
+      font-size: 1.1rem; opacity: .92; max-width: 640px; margin: .5rem auto 0; position: relative;
+    }
+    .pq-cover__meta {
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 1.5rem; font-size: .9rem; position: relative;
+    }
+    .pq-cover__meta span {
+      background: rgba(255,255,255,.10); padding: .35rem .8rem; border-radius: 20px;
+    }
 
-    .pq-cell{background:var(--pq-surface);border:2px solid var(--pq-border);border-radius:10px;padding:.6rem .4rem;text-align:center;min-height:70px;position:relative;transition:all .3s;cursor:default;font-size:.78rem;}
-    .pq-cell:hover{transform:scale(1.03);}
-    .pq-cell--start{background:linear-gradient(135deg,#E1BEE7,#CE93D8);border-color:var(--pq-accent);}
-    .pq-cell--finish{background:linear-gradient(135deg,#FFD54F,#FFC107);border-color:#FF8F00;}
-    .pq-cell__num{font-family:'Poppins',sans-serif;font-weight:800;font-size:.7rem;color:var(--pq-text-light);position:absolute;top:3px;left:6px;}
-    .pq-cell__cat{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
-    .pq-cell__icon{font-size:1.3rem;}
-    .pq-cell__players{margin-top:4px;display:flex;gap:2px;justify-content:center;flex-wrap:wrap;}
-    .pq-token{width:22px;height:22px;border-radius:50%;border:2px solid #fff;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+    /* ── Container ── */
+    .pq-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    /* CONTROLS */
-    .pq-controls{background:var(--pq-surface);border-radius:var(--pq-radius);padding:1.5rem;margin:1.5rem 0;box-shadow:var(--pq-shadow);text-align:center;}
-    .pq-controls__turn{font-family:'Poppins',sans-serif;font-size:1.1rem;font-weight:700;color:var(--pq-accent-dark);margin-bottom:.8rem;}
-    .pq-dice{display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:16px;background:var(--pq-accent);color:#fff;font-family:'Poppins',sans-serif;font-size:2.5rem;font-weight:800;cursor:pointer;transition:transform .3s;box-shadow:0 4px 16px rgba(156,39,176,.3);user-select:none;}
-    .pq-dice:hover{transform:scale(1.08);}
-    .pq-dice.rolling{animation:diceRoll .4s ease;}
-    @keyframes diceRoll{0%{transform:rotate(0)}25%{transform:rotate(15deg)}50%{transform:rotate(-15deg)}75%{transform:rotate(10deg)}100%{transform:rotate(0)}}
-    .pq-dice-label{font-size:.85rem;color:var(--pq-text-light);margin-top:.5rem;}
+    /* ── Progress map ── */
+    .pq-map {
+      display: flex; justify-content: center; gap: .3rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .pq-map__node {
+      width: 44px; height: 44px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-size: 1.2rem;
+      border: 3px solid var(--pq-border); background: var(--pq-surface);
+      transition: all .3s; position: relative;
+    }
+    .pq-map__node.active {
+      border-color: var(--pq-accent); box-shadow: 0 0 12px rgba(0,210,255,.3);
+      animation: pulseNode 1.5s ease-in-out infinite alternate;
+    }
+    .pq-map__node.completed { border-color: var(--pq-green); background: var(--pq-green-bg); }
+    .pq-map__node.locked { opacity: .4; }
+    .pq-map__connector {
+      width: 20px; height: 3px; background: var(--pq-border);
+      align-self: center; border-radius: 2px;
+    }
+    .pq-map__connector.active { background: var(--pq-accent); }
+    .pq-map__connector.completed { background: var(--pq-green); }
+    @keyframes pulseNode { from { box-shadow: 0 0 8px rgba(0,210,255,.2); } to { box-shadow: 0 0 20px rgba(0,210,255,.4); } }
 
-    /* QUESTION MODAL */
-    .pq-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;}
-    .pq-modal-overlay.show{display:flex;}
-    .pq-modal{background:var(--pq-surface);border-radius:var(--pq-radius);max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:2rem;box-shadow:0 8px 40px rgba(0,0,0,.3);position:relative;}
-    .pq-modal__cat{font-family:'Poppins',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:.3rem .8rem;border-radius:12px;color:#fff;display:inline-block;margin-bottom:.5rem;}
-    .pq-modal__question{font-family:'Poppins',sans-serif;font-size:1.1rem;font-weight:600;margin:.5rem 0 1rem;color:var(--pq-text);}
-    .pq-modal__options{display:flex;flex-direction:column;gap:.5rem;}
-    .pq-modal__opt{padding:.7rem 1rem;border:2px solid var(--pq-border);border-radius:10px;cursor:pointer;font-size:.92rem;transition:all .2s;background:var(--pq-bg);}
-    .pq-modal__opt:hover{border-color:var(--pq-accent);background:rgba(156,39,176,.05);}
-    .pq-modal__opt.correct{border-color:#4CAF50;background:rgba(76,175,80,.12);font-weight:600;}
-    .pq-modal__opt.wrong{border-color:#EF5350;background:rgba(239,83,80,.08);}
-    .pq-modal__opt.disabled{pointer-events:none;opacity:.7;}
-    .pq-modal__feedback{margin-top:1rem;padding:1rem;border-radius:8px;font-size:.88rem;display:none;}
-    .pq-modal__feedback.show{display:block;}
-    .pq-modal__feedback.success{background:rgba(76,175,80,.1);border:1px solid #4CAF50;}
-    .pq-modal__feedback.fail{background:rgba(239,83,80,.1);border:1px solid #EF5350;}
-    .pq-modal__legal{margin-top:.8rem;font-size:.8rem;color:var(--pq-text-light);background:var(--pq-bg);padding:.5rem .8rem;border-radius:6px;}
-    .pq-modal__close{margin-top:1rem;font-family:'Poppins',sans-serif;font-weight:600;padding:.6rem 1.5rem;border:none;border-radius:20px;background:var(--pq-accent);color:#fff;cursor:pointer;display:none;}
+    /* ── Stats ── */
+    .pq-stats {
+      display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem;
+    }
+    .pq-stat {
+      background: var(--pq-surface); border: 1px solid var(--pq-border);
+      border-radius: 10px; padding: .35rem .7rem; text-align: center; min-width: 70px;
+    }
+    .pq-stat__value {
+      font-family: 'Poppins', sans-serif; font-weight: 800;
+      font-size: 1rem; color: var(--pq-accent);
+    }
+    .pq-stat__label {
+      font-size: .65rem; color: var(--pq-text-light); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
 
-    /* SCOREBOARD */
-    .pq-scoreboard{background:var(--pq-surface);border-radius:var(--pq-radius);padding:1.5rem;margin:1.5rem 0;box-shadow:var(--pq-shadow);}
-    .pq-scoreboard h3{font-family:'Poppins',sans-serif;color:var(--pq-accent-dark);margin-top:0;}
-    .pq-scoreboard__row{display:flex;align-items:center;gap:.8rem;padding:.5rem 0;border-bottom:1px solid var(--pq-border);}
-    .pq-scoreboard__name{font-weight:600;flex:1;}
-    .pq-scoreboard__pos{font-family:'Poppins',sans-serif;font-weight:700;font-size:.9rem;color:var(--pq-accent);}
-    .pq-scoreboard__stats{font-size:.85rem;color:var(--pq-text-light);}
+    /* ── Scene card ── */
+    .pq-scene {
+      background: var(--pq-surface); border: 2px solid var(--pq-border);
+      border-radius: var(--pq-radius); padding: 2rem;
+      box-shadow: var(--pq-shadow); margin-bottom: 1.5rem;
+      animation: qfFadeIn .4s ease;
+    }
+    @keyframes qfFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .pq-scene__chapter {
+      font-family: 'Poppins', sans-serif; font-size: .75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2px; color: var(--pq-accent);
+      margin-bottom: .5rem;
+    }
+    .pq-scene__title {
+      font-family: 'Poppins', sans-serif; font-weight: 700;
+      font-size: 1.2rem; margin-bottom: .8rem;
+    }
+    .pq-scene__narrative {
+      font-size: .95rem; line-height: 1.8; color: var(--pq-text);
+      background: var(--pq-surface-light); padding: 1.2rem;
+      border-radius: 12px; border-left: 3px solid var(--pq-accent);
+      margin-bottom: 1.2rem;
+    }
+    .pq-scene__question {
+      font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
+      color: var(--pq-accent);
+    }
 
-    /* WINNER */
-    .pq-winner{display:none;text-align:center;padding:3rem 2rem;background:linear-gradient(135deg,#FFD54F,#FFC107);border-radius:var(--pq-radius);margin:2rem 0;}
-    .pq-winner.show{display:block;animation:fadeIn .5s;}
-    .pq-winner h2{font-family:'Playfair Display',serif;font-size:2rem;color:#4E342E;}
-    .pq-winner__name{font-family:'Poppins',sans-serif;font-size:2.5rem;font-weight:800;color:var(--pq-accent-dark);}
-    @keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+    /* ── Choices ── */
+    .pq-choices { display: flex; flex-direction: column; gap: .6rem; }
+    .pq-choice {
+      background: var(--pq-surface-light); border: 2px solid var(--pq-border);
+      border-radius: 12px; padding: .8rem 1.2rem; cursor: pointer;
+      transition: all .25s; font-size: .92rem;
+      display: flex; align-items: flex-start; gap: .6rem;
+    }
+    .pq-choice:hover { border-color: var(--pq-accent); background: var(--pq-accent-bg); transform: translateX(4px); }
+    .pq-choice:focus-visible { outline: 3px solid var(--pq-accent); outline-offset: 2px; }
+    .pq-choice__icon { font-size: 1.2rem; flex-shrink: 0; }
+    .pq-choice__text { flex: 1; }
+    .pq-choice.correct { border-color: var(--pq-green); background: var(--pq-green-bg); }
+    .pq-choice.wrong { border-color: var(--pq-red); background: var(--pq-red-bg); }
+    .pq-choice.disabled { pointer-events: none; opacity: .5; }
 
-    .pq-btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;padding:.7rem 1.5rem;border:none;border-radius:30px;cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;}
-    .pq-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.15);}
-    .pq-btn--primary{background:var(--pq-accent);color:#fff;}
-    .pq-btn--outline{background:transparent;border:2px solid var(--pq-accent);color:var(--pq-accent-dark);}
-    .pq-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin:2rem 0;}
+    /* ── Feedback ── */
+    .pq-feedback {
+      margin-top: 1rem; padding: 1rem; border-radius: 12px; font-size: .9rem; display: none;
+    }
+    .pq-feedback.show { display: block; animation: qfFadeIn .3s ease; }
+    .pq-feedback--good { background: var(--pq-green-bg); color: var(--pq-green); border: 1px solid var(--pq-green); }
+    .pq-feedback--ok { background: var(--pq-gold-bg); color: var(--pq-gold); border: 1px solid var(--pq-gold); }
+    .pq-feedback--bad { background: var(--pq-red-bg); color: var(--pq-red); border: 1px solid var(--pq-red); }
 
-    .pq-footer{text-align:center;padding:2rem;font-size:.82rem;color:var(--pq-text-light);border-top:1px solid var(--pq-border);margin-top:2rem;}
-    .pq-footer a{color:var(--pq-accent-dark);}
+    /* ── Inventory ── */
+    .pq-inventory {
+      background: var(--pq-surface); border: 1px solid var(--pq-border);
+      border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;
+    }
+    .pq-inventory__title {
+      font-family: 'Poppins', sans-serif; font-size: .85rem; font-weight: 700;
+      color: var(--pq-gold); margin-bottom: .5rem;
+    }
+    .pq-inventory__items { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .pq-inventory__item {
+      background: var(--pq-gold-bg); border: 1px solid var(--pq-gold);
+      border-radius: 8px; padding: .25rem .6rem; font-size: .8rem;
+      font-weight: 600; color: var(--pq-gold);
+    }
+    .pq-inventory__empty { font-size: .82rem; color: var(--pq-text-light); font-style: italic; }
 
-    @media print{.pq-modal-overlay,.pq-controls,.pq-setup{display:none!important;} @page{size:A3 landscape;margin:1cm;}}
+    /* ── Buttons ── */
+    .pq-btn {
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .95rem;
+      padding: .7rem 1.5rem; border: none; border-radius: 30px;
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .pq-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+    .pq-btn:focus-visible { outline: 3px solid var(--pq-accent); outline-offset: 2px; }
+    .pq-btn--primary { background: var(--pq-accent); color: #0f0c29; }
+    .pq-btn--gold { background: var(--pq-gold); color: #0f0c29; }
+    .pq-btn--outline { background: transparent; border: 2px solid var(--pq-accent); color: var(--pq-accent); }
+    .pq-btn--danger { background: var(--pq-red); color: #fff; }
+
+    .pq-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 1.5rem 0; }
+
+    /* ── Result ── */
+    .pq-result {
+      background: linear-gradient(135deg, var(--pq-surface) 0%, var(--pq-surface-light) 100%);
+      border: 2px solid var(--pq-gold); border-radius: var(--pq-radius);
+      padding: 2.5rem; text-align: center; box-shadow: 0 8px 32px rgba(255,215,0,.1);
+      display: none;
+    }
+    .pq-result.show { display: block; animation: qfFadeIn .5s ease; }
+    .pq-result__badge { font-size: 4rem; margin-bottom: .5rem; }
+    .pq-result__title {
+      font-family: 'Playfair Display', serif; font-size: 1.6rem;
+      color: var(--pq-gold); margin-bottom: .3rem;
+    }
+    .pq-result__score {
+      font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800;
+      color: var(--pq-accent);
+    }
+    .pq-result__details {
+      font-size: .9rem; color: var(--pq-text-light); margin: 1rem 0;
+    }
+    .pq-result__details span {
+      display: inline-block; background: var(--pq-accent-bg);
+      padding: .3rem .8rem; border-radius: 15px; margin: .3rem;
+    }
+    .pq-result__narrative {
+      background: var(--pq-surface-light); border-radius: 12px;
+      padding: 1.2rem; margin: 1rem 0; text-align: left;
+      font-size: .9rem; line-height: 1.7;
+    }
+
+    /* ── Name input ── */
+    .pq-start {
+      background: var(--pq-surface); border: 2px solid var(--pq-border);
+      border-radius: var(--pq-radius); padding: 2rem; text-align: center;
+      box-shadow: var(--pq-shadow); margin-bottom: 1.5rem;
+    }
+    .pq-start h2 { font-family: 'Poppins', sans-serif; color: var(--pq-accent); margin-top: 0; }
+    .pq-start input {
+      font-family: 'Inter', sans-serif; font-size: 1.1rem; padding: .7rem 1rem;
+      border: 2px solid var(--pq-border); border-radius: 8px;
+      background: var(--pq-surface-light); color: var(--pq-text);
+      width: 100%; max-width: 400px; box-sizing: border-box; text-align: center;
+    }
+    .pq-start input:focus-visible { outline: 3px solid var(--pq-accent); outline-offset: 2px; }
+
+    /* ── Footer ── */
+    .pq-footer {
+      text-align: center; padding: 2rem; font-size: .82rem;
+      color: var(--pq-text-light); border-top: 1px solid var(--pq-border); margin-top: 2rem;
+    }
+    .pq-footer a { color: var(--pq-accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .pq-cover { padding: 2.5rem 1rem 2rem; }
+      .pq-scene { padding: 1.2rem; }
+      .pq-map__node { width: 36px; height: 36px; font-size: 1rem; }
+      .pq-map__connector { width: 12px; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      .pq-cover, .pq-stats, .pq-map, .pq-actions, .pq-start, .pq-inventory { display: none !important; }
+      .pq-result { border: 2px solid #d4a017; box-shadow: none; }
+      @page { size: A4 portrait; margin: 1.5cm; }
+    }
   </style>
 </head>
 <body class="pq-page">
 
+  <!-- Theme toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro"
+    style="position:fixed;top:1rem;right:1rem;z-index:999;background:var(--pq-surface);border:2px solid var(--pq-border);border-radius:50%;width:44px;height:44px;font-size:1.3rem;cursor:pointer;">
+    🌗
+  </button>
+
+  <!-- Cover -->
   <header class="pq-cover">
-    <div class="pq-cover__overline">Fase 5 — Avaliar</div>
-    <h1 class="pq-cover__title">🎲 PI Quest</h1>
-    <p class="pq-cover__sub">Jogo de tabuleiro virtual de Propriedade Intelectual. Avance respondendo corretamente!</p>
+    <div class="pq-cover__overline">Jogo Narrativo</div>
+    <h1 class="pq-cover__title">PI Quest</h1>
+    <p class="pq-cover__sub">Uma aventura interativa sobre Propriedade Intelectual. Ajude a inventora Luma a proteger sua criação em 5 capítulos épicos.</p>
     <div class="pq-cover__meta">
-      <span>🎯 30 casas</span>
-      <span>❓ 30 perguntas</span>
-      <span>👥 2–4 jogadores</span>
+      <span>📖 5 capítulos</span>
+      <span>🎭 15 decisões</span>
       <span>⏱ 20–30 min</span>
+      <span>🎒 Inventário de PI</span>
     </div>
   </header>
 
   <main class="pq-container">
 
-    <!-- SETUP -->
-    <section class="pq-setup" id="setupScreen">
-      <h2>⚙️ Configurar Jogo</h2>
-      <label>Número de jogadores:</label>
-      <select id="numPlayers" onchange="renderPlayerInputs()">
-        <option value="2">2 jogadores</option>
-        <option value="3">3 jogadores</option>
-        <option value="4">4 jogadores</option>
-      </select>
-      <div class="pq-player-inputs" id="playerInputs"></div>
+    <!-- Start -->
+    <section class="pq-start" id="startSection">
+      <h2>🎮 Comece sua Quest</h2>
+      <p>Você será <strong>Luma</strong>, uma pesquisadora da Amazônia que inventou um biossensor para monitorar a qualidade da água usando nanotecnologia com pigmentos de plantas nativas. Ajude-a a navegar o mundo da PI.</p>
       <br>
-      <button class="pq-btn pq-btn--primary" onclick="startGame()">🎮 Iniciar Jogo</button>
+      <label for="heroName" class="sr-only">Nome do jogador</label>
+      <input type="text" id="heroName" placeholder="Seu nome (opcional)" aria-label="Nome do jogador para personalização" maxlength="40">
+      <br><br>
+      <button class="pq-btn pq-btn--primary" onclick="startGame()" aria-label="Iniciar a PI Quest">🚀 Iniciar Quest</button>
     </section>
 
-    <!-- BOARD -->
-    <div class="pq-board-wrap" id="gameArea" style="display:none;">
-      <div class="pq-board" id="board"></div>
+    <!-- Game area -->
+    <div id="gameArea" style="display:none;">
 
-      <div class="pq-controls">
-        <div class="pq-controls__turn" id="turnLabel">Vez de: —</div>
-        <div class="pq-dice" id="dice" onclick="rollDice()">🎲</div>
-        <div class="pq-dice-label">Clique para jogar o dado</div>
+      <!-- Map -->
+      <div class="pq-map" id="progressMap" aria-label="Mapa de progresso pelos capítulos"></div>
+
+      <!-- Stats -->
+      <div class="pq-stats">
+        <div class="pq-stat">
+          <div class="pq-stat__value" id="scoreValue">0</div>
+          <div class="pq-stat__label">Pontos PI</div>
+        </div>
+        <div class="pq-stat">
+          <div class="pq-stat__value" id="chapterValue">1/5</div>
+          <div class="pq-stat__label">Capítulo</div>
+        </div>
+        <div class="pq-stat">
+          <div class="pq-stat__value" id="itemsValue">0</div>
+          <div class="pq-stat__label">Itens</div>
+        </div>
       </div>
 
-      <div class="pq-scoreboard">
-        <h3>📊 Placar</h3>
-        <div id="scoreboardContent"></div>
+      <!-- Inventory -->
+      <div class="pq-inventory" id="inventoryBlock">
+        <div class="pq-inventory__title">🎒 Inventário de PI</div>
+        <div class="pq-inventory__items" id="inventoryItems">
+          <span class="pq-inventory__empty">Nenhum item coletado ainda.</span>
+        </div>
+      </div>
+
+      <!-- Scene -->
+      <div id="sceneContainer" aria-live="polite"></div>
+
+      <!-- Actions -->
+      <div class="pq-actions" id="gameActions">
+        <button class="pq-btn pq-btn--danger" onclick="restartGame()" aria-label="Reiniciar a PI Quest">🔄 Reiniciar</button>
+        <a href="index.html" class="pq-btn pq-btn--outline">🏠 Toolkit</a>
       </div>
     </div>
 
-    <div class="pq-winner" id="winnerScreen">
-      <h2>🏆 Vencedor!</h2>
-      <div class="pq-winner__name" id="winnerName"></div>
-      <p>Parabéns! Você domina a PI!</p>
+    <!-- Result -->
+    <div class="pq-result" id="resultSection">
+      <div class="pq-result__badge" id="resBadge">🏆</div>
+      <div class="pq-result__title" id="resTitle">Quest Concluída!</div>
+      <div class="pq-result__score" id="resScore">0 pontos</div>
+      <div id="resName" style="font-family:'Poppins';font-weight:700;font-size:1.1rem;margin:.3rem 0;"></div>
+      <div class="pq-result__details" id="resDetails"></div>
+      <div class="pq-result__narrative" id="resNarrative"></div>
       <br>
-      <button class="pq-btn pq-btn--primary" onclick="resetGame()">↺ Jogar Novamente</button>
-    </div>
-
-    <div class="pq-actions" id="gameActions" style="display:none;">
-      <button class="pq-btn pq-btn--outline" onclick="resetGame()">↺ Reiniciar</button>
-      <a href="quiz-final.html" class="pq-btn pq-btn--outline">📝 Quiz Final</a>
-      <a href="index.html" class="pq-btn pq-btn--outline">🏠 Toolkit</a>
-    </div>
-
-    <!-- QUESTION MODAL -->
-    <div class="pq-modal-overlay" id="questionModal">
-      <div class="pq-modal">
-        <div class="pq-modal__cat" id="modalCat"></div>
-        <div class="pq-modal__question" id="modalQuestion"></div>
-        <div class="pq-modal__options" id="modalOptions"></div>
-        <div class="pq-modal__feedback" id="modalFeedback"></div>
-        <div class="pq-modal__legal" id="modalLegal" style="display:none;"></div>
-        <button class="pq-modal__close" id="modalClose" onclick="closeModal()">Continuar →</button>
+      <div class="pq-actions">
+        <button class="pq-btn pq-btn--primary" onclick="restartGame()" aria-label="Jogar novamente">🔄 Jogar Novamente</button>
+        <button class="pq-btn pq-btn--gold" onclick="window.print()" aria-label="Imprimir resultado">🖨️ Imprimir</button>
+        <a href="canvas-avaliacao.html" class="pq-btn pq-btn--outline">📋 Canvas de Avaliação</a>
+        <a href="quiz-final.html" class="pq-btn pq-btn--outline">🏆 Quiz Final</a>
+        <a href="index.html" class="pq-btn pq-btn--outline">🏠 Toolkit</a>
       </div>
     </div>
+
   </main>
 
+  <!-- Footer -->
   <footer class="pq-footer">
-    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY‑NC‑SA 4.0</a></p>
+    <p>Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener noreferrer">Lei 9.279/96</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank" rel="noopener noreferrer">Lei 9.610/98</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank" rel="noopener noreferrer">Lei 9.609/98</a></p>
   </footer>
 
+  <!-- Scripts -->
+  <script src="script.js"></script>
   <script>
-    // ============================================================
-    //  QUESTIONS DATABASE — 30 questions, 6 categories
-    // ============================================================
-    const questions = [
-      // PATENTES (5)
-      {cat:'patente',catLabel:'Patentes',catColor:'#2196F3',icon:'🔬',q:'Qual é a vigência de uma patente de invenção no Brasil?',opts:['10 anos','15 anos','20 anos','25 anos'],correct:2,legal:'Art. 40, Lei 9.279/96: vigência de 20 anos a partir da data de depósito.'},
-      {cat:'patente',catLabel:'Patentes',catColor:'#2196F3',icon:'🔬',q:'Qual é o prazo do período de graça para depósito de patente no Brasil?',opts:['6 meses','12 meses','18 meses','24 meses'],correct:1,legal:'Art. 12, Lei 9.279/96: divulgação nos 12 meses anteriores ao depósito não prejudica a novidade.'},
-      {cat:'patente',catLabel:'Patentes',catColor:'#2196F3',icon:'🔬',q:'Qual NÃO é requisito de patenteabilidade de uma invenção?',opts:['Novidade','Atividade inventiva','Aplicação industrial','Originalidade'],correct:3,legal:'Art. 8º, Lei 9.279/96: requisitos são novidade, atividade inventiva e aplicação industrial. Originalidade é requisito de desenho industrial (art. 97).'},
-      {cat:'patente',catLabel:'Patentes',catColor:'#2196F3',icon:'🔬',q:'Qual o prazo máximo para solicitar exame técnico de patente no INPI?',opts:['12 meses','24 meses','36 meses','48 meses'],correct:2,legal:'Art. 33, Lei 9.279/96: o pedido de exame deve ser feito em até 36 meses do depósito, sob pena de arquivamento.'},
-      {cat:'patente',catLabel:'Patentes',catColor:'#2196F3',icon:'🔬',q:'Qual o custo de depósito eletrônico de patente de invenção no INPI (com desconto para ICT)?',opts:['R$ 45,00','R$ 90,00','R$ 180,00','R$ 260,00'],correct:1,legal:'Portaria GM/MDIC nº 110/2025: depósito eletrônico (cód. 200) = R$ 260,00 (normal) / R$ 90,00 (com desconto 50% para ICT).'},
-      // MARCAS (5)
-      {cat:'marca',catLabel:'Marcas',catColor:'#FF9800',icon:'®️',q:'Qual a vigência de um registro de marca no Brasil?',opts:['5 anos','10 anos','15 anos','20 anos'],correct:1,legal:'Art. 133, Lei 9.279/96: vigência de 10 anos, prorrogável por períodos iguais e sucessivos.'},
-      {cat:'marca',catLabel:'Marcas',catColor:'#FF9800',icon:'®️',q:'Qual tipo de marca consiste apenas em palavras, sem elemento figurativo?',opts:['Figurativa','Mista','Nominativa','Tridimensional'],correct:2,legal:'Art. 122, LPI. Classificação INPI: nominativa (palavras), figurativa (imagem), mista (palavras + imagem), tridimensional (forma do produto).'},
-      {cat:'marca',catLabel:'Marcas',catColor:'#FF9800',icon:'®️',q:'Qual o prazo de oposição após publicação de pedido de marca na RPI?',opts:['30 dias','60 dias','90 dias','120 dias'],correct:1,legal:'Art. 158, Lei 9.279/96: prazo de 60 dias para oposição a partir da publicação na RPI.'},
-      {cat:'marca',catLabel:'Marcas',catColor:'#FF9800',icon:'®️',q:'Caso Gradiente vs. Apple: quem registrou primeiro a marca "iPhone" no Brasil?',opts:['Apple','Gradiente (IGB)','Samsung','Nenhuma'],correct:1,legal:'A Gradiente (IGB Eletrônica) registrou a marca "IPHONE" no INPI em 2000, antes da Apple lançar o iPhone em 2007. O caso é exemplo da importância do registro de marca prévio.'},
-      {cat:'marca',catLabel:'Marcas',catColor:'#FF9800',icon:'®️',q:'Qual sistema internacional permite registrar uma marca em vários países com um único pedido?',opts:['PCT','Protocolo de Madri','Convenção de Paris','Acordo TRIPS'],correct:1,legal:'Protocolo de Madri (adesão do Brasil em 2019): permite depósito internacional de marca via INPI com efeito em múltiplos países.'},
-      // DIREITO AUTORAL (5)
-      {cat:'autoral',catLabel:'Direito Autoral',catColor:'#4CAF50',icon:'📚',q:'O direito autoral no Brasil depende de registro para existir?',opts:['Sim, é obrigatório','Não, a proteção é automática','Depende do tipo de obra','Somente para obras musicais'],correct:1,legal:'Art. 18, Lei 9.610/98: "A proteção aos direitos de que trata esta Lei independe de registro."'},
-      {cat:'autoral',catLabel:'Direito Autoral',catColor:'#4CAF50',icon:'📚',q:'Qual a vigência dos direitos patrimoniais de autor para pessoa física no Brasil?',opts:['50 anos post-mortem','70 anos post-mortem','A vida do autor','100 anos post-mortem'],correct:1,legal:'Art. 41, Lei 9.610/98: os direitos patrimoniais perduram por 70 anos contados de 1º de janeiro do ano subsequente ao falecimento do autor.'},
-      {cat:'autoral',catLabel:'Direito Autoral',catColor:'#4CAF50',icon:'📚',q:'Um software é protegido por qual tipo de direito de PI no Brasil?',opts:['Patente de invenção','Direito autoral','Modelo de utilidade','Desenho industrial'],correct:1,legal:'Lei 9.609/98, art. 2º: programas de computador são protegidos por direito autoral, com vigência de 50 anos.'},
-      {cat:'autoral',catLabel:'Direito Autoral',catColor:'#4CAF50',icon:'📚',q:'Copiar trechos de artigo científico em relatório de patente sem citar é:',opts:['Permitido por ser estado da técnica','Violação de direito autoral','Prática comum e aceita','Irrelevante juridicamente'],correct:1,legal:'Art. 46, III, Lei 9.610/98: citação parcial é permitida COM indicação de autoria. Copiar sem citar viola o direito autoral sobre a expressão do texto.'},
-      {cat:'autoral',catLabel:'Direito Autoral',catColor:'#4CAF50',icon:'📚',q:'Qual licença permite compartilhar obra com crédito ao autor, sem uso comercial e com mesma licença?',opts:['MIT License','GPL v3','CC BY-NC-SA 4.0','Apache 2.0'],correct:2,legal:'Creative Commons BY-NC-SA 4.0: Atribuição, Não-Comercial, Compartilha-Igual. É a licença do Toolkit PI Thinking.'},
-      // BIODIVERSIDADE (5)
-      {cat:'biodiv',catLabel:'Biodiversidade',catColor:'#1B5E20',icon:'🌿',q:'Qual lei regula o acesso ao patrimônio genético e conhecimento tradicional no Brasil?',opts:['Lei 9.279/96','Lei 9.610/98','Lei 13.123/2015','Lei 10.973/2004'],correct:2,legal:'Lei 13.123/2015 (Marco da Biodiversidade): regula acesso, remessa, repartição de benefícios do patrimônio genético e CTA.'},
-      {cat:'biodiv',catLabel:'Biodiversidade',catColor:'#1B5E20',icon:'🌿',q:'O que é o SisGen?',opts:['Sistema de registro de marcas','Sistema de gestão do patrimônio genético','Sistema de patentes do INPI','Sistema de cultivares do MAPA'],correct:1,legal:'SisGen: Sistema Nacional de Gestão do Patrimônio Genético e do Conhecimento Tradicional Associado (Lei 13.123/2015).'},
-      {cat:'biodiv',catLabel:'Biodiversidade',catColor:'#1B5E20',icon:'🌿',q:'No caso do cupuaçu, o que a empresa japonesa Asahi Foods tentou fazer?',opts:['Patentear o fruto','Registrar a marca "cupuaçu"','Criar uma IG japonesa','Proibir exportação do fruto'],correct:1,legal:'Em 2000, a Asahi Foods registrou a marca "cupuaçu" no Japão e patenteou o processo do cupulate. Em 2004, após pressão internacional, os registros foram cancelados.'},
-      {cat:'biodiv',catLabel:'Biodiversidade',catColor:'#1B5E20',icon:'🌿',q:'Qual é a primeira Indicação Geográfica de Roraima registrada no INPI?',opts:['Café de Pacaraima','Farinha de Uarini','Panela de Barro da Raposa','Açaí de Roraima'],correct:2,legal:'Em 2024, o INPI reconheceu a IG "Raposa" para Panela de Barro, produzida na Comunidade Indígena Raposa I (Normandia, RR).'},
-      {cat:'biodiv',catLabel:'Biodiversidade',catColor:'#1B5E20',icon:'🌿',q:'O que é "repartição de benefícios" na Lei 13.123/2015?',opts:['Divisão de lucros entre sócios','Compensação por acesso a patrimônio genético/CTA','Distribuição de amostras biológicas','Partilha de dados científicos'],correct:1,legal:'Arts. 17–26, Lei 13.123/2015: repartição de benefícios (monetária ou não) devida quando há exploração econômica de produto acabado a partir de patrimônio genético ou CTA.'},
-      // ESTRATÉGIA (5)
-      {cat:'estrategia',catLabel:'Estratégia',catColor:'#FFC107',icon:'♟️',q:'Um pesquisador de ICT pública tem direito a qual percentual dos ganhos econômicos de uma patente da universidade?',opts:['1% a 5%','5% a 33%','50%','Nenhum'],correct:1,legal:'Art. 13, Lei 10.973/2004 (Lei de Inovação): o inventor tem direito a participação mínima de 5% e máxima de 33% nos ganhos econômicos.'},
-      {cat:'estrategia',catLabel:'Estratégia',catColor:'#FFC107',icon:'♟️',q:'Qual sistema internacional permite buscar proteção de patente em vários países com um único depósito?',opts:['Protocolo de Madri','PCT (Patent Cooperation Treaty)','Convenção de Berna','Acordo TRIPS'],correct:1,legal:'PCT (Tratado de Cooperação em Matéria de Patentes, WIPO): permite depósito internacional com efeito em 150+ países. Prazo de entrada na fase nacional: 30 meses.'},
-      {cat:'estrategia',catLabel:'Estratégia',catColor:'#FFC107',icon:'♟️',q:'Qual a diferença entre Patente de Invenção e Modelo de Utilidade?',opts:['PI protege estética, MU protege função','PI exige novidade, MU não','PI protege invenção com atividade inventiva, MU protege uso prático com ato inventivo','Não há diferença legal'],correct:2,legal:'Art. 8 (PI: novidade + atividade inventiva + aplicação industrial) vs. Art. 9 (MU: objeto de uso prático com ato inventivo resultando em melhoria funcional), Lei 9.279/96.'},
-      {cat:'estrategia',catLabel:'Estratégia',catColor:'#FFC107',icon:'♟️',q:'Qual estratégia de PI combina proteção de forma e de função de um mesmo produto?',opts:['Patente + Marca','Patente + Desenho Industrial','Direito Autoral + Marca','Segredo Industrial + IG'],correct:1,legal:'Estratégia combinada: Patente de Invenção/MU protege a funcionalidade; Desenho Industrial protege a forma ornamental. Ambos registrados no INPI.'},
-      {cat:'estrategia',catLabel:'Estratégia',catColor:'#FFC107',icon:'♟️',q:'O que é licença compulsória?',opts:['Licença voluntária entre partes','Autorização governamental para uso sem consentimento do titular','Contrato de transferência de tecnologia','Licença de software livre'],correct:1,legal:'Arts. 68–74, Lei 9.279/96: licença compulsória pode ser concedida por abuso de direito, não exploração, interesse público ou emergência.'},
-      // DESAFIO ESPECIAL (5)
-      {cat:'desafio',catLabel:'Desafio',catColor:'#E53935',icon:'🔥',q:'Em 2007, o Brasil decretou licença compulsória de qual medicamento?',opts:['Tamiflu','Efavirenz','Cloroquina','Ivermectina'],correct:1,legal:'Decreto nº 6.108/2007: licença compulsória do Efavirenz (antirretroviral HIV/AIDS), por interesse público, para fins de uso público não-comercial.'},
-      {cat:'desafio',catLabel:'Desafio',catColor:'#E53935',icon:'🔥',q:'Qual STF decidiu pela inconstitucionalidade do parágrafo único do art. 40 da LPI (extensão automática de patentes)?',opts:['ADI 5529','ADI 3512','ADPF 153','ADI 4277'],correct:0,legal:'STF, ADI 5529 (2021): declarou inconstitucional a extensão automática do prazo de patentes (§único do art. 40 da LPI), que estendia patentes além de 20 anos quando o INPI demorava no exame.'},
-      {cat:'desafio',catLabel:'Desafio',catColor:'#E53935',icon:'🔥',q:'O Brasil aderiu à Convenção de Paris em que ano?',opts:['1809','1884','1970','1996'],correct:1,legal:'O Brasil aderiu à Convenção de Paris em 1884 (Decreto nº 9.233/1884), sendo um dos 14 signatários originais da Convenção de 1883.'},
-      {cat:'desafio',catLabel:'Desafio',catColor:'#E53935',icon:'🔥',q:'Qual é a vigência máxima de um Desenho Industrial no Brasil?',opts:['10 anos','15 anos','20 anos','25 anos'],correct:3,legal:'Art. 108, Lei 9.279/96: vigência de 10 anos + 3 prorrogações de 5 anos = máximo 25 anos.'},
-      {cat:'desafio',catLabel:'Desafio',catColor:'#E53935',icon:'🔥',q:'O Alvará de D. João VI de 1809 é considerado marco da PI no Brasil. O que ele fez?',opts:['Criou o INPI','Instituiu privilégios de exclusividade para inventores','Aderiu à Convenção de Paris','Criou o direito autoral'],correct:1,legal:'O Alvará de 28/04/1809 de D. João VI instituiu os primeiros privilégios de exclusividade para inventores no Brasil, sendo considerado o marco inicial da PI brasileira.'}
+    /* ================================================================
+       PI QUEST — Jogo Narrativo de PI · PI Thinking
+       ================================================================ */
+
+    // ── Story data ──
+    var story = [
+      // ── CAPÍTULO 1: SENTIR ──
+      {
+        chapter: 1, chapterName: 'Sentir', icon: '❤️', id: 's1',
+        title: 'O Laboratório',
+        narrative: 'Luma trabalha no laboratório de biotecnologia da universidade em Roraima. Após meses de pesquisa, ela desenvolveu um biossensor inovador que detecta contaminantes na água usando nanopartículas de pigmentos extraídos de plantas amazônicas. O sensor muda de cor quando identifica metais pesados. Sua orientadora, Dra. Marina, diz: "Isso pode mudar vidas nas comunidades ribeirinhas. Mas primeiro, precisamos entender quem vai usar isso e o que eles precisam."',
+        question: 'Como Luma deve começar a entender seus potenciais usuários?',
+        choices: [
+          {
+            icon: '👤', text: 'Criar um Mapa de Empatia para entender as dores, necessidades e contexto dos ribeirinhos.',
+            points: 30, quality: 'good', item: '🗺️ Mapa de Empatia',
+            feedback: 'Excelente! O Mapa de Empatia ajuda a entender profundamente o contexto, dores e necessidades dos usuários. Luma descobre que os ribeirinhos precisam de uma solução <strong>simples, barata e que funcione sem eletricidade</strong>.'
+          },
+          {
+            icon: '📊', text: 'Fazer uma pesquisa estatística online sobre poluição hídrica.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'A pesquisa traz dados úteis, mas não captura as experiências reais das comunidades. Luma obtém números, mas perde a oportunidade de <strong>empatia profunda</strong> com os usuários finais.'
+          },
+          {
+            icon: '📝', text: 'Ir direto ao INPI e registrar a invenção.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Pular a fase de empatia é arriscado. Sem entender o contexto de uso, Luma pode projetar proteção inadequada. Além disso, ainda não está claro o que exatamente proteger.'
+          }
+        ]
+      },
+      {
+        chapter: 1, chapterName: 'Sentir', icon: '❤️', id: 's2',
+        title: 'A Comunidade',
+        narrative: 'Luma visita a comunidade ribeirinha de São José. Dona Raimunda, líder comunitária, mostra os pontos de coleta de água e conta que as crianças frequentemente adoecem. "Se existisse um jeito simples de testar a água antes de beber...", suspira. Luma percebe que a solução dela pode ter um impacto real. Mas também descobre que a comunidade já usa um extrato de planta local para "testar" a água — um conhecimento tradicional passado por gerações.',
+        question: 'Como Luma deve lidar com o conhecimento tradicional da comunidade?',
+        choices: [
+          {
+            icon: '🤝', text: 'Reconhecer o conhecimento tradicional, buscar consentimento prévio informado e propor parceria justa com a comunidade.',
+            points: 30, quality: 'good', item: '📜 Consentimento Prévio Informado',
+            feedback: 'Perfeito! A Lei 13.123/2015 exige <strong>consentimento prévio informado (CPI)</strong> e repartição de benefícios ao acessar conhecimento tradicional associado. Luma formaliza uma parceria ética com a comunidade.'
+          },
+          {
+            icon: '📓', text: 'Anotar o conhecimento da comunidade para usar na pesquisa, citando-os no artigo.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'Citar no artigo é respeitoso, mas insuficiente legalmente. A Lei da Biodiversidade exige CPI formal e repartição de benefícios, não apenas citação acadêmica.'
+          },
+          {
+            icon: '🔬', text: 'Ignorar o conhecimento tradicional e focar apenas na nanotecnologia.',
+            points: 0, quality: 'bad', item: null,
+            feedback: 'Ignorar o conhecimento tradicional é eticamente problemático e potencialmente ilegal se a pesquisa usar patrimônio genético ou conhecimento associado sem consentimento (Lei 13.123/2015).'
+          }
+        ]
+      },
+      {
+        chapter: 1, chapterName: 'Sentir', icon: '❤️', id: 's3',
+        title: 'A Persona',
+        narrative: 'De volta ao laboratório, Luma precisa sintetizar tudo que aprendeu sobre os possíveis usuários do biossensor. A Dra. Marina sugere criar uma persona para guiar o desenvolvimento e a estratégia de proteção.',
+        question: 'Qual persona Luma deve priorizar?',
+        choices: [
+          {
+            icon: '🏘️', text: '"Dona Raimunda" — líder comunitária ribeirinha que precisa testar a água de forma simples e acessível.',
+            points: 25, quality: 'good', item: '🎴 Carta Persona',
+            feedback: 'Focar na usuária final garante que o produto e a proteção sejam alinhados à necessidade real. A proteção deve considerar <strong>acessibilidade, baixo custo e impacto social</strong>.'
+          },
+          {
+            icon: '🏢', text: '"Dr. Marcos" — gerente de saneamento municipal que compra equipamentos em licitação.',
+            points: 20, quality: 'ok', item: '🎴 Carta Persona',
+            feedback: 'Persona válida para o mercado institucional, mas menos conectada com o impacto social direto. Pode complementar a estratégia, mas não deve ser a principal.'
+          },
+          {
+            icon: '💰', text: '"Investidor Anjo" — quer retorno rápido e pede exclusividade total.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Focar no investidor antes de entender o usuário é colocar o lucro antes do propósito. A proteção de PI deve ser guiada pelo impacto, não apenas pelo retorno financeiro.'
+          }
+        ]
+      },
+
+      // ── CAPÍTULO 2: DIAGNOSTICAR ──
+      {
+        chapter: 2, chapterName: 'Diagnosticar', icon: '🔍', id: 'd1',
+        title: 'O Diagnóstico',
+        narrative: 'Luma vai ao NIT (Núcleo de Inovação Tecnológica) da universidade. O analista de PI, Carlos, ajuda a preencher o Canvas de Diagnóstico. Eles mapeiam: a invenção envolve uma composição de nanopartículas (processo), um dispositivo de teste (produto) e um software embarcado que analisa a cor (programa de computador). Carlos pergunta: "Qual o TRL (Technology Readiness Level) atual?"',
+        question: 'Qual TRL melhor descreve o biossensor de Luma?',
+        choices: [
+          {
+            icon: '🔬', text: 'TRL 4 — Validação em laboratório. O protótipo funciona em condições controladas, mas ainda não foi testado em campo.',
+            points: 25, quality: 'good', item: '📋 Canvas de Diagnóstico',
+            feedback: 'Correto! TRL 4 indica validação laboratorial. Isso significa que Luma pode depositar uma patente (não exige protótipo final), mas deve planejar testes de campo para aumentar o TRL.'
+          },
+          {
+            icon: '💡', text: 'TRL 1 — Apenas uma ideia teórica.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Luma já tem protótipo funcional em laboratório — isso é bem além de TRL 1. Subestimar a maturidade pode atrasar a proteção.'
+          },
+          {
+            icon: '🏭', text: 'TRL 9 — Pronto para produção em escala.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'TRL 9 é produto final, validado e em produção. Luma ainda está em fase laboratorial — superestimar pode gerar expectativas irreais.'
+          }
+        ]
+      },
+      {
+        chapter: 2, chapterName: 'Diagnosticar', icon: '🔍', id: 'd2',
+        title: 'A Árvore de Decisão',
+        narrative: 'Carlos guia Luma pela Árvore de Decisão de PI. O biossensor tem três componentes protegíveis: (1) a composição de nanopartículas, (2) o dispositivo físico e (3) o software embarcado.',
+        question: 'Qual combinação de proteção é mais adequada?',
+        choices: [
+          {
+            icon: '🛡️', text: 'Patente de invenção para a composição e dispositivo + Registro de software para o código + Marca para o nome comercial.',
+            points: 30, quality: 'good', item: '🌳 Mapa de Proteção',
+            feedback: 'Estratégia completa! A patente protege a composição e o dispositivo (novidade + atividade inventiva), o registro de software protege o código-fonte, e a marca protege a identidade comercial. Proteção em camadas!'
+          },
+          {
+            icon: '📝', text: 'Apenas patente de invenção para tudo.',
+            points: 15, quality: 'ok', item: null,
+            feedback: 'A patente protege a composição e o dispositivo, mas software "em si" não é patenteável no Brasil (Art. 10, LPI). E a marca ficaria desprotegida.'
+          },
+          {
+            icon: '©️', text: 'Apenas direito autoral.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Direito autoral protege expressão, não funcionalidade técnica. Um biossensor precisa de patente para proteger o processo e o produto.'
+          }
+        ]
+      },
+      {
+        chapter: 2, chapterName: 'Diagnosticar', icon: '🔍', id: 'd3',
+        title: 'A Busca de Anterioridade',
+        narrative: 'Antes de depositar qualquer pedido, Carlos insiste: "Precisamos fazer uma busca de anterioridade." Eles acessam as bases de patentes do INPI, Espacenet e PatentScope. Encontram 3 patentes relacionadas a biossensores com nanopartículas, mas nenhuma usa pigmentos de plantas amazônicas.',
+        question: 'O que esse resultado significa para Luma?',
+        choices: [
+          {
+            icon: '✅', text: 'O uso específico de pigmentos amazônicos confere novidade e atividade inventiva. Pode depositar com confiança, diferenciando-se das anterioridades.',
+            points: 25, quality: 'good', item: '🔍 Relatório de Busca',
+            feedback: 'Correto! A busca mostra que o diferencial de Luma (pigmentos amazônicos) não foi antecipado. As reivindicações devem focar nessa diferença. A busca também ajuda a redigir reivindicações mais fortes.'
+          },
+          {
+            icon: '⚠️', text: 'Existem patentes similares, então é melhor desistir.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Patentes similares não impedem o depósito se houver diferença inventiva. A chave é o diferencial — neste caso, os pigmentos amazônicos.'
+          },
+          {
+            icon: '🤷', text: 'A busca é desnecessária, o INPI fará isso durante o exame.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'Tecnicamente, o INPI faz busca durante o exame. Mas a busca prévia evita custos com pedidos fadados ao fracasso e permite redigir reivindicações mais precisas.'
+          }
+        ]
+      },
+
+      // ── CAPÍTULO 3: ESTRATEGAR ──
+      {
+        chapter: 3, chapterName: 'Estrategar', icon: '⚡', id: 'e1',
+        title: 'O Brainstorm',
+        narrative: 'Luma reúne sua equipe para um Crazy 8s: 8 estratégias de proteção em 8 minutos. As ideias variam: patente nacional, PCT internacional, segredo da formulação, licenciamento social, marca forte, parceria com startup, registro de software, e proteção de cultivar para a planta fonte do pigmento.',
+        question: 'Qual estratégia principal Luma deve priorizar, dado o orçamento limitado?',
+        choices: [
+          {
+            icon: '🎯', text: '1º Patente nacional (proteger antes de publicar) + Segredo da formulação exata + Registro de software. Avaliar PCT em 12 meses.',
+            points: 30, quality: 'good', item: '⚡ Estratégia PI',
+            feedback: 'Estratégia escalonada perfeita! A patente nacional garante prioridade (12 meses para PCT via Convenção de Paris), o segredo complementa a proteção da formulação, e o registro de software é barato (~R$185). O prazo de 12 meses dá tempo para buscar parcerias e financiamento para a fase internacional.'
+          },
+          {
+            icon: '🌍', text: 'Depositar diretamente via PCT em todos os países.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'O PCT é poderoso, mas caro para orçamento limitado. A estratégia escalonada (nacional → PCT em 12 meses) é mais prudente e permite avaliar o mercado.'
+          },
+          {
+            icon: '📰', text: 'Publicar o artigo primeiro para ganhar reconhecimento e depois pensar em proteção.',
+            points: 0, quality: 'bad', item: null,
+            feedback: 'Publicar ANTES do depósito pode destruir a novidade em muitos países. O período de graça brasileiro é de apenas 12 meses e não é reconhecido globalmente.'
+          }
+        ]
+      },
+      {
+        chapter: 3, chapterName: 'Estrategar', icon: '⚡', id: 'e2',
+        title: 'O Canvas de Estratégia',
+        narrative: 'Luma preenche o Canvas de Estratégia com Carlos. Custos estimados: depósito de patente (R$175 + R$590 para exame = R$765 com desconto de ICT), registro de software (R$185 com desconto), marca (R$355 com desconto). Total: ~R$1.305. O NIT cobre os custos do depósito.',
+        question: 'Como Luma deve definir a marca do biossensor?',
+        choices: [
+          {
+            icon: '✨', text: '"AquaGuarda" — nome fantasia forte, distintivo, evocando proteção da água. Fácil de pronunciar e memorizar.',
+            points: 25, quality: 'good', item: '™️ Marca Registrada',
+            feedback: 'Nome fantasia forte! "AquaGuarda" é distintivo (não é descritivo), fácil de lembrar e evoca o benefício do produto. Boa candidata a registro como marca nominativa.'
+          },
+          {
+            icon: '📌', text: '"Sensor de Água Nanopartículas" — nome descritivo que explica o produto.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Nome puramente descritivo — seria provavelmente indeferido pelo INPI (Art. 124, VI da LPI). Uma marca precisa de <strong>distintividade</strong>.'
+          },
+          {
+            icon: '🤔', text: 'Não registrar marca agora, deixar para depois.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'Adiar a marca é arriscado — outro pode registrar nome similar antes. A marca é a identidade no mercado e custa relativamente pouco.'
+          }
+        ]
+      },
+      {
+        chapter: 3, chapterName: 'Estrategar', icon: '⚡', id: 'e3',
+        title: 'O Storyboard',
+        narrative: 'A equipe cria um Storyboard de Proteção com 6 cenas: (1) Ideia no laboratório, (2) Busca de anterioridade, (3) Redação do pedido, (4) Depósito no INPI, (5) Publicação do artigo, (6) Licenciamento.',
+        question: 'Qual ordem é a mais estratégica para Luma?',
+        choices: [
+          {
+            icon: '📋', text: 'Busca → Redação → Depósito → Publicação → Licenciamento. Artigo DEPOIS do depósito.',
+            points: 25, quality: 'good', item: '🎬 Storyboard',
+            feedback: 'Ordem correta! A regra de ouro: <strong>depositar ANTES de publicar</strong>. Após o depósito, Luma tem a data de prioridade garantida e pode publicar com tranquilidade.'
+          },
+          {
+            icon: '📰', text: 'Publicação → Busca → Redação → Depósito → Licenciamento.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Publicar primeiro = risco de perda de novidade em países sem período de graça. A ordem ideal é sempre proteger antes de divulgar.'
+          },
+          {
+            icon: '💼', text: 'Licenciamento → Depósito → Publicação.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Não é possível licenciar o que ainda não está protegido. O depósito deve vir primeiro.'
+          }
+        ]
+      },
+
+      // ── CAPÍTULO 4: PROTEGER ──
+      {
+        chapter: 4, chapterName: 'Proteger', icon: '🛡️', id: 'p1',
+        title: 'O Depósito',
+        narrative: 'Chegou o dia do depósito. Carlos preparou toda a documentação: relatório descritivo, reivindicações, resumo, desenhos e o formulário do e-INPI. Luma está ansiosa. A Dra. Marina revisou e assinou como coinventora. A universidade é a titular (conforme a política de PI da ICT e a Lei de Inovação).',
+        question: 'Quem deve constar como inventor e titular no pedido de patente?',
+        choices: [
+          {
+            icon: '✅', text: 'Inventores: Luma + Dra. Marina (pessoas físicas). Titular: Universidade (ICT). Conforme Lei de Inovação e política institucional.',
+            points: 30, quality: 'good', item: '📄 Pedido de Patente',
+            feedback: 'Correto! Os <strong>inventores</strong> são sempre pessoas físicas (quem criou). O <strong>titular</strong> é a ICT (quem detém os direitos patrimoniais), conforme Art. 11 da Lei de Inovação. Os inventores têm direito a participação nos ganhos (Art. 13).'
+          },
+          {
+            icon: '👤', text: 'Inventora e titular: apenas Luma.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'A Dra. Marina contribuiu como coinventora e a universidade forneceu os recursos. Omitir inventores é eticamente errado e pode invalidar a patente.'
+          },
+          {
+            icon: '🏫', text: 'Inventora e titular: universidade.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'A universidade pode ser titular, mas <strong>inventores são sempre pessoas físicas</strong>. Instituições não inventam — pessoas inventam.'
+          }
+        ]
+      },
+      {
+        chapter: 4, chapterName: 'Proteger', icon: '🛡️', id: 'p2',
+        title: 'O Software e a Marca',
+        narrative: 'Após o depósito da patente, Luma registra o software embarcado do biossensor no INPI (R$92,50 com desconto de ICT) e deposita o pedido de marca "AquaGuarda" (R$177,50 com desconto). Carlos lembra: "Temos 12 meses de prioridade unionista para decidir sobre o PCT."',
+        question: 'Após 6 meses, uma empresa multinacional oferece parceria para produção em escala. O que Luma deve fazer?',
+        choices: [
+          {
+            icon: '📋', text: 'Negociar contrato de licenciamento via NIT, com royalties e cláusula de acesso social. Usar o restante do prazo para avaliar PCT.',
+            points: 30, quality: 'good', item: '📑 Contrato de Licenciamento',
+            feedback: 'Estratégia ideal! O NIT negocia o licenciamento garantindo retorno à universidade e inventores. A cláusula social garante acesso para comunidades. O prazo de prioridade permite avaliar se vale expandir via PCT.'
+          },
+          {
+            icon: '💰', text: 'Vender a patente diretamente para a empresa por um valor fixo.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'Vender (cessão) elimina o controle sobre o uso e pode limitar o acesso social. Licenciamento é geralmente mais vantajoso a longo prazo.'
+          },
+          {
+            icon: '🚫', text: 'Recusar qualquer parceria e tentar produzir sozinha.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Sem capacidade de produção em escala, o biossensor fica limitado ao laboratório. Parceria estratégica é essencial para impacto real.'
+          }
+        ]
+      },
+
+      // ── CAPÍTULO 5: REFLETIR ──
+      {
+        chapter: 5, chapterName: 'Refletir', icon: '🪞', id: 'r1',
+        title: 'O Dilema Ético',
+        narrative: 'A empresa parceira sugere uma modificação: remover a referência à comunidade ribeirinha do produto e patentear a versão modificada como invenção própria em outros países. "É mais simples comercialmente", argumentam. Luma lembra do compromisso com Dona Raimunda e a comunidade.',
+        question: 'O que Luma deve fazer?',
+        choices: [
+          {
+            icon: '⚖️', text: 'Recusar. Manter o reconhecimento da comunidade, a repartição de benefícios e a integridade ética da pesquisa.',
+            points: 30, quality: 'good', item: '⚖️ Integridade Ética',
+            feedback: 'A decisão correta! Remover a referência à comunidade violaria a Lei 13.123/2015, o Protocolo de Nagoya e os princípios éticos de pesquisa. A integridade é o alicerce da inovação responsável.'
+          },
+          {
+            icon: '🤝', text: 'Negociar um meio-termo: manter a referência mas reduzir os royalties da comunidade.',
+            points: 15, quality: 'ok', item: null,
+            feedback: 'Manter a referência é bom, mas reduzir unilateralmente os royalties pode violar o acordo de repartição de benefícios. Qualquer alteração deve ser negociada com a comunidade.'
+          },
+          {
+            icon: '💰', text: 'Aceitar a proposta da empresa pelo potencial financeiro.',
+            points: 0, quality: 'bad', item: null,
+            feedback: 'Aceitar seria biopirataria e violação legal. Além do dano ético, Luma arriscaria sanções legais, perda de reputação e invalidação da patente.'
+          }
+        ]
+      },
+      {
+        chapter: 5, chapterName: 'Refletir', icon: '🪞', id: 'r2',
+        title: 'O Legado',
+        narrative: 'Dois anos depois: o AquaGuarda está em 50 comunidades ribeirinhas. A patente foi concedida. A comunidade de São José recebe royalties e virou referência em monitoramento ambiental comunitário. Luma recebeu o Prêmio Jovem Cientista. Dona Raimunda diz: "A ciência da Luma e o saber da floresta juntos. É assim que deve ser."',
+        question: 'Qual é a principal lição da jornada de Luma sobre PI?',
+        choices: [
+          {
+            icon: '🌱', text: 'PI não é apenas sobre proteger — é sobre equilibrar inovação, ética, acesso e impacto social. O Design Thinking aplicado à PI ajuda a tomar decisões mais humanas e estratégicas.',
+            points: 30, quality: 'good', item: '🎓 Sabedoria PI',
+            feedback: 'Essa é a essência do PI Thinking! A Propriedade Intelectual é uma <strong>ferramenta estratégica</strong> que, quando usada com empatia e ética, pode gerar impacto positivo para a sociedade enquanto protege os direitos dos criadores.'
+          },
+          {
+            icon: '💰', text: 'PI serve principalmente para gerar lucro com exclusividade de mercado.',
+            points: 10, quality: 'ok', item: null,
+            feedback: 'A PI pode gerar retorno financeiro, mas reduzi-la a isso ignora sua função social (CF, Art. 5º, XXIX) e seu papel no avanço do conhecimento.'
+          },
+          {
+            icon: '📝', text: 'PI é burocracia necessária que atrasa a pesquisa.',
+            points: 5, quality: 'bad', item: null,
+            feedback: 'Ver PI como burocracia é perder a oportunidade de usar estrategicamente a proteção para potencializar impacto, atrair investimento e garantir reconhecimento.'
+          }
+        ]
+      }
     ];
 
-    // ============================================================
-    //  BOARD LAYOUT — 30 cells + start
-    // ============================================================
-    const categoryOrder = ['patente','marca','autoral','biodiv','estrategia','desafio'];
-    const catIcons = {patente:'🔬',marca:'®️',autoral:'📚',biodiv:'🌿',estrategia:'♟️',desafio:'🔥'};
-    const catLabels = {patente:'Patentes',marca:'Marcas',autoral:'D. Autoral',biodiv:'Biodiversidade',estrategia:'Estratégia',desafio:'Desafio'};
-    const catColors = {patente:'#2196F3',marca:'#FF9800',autoral:'#4CAF50',biodiv:'#1B5E20',estrategia:'#FFC107',desafio:'#E53935'};
-    const playerColors = ['#9C27B0','#2196F3','#FF9800','#4CAF50'];
-    const playerEmojis = ['🟣','🔵','🟠','🟢'];
+    // ── State ──
+    var playerName = '';
+    var currentScene = 0;
+    var score = 0;
+    var inventory = [];
+    var decisions = [];
+    var gameStarted = false;
 
-    let players = [];
-    let currentPlayerIdx = 0;
-    let gameStarted = false;
-    let questionPool = [];
-    let usedQuestions = new Set();
-
-    // ============================================================
-    //  SETUP
-    // ============================================================
-    function renderPlayerInputs() {
-      const n = parseInt(document.getElementById('numPlayers').value);
-      const div = document.getElementById('playerInputs');
-      div.innerHTML = '';
-      for (let i = 0; i < n; i++) {
-        div.innerHTML += `<div><label style="font-size:.85rem;">Jogador ${i+1}:</label><input type="text" id="pname-${i}" placeholder="Nome do jogador ${i+1}" value="Jogador ${i+1}"></div>`;
-      }
-    }
-    renderPlayerInputs();
-
+    // ── Start ──
     function startGame() {
-      const n = parseInt(document.getElementById('numPlayers').value);
-      players = [];
-      for (let i = 0; i < n; i++) {
-        const name = document.getElementById(`pname-${i}`).value.trim() || `Jogador ${i+1}`;
-        players.push({name, pos:0, correct:0, wrong:0, color:playerColors[i], emoji:playerEmojis[i]});
-      }
-      currentPlayerIdx = 0;
-      gameStarted = true;
-      usedQuestions = new Set();
-      questionPool = [...questions].sort(() => Math.random() - 0.5);
-
-      document.getElementById('setupScreen').style.display = 'none';
+      playerName = (document.getElementById('heroName').value || '').trim() || 'Jogador';
+      currentScene = 0; score = 0; inventory = []; decisions = []; gameStarted = true;
+      document.getElementById('startSection').style.display = 'none';
       document.getElementById('gameArea').style.display = 'block';
-      document.getElementById('gameActions').style.display = 'flex';
-      document.getElementById('winnerScreen').classList.remove('show');
-
-      renderBoard();
-      updateTurn();
-      updateScoreboard();
+      document.getElementById('resultSection').classList.remove('show');
+      renderScene();
+      autoSave();
     }
 
-    // ============================================================
-    //  BOARD RENDERING
-    // ============================================================
-    function renderBoard() {
-      const board = document.getElementById('board');
-      board.innerHTML = '';
-      // Cell 0 = START
-      let html = `<div class="pq-cell pq-cell--start"><div class="pq-cell__icon">🚀</div><div style="font-family:Poppins;font-weight:700;font-size:.7rem;">INÍCIO</div><div class="pq-cell__players" id="cell-players-0"></div></div>`;
-      for (let i = 1; i <= 30; i++) {
-        const catIdx = (i - 1) % 6;
-        const cat = categoryOrder[catIdx];
-        const isFinish = i === 30;
-        html += `<div class="pq-cell ${isFinish ? 'pq-cell--finish' : ''}" style="border-top:3px solid ${catColors[cat]};">
-          <span class="pq-cell__num">${i}</span>
-          <div class="pq-cell__cat" style="color:${catColors[cat]};">${catLabels[cat]}</div>
-          <div class="pq-cell__icon">${isFinish ? '🏆' : catIcons[cat]}</div>
-          <div class="pq-cell__players" id="cell-players-${i}"></div>
-        </div>`;
-      }
-      board.innerHTML = html;
-      renderTokens();
-    }
-
-    function renderTokens() {
-      // Clear all
-      for (let i = 0; i <= 30; i++) {
-        const el = document.getElementById(`cell-players-${i}`);
-        if (el) el.innerHTML = '';
-      }
-      players.forEach((p, idx) => {
-        const cellEl = document.getElementById(`cell-players-${Math.min(p.pos, 30)}`);
-        if (cellEl) {
-          cellEl.innerHTML += `<span class="pq-token" style="background:${p.color};" title="${p.name}">${idx+1}</span>`;
+    // ── Render map ──
+    function renderMap() {
+      var map = document.getElementById('progressMap');
+      var chapters = [
+        { num: 1, icon: '❤️', name: 'Sentir' },
+        { num: 2, icon: '🔍', name: 'Diagnosticar' },
+        { num: 3, icon: '⚡', name: 'Estrategar' },
+        { num: 4, icon: '🛡️', name: 'Proteger' },
+        { num: 5, icon: '🪞', name: 'Refletir' }
+      ];
+      var currentChapter = currentScene < story.length ? story[currentScene].chapter : 6;
+      var html = '';
+      chapters.forEach(function(ch, i) {
+        var cls = 'locked';
+        if (ch.num < currentChapter) cls = 'completed';
+        else if (ch.num === currentChapter) cls = 'active';
+        html += '<div class="pq-map__node ' + cls + '" title="Capítulo ' + ch.num + ': ' + ch.name + '">' + ch.icon + '</div>';
+        if (i < chapters.length - 1) {
+          var cCls = '';
+          if (ch.num < currentChapter) cCls = 'completed';
+          else if (ch.num === currentChapter) cCls = 'active';
+          html += '<div class="pq-map__connector ' + cCls + '"></div>';
         }
       });
+      map.innerHTML = html;
     }
 
-    // ============================================================
-    //  DICE & TURN
-    // ============================================================
-    function updateTurn() {
-      const p = players[currentPlayerIdx];
-      document.getElementById('turnLabel').innerHTML = `Vez de: <span style="color:${p.color};font-size:1.2rem;">${p.emoji} ${p.name}</span> (Casa ${p.pos})`;
-    }
-
-    function updateScoreboard() {
-      let html = '';
-      players.forEach((p, i) => {
-        html += `<div class="pq-scoreboard__row">
-          <span class="pq-token" style="background:${p.color};width:26px;height:26px;">${i+1}</span>
-          <span class="pq-scoreboard__name">${p.name}</span>
-          <span class="pq-scoreboard__pos">Casa ${Math.min(p.pos, 30)}</span>
-          <span class="pq-scoreboard__stats">✅ ${p.correct} | ❌ ${p.wrong}</span>
-        </div>`;
-      });
-      document.getElementById('scoreboardContent').innerHTML = html;
-    }
-
-    let rolling = false;
-    function rollDice() {
-      if (rolling) return;
-      rolling = true;
-      const dice = document.getElementById('dice');
-      dice.classList.add('rolling');
-
-      // Animate numbers
-      let count = 0;
-      const interval = setInterval(() => {
-        dice.textContent = Math.floor(Math.random() * 6) + 1;
-        count++;
-        if (count > 8) {
-          clearInterval(interval);
-          const result = Math.floor(Math.random() * 6) + 1;
-          dice.textContent = result;
-          dice.classList.remove('rolling');
-          setTimeout(() => showQuestion(result), 400);
-        }
-      }, 80);
-    }
-
-    // ============================================================
-    //  QUESTION
-    // ============================================================
-    function showQuestion(diceResult) {
-      const p = players[currentPlayerIdx];
-      const targetPos = Math.min(p.pos + diceResult, 30);
-      const catIdx = ((targetPos - 1) % 6 + 6) % 6;
-      const targetCat = categoryOrder[catIdx];
-
-      // Find question
-      let q = questionPool.find(qq => qq.cat === targetCat && !usedQuestions.has(questionPool.indexOf(qq)));
-      if (!q) {
-        // Fallback: any unused question
-        q = questionPool.find(qq => !usedQuestions.has(questionPool.indexOf(qq)));
-      }
-      if (!q) {
-        // All used, reset
-        usedQuestions = new Set();
-        q = questionPool.find(qq => qq.cat === targetCat) || questionPool[0];
-      }
-      usedQuestions.add(questionPool.indexOf(q));
-
-      // Show modal
-      const modal = document.getElementById('questionModal');
-      document.getElementById('modalCat').textContent = q.catLabel;
-      document.getElementById('modalCat').style.background = q.catColor;
-      document.getElementById('modalQuestion').textContent = `${q.icon} ${q.q}`;
-
-      const optsDiv = document.getElementById('modalOptions');
-      optsDiv.innerHTML = '';
-      q.opts.forEach((opt, i) => {
-        const btn = document.createElement('div');
-        btn.className = 'pq-modal__opt';
-        btn.textContent = `${String.fromCharCode(65+i)}) ${opt}`;
-        btn.onclick = () => answerQuestion(i, q.correct, q.legal, diceResult);
-        optsDiv.appendChild(btn);
-      });
-
-      document.getElementById('modalFeedback').className = 'pq-modal__feedback';
-      document.getElementById('modalFeedback').style.display = 'none';
-      document.getElementById('modalLegal').style.display = 'none';
-      document.getElementById('modalClose').style.display = 'none';
-
-      modal.classList.add('show');
-    }
-
-    function answerQuestion(selected, correct, legal, diceResult) {
-      const opts = document.querySelectorAll('.pq-modal__opt');
-      opts.forEach((o, i) => {
-        o.classList.add('disabled');
-        if (i === correct) o.classList.add('correct');
-        if (i === selected && i !== correct) o.classList.add('wrong');
-      });
-
-      const feedback = document.getElementById('modalFeedback');
-      const p = players[currentPlayerIdx];
-
-      if (selected === correct) {
-        p.correct++;
-        p.pos = Math.min(p.pos + diceResult, 30);
-        feedback.className = 'pq-modal__feedback show success';
-        feedback.innerHTML = `✅ <strong>Correto!</strong> ${p.name} avança ${diceResult} casas para a casa ${p.pos}.`;
+    // ── Render inventory ──
+    function renderInventory() {
+      var el = document.getElementById('inventoryItems');
+      if (inventory.length === 0) {
+        el.innerHTML = '<span class="pq-inventory__empty">Nenhum item coletado ainda.</span>';
       } else {
-        p.wrong++;
-        feedback.className = 'pq-modal__feedback show fail';
-        feedback.innerHTML = `❌ <strong>Errado!</strong> ${p.name} fica na casa ${p.pos}. A resposta era: <strong>${String.fromCharCode(65+correct)}</strong>.`;
+        el.innerHTML = inventory.map(function(item) {
+          return '<span class="pq-inventory__item">' + item + '</span>';
+        }).join('');
       }
-
-      document.getElementById('modalLegal').innerHTML = `<strong>📚 Fundamento:</strong> ${legal}`;
-      document.getElementById('modalLegal').style.display = 'block';
-      document.getElementById('modalClose').style.display = 'inline-block';
+      document.getElementById('itemsValue').textContent = inventory.length;
     }
 
-    function closeModal() {
-      document.getElementById('questionModal').classList.remove('show');
-      rolling = false;
-
-      const p = players[currentPlayerIdx];
-      renderTokens();
-      updateScoreboard();
-
-      // Check winner
-      if (p.pos >= 30) {
-        document.getElementById('winnerName').textContent = `🎉 ${p.name}!`;
-        document.getElementById('winnerScreen').classList.add('show');
-        document.getElementById('winnerScreen').scrollIntoView({behavior:'smooth'});
-        return;
-      }
-
-      // Next player
-      currentPlayerIdx = (currentPlayerIdx + 1) % players.length;
-      updateTurn();
+    // ── Render stats ──
+    function renderStats() {
+      document.getElementById('scoreValue').textContent = score;
+      var ch = currentScene < story.length ? story[currentScene].chapter : 5;
+      document.getElementById('chapterValue').textContent = ch + '/5';
     }
 
-    function resetGame() {
-      document.getElementById('setupScreen').style.display = 'block';
-      document.getElementById('gameArea').style.display = 'none';
-      document.getElementById('gameActions').style.display = 'none';
-      document.getElementById('winnerScreen').classList.remove('show');
+    // ── Render scene ──
+    function renderScene() {
+      if (currentScene >= story.length) { endGame(); return; }
+      var s = story[currentScene];
+      var answered = decisions[currentScene];
+      renderMap(); renderInventory(); renderStats();
+
+      var html = '<div class="pq-scene">';
+      html += '<div class="pq-scene__chapter">Capítulo ' + s.chapter + ' — ' + s.chapterName + ' ' + s.icon + '</div>';
+      html += '<div class="pq-scene__title">' + s.title + '</div>';
+      html += '<div class="pq-scene__narrative">' + s.narrative + '</div>';
+      html += '<div class="pq-scene__question">' + s.question + '</div>';
+      html += '<div class="pq-choices">';
+
+      s.choices.forEach(function(choice, ci) {
+        var cls = '';
+        var dis = '';
+        if (answered !== undefined) {
+          dis = ' disabled';
+          if (ci === answered) {
+            cls = choice.quality === 'good' ? ' correct' : choice.quality === 'ok' ? ' correct' : ' wrong';
+          } else {
+            cls = ' disabled';
+          }
+        }
+        html += '<div class="pq-choice' + cls + dis + '" role="button" tabindex="0" ';
+        html += 'onclick="selectChoice(' + ci + ')" ';
+        html += 'onkeydown="handleChoiceKey(event,' + ci + ')" ';
+        html += 'aria-label="Opção: ' + choice.text.replace(/"/g, '&quot;') + '">';
+        html += '<span class="pq-choice__icon">' + choice.icon + '</span>';
+        html += '<span class="pq-choice__text">' + choice.text + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+
+      // Feedback
+      if (answered !== undefined) {
+        var choice = s.choices[answered];
+        var fbClass = choice.quality === 'good' ? 'good' : choice.quality === 'ok' ? 'ok' : 'bad';
+        html += '<div class="pq-feedback show pq-feedback--' + fbClass + '">';
+        html += '<strong>' + (choice.quality === 'good' ? '🌟 Excelente!' : choice.quality === 'ok' ? '👍 Aceitável' : '⚠️ Risco!') + '</strong> ';
+        html += choice.feedback;
+        html += '<br><small style="opacity:.8">+' + choice.points + ' pontos PI</small>';
+        if (choice.item) html += ' · <small>Item coletado: ' + choice.item + '</small>';
+        html += '</div>';
+        html += '<div class="pq-actions" style="margin-top:1rem;">';
+        if (currentScene < story.length - 1) {
+          html += '<button class="pq-btn pq-btn--primary" onclick="nextScene()" aria-label="Avançar para a próxima cena">➡️ Continuar</button>';
+        } else {
+          html += '<button class="pq-btn pq-btn--gold" onclick="endGame()" aria-label="Ver resultado final da quest">🏆 Ver Resultado</button>';
+        }
+        html += '</div>';
+      }
+
+      html += '</div>';
+      document.getElementById('sceneContainer').innerHTML = html;
+    }
+
+    // ── Select ──
+    function selectChoice(ci) {
+      if (decisions[currentScene] !== undefined) return;
+      var s = story[currentScene];
+      var choice = s.choices[ci];
+      decisions[currentScene] = ci;
+      score += choice.points;
+      if (choice.item && inventory.indexOf(choice.item) === -1) {
+        inventory.push(choice.item);
+      }
+      renderScene();
+      autoSave();
+    }
+    function handleChoiceKey(e, ci) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectChoice(ci); }
+    }
+
+    // ── Next ──
+    function nextScene() {
+      currentScene++;
+      renderScene();
+      autoSave();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── End ──
+    function endGame() {
       gameStarted = false;
-      renderPlayerInputs();
+      document.getElementById('gameArea').style.display = 'none';
+
+      var maxScore = 0;
+      story.forEach(function(s) {
+        var best = 0;
+        s.choices.forEach(function(c) { if (c.points > best) best = c.points; });
+        maxScore += best;
+      });
+      var pct = Math.round((score / maxScore) * 100);
+
+      var badge, title, narrative;
+      if (pct >= 85) {
+        badge = '🏆'; title = 'Mestre da PI!';
+        narrative = 'Luma se tornou referência nacional em inovação responsável. O AquaGuarda é usado em centenas de comunidades, a parceria com os ribeirinhos virou modelo de repartição de benefícios, e o toolkit PI Thinking — que ela ajudou a inspirar — é usado em universidades de todo o Brasil. Seu legado prova que PI, quando guiada por empatia e ética, transforma vidas.';
+      } else if (pct >= 60) {
+        badge = '🥈'; title = 'Estrategista Promissora';
+        narrative = 'Luma conseguiu proteger sua invenção e lançar o AquaGuarda com sucesso parcial. Algumas decisões poderiam ter sido mais estratégicas, mas ela aprendeu lições valiosas. Com ajuste fino nas próximas decisões de PI, o futuro é brilhante.';
+      } else if (pct >= 40) {
+        badge = '🥉'; title = 'Aprendiz Determinada';
+        narrative = 'A jornada de Luma teve percalços. Algumas oportunidades de proteção foram perdidas e decisões éticas poderiam ter sido melhores. Mas cada erro é uma lição, e Luma agora sabe o que precisa estudar para se tornar uma estrategista de PI mais forte.';
+      } else {
+        badge = '📚'; title = 'Início da Jornada';
+        narrative = 'Luma enfrentou dificuldades significativas na gestão da PI. Muitas decisões resultaram em perda de proteção ou problemas éticos. Recomendação: refaça o toolkit desde a Fase 1, explore cada ferramenta, e tente novamente. O conhecimento de PI se constrói com prática!';
+      }
+
+      document.getElementById('resultSection').classList.add('show');
+      document.getElementById('resBadge').textContent = badge;
+      document.getElementById('resTitle').textContent = title;
+      document.getElementById('resScore').textContent = score + ' / ' + maxScore + ' pontos (' + pct + '%)';
+      document.getElementById('resName').textContent = playerName;
+      document.getElementById('resDetails').innerHTML =
+        '<span>📖 ' + story.length + ' cenas</span>' +
+        '<span>🎒 ' + inventory.length + ' itens coletados</span>' +
+        '<span>📊 ' + pct + '% aproveitamento</span>';
+      document.getElementById('resNarrative').innerHTML = '<strong>Epílogo:</strong> ' + narrative;
+
+      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
+        PIThinking.saveProgress('pi-quest-result', {
+          name: playerName, score: score, maxScore: maxScore, pct: pct,
+          inventory: inventory, date: new Date().toISOString()
+        });
+      }
     }
+
+    // ── Restart ──
+    function restartGame() {
+      if (!confirm('Reiniciar a PI Quest? Todo o progresso será perdido.')) return;
+      document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('resultSection').classList.remove('show');
+      document.getElementById('startSection').style.display = 'block';
+      if (typeof PIThinking !== 'undefined' && PIThinking.clearProgress) {
+        PIThinking.clearProgress('pi-quest');
+      }
+    }
+
+    // ── Persistence ──
+    function autoSave() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
+        PIThinking.saveProgress('pi-quest', {
+          playerName: playerName, currentScene: currentScene,
+          score: score, inventory: inventory, decisions: decisions,
+          gameStarted: gameStarted
+        });
+      }
+    }
+    function loadSaved() {
+      if (typeof PIThinking !== 'undefined' && PIThinking.loadProgress) {
+        var saved = PIThinking.loadProgress('pi-quest');
+        if (saved && saved.gameStarted) {
+          playerName = saved.playerName || 'Jogador';
+          currentScene = saved.currentScene || 0;
+          score = saved.score || 0;
+          inventory = saved.inventory || [];
+          decisions = saved.decisions || [];
+          gameStarted = true;
+          document.getElementById('startSection').style.display = 'none';
+          document.getElementById('gameArea').style.display = 'block';
+          renderScene();
+          return;
+        }
+      }
+    }
+
+    // ── Theme ──
+    function toggleTheme() {
+      var html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    // ── Init ──
+    loadSaved();
   </script>
 </body>
 </html>
