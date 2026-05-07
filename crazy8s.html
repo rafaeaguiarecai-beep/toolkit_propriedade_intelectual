@@ -121,6 +121,7 @@
       background: var(--c8-bg);
       color: var(--c8-text);
       cursor: pointer;
+      box-sizing: border-box;
     }
     .c8-scenario__desc {
       margin-top: .8rem;
@@ -162,6 +163,7 @@
       transition: all .2s;
     }
     .c8-timer-btn:hover { background: var(--c8-accent); color: #fff; }
+    .c8-timer-btn:focus-visible { outline: 3px solid var(--c8-accent-dark); outline-offset: 2px; }
     .c8-timer-btn.active { background: var(--c8-accent); color: #fff; }
 
     /* === GRID OF 8 === */
@@ -240,6 +242,7 @@
       transition: all .2s;
     }
     .c8-card__vote button:hover { background: var(--c8-accent); border-color: var(--c8-accent); }
+    .c8-card__vote button:focus-visible { outline: 3px solid var(--c8-accent-dark); outline-offset: 2px; }
     .c8-card__vote span { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .9rem; }
 
     /* === VOTE RESULTS === */
@@ -291,6 +294,7 @@
       gap: .5rem;
     }
     .c8-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .c8-btn:focus-visible { outline: 3px solid var(--c8-accent-dark); outline-offset: 2px; }
     .c8-btn--primary { background: var(--c8-accent); color: #fff; }
     .c8-btn--outline { background: transparent; border: 2px solid var(--c8-accent); color: var(--c8-accent-dark); }
     .c8-btn--danger { background: var(--c8-red); color: #fff; }
@@ -326,6 +330,13 @@
       .c8-timer-wrap, .c8-actions, .c8-card__vote { display: none !important; }
       @page { size: A3 landscape; margin: 1cm; }
     }
+
+    /* === RESPONSIVE TIMER === */
+    @media (max-width: 600px) {
+      .c8-timer {
+        font-size: 2rem;
+      }
+    }
   </style>
 </head>
 <body class="c8-page">
@@ -354,7 +365,7 @@
     <!-- SCENARIO SELECTOR -->
     <section class="c8-scenario">
       <h3>📋 Escolha o Cenário</h3>
-      <select id="scenarioSelect" onchange="selectScenario()">
+      <select id="scenarioSelect" onchange="selectScenario()" aria-label="Selecione um cenário para o exercício Crazy 8s">
         <option value="">Selecione um cenário ou use a persona atual...</option>
         <option value="0">🔬 Dr. Apressado — Publicou artigo sobre nova molécula, quer patentear</option>
         <option value="1">👩‍🔬 Ana Inventora — Criou dispositivo médico na universidade com aluna de IC</option>
@@ -372,12 +383,12 @@
     <!-- TIMER -->
     <div class="c8-timer-wrap">
       <div style="font-family:'Poppins';font-size:.9rem;font-weight:600;color:var(--c8-text-light)">⏱ CRONÔMETRO — 1 minuto por quadro</div>
-      <div class="c8-timer" id="timer">08:00</div>
+      <div class="c8-timer" id="timer" role="timer" aria-live="off" aria-label="Cronômetro do exercício">08:00</div>
       <div style="font-size:.85rem;color:var(--c8-text-light);margin-bottom:.8rem;" id="timerHint">Quadro atual: —</div>
       <div class="c8-timer-controls">
-        <button class="c8-timer-btn" onclick="startTimer()" id="btnStart">▶ Iniciar</button>
-        <button class="c8-timer-btn" onclick="pauseTimer()">⏸ Pausar</button>
-        <button class="c8-timer-btn" onclick="resetTimer()">↺ Reiniciar</button>
+        <button class="c8-timer-btn" onclick="startTimer()" id="btnStart" aria-label="Iniciar cronômetro">▶ Iniciar</button>
+        <button class="c8-timer-btn" onclick="pauseTimer()" aria-label="Pausar cronômetro">⏸ Pausar</button>
+        <button class="c8-timer-btn" onclick="resetTimer()" aria-label="Reiniciar cronômetro">↺ Reiniciar</button>
       </div>
     </div>
 
@@ -394,9 +405,9 @@
     </section>
 
     <div class="c8-actions">
-      <button class="c8-btn ce-btn--primary" onclick="showResults()">🏆 Ver Votação</button>
-      <button class="c8-btn ce-btn--primary" onclick="window.print()">🖨️ Imprimir</button>
-      <button class="c8-btn c8-btn--danger" onclick="clearAll()">🗑️ Limpar Tudo</button>
+      <button class="c8-btn c8-btn--primary" onclick="showResults()" aria-label="Ver resultado da votação">🏆 Ver Votação</button>
+      <button class="c8-btn c8-btn--primary" onclick="window.print()" aria-label="Imprimir as ideias">🖨️ Imprimir</button>
+      <button class="c8-btn c8-btn--danger" onclick="clearAll()" aria-label="Limpar todas as ideias e votos">🗑️ Limpar Tudo</button>
       <a href="canvas-estrategia.html" class="c8-btn c8-btn--outline">📐 Canvas de Estratégia</a>
       <a href="index.html" class="c8-btn c8-btn--outline">🏠 Toolkit</a>
     </div>
@@ -416,8 +427,8 @@
   </main>
 
   <footer class="c8-footer">
-    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
-    <p>Técnica adaptada do Design Sprint Kit (Google) · Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96</a></p>
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></p>
+    <p>Técnica adaptada do Design Sprint Kit (Google) · Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener noreferrer">Lei 9.279/96</a></p>
   </footer>
 
   <script>
@@ -543,18 +554,16 @@
       const grid = document.getElementById('crazy8Grid');
       grid.innerHTML = '';
       for (let i = 0; i < 8; i++) {
-        const prompt = prompts ? prompts[i] : `Ideia ${i+1} — escreva uma estratégia de proteção diferente`;
-        grid.innerHTML += `
-          <div class="c8-card" id="card-${i}">
-            <span class="c8-card__num">${i+1}</span>
-            <div class="c8-card__prompt">${prompt}</div>
-            <textarea placeholder="Sua ideia aqui..." id="idea-${i}"></textarea>
-            <div class="c8-card__vote">
-              <button onclick="vote(${i})" title="Votar nesta ideia">⭐</button>
-              <span id="votes-${i}">${votes[i]}</span>
-            </div>
-          </div>
-        `;
+        const prompt = prompts ? prompts[i] : 'Ideia ' + (i+1) + ' — escreva uma estratégia de proteção diferente';
+        grid.innerHTML += '<div class="c8-card" id="card-' + i + '">' +
+          '<span class="c8-card__num">' + (i+1) + '</span>' +
+          '<div class="c8-card__prompt">' + prompt + '</div>' +
+          '<label for="idea-' + i + '" class="sr-only">Ideia ' + (i+1) + '</label>' +
+          '<textarea placeholder="Sua ideia aqui..." id="idea-' + i + '"></textarea>' +
+          '<div class="c8-card__vote">' +
+          '<button onclick="vote(' + i + ')" aria-label="Votar na ideia ' + (i+1) + '">⭐</button>' +
+          '<span id="votes-' + i + '">' + votes[i] + '</span>' +
+          '</div></div>';
       }
     }
     renderGrid(null);
@@ -570,33 +579,31 @@
       }
       const s = scenarios[parseInt(val)];
       descEl.style.display = 'block';
-      descEl.innerHTML = `<strong>${s.title}:</strong> ${s.desc}`;
+      descEl.innerHTML = '<strong>' + s.title + ':</strong> ' + s.desc;
       renderGrid(s.prompts);
     }
 
     function vote(idx) {
       votes[idx]++;
-      document.getElementById(`votes-${idx}`).textContent = votes[idx];
+      document.getElementById('votes-' + idx).textContent = votes[idx];
     }
 
     function showResults() {
       const resultsEl = document.getElementById('voteResults');
       const chartEl = document.getElementById('voteChart');
-      const maxVotes = Math.max(...votes, 1);
-      let html = '';
-      const sorted = votes.map((v, i) => ({idx: i, votes: v})).sort((a,b) => b.votes - a.votes);
-      sorted.forEach((item, rank) => {
-        const pct = (item.votes / maxVotes) * 100;
-        const medal = rank === 0 ? '🥇' : rank === 1 ? '🥈' : '';
-        html += `
-          <div class="c8-results__bar">
-            <span class="c8-results__label">${medal} Ideia ${item.idx + 1}</span>
-            <div style="flex:1;background:var(--c8-bg);border-radius:12px;overflow:hidden;">
-              <div class="c8-results__fill" style="width:${pct}%"></div>
-            </div>
-            <span class="c8-results__count">${item.votes} votos</span>
-          </div>
-        `;
+      const maxVotes = Math.max.apply(null, votes.concat([1]));
+      var html = '';
+      var sorted = votes.map(function(v, i) { return {idx: i, votes: v}; }).sort(function(a,b) { return b.votes - a.votes; });
+      sorted.forEach(function(item, rank) {
+        var pct = (item.votes / maxVotes) * 100;
+        var medal = rank === 0 ? '🥇' : rank === 1 ? '🥈' : '';
+        html += '<div class="c8-results__bar">' +
+          '<span class="c8-results__label">' + medal + ' Ideia ' + (item.idx + 1) + '</span>' +
+          '<div style="flex:1;background:var(--c8-bg);border-radius:12px;overflow:hidden;">' +
+          '<div class="c8-results__fill" style="width:' + pct + '%"></div>' +
+          '</div>' +
+          '<span class="c8-results__count">' + item.votes + ' votos</span>' +
+          '</div>';
       });
       chartEl.innerHTML = html;
       resultsEl.style.display = 'block';
@@ -604,32 +611,43 @@
     }
 
     // ========== TIMER ==========
-    let totalSeconds = 480; // 8 min
-    let timerInterval = null;
-    let running = false;
+    var totalSeconds = 480; // 8 min
+    var timerInterval = null;
+    var running = false;
 
     function updateTimerDisplay() {
-      const m = Math.floor(totalSeconds / 60);
-      const s = totalSeconds % 60;
-      const display = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      const timerEl = document.getElementById('timer');
+      var m = Math.floor(totalSeconds / 60);
+      var s = totalSeconds % 60;
+      var display = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      var timerEl = document.getElementById('timer');
       timerEl.textContent = display;
 
       // Current card highlight
-      const elapsed = 480 - totalSeconds;
-      const currentCard = Math.min(Math.floor(elapsed / 60), 7);
+      var elapsed = 480 - totalSeconds;
+      var currentCard = Math.min(Math.floor(elapsed / 60), 7);
       document.getElementById('timerHint').textContent = totalSeconds > 0
-        ? `Quadro atual: ${currentCard + 1} de 8`
+        ? 'Quadro atual: ' + (currentCard + 1) + ' de 8'
         : '⏰ Tempo esgotado! Hora de votar!';
 
-      // Color coding
+      // Color coding and aria-live
       timerEl.classList.remove('warning', 'danger');
-      if (totalSeconds <= 60) timerEl.classList.add('danger');
-      else if (totalSeconds <= 180) timerEl.classList.add('warning');
+      if (totalSeconds <= 60) {
+        timerEl.classList.add('danger');
+        timerEl.setAttribute('aria-live', 'assertive');
+      } else if (totalSeconds <= 180) {
+        timerEl.classList.add('warning');
+        timerEl.setAttribute('aria-live', 'off');
+      } else {
+        timerEl.setAttribute('aria-live', 'off');
+      }
 
       // Highlight active card
-      document.querySelectorAll('.c8-card').forEach((c, i) => {
-        c.classList.toggle('active', i === currentCard && totalSeconds > 0);
+      document.querySelectorAll('.c8-card').forEach(function(c, i) {
+        if (i === currentCard && totalSeconds > 0) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
       });
     }
 
@@ -637,7 +655,7 @@
       if (running) return;
       running = true;
       document.getElementById('btnStart').classList.add('active');
-      timerInterval = setInterval(() => {
+      timerInterval = setInterval(function() {
         if (totalSeconds <= 0) {
           clearInterval(timerInterval);
           running = false;
@@ -664,11 +682,11 @@
     function clearAll() {
       if (!confirm('Limpar todas as ideias e votos?')) return;
       resetTimer();
-      for (let i = 0; i < 8; i++) {
+      for (var i = 0; i < 8; i++) {
         votes[i] = 0;
-        const ideaEl = document.getElementById(`idea-${i}`);
+        var ideaEl = document.getElementById('idea-' + i);
         if (ideaEl) ideaEl.value = '';
-        const voteEl = document.getElementById(`votes-${i}`);
+        var voteEl = document.getElementById('votes-' + i);
         if (voteEl) voteEl.textContent = '0';
       }
       document.getElementById('voteResults').style.display = 'none';

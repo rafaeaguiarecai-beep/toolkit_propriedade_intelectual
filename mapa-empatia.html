@@ -153,6 +153,8 @@
         color: var(--m-text);
         cursor: pointer;
         transition: var(--m-transition);
+        text-decoration: none;
+        display: inline-block;
     }
 
     .m-persona-bar__btn:hover {
@@ -364,6 +366,10 @@
         font-size: 0.7rem;
         transition: opacity 0.2s;
         flex-shrink: 0;
+        background: none;
+        border: none;
+        padding: 2px;
+        color: inherit;
     }
 
     .m-canvas__note-remove:hover { opacity: 1; }
@@ -588,6 +594,18 @@
         .m-example__grid { grid-template-columns: 1fr; }
         .m-howto__grid { grid-template-columns: 1fr; }
     }
+
+    /* ---- Screen reader only ---- */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
     </style>
 </head>
 <body>
@@ -645,7 +663,7 @@
 
             <!-- ====== PERSONA SELECTOR ====== -->
             <div class="m-persona-bar m-print-hide">
-                <span class="m-persona-bar__label">Persona</span>
+                <label for="personaSelect" class="m-persona-bar__label">Persona</label>
                 <select class="m-persona-bar__select" id="personaSelect" onchange="selectPersona()">
                     <option value="">Selecione a persona do seu grupo...</option>
                     <option value="0">🔬 Dr. Apressado — Pesquisador Universitário</option>
@@ -660,13 +678,13 @@
                     <option value="9">🏭 Tec Industrial — Engenheiro de Produção</option>
                     <option value="custom">✏️ Persona personalizada...</option>
                 </select>
-                <button class="m-persona-bar__btn" onclick="clearCanvas()">🗑️ Limpar tudo</button>
-                <button class="m-persona-bar__btn" onclick="window.print()">🖨️ Imprimir</button>
+                <button class="m-persona-bar__btn" onclick="clearCanvas()" aria-label="Limpar todos os campos do canvas">🗑️ Limpar tudo</button>
+                <button class="m-persona-bar__btn" onclick="window.print()" aria-label="Imprimir o mapa de empatia">🖨️ Imprimir</button>
             </div>
 
             <!-- ====== PERSONA PREVIEW ====== -->
             <div class="m-persona-preview" id="personaPreview">
-                <div class="m-persona-preview__emoji" id="previewEmoji">🔬</div>
+                <div class="m-persona-preview__emoji" id="previewEmoji" aria-hidden="true">🔬</div>
                 <div class="m-persona-preview__info">
                     <div class="m-persona-preview__name" id="previewName">Dr. Apressado</div>
                     <div class="m-persona-preview__role" id="previewRole">Pesquisador Universitário</div>
@@ -686,11 +704,11 @@
                     <div class="m-canvas__goal-fields">
                         <div class="m-canvas__goal-field">
                             <label for="goalWho">Quem é a persona?</label>
-                            <input type="text" id="goalWho" placeholder="Nome e papel da persona...">
+                            <input type="text" id="goalWho" placeholder="Nome e papel da persona..." oninput="autoSave()">
                         </div>
                         <div class="m-canvas__goal-field">
                             <label for="goalWhat">O que ela precisa decidir sobre PI?</label>
-                            <input type="text" id="goalWhat" placeholder="Decisão ou situação-chave...">
+                            <input type="text" id="goalWhat" placeholder="Decisão ou situação-chave..." oninput="autoSave()">
                         </div>
                     </div>
                 </div>
@@ -700,13 +718,14 @@
                     <div class="m-canvas__cell-header">
                         <div class="m-canvas__cell-num" style="background:var(--m-see)">1</div>
                         <span class="m-canvas__cell-title" style="color:var(--m-see)">O que vê?</span>
-                        <span class="m-canvas__cell-emoji">👀</span>
+                        <span class="m-canvas__cell-emoji" aria-hidden="true">👀</span>
                     </div>
                     <div class="m-canvas__cell-hint">Que informações sobre PI chegam até ela? O que vê colegas fazendo? Que exemplos de proteção (ou falta dela) observa ao redor?</div>
-                    <div class="m-canvas__notes" id="notes-see"></div>
+                    <div class="m-canvas__notes" id="notes-see" aria-live="polite"></div>
                     <div class="m-canvas__input-row">
+                        <label for="input-see" class="sr-only">Adicionar observação ao quadrante O que vê</label>
                         <input class="m-canvas__input" id="input-see" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('see')">
-                        <button class="m-canvas__input-btn" onclick="addNote('see')">+</button>
+                        <button class="m-canvas__input-btn" onclick="addNote('see')" aria-label="Adicionar nota ao quadrante O que vê">+</button>
                     </div>
                 </div>
 
@@ -714,13 +733,14 @@
                     <div class="m-canvas__cell-header">
                         <div class="m-canvas__cell-num" style="background:var(--m-hear)">2</div>
                         <span class="m-canvas__cell-title" style="color:var(--m-hear)">O que ouve?</span>
-                        <span class="m-canvas__cell-emoji">👂</span>
+                        <span class="m-canvas__cell-emoji" aria-hidden="true">👂</span>
                     </div>
                     <div class="m-canvas__cell-hint">O que colegas, chefes, orientadores e a mídia dizem sobre PI? Que conselhos recebe? Que mitos escuta?</div>
-                    <div class="m-canvas__notes" id="notes-hear"></div>
+                    <div class="m-canvas__notes" id="notes-hear" aria-live="polite"></div>
                     <div class="m-canvas__input-row">
+                        <label for="input-hear" class="sr-only">Adicionar observação ao quadrante O que ouve</label>
                         <input class="m-canvas__input" id="input-hear" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('hear')">
-                        <button class="m-canvas__input-btn" onclick="addNote('hear')">+</button>
+                        <button class="m-canvas__input-btn" onclick="addNote('hear')" aria-label="Adicionar nota ao quadrante O que ouve">+</button>
                     </div>
                 </div>
 
@@ -729,13 +749,14 @@
                     <div class="m-canvas__cell-header">
                         <div class="m-canvas__cell-num" style="background:var(--m-say)">3</div>
                         <span class="m-canvas__cell-title" style="color:var(--m-say)">O que fala e faz?</span>
-                        <span class="m-canvas__cell-emoji">💬</span>
+                        <span class="m-canvas__cell-emoji" aria-hidden="true">💬</span>
                     </div>
                     <div class="m-canvas__cell-hint">Que atitudes toma (ou deixa de tomar) em relação à PI? O que diz para os outros sobre proteger criações? Como se comporta?</div>
-                    <div class="m-canvas__notes" id="notes-say"></div>
+                    <div class="m-canvas__notes" id="notes-say" aria-live="polite"></div>
                     <div class="m-canvas__input-row">
+                        <label for="input-say" class="sr-only">Adicionar observação ao quadrante O que fala e faz</label>
                         <input class="m-canvas__input" id="input-say" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('say')">
-                        <button class="m-canvas__input-btn" onclick="addNote('say')">+</button>
+                        <button class="m-canvas__input-btn" onclick="addNote('say')" aria-label="Adicionar nota ao quadrante O que fala e faz">+</button>
                     </div>
                 </div>
 
@@ -743,13 +764,14 @@
                     <div class="m-canvas__cell-header">
                         <div class="m-canvas__cell-num" style="background:var(--m-think)">4</div>
                         <span class="m-canvas__cell-title" style="color:var(--m-think)">O que pensa e sente?</span>
-                        <span class="m-canvas__cell-emoji">🧠</span>
+                        <span class="m-canvas__cell-emoji" aria-hidden="true">🧠</span>
                     </div>
                     <div class="m-canvas__cell-hint">Quais preocupações, medos e expectativas ela tem sobre PI? O que realmente importa para ela? O que a mantém acordada à noite?</div>
-                    <div class="m-canvas__notes" id="notes-think"></div>
+                    <div class="m-canvas__notes" id="notes-think" aria-live="polite"></div>
                     <div class="m-canvas__input-row">
+                        <label for="input-think" class="sr-only">Adicionar observação ao quadrante O que pensa e sente</label>
                         <input class="m-canvas__input" id="input-think" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter')addNote('think')">
-                        <button class="m-canvas__input-btn" onclick="addNote('think')">+</button>
+                        <button class="m-canvas__input-btn" onclick="addNote('think')" aria-label="Adicionar nota ao quadrante O que pensa e sente">+</button>
                     </div>
                 </div>
 
@@ -758,13 +780,14 @@
                     <div class="m-canvas__cell-header">
                         <div class="m-canvas__cell-num" style="background:var(--m-pain)">5</div>
                         <span class="m-canvas__cell-title" style="color:var(--m-pain)">Dores</span>
-                        <span class="m-canvas__cell-emoji">😣</span>
+                        <span class="m-canvas__cell-emoji" aria-hidden="true">😣</span>
                     </div>
                     <div class="m-canvas__cell-hint">Quais são seus maiores obstáculos para proteger suas criações? Medos, frustrações, riscos que enfrenta? O que pode dar errado?</div>
-                    <div class="m-canvas__notes" id="notes-pain"></div>
+                    <div class="m-canvas__notes" id="notes-pain" aria-live="polite"></div>
                     <div class="m-canvas__input-row">
+                        <label for="input-pain" class="sr-only">Adicionar observação ao quadrante Dores</label>
                         <input class="m-canvas__input" id="input-pain" placeholder="Adicionar dor..." onkeydown="if(event.key==='Enter')addNote('pain')">
-                        <button class="m-canvas__input-btn" onclick="addNote('pain')">+</button>
+                        <button class="m-canvas__input-btn" onclick="addNote('pain')" aria-label="Adicionar nota ao quadrante Dores">+</button>
                     </div>
                 </div>
 
@@ -772,22 +795,23 @@
                     <div class="m-canvas__cell-header">
                         <div class="m-canvas__cell-num" style="background:var(--m-gain)">6</div>
                         <span class="m-canvas__cell-title" style="color:var(--m-gain)">Ganhos esperados</span>
-                        <span class="m-canvas__cell-emoji">🎯</span>
+                        <span class="m-canvas__cell-emoji" aria-hidden="true">🎯</span>
                     </div>
                     <div class="m-canvas__cell-hint">O que ela ganha ao proteger sua criação? Que resultado de sucesso ela imagina? Quais métricas indicariam que deu certo?</div>
-                    <div class="m-canvas__notes" id="notes-gain"></div>
+                    <div class="m-canvas__notes" id="notes-gain" aria-live="polite"></div>
                     <div class="m-canvas__input-row">
+                        <label for="input-gain" class="sr-only">Adicionar observação ao quadrante Ganhos esperados</label>
                         <input class="m-canvas__input" id="input-gain" placeholder="Adicionar ganho..." onkeydown="if(event.key==='Enter')addNote('gain')">
-                        <button class="m-canvas__input-btn" onclick="addNote('gain')">+</button>
+                        <button class="m-canvas__input-btn" onclick="addNote('gain')" aria-label="Adicionar nota ao quadrante Ganhos esperados">+</button>
                     </div>
                 </div>
             </div>
 
             <!-- ====== EXAMPLE (collapsible) ====== -->
             <div class="m-example" id="exampleSection">
-                <div class="m-example__header" onclick="document.getElementById('exampleSection').classList.toggle('open')">
+                <div class="m-example__header" role="button" tabindex="0" aria-expanded="false" onclick="toggleExample()" onkeydown="handleExampleKey(event)">
                     <span class="m-example__header-title">📝 Ver exemplo preenchido — Dr. Apressado</span>
-                    <span class="m-example__toggle">
+                    <span class="m-example__toggle" aria-hidden="true">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
                     </span>
                 </div>
@@ -894,6 +918,50 @@
     const notes = {};
     sections.forEach(s => notes[s] = []);
 
+    // ---- Persistence helpers ----
+    function canPersist() {
+        return typeof PIThinking !== 'undefined' && PIThinking.saveProgress && PIThinking.loadProgress;
+    }
+
+    function autoSave() {
+        if (!canPersist()) return;
+        const data = {
+            notes: {},
+            goalWho: document.getElementById('goalWho').value,
+            goalWhat: document.getElementById('goalWhat').value,
+            persona: document.getElementById('personaSelect').value
+        };
+        sections.forEach(s => { data.notes[s] = notes[s]; });
+        PIThinking.saveProgress('mapa-empatia', data);
+    }
+
+    function loadSaved() {
+        if (!canPersist()) return;
+        const data = PIThinking.loadProgress('mapa-empatia');
+        if (!data) return;
+
+        // Restore notes
+        if (data.notes) {
+            sections.forEach(s => {
+                if (Array.isArray(data.notes[s])) {
+                    notes[s] = data.notes[s];
+                    renderNotes(s);
+                }
+            });
+        }
+
+        // Restore goal fields
+        if (data.goalWho) document.getElementById('goalWho').value = data.goalWho;
+        if (data.goalWhat) document.getElementById('goalWhat').value = data.goalWhat;
+
+        // Restore persona selection
+        if (data.persona) {
+            document.getElementById('personaSelect').value = data.persona;
+            selectPersona();
+        }
+    }
+
+    // ---- Persona selection ----
     function selectPersona() {
         const val = document.getElementById('personaSelect').value;
         const preview = document.getElementById('personaPreview');
@@ -905,6 +973,7 @@
                 document.getElementById('goalWhat').value = '';
                 document.getElementById('goalWho').focus();
             }
+            autoSave();
             return;
         }
 
@@ -916,8 +985,10 @@
         document.getElementById('goalWho').value = p.name + ' — ' + p.role;
         document.getElementById('goalWhat').value = p.goal;
         preview.classList.add('visible');
+        autoSave();
     }
 
+    // ---- Notes management ----
     function addNote(section) {
         const input = document.getElementById('input-' + section);
         const text = input.value.trim();
@@ -927,11 +998,13 @@
         renderNotes(section);
         input.value = '';
         input.focus();
+        autoSave();
     }
 
     function removeNote(section, index) {
         notes[section].splice(index, 1);
         renderNotes(section);
+        autoSave();
     }
 
     function renderNotes(section) {
@@ -939,11 +1012,27 @@
         container.innerHTML = notes[section].map((text, i) => `
             <div class="m-canvas__note">
                 <span>${text}</span>
-                <span class="m-canvas__note-remove" onclick="removeNote('${section}', ${i})">✕</span>
+                <button class="m-canvas__note-remove" onclick="removeNote('${section}', ${i})" aria-label="Remover nota: ${text}">✕</button>
             </div>
         `).join('');
     }
 
+    // ---- Example toggle ----
+    function toggleExample() {
+        const el = document.getElementById('exampleSection');
+        el.classList.toggle('open');
+        const header = el.querySelector('.m-example__header');
+        header.setAttribute('aria-expanded', el.classList.contains('open'));
+    }
+
+    function handleExampleKey(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleExample();
+        }
+    }
+
+    // ---- Clear ----
     function clearCanvas() {
         if (!confirm('Limpar todos os campos do canvas?')) return;
         sections.forEach(s => {
@@ -954,7 +1043,13 @@
         document.getElementById('goalWhat').value = '';
         document.getElementById('personaSelect').value = '';
         document.getElementById('personaPreview').classList.remove('visible');
+        if (canPersist()) {
+            PIThinking.clearProgress('mapa-empatia');
+        }
     }
+
+    // ---- Init ----
+    loadSaved();
     </script>
 </body>
 </html>

@@ -146,7 +146,7 @@
         color: var(--p-text-muted);
     }
 
-    .p-controls__actions { display: flex; gap: 8px; }
+    .p-controls__actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .p-ctrl-btn {
         padding: 8px 18px;
@@ -157,6 +157,8 @@
         color: var(--p-text);
         cursor: pointer;
         transition: var(--p-transition);
+        text-decoration: none;
+        display: inline-block;
     }
 
     .p-ctrl-btn:hover {
@@ -189,7 +191,7 @@
     /* ---- Card (flip) ---- */
     .p-card-wrapper {
         perspective: 1000px;
-        height: 520px;
+        height: 600px;
     }
 
     .p-card {
@@ -199,6 +201,12 @@
         transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         transform-style: preserve-3d;
         cursor: pointer;
+    }
+
+    .p-card:focus-visible {
+        outline: 3px solid var(--p-accent);
+        outline-offset: 4px;
+        border-radius: 4px;
     }
 
     .p-card.flipped { transform: rotateY(180deg); }
@@ -301,11 +309,12 @@
 
     /* ---- Back ---- */
     .p-card__back-header {
-        padding: 20px 24px;
+        padding: 16px 20px;
         border-bottom: 1px solid var(--p-border);
         display: flex;
         align-items: center;
         gap: 12px;
+        flex-shrink: 0;
     }
 
     .p-card__back-avatar {
@@ -319,13 +328,13 @@
     }
 
     .p-card__back-body {
-        padding: 20px 24px;
+        padding: 16px 20px;
         flex: 1;
         overflow-y: auto;
     }
 
     .p-card__detail {
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }
 
     .p-card__detail-label {
@@ -336,7 +345,7 @@
     }
 
     .p-card__detail-value {
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         color: var(--p-text);
         line-height: 1.5;
     }
@@ -351,13 +360,16 @@
     }
 
     .p-card__back-footer {
-        padding: 12px 24px;
+        padding: 10px 20px;
         border-top: 1px solid var(--p-border);
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         color: var(--p-text-muted);
         text-align: center;
         font-weight: 600;
         letter-spacing: 0.5px;
+        flex-shrink: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* ---- Color Themes per Card ---- */
@@ -473,6 +485,26 @@
         .p-instructions { flex-direction: column; }
         .p-guide { padding: 24px; }
     }
+
+    @media (max-width: 400px) {
+        .p-card__back-footer {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    }
+
+    /* ---- Screen reader only ---- */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
     </style>
 </head>
 <body>
@@ -530,7 +562,7 @@
 
             <!-- ====== INSTRUCTIONS ====== -->
             <div class="p-instructions">
-                <div class="p-instructions__icon">🃏</div>
+                <div class="p-instructions__icon" aria-hidden="true">🃏</div>
                 <div class="p-instructions__content">
                     <h3>Como usar as cartas</h3>
                     <p>Clique em qualquer carta para virá-la e ver os detalhes completos da persona. Na oficina presencial, cada grupo sorteia uma carta e deve se colocar no lugar da persona para preencher o Canvas Mapa de Empatia do Inventor. Use o botão "Sortear" para distribuir aleatoriamente.</p>
@@ -541,10 +573,10 @@
             <div class="p-controls p-print-hide">
                 <span class="p-controls__label">10 Personas</span>
                 <div class="p-controls__actions">
-                    <button class="p-ctrl-btn" onclick="shuffleCards()">🎲 Sortear uma</button>
-                    <button class="p-ctrl-btn" onclick="showAll()">📋 Ver todas</button>
-                    <button class="p-ctrl-btn" onclick="flipAll()">🔄 Virar todas</button>
-                    <button class="p-ctrl-btn" onclick="window.print()">🖨️ Imprimir</button>
+                    <button class="p-ctrl-btn" onclick="shuffleCards()" aria-label="Sortear uma persona aleatoriamente">🎲 Sortear uma</button>
+                    <button class="p-ctrl-btn" onclick="showAll()" aria-label="Mostrar todas as personas">📋 Ver todas</button>
+                    <button class="p-ctrl-btn" onclick="flipAll()" aria-label="Virar todas as cartas">🔄 Virar todas</button>
+                    <button class="p-ctrl-btn" onclick="window.print()" aria-label="Imprimir as cartas personas">🖨️ Imprimir</button>
                 </div>
             </div>
 
@@ -686,7 +718,7 @@
             piColor: "#2D9F6F",
             dor: "Medo de que o conhecimento ancestral seja apropriado sem retorno justo para a comunidade.",
             ganho: "Garantir repartição de benefícios e preservação do conhecimento tradicional.",
-            legal: "Lei 13.123/2015 (Marco Legal da Biodiversidade), Art. 8º e 9º — Acesso a CTA exige consentimento prévio informado e repartição de benefícios."
+            legal: "Lei 13.123/2015, Art. 8º e 9º — Acesso a CTA exige consentimento prévio informado e repartição de benefícios."
         },
         {
             id: 7, color: "teal", emoji: "🚀",
@@ -753,11 +785,11 @@
         grid.className = list.length === 1 ? 'p-grid p-grid--single' : 'p-grid';
         grid.innerHTML = list.map(p => `
             <div class="p-card-wrapper" id="cardWrapper-${p.id}">
-                <div class="p-card p-card--${p.color}" id="card-${p.id}" onclick="this.classList.toggle('flipped')">
+                <div class="p-card p-card--${p.color}" id="card-${p.id}" role="button" tabindex="0" aria-label="Carta persona: ${p.name} — ${p.role}. Clique ou pressione Enter para virar." onclick="toggleCard(this)" onkeydown="handleCardKey(event, this)">
                     <!-- FRONT -->
                     <div class="p-card__face p-card__front">
                         <div class="p-card__banner">
-                            <div class="p-card__avatar">${p.emoji}</div>
+                            <div class="p-card__avatar" aria-hidden="true">${p.emoji}</div>
                         </div>
                         <div class="p-card__front-body">
                             <div class="p-card__name">${p.name}</div>
@@ -767,13 +799,13 @@
                                 ${p.tags.map(t => `<span class="p-card__tag">${t}</span>`).join('')}
                             </div>
                         </div>
-                        <div class="p-card__flip-hint">Clique para virar →</div>
+                        <div class="p-card__flip-hint" aria-hidden="true">Clique para virar →</div>
                     </div>
 
                     <!-- BACK -->
                     <div class="p-card__face p-card__back">
                         <div class="p-card__back-header">
-                            <span class="p-card__back-avatar">${p.emoji}</span>
+                            <span class="p-card__back-avatar" aria-hidden="true">${p.emoji}</span>
                             <span class="p-card__back-name">${p.name} — ${p.role}</span>
                         </div>
                         <div class="p-card__back-body">
@@ -800,11 +832,22 @@
                                 <div class="p-card__detail-value">${p.ganho}</div>
                             </div>
                         </div>
-                        <div class="p-card__back-footer">📜 ${p.legal}</div>
+                        <div class="p-card__back-footer">${p.legal}</div>
                     </div>
                 </div>
             </div>
         `).join('');
+    }
+
+    function toggleCard(cardEl) {
+        cardEl.classList.toggle('flipped');
+    }
+
+    function handleCardKey(event, cardEl) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleCard(cardEl);
+        }
     }
 
     function shuffleCards() {

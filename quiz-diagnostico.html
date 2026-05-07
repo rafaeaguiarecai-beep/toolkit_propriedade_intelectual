@@ -264,6 +264,11 @@
         background: var(--q-bg);
     }
 
+    .q-option:focus-visible {
+        outline: 2px solid var(--q-accent);
+        outline-offset: 2px;
+    }
+
     .q-option__marker {
         width: 28px;
         height: 28px;
@@ -285,6 +290,7 @@
         font-size: 0.95rem;
         color: var(--q-text);
         line-height: 1.5;
+        word-break: break-word;
     }
 
     .q-option.selected {
@@ -697,6 +703,23 @@
         .q-results__hero { padding: 32px 24px; }
         .q-results__score-num { font-size: 3.5rem; }
     }
+
+    @media (max-width: 480px) {
+        .q-option {
+            padding: 12px 14px;
+        }
+        .q-option__text {
+            font-size: 0.88rem;
+        }
+        .q-option__marker {
+            width: 24px;
+            height: 24px;
+            font-size: 0.7rem;
+        }
+        .q-card__question {
+            font-size: 1rem;
+        }
+    }
     </style>
 </head>
 <body>
@@ -771,7 +794,7 @@
                         <div class="q-start__rule-label">Correta</div>
                     </div>
                 </div>
-                <button class="q-btn q-btn--primary" onclick="startQuiz()">Iniciar Quiz</button>
+                <button class="q-btn q-btn--primary" onclick="startQuiz()" aria-label="Iniciar o quiz diagnóstico">Iniciar Quiz</button>
             </div>
 
             <!-- ====== PROGRESS ====== -->
@@ -790,7 +813,7 @@
 
             <!-- ====== FINISH BUTTON ====== -->
             <div id="finishSection" style="display:none; text-align:center; margin-top:32px;" class="q-print-hide">
-                <button class="q-btn q-btn--primary q-btn--block" onclick="showResults()" id="finishBtn" disabled>
+                <button class="q-btn q-btn--primary q-btn--block" onclick="showResults()" id="finishBtn" disabled aria-label="Finalizar quiz e ver resultado">
                     Finalizar e ver resultado
                 </button>
                 <p style="margin-top:10px; font-size:0.85rem; color:var(--q-text-muted);" id="finishHint">Responda todas as questões para habilitar.</p>
@@ -830,8 +853,8 @@
                 </div>
 
                 <div style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;" class="q-print-hide">
-                    <button class="q-btn q-btn--outline" onclick="window.print()">🖨️ Imprimir resultado</button>
-                    <button class="q-btn q-btn--outline" onclick="restartQuiz()">🔄 Refazer quiz</button>
+                    <button class="q-btn q-btn--outline" onclick="window.print()" aria-label="Imprimir resultado">🖨️ Imprimir resultado</button>
+                    <button class="q-btn q-btn--outline" onclick="restartQuiz()" aria-label="Refazer o quiz">🔄 Refazer quiz</button>
                     <a href="index.html" class="q-btn q-btn--outline">← Voltar ao Toolkit</a>
                 </div>
             </div>
@@ -842,7 +865,7 @@
     <footer class="footer">
         <div class="container">
             <div class="footer__bottom" style="border:none; padding:0;">
-                <p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p>
+                <p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>.</p>
             </div>
         </div>
     </footer>
@@ -853,7 +876,7 @@
        QUIZ DIAGNÓSTICO — ENGINE
        ============================================= */
 
-    const questions = [
+    var questions = [
         {
             id: 1,
             category: "Conceitos Básicos",
@@ -997,12 +1020,12 @@
     ];
 
     // State
-    let answered = 0;
-    let score = 0;
-    let answers = {};
+    var answered = 0;
+    var score = 0;
+    var answers = {};
 
     // Categories for breakdown
-    const categories = {
+    var categories = {
         "Conceitos Básicos": { total: 0, correct: 0 },
         "Tipos de PI": { total: 0, correct: 0 },
         "Patentes": { total: 0, correct: 0 },
@@ -1011,7 +1034,7 @@
         "Software": { total: 0, correct: 0 }
     };
 
-    questions.forEach(q => {
+    questions.forEach(function(q) {
         if (categories[q.category]) categories[q.category].total++;
     });
 
@@ -1023,40 +1046,47 @@
     }
 
     function renderQuestions() {
-        const container = document.getElementById('questionsContainer');
-        container.innerHTML = questions.map((q, i) => `
-            <div class="q-card" id="qcard-${q.id}" style="animation-delay: ${i * 0.05}s">
-                <div class="q-card__header">
-                    <div class="q-card__number">${q.id}</div>
-                    <div>
-                        <span class="q-card__category">${q.category}</span>
-                        <div class="q-card__question">${q.question}</div>
-                    </div>
-                </div>
-                <div class="q-card__body">
-                    <div class="q-options" id="options-${q.id}">
-                        ${q.options.map(opt => `
-                            <div class="q-option" data-question="${q.id}" data-letter="${opt.letter}" onclick="selectOption(this)">
-                                <div class="q-option__marker">${opt.letter}</div>
-                                <div class="q-option__text">${opt.text}</div>
-                                <span class="q-option__icon"></span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="q-explanation" id="explanation-${q.id}">
-                        <div class="q-explanation__title">Comentário</div>
-                        <div class="q-explanation__text">${q.explanation}</div>
-                        <div class="q-explanation__legal">📜 ${q.legal}</div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+        var container = document.getElementById('questionsContainer');
+        container.innerHTML = questions.map(function(q, i) {
+            return '<div class="q-card" id="qcard-' + q.id + '" style="animation-delay: ' + (i * 0.05) + 's">' +
+                '<div class="q-card__header">' +
+                    '<div class="q-card__number">' + q.id + '</div>' +
+                    '<div>' +
+                        '<span class="q-card__category">' + q.category + '</span>' +
+                        '<div class="q-card__question">' + q.question + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="q-card__body">' +
+                    '<div class="q-options" id="options-' + q.id + '">' +
+                        q.options.map(function(opt) {
+                            return '<div class="q-option" role="button" tabindex="0" data-question="' + q.id + '" data-letter="' + opt.letter + '" onclick="selectOption(this)" onkeydown="handleOptionKey(event, this)" aria-label="Opção ' + opt.letter + ': ' + opt.text + '">' +
+                                '<div class="q-option__marker">' + opt.letter + '</div>' +
+                                '<div class="q-option__text">' + opt.text + '</div>' +
+                                '<span class="q-option__icon"></span>' +
+                            '</div>';
+                        }).join('') +
+                    '</div>' +
+                    '<div class="q-explanation" id="explanation-' + q.id + '">' +
+                        '<div class="q-explanation__title">Comentário</div>' +
+                        '<div class="q-explanation__text">' + q.explanation + '</div>' +
+                        '<div class="q-explanation__legal">📜 ' + q.legal + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    function handleOptionKey(e, el) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectOption(el);
+        }
     }
 
     function selectOption(el) {
-        const qId = parseInt(el.dataset.question);
-        const letter = el.dataset.letter;
-        const q = questions.find(x => x.id === qId);
+        var qId = parseInt(el.dataset.question);
+        var letter = el.dataset.letter;
+        var q = questions.find(function(x) { return x.id === qId; });
 
         // Prevent re-answering
         if (answers[qId] !== undefined) return;
@@ -1065,16 +1095,17 @@
         answers[qId] = letter;
         answered++;
 
-        const isCorrect = letter === q.correct;
+        var isCorrect = letter === q.correct;
         if (isCorrect) {
             score++;
             categories[q.category].correct++;
         }
 
         // Visual feedback
-        const allOptions = document.querySelectorAll(`#options-${qId} .q-option`);
-        allOptions.forEach(opt => {
+        var allOptions = document.querySelectorAll('#options-' + qId + ' .q-option');
+        allOptions.forEach(function(opt) {
             opt.classList.add('disabled');
+            opt.setAttribute('tabindex', '-1');
             if (opt.dataset.letter === q.correct) {
                 opt.classList.add('correct');
                 opt.querySelector('.q-option__icon').textContent = '✓';
@@ -1086,13 +1117,13 @@
         });
 
         // Show explanation
-        const explanation = document.getElementById(`explanation-${qId}`);
+        var explanation = document.getElementById('explanation-' + qId);
         explanation.classList.add('visible');
         explanation.classList.add(isCorrect ? 'q-explanation--correct' : 'q-explanation--wrong');
         explanation.querySelector('.q-explanation__title').textContent = isCorrect ? '✅ Correto!' : '❌ Incorreto — veja o comentário:';
 
         // Mark card
-        document.getElementById(`qcard-${qId}`).classList.add('q-card--answered');
+        document.getElementById('qcard-' + qId).classList.add('q-card--answered');
 
         // Update progress
         updateProgress();
@@ -1101,14 +1132,13 @@
         if (answered === questions.length) {
             document.getElementById('finishBtn').disabled = false;
             document.getElementById('finishHint').textContent = 'Todas as questões respondidas. Clique para ver seu resultado!';
-            document.getElementById('finishBtn').classList.add('q-btn--primary');
         }
     }
 
     function updateProgress() {
-        const pct = (answered / questions.length) * 100;
+        var pct = (answered / questions.length) * 100;
         document.getElementById('progressFill').style.width = pct + '%';
-        document.getElementById('progressCount').textContent = `${answered} / ${questions.length}`;
+        document.getElementById('progressCount').textContent = answered + ' / ' + questions.length;
     }
 
     function showResults() {
@@ -1118,23 +1148,23 @@
         document.getElementById('progressSection').style.display = 'none';
 
         // Show results
-        const panel = document.getElementById('resultsPanel');
+        var panel = document.getElementById('resultsPanel');
         panel.classList.add('visible');
 
         // Score
-        const pct = (score / questions.length) * 100;
+        var pct = (score / questions.length) * 100;
         document.getElementById('scoreNum').textContent = score;
 
-        const bar = document.getElementById('scoreBar');
-        let barClass = 'q-results__bar-fill--low';
+        var bar = document.getElementById('scoreBar');
+        var barClass = 'q-results__bar-fill--low';
         if (pct >= 70) barClass = 'q-results__bar-fill--good';
         else if (pct >= 40) barClass = 'q-results__bar-fill--ok';
         bar.className = 'q-results__bar-fill ' + barClass;
-        setTimeout(() => { bar.style.width = pct + '%'; }, 300);
+        setTimeout(function() { bar.style.width = pct + '%'; }, 300);
 
         // Icon & message
-        let icon = '🌱';
-        let msg = '';
+        var icon = '🌱';
+        var msg = '';
         if (pct >= 80) {
             icon = '🏆';
             msg = 'Excelente! Você já tem uma base sólida em PI. A oficina vai aprofundar e ampliar seus conhecimentos.';
@@ -1150,23 +1180,31 @@
         }
         document.getElementById('resultsIcon').textContent = icon;
         document.getElementById('scoreMessage').textContent = msg;
-        document.getElementById('scoreCode').textContent = `D-${score}`;
+        document.getElementById('scoreCode').textContent = 'D-' + score;
+
+        // Save to localStorage
+        if (typeof window.PIThinking !== 'undefined' && window.PIThinking.saveProgress) {
+            window.PIThinking.saveProgress('quiz-diagnostico', {
+                score: score,
+                code: 'D-' + score,
+                date: new Date().toISOString()
+            });
+        }
 
         // Breakdown
-        const breakdownContainer = document.getElementById('breakdownItems');
+        var breakdownContainer = document.getElementById('breakdownItems');
         breakdownContainer.innerHTML = '';
-        Object.entries(categories).forEach(([cat, data]) => {
+        Object.keys(categories).forEach(function(cat) {
+            var data = categories[cat];
             if (data.total === 0) return;
-            const catPct = (data.correct / data.total) * 100;
-            breakdownContainer.innerHTML += `
-                <div class="q-breakdown__item">
-                    <span class="q-breakdown__item-label">${cat}</span>
-                    <span class="q-breakdown__item-score">${data.correct}/${data.total}</span>
-                    <div class="q-breakdown__item-bar">
-                        <div class="q-breakdown__item-fill" style="width:${catPct}%"></div>
-                    </div>
-                </div>
-            `;
+            var catPct = (data.correct / data.total) * 100;
+            breakdownContainer.innerHTML += '<div class="q-breakdown__item">' +
+                '<span class="q-breakdown__item-label">' + cat + '</span>' +
+                '<span class="q-breakdown__item-score">' + data.correct + '/' + data.total + '</span>' +
+                '<div class="q-breakdown__item-bar">' +
+                    '<div class="q-breakdown__item-fill" style="width:' + catPct + '%"></div>' +
+                '</div>' +
+            '</div>';
         });
 
         // Scroll to top
@@ -1177,7 +1215,7 @@
         answered = 0;
         score = 0;
         answers = {};
-        Object.keys(categories).forEach(k => { categories[k].correct = 0; });
+        Object.keys(categories).forEach(function(k) { categories[k].correct = 0; });
 
         document.getElementById('resultsPanel').classList.remove('visible');
         document.getElementById('questionsContainer').style.display = 'block';

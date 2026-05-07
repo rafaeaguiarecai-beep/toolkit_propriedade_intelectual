@@ -42,6 +42,7 @@
     .t-filter { display:flex; gap:8px; margin-bottom:40px; flex-wrap:wrap; justify-content:center; }
     .t-filter__btn { padding:6px 16px; font-family:var(--t-font-sans); font-size:0.8rem; font-weight:600; border:1px solid var(--t-border); background:var(--t-surface); color:var(--t-text-muted); cursor:pointer; transition:var(--t-transition); }
     .t-filter__btn:hover { border-color:var(--t-text-muted); color:var(--t-text); }
+    .t-filter__btn:focus-visible { outline:3px solid var(--t-accent); outline-offset:2px; }
     .t-filter__btn.active { background:var(--t-text); color:var(--t-surface); border-color:var(--t-text); }
 
     /* Timeline */
@@ -65,6 +66,11 @@
         background:var(--t-surface); border:1px solid var(--t-border);
         padding:24px 28px; transition:var(--t-transition);
         cursor:pointer; position:relative; overflow:hidden;
+    }
+
+    .t-event__card:focus-visible {
+        outline:3px solid var(--t-accent);
+        outline-offset:2px;
     }
 
     .t-event__card::before {
@@ -176,19 +182,19 @@
             </div>
 
             <div class="t-filter t-print-hide" id="filterBar">
-                <button class="t-filter__btn active" onclick="filterEvents('all')">Todos</button>
-                <button class="t-filter__btn" onclick="filterEvents('internacional')">🌍 Internacional</button>
-                <button class="t-filter__btn" onclick="filterEvents('nacional')">🇧🇷 Nacional</button>
-                <button class="t-filter__btn" onclick="filterEvents('lei')">📜 Legislação</button>
-                <button class="t-filter__btn" onclick="filterEvents('institucional')">🏛️ Institucional</button>
-                <button class="t-filter__btn" onclick="filterEvents('judicial')">⚖️ Judicial</button>
+                <button class="t-filter__btn active" onclick="filterEvents('all', this)" aria-label="Mostrar todos os eventos">Todos</button>
+                <button class="t-filter__btn" onclick="filterEvents('internacional', this)" aria-label="Filtrar eventos internacionais">🌍 Internacional</button>
+                <button class="t-filter__btn" onclick="filterEvents('nacional', this)" aria-label="Filtrar eventos nacionais">🇧🇷 Nacional</button>
+                <button class="t-filter__btn" onclick="filterEvents('lei', this)" aria-label="Filtrar legislação">📜 Legislação</button>
+                <button class="t-filter__btn" onclick="filterEvents('institucional', this)" aria-label="Filtrar eventos institucionais">🏛️ Institucional</button>
+                <button class="t-filter__btn" onclick="filterEvents('judicial', this)" aria-label="Filtrar decisões judiciais">⚖️ Judicial</button>
             </div>
 
             <div class="t-timeline" id="timeline"></div>
 
             <div style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:40px;" class="t-print-hide">
-                <button class="t-filter__btn" onclick="expandAll()">📖 Expandir todos</button>
-                <button class="t-filter__btn" onclick="window.print()">🖨️ Imprimir pôster</button>
+                <button class="t-filter__btn" onclick="expandAll()" aria-label="Expandir todos os eventos da linha do tempo">📖 Expandir todos</button>
+                <button class="t-filter__btn" onclick="window.print()" aria-label="Imprimir a linha do tempo como pôster">🖨️ Imprimir pôster</button>
                 <a href="index.html" class="t-filter__btn">← Voltar ao Toolkit</a>
             </div>
         </div>
@@ -240,7 +246,7 @@
             .map(e => `
                 <div class="t-event t-event--${e.category}">
                     <div class="t-event__dot"></div>
-                    <div class="t-event__card" onclick="this.classList.toggle('expanded')">
+                    <div class="t-event__card" role="button" tabindex="0" aria-expanded="false" onclick="toggleEventCard(this)" onkeydown="handleEventCardKey(event, this)">
                         <div class="t-event__year">${e.year}</div>
                         <div class="t-event__title">${e.title}</div>
                         <div class="t-event__text">${e.text}</div>
@@ -253,14 +259,31 @@
             `).join('');
     }
 
-    function filterEvents(cat) {
+    function toggleEventCard(cardEl) {
+        const isExpanded = cardEl.classList.toggle('expanded');
+        cardEl.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+    }
+
+    function handleEventCardKey(event, cardEl) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleEventCard(cardEl);
+        }
+    }
+
+    function filterEvents(cat, element) {
         document.querySelectorAll('.t-filter__btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        if (element) {
+            element.classList.add('active');
+        }
         renderTimeline(cat);
     }
 
     function expandAll() {
-        document.querySelectorAll('.t-event__card').forEach(c => c.classList.add('expanded'));
+        document.querySelectorAll('.t-event__card').forEach(c => {
+            c.classList.add('expanded');
+            c.setAttribute('aria-expanded', 'true');
+        });
     }
 
     renderTimeline('all');

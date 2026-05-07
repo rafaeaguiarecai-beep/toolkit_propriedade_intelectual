@@ -17,10 +17,10 @@
         .glossary-search input {
             width: 100%; padding: 16px 24px 16px 48px; border: 2px solid var(--border-color); border-radius: var(--radius-full);
             font-family: var(--font-primary); font-size: 1rem; color: var(--text-dark); background: var(--bg-white);
-            transition: var(--transition);
+            transition: var(--transition); box-sizing: border-box;
         }
         .glossary-search input:focus { border-color: var(--accent); outline: none; box-shadow: var(--shadow-glow); }
-        .glossary-search__icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-light); }
+        .glossary-search__icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-light); pointer-events: none; }
 
         .glossary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-md); }
         .glossary-card {
@@ -41,6 +41,7 @@
         .glossary-tags { display: flex; justify-content: center; gap: 8px; margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
         .glossary-tag { padding: 6px 14px; border-radius: 50px; font-size: 0.85rem; font-weight: 500; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-white); color: var(--text-medium); transition: var(--transition); }
         .glossary-tag:hover, .glossary-tag.active { background: var(--primary-dark); color: white; border-color: var(--primary-dark); }
+        .glossary-tag:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
         .no-results { text-align: center; padding: var(--spacing-xl); color: var(--text-light); font-size: 1.1rem; display: none; }
         .no-results.visible { display: block; }
@@ -83,21 +84,21 @@
                 <p>Busque termos essenciais de Propriedade Intelectual. Clique nas categorias para filtrar ou digite para pesquisar.</p>
             </div>
 
-            <div class="glossary-search">
-                <span class="glossary-search__icon">🔍</span>
-                <input type="text" id="searchInput" placeholder="Buscar termo... (ex: patente, marca, TRL)" oninput="filterGlossary()">
+            <div class="glossary-search" role="search">
+                <span class="glossary-search__icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" placeholder="Buscar termo... (ex: patente, marca, TRL)" oninput="filterGlossary()" aria-label="Buscar termo no glossário de Propriedade Intelectual">
             </div>
 
             <div class="glossary-tags">
-                <button class="glossary-tag active" onclick="filterCategory('all')">Todos</button>
-                <button class="glossary-tag" onclick="filterCategory('patente')">Patentes</button>
-                <button class="glossary-tag" onclick="filterCategory('marca')">Marcas</button>
-                <button class="glossary-tag" onclick="filterCategory('autoral')">Direito Autoral</button>
-                <button class="glossary-tag" onclick="filterCategory('geral')">Geral</button>
+                <button class="glossary-tag active" onclick="filterCategory('all', this)" aria-label="Filtrar por categoria: Todos os termos">Todos</button>
+                <button class="glossary-tag" onclick="filterCategory('patente', this)" aria-label="Filtrar por categoria: Patentes">Patentes</button>
+                <button class="glossary-tag" onclick="filterCategory('marca', this)" aria-label="Filtrar por categoria: Marcas">Marcas</button>
+                <button class="glossary-tag" onclick="filterCategory('autoral', this)" aria-label="Filtrar por categoria: Direito Autoral">Direito Autoral</button>
+                <button class="glossary-tag" onclick="filterCategory('geral', this)" aria-label="Filtrar por categoria: Termos gerais">Geral</button>
             </div>
 
-            <div class="glossary-grid" id="glossaryGrid"></div>
-            <div class="no-results" id="noResults">Nenhum termo encontrado. Tente outra busca.</div>
+            <div class="glossary-grid" id="glossaryGrid" aria-live="polite"></div>
+            <div class="no-results" id="noResults" aria-live="polite">Nenhum termo encontrado. Tente outra busca.</div>
         </div>
     </main>
 
@@ -132,7 +133,7 @@
         { term: "Spin-off", category: "geral", def: "Empresa criada a partir de uma instituição de pesquisa para explorar comercialmente uma tecnologia desenvolvida internamente." },
         { term: "Start-up", category: "geral", def: "Empresa emergente de base tecnológica, geralmente com modelo de negócio escalável e alto potencial de crescimento." },
         { term: "Know-how", category: "geral", def: "Conhecimento técnico prático, não patenteado, acumulado por experiência. Protegido por contratos de confidencialidade e segredo industrial." },
-        { term: "Segredo Industrial", category: "geral", def: "Informação técnica ou comercial de valor econômico que é mantida em sigelo. Não requer registro, mas exige medidas de proteção ativas." },
+        { term: "Segredo Industrial", category: "geral", def: "Informação técnica ou comercial de valor econômico que é mantida em sigilo. Não requer registro, mas exige medidas de proteção ativas." },
         { term: "Busca de Anterioridade", category: "patente", def: "Pesquisa em bases de dados de PI para verificar se uma invenção ou marca já foi depositada ou registrada anteriormente. Etapa crucial antes do depósito." },
         { term: "Depósito", category: "geral", def: "Ato de apresentar o pedido de proteção de PI ao órgão competente (INPI, SNPC, etc.). A data do depósito é crucial para definir a prioridade." },
         { term: "Exame Técnico", category: "patente", def: "Análise realizada pelo INPI para verificar se o pedido de patente atende aos requisitos legais. No Brasil, o exame é requerido pelo depositante em até 36 meses." },
@@ -146,14 +147,15 @@
 
     let currentCategory = 'all';
 
-    function renderTerms(filterText = '') {
+    function renderTerms(filterText) {
+        filterText = filterText || '';
         const grid = document.getElementById('glossaryGrid');
         const noResults = document.getElementById('noResults');
         grid.innerHTML = '';
 
-        const filtered = terms.filter(t => {
-            const matchesCategory = currentCategory === 'all' || t.category === currentCategory;
-            const matchesText = !filterText || t.term.toLowerCase().includes(filterText.toLowerCase()) || t.def.toLowerCase().includes(filterText.toLowerCase());
+        const filtered = terms.filter(function(t) {
+            var matchesCategory = currentCategory === 'all' || t.category === currentCategory;
+            var matchesText = !filterText || t.term.toLowerCase().includes(filterText.toLowerCase()) || t.def.toLowerCase().includes(filterText.toLowerCase());
             return matchesCategory && matchesText;
         });
 
@@ -161,23 +163,26 @@
             noResults.classList.add('visible');
         } else {
             noResults.classList.remove('visible');
-            filtered.forEach(t => {
-                const card = document.createElement('div');
+            filtered.forEach(function(t) {
+                var card = document.createElement('div');
                 card.className = 'glossary-card';
-                card.innerHTML = `
-                    <div class="glossary-card__term">${t.term}</div>
-                    <div class="glossary-card__category glossary-card__category--${t.category}">${t.category}</div>
-                    <div class="glossary-card__def">${t.def}</div>
-                `;
+                card.innerHTML =
+                    '<div class="glossary-card__term">' + t.term + '</div>' +
+                    '<div class="glossary-card__category glossary-card__category--' + t.category + '">' + t.category + '</div>' +
+                    '<div class="glossary-card__def">' + t.def + '</div>';
                 grid.appendChild(card);
             });
         }
     }
 
-    function filterCategory(cat) {
+    function filterCategory(cat, element) {
         currentCategory = cat;
-        document.querySelectorAll('.glossary-tag').forEach(tag => tag.classList.remove('active'));
-        event.target.classList.add('active');
+        document.querySelectorAll('.glossary-tag').forEach(function(tag) {
+            tag.classList.remove('active');
+        });
+        if (element) {
+            element.classList.add('active');
+        }
         renderTerms(document.getElementById('searchInput').value);
     }
 

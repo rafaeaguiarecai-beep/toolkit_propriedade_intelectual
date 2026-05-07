@@ -13,7 +13,7 @@
         .tool-page__header h1 { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary-dark); margin-bottom: var(--spacing-sm); }
         .tool-page__header p { color: var(--text-medium); max-width: 600px; margin: 0 auto; }
 
-        .calc-container { max-width: 600px; margin: 0 auto; }
+        .calc-container { max-width: 650px; margin: 0 auto; }
         .calc-form { background: var(--bg-white); border: 2px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--spacing-xl); margin-bottom: var(--spacing-lg); }
         .calc-form__group { margin-bottom: var(--spacing-md); }
         .calc-form__group label { display: block; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; font-size: 0.95rem; }
@@ -21,12 +21,17 @@
         .calc-form__group input {
             width: 100%; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md);
             font-family: var(--font-primary); font-size: 1rem; color: var(--text-dark); background: var(--bg-white);
-            transition: var(--transition);
+            transition: var(--transition); box-sizing: border-box;
         }
         .calc-form__group select:focus,
         .calc-form__group input:focus { border-color: var(--accent); outline: none; }
+
+        .calc-form__group--conditional { display: none; }
+        .calc-form__group--conditional.visible { display: block; animation: slideUp 0.3s ease; }
+
         .calc-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--fase-3), var(--fase-1)); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
         .calc-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .calc-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
         .result-display { background: var(--bg-white); border: 2px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--spacing-xl); text-align: center; display: none; animation: slideUp 0.5s ease; }
         .result-display.visible { display: block; }
@@ -38,10 +43,19 @@
         .result-display__alert--safe { background: rgba(6,214,160,0.1); color: var(--fase-5); border: 1px solid var(--fase-5); }
         .result-display__alert--warning { background: rgba(255,109,0,0.1); color: var(--fase-4); border: 1px solid var(--fase-4); }
         .result-display__alert--danger { background: rgba(247,37,133,0.1); color: var(--fase-3); border: 1px solid var(--fase-3); }
+        .result-display__alert--info { background: rgba(67,97,238,0.08); color: var(--fase-1); border: 1px solid var(--fase-1); }
 
         .timeline-preview { margin-top: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm); }
         .timeline-preview__bar { flex: 1; height: 8px; background: var(--bg-alt); border-radius: var(--radius-full); overflow: hidden; }
         .timeline-preview__fill { height: 100%; background: linear-gradient(90deg, var(--fase-5), var(--fase-4), var(--fase-3)); border-radius: var(--radius-full); width: 0%; transition: width 1s ease; }
+
+        /* Legal basis block */
+        .result-legal { margin-top: var(--spacing-md); background: var(--bg-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--spacing-md); text-align: left; }
+        .result-legal__title { font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--primary-dark); margin-bottom: 12px; }
+        .result-legal__item { margin-bottom: 10px; font-size: 0.88rem; color: var(--text-medium); line-height: 1.6; }
+        .result-legal__item strong { color: var(--primary-dark); display: inline; }
+        .result-legal__link { display: inline-block; margin-top: 8px; font-size: 0.85rem; color: var(--fase-1); text-decoration: underline; }
+        .result-legal__link:hover { color: var(--primary-dark); }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -86,7 +100,7 @@
                 <div class="calc-form">
                     <div class="calc-form__group">
                         <label for="tipoProtecao">Tipo de Proteção</label>
-                        <select id="tipoProtecao">
+                        <select id="tipoProtecao" onchange="onTipoChange()" aria-label="Selecione o tipo de proteção de PI">
                             <option value="">Selecione...</option>
                             <option value="patente">Patente de Invenção</option>
                             <option value="modelo">Modelo de Utilidade</option>
@@ -98,19 +112,48 @@
                             <option value="ig">Indicação Geográfica</option>
                         </select>
                     </div>
-                    <div class="calc-form__group">
-                        <label for="dataDeposito">Data de Depósito ou Criação</label>
-                        <input type="date" id="dataDeposito">
+
+                    <!-- Conditional: Autoral sub-type -->
+                    <div class="calc-form__group calc-form__group--conditional" id="groupAutoralTipo">
+                        <label for="autoralTipo">Tipo de autoria</label>
+                        <select id="autoralTipo" onchange="onAutoralTipoChange()" aria-label="Selecione o tipo de autoria">
+                            <option value="">Selecione...</option>
+                            <option value="pf">Pessoa física</option>
+                            <option value="pj">Pessoa jurídica</option>
+                            <option value="anonima">Obra anônima ou pseudônima</option>
+                        </select>
                     </div>
-                    <button class="calc-btn" onclick="calcularVigencia()">Calcular Vigência</button>
+
+                    <!-- Conditional: Autoral PF - ano falecimento -->
+                    <div class="calc-form__group calc-form__group--conditional" id="groupAutoralFalecimento">
+                        <label for="autoralFalecimento">Status do autor</label>
+                        <select id="autoralFalecimento" onchange="onFalecimentoChange()" aria-label="O autor ainda está vivo?">
+                            <option value="">Selecione...</option>
+                            <option value="vivo">Ainda vivo</option>
+                            <option value="falecido">Já faleceu</option>
+                        </select>
+                    </div>
+
+                    <div class="calc-form__group calc-form__group--conditional" id="groupAnoFalecimento">
+                        <label for="anoFalecimento">Ano de falecimento</label>
+                        <input type="number" id="anoFalecimento" placeholder="Ex: 2020" min="1800" max="2100" aria-label="Informe o ano de falecimento do autor">
+                    </div>
+
+                    <!-- Standard date input (hidden for IG and some autoral cases) -->
+                    <div class="calc-form__group" id="groupDataDeposito">
+                        <label for="dataDeposito" id="labelDataDeposito">Data de Depósito ou Criação</label>
+                        <input type="date" id="dataDeposito" aria-label="Data de depósito ou criação">
+                    </div>
+
+                    <button class="calc-btn" onclick="calcularVigencia()" aria-label="Calcular a vigência da proteção">Calcular Vigência</button>
                 </div>
 
-                <div class="result-display" id="resultDisplay">
+                <div class="result-display" id="resultDisplay" aria-live="polite">
                     <div class="result-display__icon" id="resultIcon">📊</div>
                     <div class="result-display__title" id="resultTitle">Resultado</div>
                     <div class="result-display__date" id="resultDate">--/--/----</div>
                     <div class="result-display__info" id="resultInfo"></div>
-                    <div class="timeline-preview">
+                    <div class="timeline-preview" id="timelinePreview">
                         <span style="font-size:0.8rem; color:var(--text-light)">Depósito</span>
                         <div class="timeline-preview__bar">
                             <div class="timeline-preview__fill" id="timelineFill"></div>
@@ -118,6 +161,7 @@
                         <span style="font-size:0.8rem; color:var(--text-light)">Expiração</span>
                     </div>
                     <div class="result-display__alert" id="resultAlert"></div>
+                    <div class="result-legal" id="resultLegal" style="display:none;"></div>
                 </div>
             </div>
         </div>
@@ -133,53 +177,301 @@
 
     <script src="script.js"></script>
     <script>
+    // ============================================================
+    //  LEGAL BASIS DATABASE
+    // ============================================================
+    const legalBasis = {
+        patente: {
+            artigo: 'Lei 9.279/1996, Art. 40 — "A patente de invenção vigorará pelo prazo de 20 (vinte) anos contados da data de depósito."',
+            manutencao: 'Anuidades obrigatórias a partir do início do 3º ano do depósito (Art. 84, Lei 9.279/96). O não pagamento da anuidade acarreta o arquivamento do pedido ou a extinção da patente.',
+            extincao: 'A patente se extingue por: expiração do prazo de vigência; falta de pagamento de anuidade (Art. 78, III); renúncia do titular; ausência de representante no Brasil (Art. 78).',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9279.htm'
+        },
+        modelo: {
+            artigo: 'Lei 9.279/1996, Art. 40, parágrafo único — "A patente de modelo de utilidade vigorará pelo prazo de 15 (quinze) anos contados da data de depósito."',
+            manutencao: 'Anuidades obrigatórias a partir do início do 3º ano do depósito (Art. 84, Lei 9.279/96). Mesmas regras da patente de invenção.',
+            extincao: 'Mesmas condições da patente de invenção: expiração, falta de anuidade, renúncia ou ausência de representante (Art. 78).',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9279.htm'
+        },
+        marca: {
+            artigo: 'Lei 9.279/1996, Art. 133 — "O registro da marca vigorará pelo prazo de 10 (dez) anos, contados da data da concessão do registro, prorrogável por períodos iguais e sucessivos."',
+            manutencao: 'Prorrogação deve ser requerida no último ano de vigência ou, extraordinariamente, nos 6 meses seguintes com taxa adicional (Art. 133, §1º). Não uso por 5 anos consecutivos pode levar à caducidade (Art. 143).',
+            extincao: 'O registro se extingue por: expiração sem prorrogação; renúncia; caducidade por não uso (5 anos); falta de representante no Brasil (Art. 142).',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9279.htm'
+        },
+        di: {
+            artigo: 'Lei 9.279/1996, Art. 108 — "O registro vigorará pelo prazo de 10 (dez) anos contados da data do depósito, prorrogável por 3 (três) períodos sucessivos de 5 (cinco) anos cada."',
+            manutencao: 'Prorrogável por até 3 períodos de 5 anos, totalizando máximo de 25 anos. Cada prorrogação deve ser requerida no último ano do período vigente (Art. 108).',
+            extincao: 'O registro se extingue por: expiração sem prorrogação; renúncia; falta de representante no Brasil; falta de pagamento da retribuição (Art. 119).',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9279.htm'
+        },
+        software: {
+            artigo: 'Lei 9.609/1998, Art. 2º, §2º — "A tutela dos direitos relativos a programa de computador fica assegurada pelo prazo de 50 (cinqüenta) anos, contados a partir de 1º de janeiro do ano subseqüente ao da sua publicação ou, na ausência desta, da sua criação."',
+            manutencao: 'Vigência automática, sem necessidade de renovação ou pagamento de anuidades. O registro no INPI é facultativo mas recomendado como prova.',
+            extincao: 'A proteção se extingue automaticamente ao final dos 50 anos. Não há mecanismo de prorrogação.',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9609.htm'
+        },
+        autoral_pf: {
+            artigo: 'Lei 9.610/1998, Art. 41 — "Os direitos patrimoniais do autor perduram por setenta anos contados de 1º de janeiro do ano subseqüente ao de seu falecimento."',
+            manutencao: 'Vigência automática, sem necessidade de registro ou renovação. Os direitos morais são inalienáveis e imprescritíveis (Art. 27).',
+            extincao: 'Os direitos patrimoniais se extinguem ao final dos 70 anos post-mortem, quando a obra cai em domínio público (Art. 45).',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9610.htm'
+        },
+        autoral_pj: {
+            artigo: 'Lei 9.610/1998, Art. 43 — "Será de setenta anos o prazo de proteção aos direitos patrimoniais sobre as obras [...] quando a obra literária, artística ou científica, realizada em co-autoria, for indivisível, o prazo [...] contar-se-á da morte do último dos co-autores sobreviventes."',
+            manutencao: 'Vigência automática, sem necessidade de registro ou renovação.',
+            extincao: 'Os direitos patrimoniais se extinguem ao final dos 70 anos contados de 1º de janeiro do ano seguinte à publicação, quando a obra cai em domínio público.',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9610.htm'
+        },
+        autoral_anonima: {
+            artigo: 'Lei 9.610/1998, Art. 43 — "Será de setenta anos o prazo de proteção aos direitos patrimoniais sobre as obras anônimas ou pseudônimas, contado de 1º de janeiro do ano imediatamente posterior ao da primeira publicação."',
+            manutencao: 'Vigência automática, sem necessidade de registro ou renovação.',
+            extincao: 'Ao final dos 70 anos da publicação, a obra cai em domínio público. Se o autor se der a conhecer antes, aplica-se o Art. 41 (vida + 70 anos).',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9610.htm'
+        },
+        cultivar: {
+            artigo: 'Lei 9.456/1997, Art. 11 — "A proteção da cultivar vigorará, a partir da data da concessão do Certificado Provisório de Proteção, pelo prazo de quinze anos, excetuadas as videiras, as árvores frutíferas, as árvores florestais e as árvores ornamentais [...] para as quais a duração será de dezoito anos."',
+            manutencao: 'Manutenção anual obrigatória junto ao SNPC/MAPA. O titular deve manter amostras vivas da cultivar à disposição do SNPC.',
+            extincao: 'A proteção se extingue por: expiração do prazo; renúncia; falta de pagamento da anuidade; não manutenção de amostra viva; perda de homogeneidade ou estabilidade (Art. 40).',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9456.htm'
+        },
+        ig: {
+            artigo: 'Lei 9.279/1996, Arts. 176–182 — A Indicação Geográfica (Indicação de Procedência ou Denominação de Origem) tem vigência indeterminada, subsistindo enquanto existirem as condições que a justificam.',
+            manutencao: 'Não há anuidades. A IG se mantém enquanto as condições geográficas e de qualidade/reputação persistirem. A entidade representativa deve zelar pelo uso adequado.',
+            extincao: 'A IG não expira por prazo. Pode ser anulada se concedida em desacordo com a lei, ou perder eficácia se as condições que a fundamentam deixarem de existir.',
+            link: 'https://www.planalto.gov.br/ccivil_03/leis/l9279.htm'
+        }
+    };
+
+    // ============================================================
+    //  CONDITIONAL FIELD VISIBILITY
+    // ============================================================
+    function onTipoChange() {
+        const tipo = document.getElementById('tipoProtecao').value;
+        const groupAutoralTipo = document.getElementById('groupAutoralTipo');
+        const groupAutoralFalecimento = document.getElementById('groupAutoralFalecimento');
+        const groupAnoFalecimento = document.getElementById('groupAnoFalecimento');
+        const groupData = document.getElementById('groupDataDeposito');
+        const labelData = document.getElementById('labelDataDeposito');
+
+        // Reset conditional fields
+        groupAutoralTipo.classList.remove('visible');
+        groupAutoralFalecimento.classList.remove('visible');
+        groupAnoFalecimento.classList.remove('visible');
+        groupData.style.display = '';
+
+        if (tipo === 'autoral') {
+            groupAutoralTipo.classList.add('visible');
+            groupData.style.display = 'none'; // Will show based on sub-selection
+        } else if (tipo === 'ig') {
+            groupData.style.display = 'none'; // IG has no expiration date
+        } else {
+            labelData.textContent = (tipo === 'marca') ? 'Data de Concessão do Registro' : 'Data de Depósito ou Criação';
+        }
+
+        // Hide result when type changes
+        document.getElementById('resultDisplay').classList.remove('visible');
+    }
+
+    function onAutoralTipoChange() {
+        const autoralTipo = document.getElementById('autoralTipo').value;
+        const groupFalecimento = document.getElementById('groupAutoralFalecimento');
+        const groupAnoFalecimento = document.getElementById('groupAnoFalecimento');
+        const groupData = document.getElementById('groupDataDeposito');
+        const labelData = document.getElementById('labelDataDeposito');
+
+        groupFalecimento.classList.remove('visible');
+        groupAnoFalecimento.classList.remove('visible');
+        groupData.style.display = 'none';
+
+        if (autoralTipo === 'pf') {
+            groupFalecimento.classList.add('visible');
+        } else if (autoralTipo === 'pj' || autoralTipo === 'anonima') {
+            labelData.textContent = 'Data da Primeira Publicação';
+            groupData.style.display = '';
+        }
+    }
+
+    function onFalecimentoChange() {
+        const status = document.getElementById('autoralFalecimento').value;
+        const groupAno = document.getElementById('groupAnoFalecimento');
+        const groupData = document.getElementById('groupDataDeposito');
+
+        groupAno.classList.remove('visible');
+        groupData.style.display = 'none';
+
+        if (status === 'falecido') {
+            groupAno.classList.add('visible');
+        }
+        // If "vivo", no date needed — we'll show a special message
+    }
+
+    // ============================================================
+    //  RENDER LEGAL BASIS
+    // ============================================================
+    function renderLegalBasis(key) {
+        const basis = legalBasis[key];
+        if (!basis) return;
+
+        const legalDiv = document.getElementById('resultLegal');
+        legalDiv.style.display = 'block';
+        legalDiv.innerHTML = `
+            <div class="result-legal__title">📚 Fundamentação Jurídica</div>
+            <div class="result-legal__item"><strong>Base legal:</strong> ${basis.artigo}</div>
+            <div class="result-legal__item"><strong>Manutenção:</strong> ${basis.manutencao}</div>
+            <div class="result-legal__item"><strong>Extinção:</strong> ${basis.extincao}</div>
+            <a href="${basis.link}" target="_blank" rel="noopener noreferrer" class="result-legal__link">📄 Ver texto legal completo →</a>
+        `;
+    }
+
+    // ============================================================
+    //  MAIN CALCULATION
+    // ============================================================
     function calcularVigencia() {
         const tipo = document.getElementById('tipoProtecao').value;
-        const dataInput = document.getElementById('dataDeposito').value;
         const resultDisplay = document.getElementById('resultDisplay');
+        const timelinePreview = document.getElementById('timelinePreview');
+        const legalDiv = document.getElementById('resultLegal');
 
-        if (!tipo || !dataInput) {
-            alert('Por favor, preencha todos os campos.');
+        if (!tipo) {
+            alert('Por favor, selecione o tipo de proteção.');
+            return;
+        }
+
+        // ---- INDICAÇÃO GEOGRÁFICA (vigência indeterminada) ----
+        if (tipo === 'ig') {
+            document.getElementById('resultIcon').textContent = '🗺️';
+            document.getElementById('resultTitle').textContent = 'Indicação Geográfica';
+            document.getElementById('resultDate').textContent = 'INDETERMINADA';
+            document.getElementById('resultInfo').textContent = 'A Indicação Geográfica tem vigência INDETERMINADA — não expira enquanto subsistirem as condições que a justificam (qualidade, reputação ou características vinculadas à origem geográfica).';
+            timelinePreview.style.display = 'none';
+            const alertDiv = document.getElementById('resultAlert');
+            alertDiv.className = 'result-display__alert result-display__alert--info';
+            alertDiv.textContent = 'ℹ️ Não há prazo de expiração nem anuidades. A proteção persiste enquanto existirem as condições geográficas e de qualidade.';
+            renderLegalBasis('ig');
+            resultDisplay.classList.add('visible');
+            resultDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+        }
+
+        // ---- DIREITO AUTORAL ----
+        if (tipo === 'autoral') {
+            const autoralTipo = document.getElementById('autoralTipo').value;
+            if (!autoralTipo) {
+                alert('Por favor, selecione o tipo de autoria.');
+                return;
+            }
+
+            // PF — Ainda vivo
+            if (autoralTipo === 'pf') {
+                const falecimentoStatus = document.getElementById('autoralFalecimento').value;
+                if (!falecimentoStatus) {
+                    alert('Por favor, informe se o autor está vivo ou já faleceu.');
+                    return;
+                }
+
+                if (falecimentoStatus === 'vivo') {
+                    document.getElementById('resultIcon').textContent = '©️';
+                    document.getElementById('resultTitle').textContent = 'Direito Autoral — Pessoa Física';
+                    document.getElementById('resultDate').textContent = 'VIDA + 70 ANOS';
+                    document.getElementById('resultInfo').textContent = 'A vigência será de 70 anos contados de 1º de janeiro do ano seguinte ao falecimento do autor. Como o autor ainda está vivo, a data exata de expiração depende de evento futuro.';
+                    timelinePreview.style.display = 'none';
+                    const alertDiv = document.getElementById('resultAlert');
+                    alertDiv.className = 'result-display__alert result-display__alert--safe';
+                    alertDiv.textContent = '✅ Proteção ativa. Os direitos patrimoniais perduram durante toda a vida do autor e por mais 70 anos após seu falecimento (Art. 41, Lei 9.610/98).';
+                    renderLegalBasis('autoral_pf');
+                    resultDisplay.classList.add('visible');
+                    resultDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    return;
+                }
+
+                // PF — Falecido
+                if (falecimentoStatus === 'falecido') {
+                    const anoFalecimento = parseInt(document.getElementById('anoFalecimento').value);
+                    if (!anoFalecimento || anoFalecimento < 1800 || anoFalecimento > 2100) {
+                        alert('Por favor, informe um ano de falecimento válido.');
+                        return;
+                    }
+                    const anoExpiracao = anoFalecimento + 1 + 70; // 1º de janeiro do ano seguinte + 70
+                    const dataExpiracao = new Date(anoExpiracao, 0, 1); // 1 de janeiro
+                    return showDateResult('©️', 'Direito Autoral — Pessoa Física', dataExpiracao,
+                        `Vigência de 70 anos contados de 1º de janeiro do ano seguinte ao falecimento (${anoFalecimento}). Conforme Art. 41 da Lei 9.610/98.`,
+                        new Date(anoFalecimento, 0, 1), 'autoral_pf');
+                }
+            }
+
+            // PJ ou Anônima
+            if (autoralTipo === 'pj' || autoralTipo === 'anonima') {
+                const dataInput = document.getElementById('dataDeposito').value;
+                if (!dataInput) {
+                    alert('Por favor, informe a data da primeira publicação.');
+                    return;
+                }
+                const data = new Date(dataInput);
+                const anoExpiracao = data.getFullYear() + 1 + 70;
+                const dataExpiracao = new Date(anoExpiracao, 0, 1);
+                const legalKey = autoralTipo === 'pj' ? 'autoral_pj' : 'autoral_anonima';
+                const tipoLabel = autoralTipo === 'pj' ? 'Pessoa Jurídica' : 'Obra Anônima/Pseudônima';
+                const artigoRef = autoralTipo === 'pj' ? 'Art. 43' : 'Art. 43';
+                return showDateResult('©️', `Direito Autoral — ${tipoLabel}`, dataExpiracao,
+                    `Vigência de 70 anos contados de 1º de janeiro do ano seguinte à primeira publicação. Conforme ${artigoRef} da Lei 9.610/98.`,
+                    data, legalKey);
+            }
+            return;
+        }
+
+        // ---- TIPOS COM DATA DE DEPÓSITO PADRÃO ----
+        const dataInput = document.getElementById('dataDeposito').value;
+        if (!dataInput) {
+            alert('Por favor, preencha a data.');
             return;
         }
 
         const data = new Date(dataInput);
-        const hoje = new Date();
         let anos = 0;
         let icon = '📊';
         let title = '';
         let info = '';
+        let legalKey = '';
 
         switch(tipo) {
-            case 'patente': anos = 20; icon = '🔬'; title = 'Patente de Invenção'; info = 'Vigência de 20 anos a contar da data de depósito. Não prorrogável.'; break;
-            case 'modelo': anos = 15; icon = '🔧'; title = 'Modelo de Utilidade'; info = 'Vigência de 15 anos a contar da data de depósito. Não prorrogável.'; break;
-            case 'marca': anos = 10; icon = '™️'; title = 'Marca'; info = 'Vigência de 10 anos, prorrogável indefinidamente a cada período.'; break;
-            case 'di': anos = 10; icon = '🎨'; title = 'Desenho Industrial'; info = 'Vigência inicial de 10 anos, prorrogável por até 3 períodos de 5 anos (total máximo: 25 anos).'; break;
-            case 'software': anos = 50; icon = '💻'; title = 'Software'; info = 'Vigência de 50 anos a contar de 1º de janeiro do ano seguinte à publicação ou criação.'; break;
-            case 'autoral': anos = 70; icon = '©️'; title = 'Direito Autoral'; info = 'Vigência de vida do autor + 70 anos. Para obras anônimas ou de pseudônimo: 70 anos da publicação.'; break;
-            case 'cultivar': anos = 15; icon = '🌱'; title = 'Cultivar'; info = 'Vigência de 15 anos (arbóreas e videiras: 18 anos).'; break;
-            case 'ig': anos = 10; icon = '🗺️'; title = 'Indicação Geográfica'; info = 'Vigência de 10 anos, prorrogável por períodos sucessivos de 10 anos.'; break;
+            case 'patente': anos = 20; icon = '🔬'; title = 'Patente de Invenção'; info = 'Vigência de 20 anos a contar da data de depósito (Art. 40, Lei 9.279/96). Não prorrogável.'; legalKey = 'patente'; break;
+            case 'modelo': anos = 15; icon = '🔧'; title = 'Modelo de Utilidade'; info = 'Vigência de 15 anos a contar da data de depósito (Art. 40, parágrafo único, Lei 9.279/96). Não prorrogável.'; legalKey = 'modelo'; break;
+            case 'marca': anos = 10; icon = '™️'; title = 'Marca'; info = 'Vigência de 10 anos a contar da concessão, prorrogável indefinidamente por períodos iguais (Art. 133, Lei 9.279/96).'; legalKey = 'marca'; break;
+            case 'di': anos = 10; icon = '🎨'; title = 'Desenho Industrial'; info = 'Vigência inicial de 10 anos, prorrogável por até 3 períodos de 5 anos (total máximo: 25 anos). Art. 108, Lei 9.279/96.'; legalKey = 'di'; break;
+            case 'software': anos = 50; icon = '💻'; title = 'Software'; info = 'Vigência de 50 anos a contar de 1º de janeiro do ano seguinte à publicação ou criação (Art. 2º, §2º, Lei 9.609/98).'; legalKey = 'software'; break;
+            case 'cultivar': anos = 15; icon = '🌱'; title = 'Cultivar'; info = 'Vigência de 15 anos (arbóreas e videiras: 18 anos). Art. 11, Lei 9.456/97.'; legalKey = 'cultivar'; break;
         }
 
         const dataExpiracao = new Date(data);
         dataExpiracao.setFullYear(dataExpiracao.getFullYear() + anos);
 
+        showDateResult(icon, title, dataExpiracao, info, data, legalKey);
+    }
+
+    function showDateResult(icon, title, dataExpiracao, info, dataInicio, legalKey) {
+        const hoje = new Date();
+        const resultDisplay = document.getElementById('resultDisplay');
+        const timelinePreview = document.getElementById('timelinePreview');
+
         const diffTime = dataExpiracao - hoje;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const diffYears = (diffDays / 365.25).toFixed(1);
 
-        const percentual = Math.max(0, Math.min(100, ((hoje - data) / (dataExpiracao - data)) * 100));
+        const percentual = Math.max(0, Math.min(100, ((hoje - dataInicio) / (dataExpiracao - dataInicio)) * 100));
 
         document.getElementById('resultIcon').textContent = icon;
         document.getElementById('resultTitle').textContent = title;
         document.getElementById('resultDate').textContent = dataExpiracao.toLocaleDateString('pt-BR');
         document.getElementById('resultInfo').textContent = info;
+
+        timelinePreview.style.display = 'flex';
         document.getElementById('timelineFill').style.width = percentual + '%';
 
         const alertDiv = document.getElementById('resultAlert');
         if (diffDays < 0) {
             alertDiv.className = 'result-display__alert result-display__alert--danger';
-            alertDiv.textContent = '⚠️ Proteção expirada! A obra/cração já está em domínio público.';
+            alertDiv.textContent = '⚠️ Proteção expirada! A criação já está em domínio público.';
         } else if (diffDays < 365) {
             alertDiv.className = 'result-display__alert result-display__alert--warning';
             alertDiv.textContent = `⏰ Atenção: restam menos de 1 ano (${diffDays} dias). Considere renovar ou reavaliar sua estratégia.`;
@@ -187,6 +479,8 @@
             alertDiv.className = 'result-display__alert result-display__alert--safe';
             alertDiv.textContent = `✅ Proteção ativa. Tempo restante: aproximadamente ${diffYears} anos.`;
         }
+
+        renderLegalBasis(legalKey);
 
         resultDisplay.classList.add('visible');
         resultDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

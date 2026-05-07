@@ -90,8 +90,7 @@
       gap: 1.2rem;
       margin-bottom: 2rem;
     }
-    @media (max-width: 800px) { .sb-strip { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 500px) { .sb-strip { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .sb-strip { grid-template-columns: 1fr; } }
 
     .sb-frame {
       background: var(--sb-surface);
@@ -159,7 +158,7 @@
       color: var(--sb-text);
       resize: vertical;
       box-sizing: border-box;
-      min-height: 50px;
+      min-height: 70px;
     }
     .sb-frame__legal {
       margin-top: .5rem;
@@ -189,6 +188,7 @@
       transition: all .2s;
     }
     .sb-example-toggle button:hover { transform: translateY(-2px); }
+    .sb-example-toggle button:focus-visible { outline: 3px solid var(--sb-accent-dark); outline-offset: 2px; }
 
     /* === BUTTONS === */
     .sb-actions {
@@ -205,6 +205,7 @@
       display: inline-flex; align-items: center; gap: .5rem;
     }
     .sb-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .sb-btn:focus-visible { outline: 3px solid var(--sb-accent-dark); outline-offset: 2px; }
     .sb-btn--primary { background: var(--sb-accent); color: #fff; }
     .sb-btn--outline { background: transparent; border: 2px solid var(--sb-accent); color: var(--sb-accent-dark); }
     .sb-btn--danger { background: #EF5350; color: #fff; }
@@ -225,6 +226,18 @@
       .sb-frame__canvas { height: 100px; }
       .sb-actions, .sb-example-toggle { display: none !important; }
       @page { size: A3 landscape; margin: 1cm; }
+    }
+
+    /* === Screen reader only === */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
     }
   </style>
 </head>
@@ -251,7 +264,7 @@
     </section>
 
     <div class="sb-example-toggle">
-      <button onclick="toggleExample()">💡 Ver/Ocultar Exemplo Preenchido (Dr. Apressado)</button>
+      <button onclick="toggleExample()" id="btnToggleExample" role="button" aria-expanded="false" aria-label="Ver ou ocultar exemplo preenchido do Dr. Apressado">💡 Ver/Ocultar Exemplo Preenchido (Dr. Apressado)</button>
     </div>
 
     <!-- 6 FRAMES -->
@@ -259,8 +272,8 @@
     </div>
 
     <div class="sb-actions">
-      <button class="sb-btn sb-btn--primary" onclick="window.print()">🖨️ Imprimir / PDF</button>
-      <button class="sb-btn sb-btn--danger" onclick="clearStory()">🗑️ Limpar</button>
+      <button class="sb-btn sb-btn--primary" onclick="window.print()" aria-label="Imprimir ou salvar como PDF">🖨️ Imprimir / PDF</button>
+      <button class="sb-btn sb-btn--danger" onclick="clearStory()" aria-label="Limpar todo o storyboard">🗑️ Limpar</button>
       <a href="canvas-estrategia.html" class="sb-btn sb-btn--outline">📐 Canvas de Estratégia</a>
       <a href="crazy8s.html" class="sb-btn sb-btn--outline">⚡ Crazy 8s</a>
       <a href="index.html" class="sb-btn sb-btn--outline">🏠 Toolkit</a>
@@ -269,8 +282,8 @@
   </main>
 
   <footer class="sb-footer">
-    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
-    <p>Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96</a> · Custos: Portaria GM/MDIC nº 110/2025</p>
+    <p>© 2025 PI Thinking — PROFNIT/UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></p>
+    <p>Legislação: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank" rel="noopener noreferrer">Lei 9.279/96</a> · Custos: Portaria GM/MDIC nº 110/2025</p>
   </footer>
 
   <script>
@@ -360,40 +373,44 @@
     function renderFrames() {
       const strip = document.getElementById('storyStrip');
       strip.innerHTML = '';
-      frames.forEach(f => {
-        strip.innerHTML += `
-          <div class="sb-frame">
-            <div class="sb-frame__header">
-              <span class="sb-frame__num">${f.num}</span>
-              ${f.title}
-            </div>
-            <div class="sb-frame__canvas">
-              <span class="sb-icon-scene">${f.icon}</span>
-            </div>
-            <div class="sb-frame__body">
-              <div class="sb-frame__label">${f.labelAction}</div>
-              <textarea placeholder="${f.hint}" id="action-${f.num}">${showExample ? f.example.action : ''}</textarea>
-
-              <div class="sb-frame__label" style="margin-top:.6rem;">${f.labelNarration}</div>
-              <textarea placeholder="Fala do personagem ou voz do narrador..." id="narration-${f.num}">${showExample ? f.example.narration : ''}</textarea>
-
-              <div class="sb-frame__legal">
-                <strong>⚖️ Base Legal:</strong> ${f.legal}
-              </div>
-            </div>
-          </div>
-        `;
+      frames.forEach(function(f) {
+        var actionId = 'action-' + f.num;
+        var narrationId = 'narration-' + f.num;
+        strip.innerHTML += '<div class="sb-frame">' +
+          '<div class="sb-frame__header">' +
+            '<span class="sb-frame__num">' + f.num + '</span> ' +
+            f.title +
+          '</div>' +
+          '<div class="sb-frame__canvas">' +
+            '<span class="sb-icon-scene" aria-hidden="true">' + f.icon + '</span>' +
+          '</div>' +
+          '<div class="sb-frame__body">' +
+            '<div class="sb-frame__label">' + f.labelAction + '</div>' +
+            '<label for="' + actionId + '" class="sr-only">Cena ' + f.num + ' — ' + f.title + ': ' + f.labelAction + '</label>' +
+            '<textarea placeholder="' + f.hint + '" id="' + actionId + '">' + (showExample ? f.example.action : '') + '</textarea>' +
+            '<div class="sb-frame__label" style="margin-top:.6rem;">' + f.labelNarration + '</div>' +
+            '<label for="' + narrationId + '" class="sr-only">Cena ' + f.num + ' — ' + f.title + ': ' + f.labelNarration + '</label>' +
+            '<textarea placeholder="Fala do personagem ou voz do narrador..." id="' + narrationId + '">' + (showExample ? f.example.narration : '') + '</textarea>' +
+            '<div class="sb-frame__legal">' +
+              '<strong>⚖️ Base Legal:</strong> ' + f.legal +
+            '</div>' +
+          '</div>' +
+        '</div>';
       });
     }
 
     function toggleExample() {
       showExample = !showExample;
+      var btn = document.getElementById('btnToggleExample');
+      btn.setAttribute('aria-expanded', showExample ? 'true' : 'false');
       renderFrames();
     }
 
     function clearStory() {
       if (!confirm('Limpar todo o storyboard?')) return;
       showExample = false;
+      var btn = document.getElementById('btnToggleExample');
+      btn.setAttribute('aria-expanded', 'false');
       renderFrames();
     }
 

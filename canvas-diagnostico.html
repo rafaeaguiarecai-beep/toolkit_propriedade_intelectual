@@ -27,7 +27,7 @@
         --d-c7: #D94848; --d-c8: #3F37C9;
     }
     [data-theme="dark"] {
-        --d-bg: #111; --d-surface: #1A1A1A; --d-text: #EAE AEA;
+        --d-bg: #111; --d-surface: #1A1A1A; --d-text: #EAEAEA;
         --d-text-secondary: #AAA; --d-text-muted: #666; --d-border: #2A2A2A;
     }
 
@@ -61,7 +61,7 @@
     .d-canvas__cell-emoji { font-size:1.1rem; margin-left:auto; }
     .d-canvas__cell-hint { font-size:0.75rem; color:var(--d-text-muted); font-style:italic; margin-bottom:12px; line-height:1.5; }
 
-    .d-canvas__textarea { flex:1; width:100%; min-height:80px; padding:12px; border:1px solid var(--d-border); background:var(--d-bg); font-family:var(--d-font-sans); font-size:0.88rem; color:var(--d-text); resize:vertical; transition:var(--d-transition); line-height:1.6; }
+    .d-canvas__textarea { flex:1; width:100%; min-height:80px; padding:12px; border:1px solid var(--d-border); background:var(--d-bg); font-family:var(--d-font-sans); font-size:0.88rem; color:var(--d-text); resize:vertical; transition:var(--d-transition); line-height:1.6; box-sizing:border-box; }
     .d-canvas__textarea:focus { border-color:var(--d-accent); outline:none; }
     .d-canvas__textarea::placeholder { color:var(--d-text-muted); }
 
@@ -77,19 +77,21 @@
     .d-protection { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
     .d-protection__option { padding:8px 16px; border:2px solid var(--d-border); background:var(--d-surface); font-family:var(--d-font-sans); font-size:0.8rem; font-weight:600; cursor:pointer; transition:var(--d-transition); display:flex; align-items:center; gap:6px; }
     .d-protection__option:hover { border-color:var(--d-text-muted); }
+    .d-protection__option:focus-visible { outline:3px solid var(--d-accent); outline-offset:2px; }
     .d-protection__option.selected { border-color:var(--d-accent); background:var(--d-accent-light); color:var(--d-accent); }
     .d-protection__option input { display:none; }
 
     /* Controls */
     .d-controls { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
     .d-controls__label { font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--d-text-muted); }
-    .d-ctrl-btn { padding:8px 18px; font-family:var(--d-font-sans); font-size:0.8rem; font-weight:600; border:1px solid var(--d-border); background:var(--d-surface); color:var(--d-text); cursor:pointer; transition:var(--d-transition); }
+    .d-ctrl-btn { padding:8px 18px; font-family:var(--d-font-sans); font-size:0.8rem; font-weight:600; border:1px solid var(--d-border); background:var(--d-surface); color:var(--d-text); cursor:pointer; transition:var(--d-transition); text-decoration:none; display:inline-block; }
     .d-ctrl-btn:hover { background:var(--d-text); color:var(--d-surface); border-color:var(--d-text); }
 
     /* Example */
     .d-example { background:var(--d-surface); border:1px solid var(--d-border); margin-bottom:48px; overflow:hidden; }
     .d-example__header { padding:20px 32px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:var(--d-transition); }
     .d-example__header:hover { background:var(--d-bg); }
+    .d-example__header:focus-visible { outline:3px solid var(--d-accent); outline-offset:-3px; }
     .d-example__header-title { font-family:var(--d-font-heading); font-size:0.95rem; font-weight:700; color:var(--d-text); display:flex; align-items:center; gap:8px; }
     .d-example__toggle { transition:transform 0.3s ease; color:var(--d-text-muted); }
     .d-example.open .d-example__toggle { transform:rotate(180deg); }
@@ -122,6 +124,18 @@
         .d-canvas { grid-template-columns:1fr; }
         .d-canvas__cell--right { border-left:none; }
         .d-example__grid { grid-template-columns:1fr; }
+    }
+
+    /* Screen reader only */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
     }
     </style>
 </head>
@@ -156,8 +170,8 @@
             <div class="d-controls d-print-hide">
                 <span class="d-controls__label">Canvas de Diagnóstico</span>
                 <div style="display:flex;gap:8px;">
-                    <button class="d-ctrl-btn" onclick="clearDiagCanvas()">🗑️ Limpar tudo</button>
-                    <button class="d-ctrl-btn" onclick="window.print()">🖨️ Imprimir A3</button>
+                    <button class="d-ctrl-btn" onclick="clearDiagCanvas()" aria-label="Limpar todos os campos do canvas">🗑️ Limpar tudo</button>
+                    <button class="d-ctrl-btn" onclick="window.print()" aria-label="Imprimir o canvas em formato A3">🖨️ Imprimir A3</button>
                 </div>
             </div>
 
@@ -168,10 +182,10 @@
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c1)">1</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c1)">Descrição da Criação</span>
-                        <span class="d-canvas__cell-emoji">💡</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">💡</span>
                     </div>
                     <div class="d-canvas__cell-hint">Descreva a criação em linguagem simples: o que é, como funciona, qual problema resolve. Não use jargão técnico.</div>
-                    <textarea class="d-canvas__textarea" placeholder="Descreva a criação aqui... (ex: 'Um filtro de água que usa areia do lavrado combinada com nanopartículas para remover mercúrio de rios contaminados por garimpo')"></textarea>
+                    <textarea class="d-canvas__textarea" id="diag-field-1" placeholder="Descreva a criação aqui... (ex: 'Um filtro de água que usa areia do lavrado combinada com nanopartículas para remover mercúrio de rios contaminados por garimpo')"></textarea>
                 </div>
 
                 <!-- 2. Problema que Resolve / 3. Divulgação -->
@@ -179,20 +193,20 @@
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c2)">2</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c2)">Problema que Resolve</span>
-                        <span class="d-canvas__cell-emoji">🎯</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">🎯</span>
                     </div>
                     <div class="d-canvas__cell-hint">Qual necessidade ou dor do mercado/sociedade essa criação atende? Por que é importante?</div>
-                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Comunidades ribeirinhas de Roraima não têm acesso a água potável devido à contaminação por mercúrio do garimpo ilegal.'"></textarea>
+                    <textarea class="d-canvas__textarea" id="diag-field-2" placeholder="Ex: 'Comunidades ribeirinhas de Roraima não têm acesso a água potável devido à contaminação por mercúrio do garimpo ilegal.'"></textarea>
                 </div>
 
                 <div class="d-canvas__cell d-canvas__cell--right">
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c3)">3</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c3)">Já foi divulgada?</span>
-                        <span class="d-canvas__cell-emoji">📢</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">📢</span>
                     </div>
                     <div class="d-canvas__cell-hint">A criação já foi publicada em artigo, congresso, rede social, TCC, dissertação? Se sim, quando? (Atenção ao período de graça de 12 meses — Art. 12, Lei 9.279/96)</div>
-                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Apresentada no Congresso Nacional de Química em 15/03/2025. Dentro do período de graça (12 meses).'"></textarea>
+                    <textarea class="d-canvas__textarea" id="diag-field-3" placeholder="Ex: 'Apresentada no Congresso Nacional de Química em 15/03/2025. Dentro do período de graça (12 meses).'"></textarea>
                 </div>
 
                 <!-- 4. Participantes / 5. Financiamento -->
@@ -200,20 +214,20 @@
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c4)">4</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c4)">Quem participou?</span>
-                        <span class="d-canvas__cell-emoji">👥</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">👥</span>
                     </div>
                     <div class="d-canvas__cell-hint">Liste todas as pessoas que contribuíram intelectualmente para a criação. Diferencie contribuição inventiva de apoio técnico ou orientação.</div>
-                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Inventores: Dra. Iara (pesquisadora principal), João (mestrando — desenvolveu o protótipo). Apoio: Prof. Silva (orientador — não contribuiu para a solução inventiva).'"></textarea>
+                    <textarea class="d-canvas__textarea" id="diag-field-4" placeholder="Ex: 'Inventores: Dra. Iara (pesquisadora principal), João (mestrando — desenvolveu o protótipo). Apoio: Prof. Silva (orientador — não contribuiu para a solução inventiva).'"></textarea>
                 </div>
 
                 <div class="d-canvas__cell d-canvas__cell--right">
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c5)">5</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c5)">Fonte de Financiamento</span>
-                        <span class="d-canvas__cell-emoji">💰</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">💰</span>
                     </div>
                     <div class="d-canvas__cell-hint">Recursos próprios, bolsa (CAPES, CNPq, FAPER), edital, empresa parceira? Isso afeta a titularidade da PI (Lei 10.973/2004).</div>
-                    <textarea class="d-canvas__textarea" placeholder="Ex: 'Bolsa CAPES (mestrado) + equipamentos do laboratório da UFRR + reagentes de edital FAPER.'"></textarea>
+                    <textarea class="d-canvas__textarea" id="diag-field-5" placeholder="Ex: 'Bolsa CAPES (mestrado) + equipamentos do laboratório da UFRR + reagentes de edital FAPER.'"></textarea>
                 </div>
 
                 <!-- 6. Nível TRL -->
@@ -221,12 +235,13 @@
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c6)">6</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c6)">Nível de Maturidade (TRL)</span>
-                        <span class="d-canvas__cell-emoji">📊</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">📊</span>
                     </div>
                     <div class="d-canvas__cell-hint">Em que estágio de desenvolvimento está a criação? Arraste o slider para indicar o nível TRL (Technology Readiness Level).</div>
                     <div class="d-trl">
+                        <label for="trlSlider" class="sr-only">Nível TRL de 1 a 9</label>
                         <input type="range" class="d-trl__slider" id="trlSlider" min="1" max="9" value="1" oninput="updateTRL()">
-                        <div class="d-trl__value" id="trlValue">1</div>
+                        <div class="d-trl__value" id="trlValue" aria-live="polite">1</div>
                         <div class="d-trl__label" id="trlLabel">TRL 1 — Princípios básicos observados e reportados. A pesquisa científica começa a ser traduzida em pesquisa aplicada.</div>
                     </div>
                 </div>
@@ -236,20 +251,20 @@
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c7)">7</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c7)">Tipo de Proteção Sugerido</span>
-                        <span class="d-canvas__cell-emoji">🛡️</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">🛡️</span>
                     </div>
                     <div class="d-canvas__cell-hint">Com base na análise acima, selecione o(s) tipo(s) de proteção que se aplica(m). Pode selecionar mais de um.</div>
-                    <div class="d-protection" id="protectionOptions">
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🔬 Patente de Invenção</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🔧 Modelo de Utilidade</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">™️ Marca</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🎨 Desenho Industrial</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">©️ Direito Autoral</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">💻 Software</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🌱 Cultivar</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🗺️ Indicação Geográfica</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🌿 Patrimônio Genético</label>
-                        <label class="d-protection__option" onclick="this.classList.toggle('selected')"><input type="checkbox">🔒 Segredo Industrial</label>
+                    <div class="d-protection" id="protectionOptions" role="group" aria-label="Tipos de proteção de PI">
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="patente-invencao">🔬 Patente de Invenção</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="modelo-utilidade">🔧 Modelo de Utilidade</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="marca">™️ Marca</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="desenho-industrial">🎨 Desenho Industrial</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="direito-autoral">©️ Direito Autoral</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="software">💻 Software</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="cultivar">🌱 Cultivar</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="indicacao-geografica">🗺️ Indicação Geográfica</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="patrimonio-genetico">🌿 Patrimônio Genético</span>
+                        <span class="d-protection__option" role="checkbox" aria-pressed="false" tabindex="0" data-value="segredo-industrial">🔒 Segredo Industrial</span>
                     </div>
                 </div>
 
@@ -258,18 +273,18 @@
                     <div class="d-canvas__cell-header">
                         <div class="d-canvas__cell-num" style="background:var(--d-c8)">8</div>
                         <span class="d-canvas__cell-title" style="color:var(--d-c8)">Próximos Passos</span>
-                        <span class="d-canvas__cell-emoji">🚀</span>
+                        <span class="d-canvas__cell-emoji" aria-hidden="true">🚀</span>
                     </div>
                     <div class="d-canvas__cell-hint">Liste as ações imediatas: consultar o NIT, fazer busca de anterioridade, redigir relatório descritivo, assinar NDA com parceiros, etc.</div>
-                    <textarea class="d-canvas__textarea" placeholder="Ex: '1) Agendar reunião com NIT/InovaRR. 2) Busca de anterioridade no PatentScope e INPI. 3) NDA com empresa parceira antes de compartilhar detalhes técnicos. 4) Redigir relatório descritivo com apoio do NIT.'"></textarea>
+                    <textarea class="d-canvas__textarea" id="diag-field-8" placeholder="Ex: '1) Agendar reunião com NIT/InovaRR. 2) Busca de anterioridade no PatentScope e INPI. 3) NDA com empresa parceira antes de compartilhar detalhes técnicos. 4) Redigir relatório descritivo com apoio do NIT.'"></textarea>
                 </div>
             </div>
 
             <!-- Example -->
             <div class="d-example" id="diagExample">
-                <div class="d-example__header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="d-example__header" role="button" tabindex="0" aria-expanded="false" onclick="toggleDiagExample()" onkeydown="handleDiagExampleKey(event)">
                     <span class="d-example__header-title">📝 Ver exemplo preenchido — Filtro da Dra. Iara Tepui</span>
-                    <span class="d-example__toggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
+                    <span class="d-example__toggle" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
                 </div>
                 <div class="d-example__body">
                     <div class="d-example__content">
@@ -322,19 +337,134 @@
         "TRL 9 — Sistema operacional comprovado. A tecnologia está em operação real, com desempenho comprovado em condições de mercado."
     ];
 
+    // ---- TRL ----
     function updateTRL() {
         const val = document.getElementById('trlSlider').value;
         document.getElementById('trlValue').textContent = val;
         document.getElementById('trlLabel').textContent = trlDescriptions[val - 1];
+        autoSaveDiag();
     }
 
+    // ---- Protection options ----
+    function initProtectionOptions() {
+        document.querySelectorAll('.d-protection__option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                toggleProtectionOption(this);
+            });
+            opt.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleProtectionOption(this);
+                }
+            });
+        });
+    }
+
+    function toggleProtectionOption(el) {
+        const isSelected = el.classList.toggle('selected');
+        el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+        autoSaveDiag();
+    }
+
+    // ---- Example toggle ----
+    function toggleDiagExample() {
+        const el = document.getElementById('diagExample');
+        el.classList.toggle('open');
+        el.querySelector('.d-example__header').setAttribute('aria-expanded', el.classList.contains('open'));
+    }
+
+    function handleDiagExampleKey(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleDiagExample();
+        }
+    }
+
+    // ---- Persistence ----
+    function canPersist() {
+        return typeof PIThinking !== 'undefined' && PIThinking.saveProgress && PIThinking.loadProgress;
+    }
+
+    function autoSaveDiag() {
+        if (!canPersist()) return;
+        const data = {
+            fields: {},
+            trl: document.getElementById('trlSlider').value,
+            protections: []
+        };
+        // Save textarea fields
+        for (let i = 1; i <= 8; i++) {
+            const el = document.getElementById('diag-field-' + i);
+            if (el) data.fields['field-' + i] = el.value;
+        }
+        // Save selected protections
+        document.querySelectorAll('.d-protection__option.selected').forEach(opt => {
+            data.protections.push(opt.getAttribute('data-value'));
+        });
+        PIThinking.saveProgress('canvas-diagnostico', data);
+    }
+
+    function loadSavedDiag() {
+        if (!canPersist()) return;
+        const data = PIThinking.loadProgress('canvas-diagnostico');
+        if (!data) return;
+
+        // Restore textareas
+        if (data.fields) {
+            for (let i = 1; i <= 8; i++) {
+                const el = document.getElementById('diag-field-' + i);
+                if (el && data.fields['field-' + i]) {
+                    el.value = data.fields['field-' + i];
+                }
+            }
+        }
+
+        // Restore TRL
+        if (data.trl) {
+            document.getElementById('trlSlider').value = data.trl;
+            updateTRL();
+        }
+
+        // Restore protections
+        if (data.protections && Array.isArray(data.protections)) {
+            document.querySelectorAll('.d-protection__option').forEach(opt => {
+                const val = opt.getAttribute('data-value');
+                if (data.protections.includes(val)) {
+                    opt.classList.add('selected');
+                    opt.setAttribute('aria-pressed', 'true');
+                }
+            });
+        }
+    }
+
+    // ---- Auto-save on input ----
+    function initAutoSave() {
+        // Textareas
+        document.querySelectorAll('.d-canvas__textarea').forEach(ta => {
+            ta.addEventListener('input', autoSaveDiag);
+        });
+        // TRL slider already calls autoSaveDiag via updateTRL
+    }
+
+    // ---- Clear ----
     function clearDiagCanvas() {
         if (!confirm('Limpar todos os campos do canvas?')) return;
         document.querySelectorAll('.d-canvas__textarea').forEach(t => t.value = '');
-        document.querySelectorAll('.d-protection__option').forEach(o => o.classList.remove('selected'));
+        document.querySelectorAll('.d-protection__option').forEach(o => {
+            o.classList.remove('selected');
+            o.setAttribute('aria-pressed', 'false');
+        });
         document.getElementById('trlSlider').value = 1;
         updateTRL();
+        if (canPersist()) {
+            PIThinking.clearProgress('canvas-diagnostico');
+        }
     }
+
+    // ---- Init ----
+    initProtectionOptions();
+    initAutoSave();
+    loadSavedDiag();
     </script>
 </body>
 </html>
