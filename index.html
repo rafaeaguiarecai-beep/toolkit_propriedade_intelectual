@@ -34,6 +34,13 @@
   --max:1140px;
   --radius:10px;
   --ease:cubic-bezier(.25,.46,.45,.94);
+  /* Badges de classificação */
+  --badge-essencial:#1B5E20;
+  --badge-essencial-bg:#E8F5E9;
+  --badge-recomendada:#E65100;
+  --badge-recomendada-bg:#FFF3E0;
+  --badge-opcional:#616161;
+  --badge-opcional-bg:#F5F5F5;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -174,18 +181,73 @@ a{color:inherit;text-decoration:none}
 .meta-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem}
 .meta-item{font-size:.74rem;font-weight:600;color:var(--txt-light);display:flex;align-items:center;gap:.25rem}
 
-/* ═══ TOOL CARDS (3-col grid dentro das fases) ═══ */
+/* ═══ TOOL CARDS ═══ */
 .tools-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.3rem}
 .tcard{
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
   border-radius:var(--radius);padding:1.1rem;cursor:pointer;
   transition:.3s var(--ease);text-decoration:none;display:block;
+  position:relative;
 }
 .sec:not(.dark) .tcard,.split-body .tcard{background:var(--bg);border-color:var(--border);box-shadow:0 1px 3px rgba(0,0,0,.03)}
 .tcard:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.08);border-color:transparent}
 .tcard .ico{font-size:1.4rem;margin-bottom:.4rem}
 .tcard h4{font-size:.8rem;font-weight:700;margin-bottom:.2rem;color:var(--txt)}
 .tcard p{font-size:.72rem;line-height:1.45;color:var(--txt-light);margin:0}
+
+/* ═══ CLASSIFICATION BADGES ═══ */
+.class-badge{
+  display:inline-flex;align-items:center;gap:.25rem;
+  padding:.15rem .5rem;border-radius:3px;
+  font-size:.58rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.08em;
+  position:absolute;top:.6rem;right:.6rem;
+  line-height:1.3;
+}
+.class-badge--essencial{background:var(--badge-essencial-bg);color:var(--badge-essencial)}
+.class-badge--recomendada{background:var(--badge-recomendada-bg);color:var(--badge-recomendada)}
+.class-badge--opcional{background:var(--badge-opcional-bg);color:var(--badge-opcional)}
+
+/* Dark mode badges inside dark sections */
+.sec.dark .class-badge--essencial{background:rgba(76,175,80,.2);color:#81C784}
+.sec.dark .class-badge--recomendada{background:rgba(255,152,0,.2);color:#FFB74D}
+.sec.dark .class-badge--opcional{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
+
+/* ═══ PERCURSOS (TRILHAS) ═══ */
+.trilhas{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2rem}
+.trilha-card{
+  background:var(--bg);border:2px solid var(--border);
+  border-radius:var(--radius);padding:1.8rem;
+  transition:.3s var(--ease);position:relative;overflow:hidden;
+}
+.trilha-card:hover{border-color:var(--azul);transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.trilha-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.trilha-card--2h::before{background:linear-gradient(90deg,var(--f1),var(--f3))}
+.trilha-card--3h::before{background:linear-gradient(90deg,var(--f1),var(--f4))}
+.trilha-card--4h::before{background:linear-gradient(90deg,var(--f1),var(--f5))}
+.trilha-card__dur{font-size:2rem;font-weight:900;color:var(--azul-escuro);margin-bottom:.3rem}
+.trilha-card__title{font-size:1rem;font-weight:700;margin-bottom:.6rem;color:var(--azul-escuro)}
+.trilha-card__count{font-size:.78rem;color:var(--txt-light);margin-bottom:.8rem}
+.trilha-card__list{list-style:none;padding:0;margin:0}
+.trilha-card__list li{
+  font-size:.78rem;padding:.3rem 0;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.4rem;
+  color:var(--txt);
+}
+.trilha-card__list li:last-child{border-bottom:none}
+.trilha-card__list .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.trilha-card__list .dot--e{background:var(--badge-essencial)}
+.trilha-card__list .dot--r{background:var(--badge-recomendada)}
+.trilha-card__list .dot--o{background:var(--badge-opcional)}
+
+/* ═══ LEGENDA DE CLASSIFICAÇÃO ═══ */
+.legend{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin:1.5rem 0 .5rem}
+.legend-item{display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:600}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.legend-dot--e{background:var(--badge-essencial)}
+.legend-dot--r{background:var(--badge-recomendada)}
+.legend-dot--o{background:var(--badge-opcional)}
 
 /* ═══ GUIA DO FACILITADOR (TIMELINE) ═══ */
 .timeline{position:relative;padding-left:2.5rem;margin-top:2rem}
@@ -200,16 +262,26 @@ a{color:inherit;text-decoration:none}
 .tl-item.i3::before{border-color:var(--f3)}.tl-item.i4::before{border-color:var(--f4)}
 .tl-item.i5::before{border-color:var(--f5)}.tl-item.brk::before{border-color:var(--txt-light);background:var(--txt-light)}
 .tl-time{font-size:.72rem;font-weight:700;color:var(--txt-light);margin-bottom:.2rem}
-.tl-item h4{font-size:.92rem;font-weight:700;margin-bottom:.3rem}
+.tl-item h4{font-size:.92rem;font-weight:700;margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .tl-item p{font-size:.84rem;color:var(--txt-light);line-height:1.6}
 .tl-item a{color:var(--azul);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+
+/* Timeline classification badges (inline) */
+.tl-badge{
+  display:inline-block;padding:.1rem .4rem;border-radius:3px;
+  font-size:.6rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.06em;vertical-align:middle;
+}
+.tl-badge--e{background:var(--badge-essencial-bg);color:var(--badge-essencial)}
+.tl-badge--r{background:var(--badge-recomendada-bg);color:var(--badge-recomendada)}
+.tl-badge--o{background:var(--badge-opcional-bg);color:var(--badge-opcional)}
 
 /* ═══ FERRAMENTAS DIGITAIS ═══ */
 .digi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.5rem}
 .digi-card{
   background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
   border-radius:var(--radius);padding:1.5rem;text-align:center;
-  transition:.3s var(--ease);
+  transition:.3s var(--ease);position:relative;
 }
 .digi-card:hover{background:rgba(255,255,255,.1);transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
 .digi-card .ico{font-size:2rem;margin-bottom:.8rem}
@@ -223,7 +295,7 @@ a{color:inherit;text-decoration:none}
 .dl-card{
   background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
   padding:1.3rem;display:flex;align-items:flex-start;gap:1rem;
-  transition:.3s var(--ease);
+  transition:.3s var(--ease);position:relative;
 }
 .dl-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06);border-color:var(--azul)}
 .dl-card .ico{font-size:1.5rem;flex-shrink:0;margin-top:.1rem}
@@ -232,6 +304,15 @@ a{color:inherit;text-decoration:none}
 .dl-card .link{display:inline-block;margin-top:.5rem;font-size:.72rem;font-weight:700;color:var(--azul);transition:.3s}
 .dl-card:hover .link{letter-spacing:.02em}
 .dl-card .badge-soon{display:inline-block;margin-top:.5rem;font-size:.65rem;font-weight:700;color:var(--txt-light);background:var(--bg-alt);padding:.2rem .6rem;border-radius:4px}
+/* Download card classification */
+.dl-card .dl-class{
+  position:absolute;top:.6rem;right:.6rem;
+  font-size:.58rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.06em;padding:.12rem .4rem;border-radius:3px;
+}
+.dl-class--e{background:var(--badge-essencial-bg);color:var(--badge-essencial)}
+.dl-class--r{background:var(--badge-recomendada-bg);color:var(--badge-recomendada)}
+.dl-class--o{background:var(--badge-opcional-bg);color:var(--badge-opcional)}
 
 /* ═══ REFERÊNCIAS ═══ */
 .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem}
@@ -296,29 +377,24 @@ footer .bar a{color:rgba(255,255,255,.6)}
   .split.flip .split-vis{order:0}
   .digi-grid{grid-template-columns:1fr 1fr}
   .ref-grid{grid-template-columns:1fr}
+  .trilhas{grid-template-columns:1fr}
   footer .inner{grid-template-columns:1fr}
 }
-
-/* Tablet breakpoint for tool cards */
 @media(min-width:481px) and (max-width:900px){
   .tools-row{grid-template-columns:repeat(2,1fr)}
 }
-
 @media(max-width:480px){
   .hero-text{padding:2rem 1.2rem}
   .tools-row{grid-template-columns:1fr}
   .digi-grid{grid-template-columns:1fr}
   .dl-grid{grid-template-columns:1fr}
 }
-
-/* Orbit fix for small screens */
 @media(max-width:600px){
   .hero-visual .orbit{width:180px;height:180px}
   .orbit-center{width:60px;height:60px;font-size:1rem}
   .orbit-item{font-size:1.2rem}
   @keyframes spin{0%{transform:rotate(0deg) translateX(70px) rotate(0deg)}100%{transform:rotate(360deg) translateX(70px) rotate(-360deg)}}
 }
-
 @media print{
   .topbar,.btt,footer{display:none}
   .hero{min-height:auto;grid-template-columns:1fr}
@@ -334,14 +410,13 @@ footer .bar a{color:rgba(255,255,255,.6)}
 <!-- ═══════════ TOPBAR ═══════════ -->
 <header class="topbar" id="topbar">
   <a href="#" class="brand">
-    <!-- IMPORTANTE: colocar logos locais na pasta img/ -->
     <img src="img/ufrr.png" alt="Brasão UFRR">
     <div class="brand-name">PI Thinking <small>PROFNIT · UFRR · INOVARR</small></div>
   </a>
   <button class="burger" id="burger" aria-label="Abrir menu de navegação"><span></span><span></span><span></span></button>
   <nav id="nav">
     <a href="#sobre">Sobre</a>
-    <a href="#guia">Guia</a>
+    <a href="#percursos">Percursos</a>
     <a href="#fases">Fases</a>
     <a href="#ferramentas">Ferramentas</a>
     <a href="#downloads">Downloads</a>
@@ -349,18 +424,17 @@ footer .bar a{color:rgba(255,255,255,.6)}
   </nav>
 </header>
 
-<!-- ═══════════ HERO — SPLIT SCREEN ═══════════ -->
+<!-- ═══════════ HERO ═══════════ -->
 <section class="hero" id="home">
   <div class="hero-text">
     <div class="hero-badge rv">PROFNIT · UFRR · INOVARR</div>
     <h1 class="rv rv-d1">PI <em>Thinking</em></h1>
-    <p class="lead rv rv-d2">Um toolkit completo para facilitar oficinas de Propriedade Intelectual. Combine <strong>Design Thinking</strong> e <strong>Lean Inception</strong> para transformar PI em experiência prática, colaborativa e envolvente.</p>
+    <p class="lead rv rv-d2">Um toolkit completo para facilitar oficinas de Propriedade Intelectual. Combine <strong>Design Thinking</strong> para transformar PI em experiência prática, colaborativa e envolvente.</p>
     <div class="hero-actions rv rv-d3">
-      <a href="#fases" class="btn btn-p">Explorar Fases →</a>
+      <a href="#percursos" class="btn btn-p">Escolher Percurso →</a>
       <a href="guia-facilitador.html" class="btn btn-o">Guia do Facilitador</a>
     </div>
     <div class="hero-logos rv rv-d4">
-      <!-- IMPORTANTE: colocar logos locais na pasta img/ -->
       <img src="img/ufrr.png" alt="UFRR">
       <img src="img/inovarr.png" alt="INOVARR">
       <img src="img/profnit.png" alt="PROFNIT">
@@ -385,94 +459,131 @@ footer .bar a{color:rgba(255,255,255,.6)}
     <span class="overline rv">Sobre o Toolkit</span>
     <h2 class="sec-title rv rv-d1">O que é o PI Thinking?</h2>
     <p class="sec-desc rv rv-d2" style="max-width:720px">
-      O <strong>PI Thinking</strong> é um toolkit educacional que reúne ferramentas de Design Thinking, Lean Inception e gamificação aplicadas ao universo da Propriedade Intelectual. Desenvolvido no âmbito do PROFNIT — ponto focal UFRR, alinhado ao Eixo 2 da ENPI 2021-2030 (Disseminação, Formação e Capacitação em PI). São <strong>16 ferramentas</strong> em <strong>5 fases</strong> para uma oficina completa de <strong>4 horas</strong>.
+      O <strong>PI Thinking</strong> é um toolkit educacional que reúne ferramentas de Design Thinking aplicadas ao universo da Propriedade Intelectual. Desenvolvido no âmbito do PROFNIT — ponto focal UFRR, alinhado ao Eixo 2 da ENPI 2021-2030. São <strong>16 ferramentas</strong> organizadas em <strong>3 níveis de prioridade</strong> para oficinas de <strong>2 a 4 horas</strong>.
     </p>
+
+    <!-- LEGENDA -->
+    <div class="legend rv rv-d3">
+      <div class="legend-item"><span class="legend-dot legend-dot--e"></span> Essencial — percurso mínimo viável</div>
+      <div class="legend-item"><span class="legend-dot legend-dot--r"></span> Recomendada — enriquece a experiência</div>
+      <div class="legend-item"><span class="legend-dot legend-dot--o"></span> Opcional — oficinas estendidas ou bônus</div>
+    </div>
   </div>
 </section>
 
-<!-- ═══════════ GUIA DO FACILITADOR — TIMELINE ═══════════ -->
-<section class="sec" id="guia">
+<!-- ═══════════ PERCURSOS (TRILHAS) ═══════════ -->
+<section class="sec" id="percursos">
   <div class="sec-inner">
-    <span class="overline rv">Roteiro da Oficina</span>
-    <h2 class="sec-title rv rv-d1">Guia do Facilitador — 4 horas</h2>
-    <p class="sec-desc rv rv-d2">Roteiro passo a passo que permite a qualquer facilitador conduzir a oficina de forma autônoma.</p>
+    <span class="overline rv">Planeje sua Oficina</span>
+    <h2 class="sec-title rv rv-d1">Escolha o Percurso</h2>
+    <p class="sec-desc rv rv-d2">Três trilhas pré-montadas para diferentes durações. Cada uma garante uma experiência completa com profundidade adequada ao tempo disponível.</p>
 
-    <div class="timeline rv rv-d3">
-      <div class="tl-item i1">
-        <div class="tl-time">0:00 — 0:15</div>
-        <h4>Abertura e Quiz Diagnóstico</h4>
-        <p><a href="quiz-diagnostico.html">Quiz Diagnóstico</a> — 10 perguntas para mapear conhecimento prévio. Registrar código D-X.</p>
+    <div class="trilhas rv rv-d3">
+      <!-- 2 horas -->
+      <div class="trilha-card trilha-card--2h">
+        <div class="trilha-card__dur">2h</div>
+        <div class="trilha-card__title">Percurso Compacto</div>
+        <div class="trilha-card__count">8 ferramentas · Apenas essenciais</div>
+        <ul class="trilha-card__list">
+          <li><span class="dot dot--e"></span> Quiz Diagnóstico (10 min)</li>
+          <li><span class="dot dot--e"></span> Cartas Personas (10 min)</li>
+          <li><span class="dot dot--e"></span> Canvas de Diagnóstico (15 min)</li>
+          <li><span class="dot dot--e"></span> Árvore de Decisão (10 min)</li>
+          <li><span class="dot dot--e"></span> Canvas de Estratégia (15 min)</li>
+          <li><span class="dot dot--e"></span> Simulador de Depósito (20 min)</li>
+          <li><span class="dot dot--e"></span> Baralho de Dilemas (10 min)</li>
+          <li><span class="dot dot--e"></span> Quiz Final (15 min)</li>
+        </ul>
       </div>
-      <div class="tl-item i1">
-        <div class="tl-time">0:15 — 0:45</div>
-        <h4>Personas + Mapa de Empatia</h4>
-        <p><a href="cartas-personas.html">Cartas Personas</a> + <a href="mapa-empatia.html">Mapa de Empatia</a> — Sortear persona, preencher canvas com post-its.</p>
+
+      <!-- 3 horas -->
+      <div class="trilha-card trilha-card--3h">
+        <div class="trilha-card__dur">3h</div>
+        <div class="trilha-card__title">Percurso Padrão</div>
+        <div class="trilha-card__count">12 ferramentas · Essenciais + Recomendadas</div>
+        <ul class="trilha-card__list">
+          <li><span class="dot dot--e"></span> Quiz Diagnóstico (10 min)</li>
+          <li><span class="dot dot--e"></span> Cartas Personas (15 min)</li>
+          <li><span class="dot dot--r"></span> Mapa de Empatia (15 min)</li>
+          <li><span class="dot dot--e"></span> Canvas de Diagnóstico (15 min)</li>
+          <li><span class="dot dot--e"></span> Árvore de Decisão (10 min)</li>
+          <li><span class="dot dot--r"></span> Crazy 8s da PI (15 min)</li>
+          <li><span class="dot dot--e"></span> Canvas de Estratégia (15 min)</li>
+          <li><span class="dot dot--r"></span> Storyboard (15 min)</li>
+          <li><span class="dot dot--e"></span> Simulador de Depósito (20 min)</li>
+          <li><span class="dot dot--e"></span> Baralho de Dilemas (15 min)</li>
+          <li><span class="dot dot--e"></span> Quiz Final (15 min)</li>
+          <li><span class="dot dot--r"></span> Canvas de Avaliação (10 min)</li>
+        </ul>
       </div>
-      <div class="tl-item i2">
-        <div class="tl-time">0:45 — 1:15</div>
-        <h4>Diagnóstico + Árvore + Linha do Tempo</h4>
-        <p><a href="canvas-diagnostico.html">Canvas de Diagnóstico</a> → <a href="arvore.html">Árvore de Decisão</a> → <a href="linha-do-tempo.html">Linha do Tempo</a>.</p>
-      </div>
-      <div class="tl-item brk">
-        <div class="tl-time">1:15 — 1:30</div>
-        <h4>☕ Intervalo</h4>
-        <p>Coffee break. Expor canvas e linha do tempo na parede.</p>
-      </div>
-      <div class="tl-item i3">
-        <div class="tl-time">1:30 — 2:15</div>
-        <h4>Crazy 8s → Storyboard → Canvas de Estratégia</h4>
-        <p><a href="crazy8s.html">Crazy 8s</a> (8 min) → <a href="storyboard.html">Storyboard</a> (20 min) → <a href="canvas-estrategia.html">Canvas de Estratégia</a> (10 min).</p>
-      </div>
-      <div class="tl-item i4">
-        <div class="tl-time">2:15 — 3:15</div>
-        <h4>Simulador + Dilemas + Escape Room</h4>
-        <p><a href="simulador-deposito.html">Simulador de Depósito</a> (30 min) → <a href="baralho-dilemas.html">Baralho de Dilemas</a> (15 min) → <a href="escape-room.html">Escape Room</a> (opcional).</p>
-      </div>
-      <div class="tl-item i5">
-        <div class="tl-time">3:15 — 3:45</div>
-        <h4>Pitch de PI</h4>
-        <p>Cada equipe apresenta seu plano em 5 minutos. Avaliação por post-its: 🟢 ponto forte, 🟡 sugestão, 🔴 risco.</p>
-      </div>
-      <div class="tl-item i5">
-        <div class="tl-time">3:45 — 4:00</div>
-        <h4>Quiz Final + Encerramento</h4>
-        <p><a href="quiz-final.html">Quiz Final</a> para medir evolução (comparação D-X vs F-X). Certificados e próximos passos.</p>
+
+      <!-- 4 horas -->
+      <div class="trilha-card trilha-card--4h">
+        <div class="trilha-card__dur">4h</div>
+        <div class="trilha-card__title">Percurso Completo</div>
+        <div class="trilha-card__count">16 ferramentas · Todas incluídas</div>
+        <ul class="trilha-card__list">
+          <li><span class="dot dot--e"></span> Quiz Diagnóstico (15 min)</li>
+          <li><span class="dot dot--e"></span> Cartas Personas (15 min)</li>
+          <li><span class="dot dot--r"></span> Mapa de Empatia (15 min)</li>
+          <li><span class="dot dot--e"></span> Canvas de Diagnóstico (15 min)</li>
+          <li><span class="dot dot--o"></span> Linha do Tempo (10 min)</li>
+          <li><span class="dot dot--e"></span> Árvore de Decisão (15 min)</li>
+          <li><span class="dot dot--r"></span> Crazy 8s da PI (15 min)</li>
+          <li><span class="dot dot--r"></span> Storyboard (15 min)</li>
+          <li><span class="dot dot--e"></span> Canvas de Estratégia (15 min)</li>
+          <li><span class="dot dot--e"></span> Simulador de Depósito (30 min)</li>
+          <li><span class="dot dot--e"></span> Baralho de Dilemas (15 min)</li>
+          <li><span class="dot dot--o"></span> Escape Room (15 min)</li>
+          <li><span class="dot dot--o"></span> PI Quest (15 min)</li>
+          <li><span class="dot dot--e"></span> Quiz Final (15 min)</li>
+          <li><span class="dot dot--r"></span> Canvas de Avaliação (10 min)</li>
+          <li><span class="dot dot--o"></span> Intervalo (15 min)</li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ BARRA DE FASES ═══════════ -->
+<!-- ═══════════ FASES — BARRA ═══════════ -->
 <section class="sec alt" id="fases" style="text-align:center">
   <div class="sec-inner">
     <span class="overline rv">Metodologia</span>
     <h2 class="sec-title rv rv-d1" style="margin-left:auto;margin-right:auto">As 5 Fases do PI Thinking</h2>
-    <p class="sec-desc rv rv-d2" style="margin-left:auto;margin-right:auto;text-align:center">Cada fase possui ferramentas específicas para conduzir o participante da curiosidade inicial até a ação concreta de proteção.</p>
+    <p class="sec-desc rv rv-d2" style="margin-left:auto;margin-right:auto;text-align:center">Cada fase possui ferramentas classificadas em Essencial, Recomendada ou Opcional.</p>
+    <div class="legend rv rv-d3">
+      <div class="legend-item"><span class="legend-dot legend-dot--e"></span> Essencial</div>
+      <div class="legend-item"><span class="legend-dot legend-dot--r"></span> Recomendada</div>
+      <div class="legend-item"><span class="legend-dot legend-dot--o"></span> Opcional</div>
+    </div>
   </div>
 </section>
 
-<!-- ═══════════ FASE 1 — DESCOBRIR ═══════════ -->
+<!-- ═══════════ FASE 1 ═══════════ -->
 <section class="split" id="fase1">
   <div class="split-body rv left">
     <span class="fase-tag t1">Fase 1</span>
     <h2>Descobrir</h2>
     <p class="question">"O que os participantes já sabem sobre PI?"</p>
     <div class="meta-row">
-      <span class="meta-item">⏱ 45 min</span>
-      <span class="meta-item">🎯 Empatia + Diagnóstico</span>
+      <span class="meta-item">⏱ 30–45 min</span>
+      <span class="meta-item">🎯 Empatia + Diagnóstico inicial</span>
     </div>
     <div class="tools-row">
       <a href="quiz-diagnostico.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">📋</div>
         <h4>Quiz Diagnóstico</h4>
         <p>10 questões · Score D-X</p>
       </a>
       <a href="cartas-personas.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">🃏</div>
         <h4>Cartas Personas</h4>
         <p>10 perfis · Efeito flip</p>
       </a>
       <a href="mapa-empatia.html" class="tcard">
+        <span class="class-badge class-badge--recomendada">Recomendada</span>
         <div class="ico">🗺️</div>
         <h4>Mapa de Empatia</h4>
         <p>6 quadrantes · Post-its</p>
@@ -485,28 +596,31 @@ footer .bar a{color:rgba(255,255,255,.6)}
   </div>
 </section>
 
-<!-- ═══════════ FASE 2 — DIAGNOSTICAR ═══════════ -->
+<!-- ═══════════ FASE 2 ═══════════ -->
 <section class="split flip" id="fase2">
   <div class="split-body rv right">
     <span class="fase-tag t2">Fase 2</span>
     <h2>Diagnosticar</h2>
     <p class="question">"Qual tipo de proteção se aplica a cada criação?"</p>
     <div class="meta-row">
-      <span class="meta-item">⏱ 30 min</span>
+      <span class="meta-item">⏱ 25–40 min</span>
       <span class="meta-item">🔍 Classificação + Contextualização</span>
     </div>
     <div class="tools-row">
       <a href="canvas-diagnostico.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">📐</div>
         <h4>Canvas de Diagnóstico</h4>
         <p>8 campos · Slider TRL</p>
       </a>
       <a href="linha-do-tempo.html" class="tcard">
+        <span class="class-badge class-badge--opcional">Opcional</span>
         <div class="ico">📅</div>
         <h4>Linha do Tempo</h4>
         <p>16 marcos · 1809–2023</p>
       </a>
       <a href="arvore.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">🌳</div>
         <h4>Árvore de Decisão</h4>
         <p>Wizard · 10 tipos de PI</p>
@@ -519,28 +633,31 @@ footer .bar a{color:rgba(255,255,255,.6)}
   </div>
 </section>
 
-<!-- ═══════════ FASE 3 — ESTRATEGAR ═══════════ -->
+<!-- ═══════════ FASE 3 ═══════════ -->
 <section class="split" id="fase3">
   <div class="split-body rv left">
     <span class="fase-tag t3">Fase 3</span>
     <h2>Estrategar</h2>
     <p class="question">"Como planejar a proteção de forma estratégica?"</p>
     <div class="meta-row">
-      <span class="meta-item">⏱ 45 min</span>
+      <span class="meta-item">⏱ 30–45 min</span>
       <span class="meta-item">💡 Ideação → Convergência</span>
     </div>
     <div class="tools-row">
       <a href="crazy8s.html" class="tcard">
+        <span class="class-badge class-badge--recomendada">Recomendada</span>
         <div class="ico">⚡</div>
         <h4>Crazy 8s da PI</h4>
         <p>8 ideias · 8 min · Timer</p>
       </a>
       <a href="storyboard.html" class="tcard">
+        <span class="class-badge class-badge--recomendada">Recomendada</span>
         <div class="ico">🎬</div>
         <h4>Storyboard</h4>
         <p>6 cenas · Base legal</p>
       </a>
       <a href="canvas-estrategia.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">📐</div>
         <h4>Canvas de Estratégia</h4>
         <p>10 blocos · Custos INPI</p>
@@ -553,31 +670,34 @@ footer .bar a{color:rgba(255,255,255,.6)}
   </div>
 </section>
 
-<!-- ═══════════ FASE 4 — PROTOTIPAR ═══════════ -->
+<!-- ═══════════ FASE 4 ═══════════ -->
 <section class="split flip" id="fase4">
   <div class="split-body rv right">
     <span class="fase-tag t4">Fase 4</span>
     <h2>Prototipar</h2>
     <p class="question">"Como testar e validar o plano de proteção?"</p>
     <div class="meta-row">
-      <span class="meta-item">⏱ 60 min</span>
-      <span class="meta-item">🛠️ Simulação + Debate + Desafio</span>
+      <span class="meta-item">⏱ 30–60 min</span>
+      <span class="meta-item">🛠️ Simulação + Debate</span>
     </div>
     <div class="tools-row">
       <a href="simulador-deposito.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">📝</div>
         <h4>Simulador de Depósito</h4>
-        <p>7 etapas · Score 0–100</p>
+        <p>9 tipos · Custos 2025</p>
       </a>
       <a href="baralho-dilemas.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">🃏</div>
         <h4>Baralho de Dilemas</h4>
-        <p>12 cartas · 6 categorias</p>
+        <p>16 cartas · 7 categorias</p>
       </a>
       <a href="escape-room.html" class="tcard">
+        <span class="class-badge class-badge--opcional">Opcional</span>
         <div class="ico">🔐</div>
         <h4>Escape Room</h4>
-        <p>5 desafios · Timer · Código</p>
+        <p>8 puzzles · Timer · Certificado</p>
       </a>
     </div>
   </div>
@@ -587,31 +707,34 @@ footer .bar a{color:rgba(255,255,255,.6)}
   </div>
 </section>
 
-<!-- ═══════════ FASE 5 — EVOLUIR ═══════════ -->
+<!-- ═══════════ FASE 5 ═══════════ -->
 <section class="split" id="fase5">
   <div class="split-body rv left">
     <span class="fase-tag t5">Fase 5</span>
     <h2>Evoluir</h2>
-    <p class="question">"Como manter e ampliar a proteção ao longo do tempo?"</p>
+    <p class="question">"Quanto aprendemos e como seguir em frente?"</p>
     <div class="meta-row">
-      <span class="meta-item">⏱ 45 min</span>
-      <span class="meta-item">📈 Pitch + Avaliação</span>
+      <span class="meta-item">⏱ 25–45 min</span>
+      <span class="meta-item">📈 Avaliação + Reflexão</span>
     </div>
     <div class="tools-row">
       <a href="pi-quest.html" class="tcard">
+        <span class="class-badge class-badge--opcional">Opcional</span>
         <div class="ico">🎲</div>
         <h4>PI Quest</h4>
-        <p>Tabuleiro · 30 perguntas</p>
+        <p>5 capítulos · Narrativa</p>
       </a>
       <a href="quiz-final.html" class="tcard">
+        <span class="class-badge class-badge--essencial">Essencial</span>
         <div class="ico">🏆</div>
         <h4>Quiz Final</h4>
-        <p>Evolução D-X → F-X</p>
+        <p>20 questões · Evolução D→F</p>
       </a>
       <a href="canvas-avaliacao.html" class="tcard">
+        <span class="class-badge class-badge--recomendada">Recomendada</span>
         <div class="ico">📊</div>
         <h4>Canvas de Avaliação</h4>
-        <p>GAF · NPS · Estrelas</p>
+        <p>5 fases · Estrelas · Export</p>
       </a>
     </div>
   </div>
@@ -624,111 +747,151 @@ footer .bar a{color:rgba(255,255,255,.6)}
 <!-- ═══════════ FERRAMENTAS DIGITAIS ═══════════ -->
 <section class="sec dark" id="ferramentas">
   <div class="sec-inner">
-    <span class="overline rv">Interatividade</span>
-    <h2 class="sec-title rv rv-d1">Ferramentas Digitais</h2>
-    <p class="sec-desc rv rv-d2">Funcionam diretamente no navegador, sem instalação. Use durante a oficina ou como consulta permanente.</p>
+    <span class="overline rv">Consulta Permanente</span>
+    <h2 class="sec-title rv rv-d1">Ferramentas de Apoio</h2>
+    <p class="sec-desc rv rv-d2">Funcionam no navegador sem instalação. Use durante a oficina como consulta ou como material de apoio entre sessões.</p>
     <div class="digi-grid">
       <div class="digi-card rv">
+        <span class="class-badge class-badge--recomendada">Apoio</span>
         <div class="ico">🌳</div>
         <h4>Árvore de Decisão</h4>
-        <p>Wizard que identifica o tipo de proteção ideal entre 10 modalidades de PI.</p>
+        <p>Wizard que identifica o tipo de proteção ideal entre 10 modalidades.</p>
         <a href="arvore.html" class="btn">Usar Agora →</a>
       </div>
       <div class="digi-card rv rv-d1">
+        <span class="class-badge class-badge--recomendada">Apoio</span>
         <div class="ico">📅</div>
         <h4>Calculadora de Vigência</h4>
-        <p>Calcule quando sua proteção cai em domínio público, com alertas visuais.</p>
+        <p>Calcule quando sua proteção cai em domínio público.</p>
         <a href="calculadora.html" class="btn">Usar Agora →</a>
       </div>
       <div class="digi-card rv rv-d2">
+        <span class="class-badge class-badge--recomendada">Apoio</span>
         <div class="ico">📖</div>
         <h4>Glossário Dinâmico</h4>
-        <p>30+ termos essenciais de PI com busca instantânea e definições interativas.</p>
+        <p>30+ termos essenciais de PI com busca instantânea.</p>
         <a href="glossario.html" class="btn">Consultar →</a>
       </div>
       <div class="digi-card rv rv-d3">
+        <span class="class-badge class-badge--recomendada">Apoio</span>
         <div class="ico">🔍</div>
         <h4>Painel de Busca Guiada</h4>
-        <p>Links diretos + mini-tutoriais para INPI, PatentScope (OMPI) e SNPC.</p>
+        <p>Links + tutoriais para INPI, PatentScope e SNPC.</p>
         <a href="busca.html" class="btn">Acessar →</a>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ═══════════ GUIA RÁPIDO (TIMELINE) ═══════════ -->
+<section class="sec" id="guia">
+  <div class="sec-inner">
+    <span class="overline rv">Roteiro da Oficina</span>
+    <h2 class="sec-title rv rv-d1">Cronograma — Percurso Completo (4h)</h2>
+    <p class="sec-desc rv rv-d2">Para percursos de 2h ou 3h, use apenas as ferramentas marcadas como Essencial ou Recomendada conforme a <a href="#percursos" style="color:var(--azul);text-decoration:underline">seção Percursos</a>.</p>
+
+    <div class="timeline rv rv-d3">
+      <div class="tl-item i1">
+        <div class="tl-time">0:00 — 0:15</div>
+        <h4>Abertura + Quiz Diagnóstico <span class="tl-badge tl-badge--e">Essencial</span></h4>
+        <p><a href="quiz-diagnostico.html">Quiz Diagnóstico</a> — 10 perguntas para mapear conhecimento prévio. Registrar código D-X.</p>
+      </div>
+      <div class="tl-item i1">
+        <div class="tl-time">0:15 — 0:45</div>
+        <h4>Personas + Mapa de Empatia <span class="tl-badge tl-badge--e">Essencial</span> <span class="tl-badge tl-badge--r">Recomendada</span></h4>
+        <p><a href="cartas-personas.html">Cartas Personas</a> (essencial) + <a href="mapa-empatia.html">Mapa de Empatia</a> (recomendada). Sortear persona, preencher canvas.</p>
+      </div>
+      <div class="tl-item i2">
+        <div class="tl-time">0:45 — 1:15</div>
+        <h4>Diagnóstico + Árvore <span class="tl-badge tl-badge--e">Essencial</span> <span class="tl-badge tl-badge--o">Opcional</span></h4>
+        <p><a href="canvas-diagnostico.html">Canvas de Diagnóstico</a> (essencial) → <a href="arvore.html">Árvore de Decisão</a> (essencial) → <a href="linha-do-tempo.html">Linha do Tempo</a> (opcional).</p>
+      </div>
+      <div class="tl-item brk">
+        <div class="tl-time">1:15 — 1:30</div>
+        <h4>☕ Intervalo</h4>
+        <p>Coffee break. Expor canvas na parede.</p>
+      </div>
+      <div class="tl-item i3">
+        <div class="tl-time">1:30 — 2:15</div>
+        <h4>Ideação → Estratégia <span class="tl-badge tl-badge--r">Recomendada</span> <span class="tl-badge tl-badge--e">Essencial</span></h4>
+        <p><a href="crazy8s.html">Crazy 8s</a> (recomendada) → <a href="storyboard.html">Storyboard</a> (recomendada) → <a href="canvas-estrategia.html">Canvas de Estratégia</a> (essencial).</p>
+      </div>
+      <div class="tl-item i4">
+        <div class="tl-time">2:15 — 3:15</div>
+        <h4>Simulação + Dilemas <span class="tl-badge tl-badge--e">Essencial</span> <span class="tl-badge tl-badge--o">Opcional</span></h4>
+        <p><a href="simulador-deposito.html">Simulador de Depósito</a> (essencial, 30 min) → <a href="baralho-dilemas.html">Baralho de Dilemas</a> (essencial, 15 min) → <a href="escape-room.html">Escape Room</a> (opcional, 15 min).</p>
+      </div>
+      <div class="tl-item i5">
+        <div class="tl-time">3:15 — 3:45</div>
+        <h4>Avaliação Final <span class="tl-badge tl-badge--e">Essencial</span> <span class="tl-badge tl-badge--o">Opcional</span></h4>
+        <p><a href="pi-quest.html">PI Quest</a> (opcional) → <a href="quiz-final.html">Quiz Final</a> (essencial) — comparação D-X vs F-X.</p>
+      </div>
+      <div class="tl-item i5">
+        <div class="tl-time">3:45 — 4:00</div>
+        <h4>Encerramento <span class="tl-badge tl-badge--r">Recomendada</span></h4>
+        <p><a href="canvas-avaliacao.html">Canvas de Avaliação</a> (recomendada) + Certificados e próximos passos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════ DOWNLOADS ═══════════ -->
-<section class="sec" id="downloads">
+<section class="sec alt" id="downloads">
   <div class="sec-inner">
     <span class="overline rv">Materiais</span>
     <h2 class="sec-title rv rv-d1">Downloads</h2>
-    <p class="sec-desc rv rv-d2">Todos os materiais prontos para uso — abra no navegador ou imprima para a oficina presencial.</p>
+    <p class="sec-desc rv rv-d2">Todos os materiais prontos para uso. Os badges indicam a classificação de prioridade.</p>
+
+    <div class="legend rv rv-d3" style="margin-bottom:1.5rem">
+      <div class="legend-item"><span class="legend-dot legend-dot--e"></span> Essencial</div>
+      <div class="legend-item"><span class="legend-dot legend-dot--r"></span> Recomendada</div>
+      <div class="legend-item"><span class="legend-dot legend-dot--o"></span> Opcional</div>
+    </div>
 
     <div class="dl-grid">
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">📖</div><div><h4>Guia do Facilitador</h4><p>Manual completo com 3 percursos pré-montados</p><a href="guia-facilitador.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv">
-        <div class="ico">📖</div>
-        <div>
-          <h4>Guia do Facilitador (Interativo)</h4>
-          <p>Manual completo da oficina com navegação e links para ferramentas</p>
-          <a href="guia-facilitador.html" class="link">Acessar online →</a>
-        </div>
-      </div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">📋</div><div><h4>Quiz Diagnóstico</h4><p>10 questões com gabarito comentado</p><a href="quiz-diagnostico.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv">
-        <div class="ico">📘</div>
-        <div>
-          <h4>Guia do Facilitador (PDF)</h4>
-          <p>Roteiro completo da oficina de 4h — versão para impressão</p>
-          <span class="badge-soon">Em breve</span>
-        </div>
-      </div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">🃏</div><div><h4>Cartas Personas (10)</h4><p>10 personas com dilemas reais de PI</p><a href="cartas-personas.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">📋</div><div><h4>Quiz Diagnóstico</h4><p>10 questões com gabarito comentado e código D-X</p><a href="quiz-diagnostico.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--r">Recomendada</span><div class="ico">🗺️</div><div><h4>Mapa de Empatia</h4><p>6 quadrantes · Digital + impressão A2</p><a href="mapa-empatia.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🃏</div><div><h4>Cartas Personas (10)</h4><p>10 personas do ecossistema de PI com dilemas reais</p><a href="cartas-personas.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">📐</div><div><h4>Canvas de Diagnóstico</h4><p>8 campos com slider TRL</p><a href="canvas-diagnostico.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🗺️</div><div><h4>Mapa de Empatia do Inventor</h4><p>Canvas interativo com 6 quadrantes — digital + impressão A2</p><a href="mapa-empatia.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--o">Opcional</span><div class="ico">📅</div><div><h4>Linha do Tempo</h4><p>16 marcos da PI no Brasil (1809–2023)</p><a href="linha-do-tempo.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">📐</div><div><h4>Canvas de Diagnóstico de PI</h4><p>8 campos interativos com slider TRL e seletor de proteção</p><a href="canvas-diagnostico.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">🌳</div><div><h4>Árvore de Decisão</h4><p>Wizard de 10 perguntas · 10 tipos de PI</p><a href="arvore.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">📅</div><div><h4>Linha do Tempo da PI no Brasil</h4><p>16 marcos históricos de 1809 a 2023 — filtrável e expandível</p><a href="linha-do-tempo.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--r">Recomendada</span><div class="ico">⚡</div><div><h4>Crazy 8s da PI</h4><p>8 ideias · 8 min · 8 cenários</p><a href="crazy8s.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🌳</div><div><h4>Árvore de Decisão</h4><p>Wizard de 6 perguntas — identifica o tipo de proteção ideal</p><a href="arvore.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--r">Recomendada</span><div class="ico">🎬</div><div><h4>Storyboard de Proteção</h4><p>Narrativa visual em 6 cenas</p><a href="storyboard.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">📐</div><div><h4>Canvas de Estratégia de PI</h4><p>10 blocos com custos INPI 2025, base legal e plano de ação</p><a href="canvas-estrategia.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">📐</div><div><h4>Canvas de Estratégia</h4><p>10 blocos · Custos INPI 2025</p><a href="canvas-estrategia.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">⚡</div><div><h4>Crazy 8s da PI</h4><p>8 ideias em 8 min — 8 cenários de personas com cronômetro</p><a href="crazy8s.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">📝</div><div><h4>Simulador de Depósito</h4><p>9 tipos de PI · Custos atualizados</p><a href="simulador-deposito.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🎬</div><div><h4>Storyboard de Proteção</h4><p>Narrativa visual em 6 cenas — da ideia ao registro</p><a href="storyboard.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">🃏</div><div><h4>Baralho de Dilemas</h4><p>16 dilemas éticos · 7 categorias</p><a href="baralho-dilemas.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">📝</div><div><h4>Simulador de Depósito</h4><p>7 etapas do INPI — patente, MU ou marca — custos 2025 e score</p><a href="simulador-deposito.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--o">Opcional</span><div class="ico">🔐</div><div><h4>Escape Room</h4><p>8 puzzles · Timer · Certificado</p><a href="escape-room.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🔐</div><div><h4>Escape Room da PI</h4><p>"A Invenção Perdida do Monte Roraima" — 5 desafios com timer</p><a href="escape-room.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--o">Opcional</span><div class="ico">🎲</div><div><h4>PI Quest</h4><p>Jogo narrativo · 5 capítulos</p><a href="pi-quest.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🃏</div><div><h4>Baralho de Dilemas</h4><p>12 dilemas éticos — saúde, biodiversidade, academia, tech, agro, cultura</p><a href="baralho-dilemas.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--e">Essencial</span><div class="ico">🏆</div><div><h4>Quiz Final</h4><p>20 questões · Evolução D-X vs F-X</p><a href="quiz-final.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🎲</div><div><h4>PI Quest — Jogo de Tabuleiro</h4><p>30 casas · 30 perguntas · 2–4 jogadores</p><a href="pi-quest.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--r">Recomendada</span><div class="ico">📊</div><div><h4>Canvas de Avaliação</h4><p>5 fases · Estrelas · Exportável</p><a href="canvas-avaliacao.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">🏆</div><div><h4>Quiz Final</h4><p>10 questões avançadas — comparação D-X vs F-X</p><a href="quiz-final.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--r">Apoio</span><div class="ico">📅</div><div><h4>Calculadora de Vigência</h4><p>Todos os tipos de PI · Alertas visuais</p><a href="calculadora.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">📊</div><div><h4>Canvas de Avaliação</h4><p>GAF + NPS + Estrelas — feedback estruturado da oficina</p><a href="canvas-avaliacao.html" class="link">Acessar →</a></div></div>
+      <div class="dl-card rv"><span class="dl-class dl-class--r">Apoio</span><div class="ico">📖</div><div><h4>Glossário Dinâmico</h4><p>30+ termos de PI com busca</p><a href="glossario.html" class="link">Acessar →</a></div></div>
 
-      <div class="dl-card rv"><div class="ico">📅</div><div><h4>Calculadora de Vigência</h4><p>Calcule quando a proteção expira com alertas e calendário</p><a href="calculadora.html" class="link">Acessar →</a></div></div>
-
-      <div class="dl-card rv"><div class="ico">📖</div><div><h4>Glossário Dinâmico</h4><p>30+ termos de PI com busca instantânea</p><a href="glossario.html" class="link">Acessar →</a></div></div>
-
-      <div class="dl-card rv"><div class="ico">🔍</div><div><h4>Painel de Busca Guiada</h4><p>Links + tutoriais para INPI, PatentScope e SNPC</p><a href="busca.html" class="link">Acessar →</a></div></div>
-
-      <div class="dl-card rv"><div class="ico">📐</div><div><h4>Canvas A2 (6 modelos)</h4><p>Diagnóstico, Empatia, É/Não É, MVP, Sequenciador, Storyboard</p><span class="badge-soon">Em breve</span></div></div>
-
-      <div class="dl-card rv"><div class="ico">📅</div><div><h4>Pôster Linha do Tempo</h4><p>Banner 3m × 0,9m com marcos da PI no Brasil</p><span class="badge-soon">Em breve</span></div></div>
-
+      <div class="dl-card rv"><span class="dl-class dl-class--r">Apoio</span><div class="ico">🔍</div><div><h4>Painel de Busca Guiada</h4><p>INPI, PatentScope, SNPC</p><a href="busca.html" class="link">Acessar →</a></div></div>
     </div>
   </div>
 </section>
 
 <!-- ═══════════ REFERÊNCIAS ═══════════ -->
-<section class="sec alt" id="referencias">
+<section class="sec" id="referencias">
   <div class="sec-inner">
     <span class="overline rv">Fundamentação</span>
     <h2 class="sec-title rv rv-d1">Referências e Legislação</h2>
@@ -753,7 +916,6 @@ footer .bar a{color:rgba(255,255,255,.6)}
           <li><a href="https://welc.wipo.int/ipedu" target="_blank" rel="noopener noreferrer">OMPI — IP4Youth & Teachers</a></li>
           <li><a href="https://ufrr.br/nit/" target="_blank" rel="noopener noreferrer">NIT / INOVARR — UFRR</a></li>
           <li><a href="https://ufrr.br/profnit/" target="_blank" rel="noopener noreferrer">PROFNIT — Ponto Focal UFRR</a></li>
-          <li>CAROLI, Paulo. <em>Lean Inception.</em> 2018.</li>
           <li><a href="https://sites.tcu.gov.br/design_thinking/" target="_blank" rel="noopener noreferrer">TCU — Toolkit de Design Thinking</a></li>
           <li><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0 — Licença de uso</a></li>
         </ul>
@@ -763,34 +925,46 @@ footer .bar a{color:rgba(255,255,255,.6)}
 </section>
 
 <!-- ═══════════ FAQ ═══════════ -->
-<section class="sec" id="faq">
+<section class="sec alt" id="faq">
   <div class="sec-inner">
     <span class="overline rv">Dúvidas Comuns</span>
     <h2 class="sec-title rv rv-d1">Perguntas Frequentes</h2>
     <div class="faq-list rv rv-d2">
-      <button class="faq-q" aria-label="Preciso de conhecimento prévio em PI para usar o toolkit?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-        <span>Preciso de conhecimento prévio em PI para usar o toolkit?</span>
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>Qual percurso devo escolher para minha oficina?</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="faq-a"><p>Não. O PI Thinking foi projetado para ser autônomo. O Guia do Facilitador contém todas as instruções, e as ferramentas digitais possuem explicações integradas.</p></div>
+      <div class="faq-a"><p>Se você tem apenas 2 horas, use o Percurso Compacto (8 ferramentas essenciais). Com 3 horas, o Percurso Padrão adiciona Mapa de Empatia, Crazy 8s, Storyboard e Canvas de Avaliação. Com 4 horas, inclua todas as ferramentas, incluindo as opcionais (Linha do Tempo, Escape Room e PI Quest).</p></div>
 
-      <button class="faq-q" aria-label="Posso adaptar as personas para outra região do Brasil?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-        <span>Posso adaptar as personas para outra região do Brasil?</span>
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>Preciso de conhecimento prévio em PI?</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="faq-a"><p>Sim! As personas foram contextualizadas para a realidade amazônica, mas você pode adaptar nomes e contextos mantendo a diversidade de tipos de PI.</p></div>
+      <div class="faq-a"><p>Não. O Guia do Facilitador contém todas as instruções, e as ferramentas digitais possuem explicações integradas. Recomenda-se ler o guia com 48h de antecedência.</p></div>
 
-      <button class="faq-q" aria-label="As ferramentas digitais funcionam offline?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-        <span>As ferramentas digitais funcionam offline?</span>
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>Posso adaptar as personas para outra região?</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="faq-a"><p>Sim. Após carregar a página uma vez, as ferramentas funcionam no navegador sem necessidade de conexão contínua com a internet.</p></div>
+      <div class="faq-a"><p>Sim! As personas foram contextualizadas para a Amazônia, mas você pode adaptar nomes e contextos mantendo a diversidade de tipos de PI.</p></div>
 
-      <button class="faq-q" aria-label="Qual a licença de uso dos materiais?" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>As ferramentas funcionam offline?</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="faq-a"><p>Sim. Após carregar a página uma vez, as ferramentas funcionam no navegador sem conexão contínua com a internet.</p></div>
+
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
         <span>Qual a licença de uso dos materiais?</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="faq-a"><p>Todo o conteúdo é licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>. Você pode usar, adaptar e compartilhar para fins não comerciais, desde que atribua os créditos.</p></div>
+      <div class="faq-a"><p>Todo o conteúdo é licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a>. Você pode usar, adaptar e compartilhar para fins não comerciais, desde que atribua os créditos.</p></div>
+
+      <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span>O que significam os badges Essencial, Recomendada e Opcional?</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="faq-a"><p><strong>Essencial</strong> (8 ferramentas): formam o percurso mínimo viável — garantem que o participante saia da oficina compreendendo os tipos de PI, sabendo classificar criações e tendo simulado um depósito. <strong>Recomendada</strong> (4 ferramentas): enriquecem a experiência com ideação criativa, narrativa visual e feedback estruturado. <strong>Opcional</strong> (3 ferramentas): atividades gamificadas e de contextualização histórica, ideais para oficinas longas ou como bônus. As 4 ferramentas de apoio (Calculadora, Glossário, Busca, Árvore) estão sempre disponíveis para consulta.</p></div>
     </div>
   </div>
 </section>
@@ -802,7 +976,6 @@ footer .bar a{color:rgba(255,255,255,.6)}
       <h5>PI Thinking</h5>
       <p>Toolkit de Propriedade Intelectual com Mindset Ágil e Experimental. Produto do Mestrado Profissional PROFNIT — Ponto Focal UFRR.</p>
       <div class="f-logos">
-        <!-- IMPORTANTE: colocar logos locais na pasta img/ -->
         <img src="img/ufrr.png" alt="UFRR">
         <img src="img/inovarr.png" alt="INOVARR">
         <img src="img/profnit.png" alt="PROFNIT">
@@ -811,9 +984,9 @@ footer .bar a{color:rgba(255,255,255,.6)}
     <div class="f-links">
       <h5>Links Rápidos</h5>
       <a href="#sobre">Sobre</a>
-      <a href="#guia">Guia do Facilitador</a>
+      <a href="#percursos">Percursos</a>
       <a href="#fases">Fases</a>
-      <a href="#ferramentas">Ferramentas Digitais</a>
+      <a href="#ferramentas">Ferramentas de Apoio</a>
       <a href="#downloads">Downloads</a>
     </div>
     <div class="f-links">
@@ -834,26 +1007,19 @@ footer .bar a{color:rgba(255,255,255,.6)}
 
 <!-- ═══════════ JAVASCRIPT ═══════════ -->
 <script>
-/* Reveal on scroll */
 const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
 document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
-
-/* Navbar sticky */
 const tb=document.getElementById('topbar');
 window.addEventListener('scroll',()=>{
   tb.classList.toggle('stuck',scrollY>20);
   document.getElementById('btt').classList.toggle('show',scrollY>600);
 },{passive:true});
-
-/* Mobile menu */
 document.getElementById('burger').addEventListener('click',()=>{
   document.getElementById('nav').classList.toggle('open');
 });
 document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',()=>{
   document.getElementById('nav').classList.remove('open');
 }));
-
-/* Smooth scroll */
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener('click',function(e){
     e.preventDefault();
