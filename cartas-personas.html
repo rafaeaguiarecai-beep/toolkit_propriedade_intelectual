@@ -191,7 +191,7 @@
     /* ---- Card (flip) ---- */
     .p-card-wrapper {
         perspective: 1000px;
-        height: 600px;
+        height: 680px;
     }
 
     .p-card {
@@ -223,7 +223,6 @@
         background: var(--p-surface);
     }
 
-    .p-card__front { z-index: 2; }
     .p-card__back { transform: rotateY(180deg); }
 
     /* ---- Front ---- */
@@ -331,6 +330,8 @@
         padding: 16px 20px;
         flex: 1;
         overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
     }
 
     .p-card__detail {
