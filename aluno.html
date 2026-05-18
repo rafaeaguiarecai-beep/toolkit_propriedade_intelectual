@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Módulo do Aluno — PI Thinking Toolkit de Propriedade Intelectual">
+<title>PI Thinking — Módulo do Aluno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   TOKENS
+   ══════════════════════════════════════ */
+:root {
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --text: #1E293B;
+  --text-mid: #475569;
+  --text-light: #94A3B8;
+  --border: #E2E8F0;
+  --accent: #4361EE;
+  --accent-hover: #3451D1;
+  --accent-bg: rgba(67,97,238,.06);
+  --green: #16A34A;
+  --green-bg: rgba(22,163,74,.06);
+  --green-border: rgba(22,163,74,.25);
+  --orange: #EA580C;
+  --orange-bg: rgba(234,88,12,.06);
+  --red: #DC2626;
+  --f1: #E91E63;
+  --f2: #FF9800;
+  --f3: #2196F3;
+  --f4: #9C27B0;
+  --f5: #4CAF50;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -2px rgba(0,0,0,.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -4px rgba(0,0,0,.04);
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --heading: 'Poppins', sans-serif;
+  --ease: cubic-bezier(.4,0,.2,1);
+}
+
+/* ══════════════════════════════════════
+   RESET
+   ══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ══════════════════════════════════════
+   TELA DE LOGIN
+   ══════════════════════════════════════ */
+.login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 100%);
+}
+
+.login__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg);
+}
+
+.login__logo {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login__logo-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: .4rem;
+}
+
+.login__logo-title {
+  font-family: var(--heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.login__logo-sub {
+  font-size: .8rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.login__desc {
+  text-align: center;
+  color: var(--text-mid);
+  font-size: .92rem;
+  margin-bottom: 1.8rem;
+  line-height: 1.6;
+}
+
+.login__field {
+  margin-bottom: 1rem;
+}
+
+.login__field label {
+  display: block;
+  font-weight: 600;
+  font-size: .85rem;
+  color: var(--text);
+  margin-bottom: .35rem;
+}
+
+.login__field input,
+.login__field select {
+  width: 100%;
+  padding: .7rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: .95rem;
+  color: var(--text);
+  background: var(--bg);
+  transition: border-color .2s var(--ease);
+}
+
+.login__field input:focus,
+.login__field select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.login__field input::placeholder {
+  color: var(--text-light);
+}
+
+.login__btn {
+  width: 100%;
+  padding: .8rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--heading);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s var(--ease), transform .1s;
+  margin-top: .5rem;
+}
+
+.login__btn:hover {
+  background: var(--accent-hover);
+}
+
+.login__btn:active {
+  transform: scale(.98);
+}
+
+.login__btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.login__error {
+  color: var(--red);
+  font-size: .82rem;
+  font-weight: 500;
+  margin-top: .6rem;
+  text-align: center;
+  display: none;
+}
+
+.login__error.visible {
+  display: block;
+  animation: fadeIn .3s var(--ease);
+}
+
+.login__footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.login__footer a {
+  font-size: .82rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.login__footer a:hover {
+  text-decoration: underline;
+}
+
+/* ══════════════════════════════════════
+   STATUS DE CONEXÃO
+   ══════════════════════════════════════ */
+.connection-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: .2rem .6rem;
+  border-radius: 20px;
+  margin-top: .8rem;
+}
+
+.connection-badge--online {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.connection-badge--offline {
+  background: var(--orange-bg);
+  color: var(--orange);
+}
+
+.connection-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.connection-badge--online .connection-badge__dot {
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+.connection-badge--offline .connection-badge__dot {
+  background: var(--orange);
+}
+
+/* ══════════════════════════════════════
+   APP PRINCIPAL
+   ══════════════════════════════════════ */
+.app {
+  display: none;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1.2rem;
+  padding-bottom: 6rem;
+}
+
+.app.visible {
+  display: block;
+  animation: fadeIn .4s var(--ease);
+}
+
+/* ── Barra superior ── */
+.app-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: .8rem;
+}
+
+.app-bar__left {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+}
+
+.app-bar__avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-bg);
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--heading);
+  flex-shrink: 0;
+}
+
+.app-bar__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-bar__name {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: .95rem;
+  line-height: 1.2;
+}
+
+.app-bar__meta {
+  font-size: .75rem;
+  color: var(--text-light);
+}
+
+.app-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-bar__progress-circle {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.app-bar__progress-circle svg {
+  transform: rotate(-90deg);
+}
+
+.app-bar__progress-circle .track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 4;
+}
+
+.app-bar__progress-circle .fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .8s var(--ease);
+}
+
+.app-bar__progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--heading);
+  font-weight: 800;
+  font-size: .7rem;
+  color: var(--accent);
+}
+
+.app-bar__exit {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .4rem .7rem;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all .2s;
+  font-family: var(--font);
+}
+
+.app-bar__exit:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* ── Barra de progresso linear ── */
+.progress-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.progress-track__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .8s var(--ease);
+  background: linear-gradient(90deg, var(--f1), var(--f2), var(--f3), var(--f4), var(--f5));
+}
+
+/* ── Seção de fase ── */
+.phase {
+  margin-bottom: 1.5rem;
+}
+
+.phase__header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .8rem;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: .82rem;
+  margin-bottom: .6rem;
+  letter-spacing: .02em;
+}
+
+.phase__header--1 { background: var(--f1); }
+.phase__header--2 { background: var(--f2); }
+.phase__header--3 { background: var(--f3); }
+.phase__header--4 { background: var(--f4); }
+.phase__header--5 { background: var(--f5); }
+
+.phase__count {
+  margin-left: auto;
+  font-size: .7rem;
+  font-weight: 600;
+  opacity: .85;
+}
+
+/* ── Item de ferramenta ── */
+.tool {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .8rem 1rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: .5rem;
+  transition: all .25s var(--ease);
+  position: relative;
+}
+
+.tool--locked {
+  opacity: .4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tool--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.tool--completed {
+  border-color: var(--green-border);
+  background: var(--green-bg);
+}
+
+.tool--next {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  animation: subtlePulse 3s ease infinite;
+}
+
+.tool__icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.tool__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool__name {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: .9rem;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  flex-wrap: wrap;
+}
+
+.tool__meta {
+  font-size: .75rem;
+  color: var(--text-light);
+  display: flex;
+  gap: .6rem;
+  margin-top: .15rem;
+}
+
+.tool__badge {
+  font-size: .6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: .12rem .45rem;
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+.tool__badge--essencial { background: #E8F5E9; color: #1B5E20; }
+.tool__badge--recomendada { background: #FFF3E0; color: #E65100; }
+.tool__badge--opcional { background: #F5F5F5; color: #616161; }
+
+.tool__action {
+  flex-shrink: 0;
+}
+
+.tool__btn {
+  padding: .45rem 1rem;
+  font-family: var(--heading);
+  font-weight: 600;
+  font-size: .78rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .2s var(--ease);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  white-space: nowrap;
+}
+
+.tool__btn--start {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tool__btn--start:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.tool__btn--continue {
+  background: var(--orange);
+  color: #fff;
+}
+
+.tool__btn--continue:hover {
+  background: #C2410C;
+}
+
+.tool__btn--done {
+  background: var(--green);
+  color: #fff;
+  cursor: default;
+  pointer-events: none;
+}
+
+.tool__btn--locked {
+  background: var(--border);
+  color: var(--text-light);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tool__check {
+  position: absolute;
+  top: -.35rem;
+  right: -.35rem;
+  width: 20px;
+  height: 20px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .65rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Seção de apoio ── */
+.apoio {
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.apoio__title {
+  font-family: var(--heading);
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: .6rem;
+}
+
+.apoio__grid {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.apoio__link {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .5rem .9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--text-mid);
+  transition: all .2s var(--ease);
+}
+
+.apoio__link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+/* ── Mensagem de conclusão ── */
+.completion {
+  background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+  border: 2px solid var(--green-border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  margin-top: 1.5rem;
+  display: none;
+}
+
+.completion.visible {
+  display: block;
+  animation: fadeIn .5s var(--ease);
+}
+
+.completion__icon {
+  font-size: 3rem;
+  margin-bottom: .5rem;
+}
+
+.completion__title {
+  font-family: var(--heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: .3rem;
+}
+
+.completion__text {
+  font-size: .92rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════
+   ANIMAÇÕES
+   ══════════════════════════════════════ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .4; }
+}
+
+@keyframes subtlePulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--accent-bg); }
+  50% { box-shadow: 0 0 0 6px rgba(67,97,238,.08); }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVO
+   ══════════════════════════════════════ */
+@media (max-width: 600px) {
+  .app { padding: .8rem; }
+  .app-bar { padding: .8rem; }
+  .app-bar__right { gap: .5rem; }
+  .tool { flex-wrap: wrap; padding: .7rem .8rem; }
+  .tool__action { width: 100%; }
+  .tool__btn { width: 100%; justify-content: center; padding: .55rem; }
+  .login__card { padding: 1.8rem; }
+  .apoio__grid { flex-direction: column; }
+  .apoio__link { justify-content: center; }
+}
+
+@media (max-width: 380px) {
+  .app-bar__progress-circle { display: none; }
+  .login__card { padding: 1.5rem 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     TELA DE LOGIN
+     ═══════════════════════════════════════ -->
+<div class="login" id="loginScreen">
+  <div class="login__card">
+    <div class="login__logo">
+      <span class="login__logo-icon">🧠</span>
+      <div class="login__logo-title">PI Thinking</div>
+      <div class="login__logo-sub">Módulo do Aluno</div>
+    </div>
+
+    <p class="login__desc">
+      Bem-vindo à oficina de Propriedade Intelectual.<br>
+      Informe seus dados para iniciar o percurso.
+    </p>
+
+    <div class="login__field">
+      <label for="loginName">Seu nome completo</label>
+      <input type="text" id="loginName" placeholder="Ex: Maria da Silva" maxlength="60" autocomplete="name">
+    </div>
+
+    <div class="login__field">
+      <label for="loginSession">Código da oficina</label>
+      <input type="text" id="loginSession" placeholder="Informe o código do facilitador" maxlength="30" style="text-transform:uppercase" autocomplete="off">
+    </div>
+
+    <div class="login__field">
+      <label for="loginPercurso">Percurso da oficina</label>
+      <select id="loginPercurso">
+        <option value="2h">Compacto — 2h (8 ferramentas essenciais)</option>
+        <option value="3h" selected>Padrão — 3h (12 ferramentas)</option>
+        <option value="4h">Completo — 4h (16 ferramentas)</option>
+      </select>
+    </div>
+
+    <button class="login__btn" id="loginBtn" onclick="handleLogin()">
+      Entrar na Oficina
+    </button>
+
+    <p class="login__error" id="loginError"></p>
+
+    <div id="connectionStatus" style="text-align:center"></div>
+
+    <div class="login__footer">
+      <a href="index.html">Conhecer o Toolkit PI Thinking →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     APP PRINCIPAL
+     ═══════════════════════════════════════ -->
+<div class="app" id="appScreen">
+
+  <!-- Barra superior -->
+  <div class="app-bar">
+    <div class="app-bar__left">
+      <div class="app-bar__avatar" id="appAvatar">—</div>
+      <div class="app-bar__info">
+        <div class="app-bar__name" id="appName">—</div>
+        <div class="app-bar__meta" id="appMeta">—</div>
+      </div>
+    </div>
+    <div class="app-bar__right">
+      <div class="app-bar__progress-circle" id="progressCircle">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle class="track" cx="24" cy="24" r="20"></circle>
+          <circle class="fill" id="progressArc" cx="24" cy="24" r="20"
+            stroke-dasharray="125.66" stroke-dashoffset="125.66"></circle>
+        </svg>
+        <div class="app-bar__progress-text" id="progressText">0%</div>
+      </div>
+      <button class="app-bar__exit" onclick="handleExit()" title="Sair da oficina">Sair</button>
+    </div>
+  </div>
+
+  <!-- Progresso linear -->
+  <div class="progress-track">
+    <div class="progress-track__fill" id="progressFill" style="width:0%"></div>
+  </div>
+
+  <!-- Container das fases e ferramentas -->
+  <div id="phasesContainer"></div>
+
+  <!-- Mensagem de conclusão -->
+  <div class="completion" id="completionMsg">
+    <div class="completion__icon">🎉</div>
+    <div class="completion__title">Parabéns! Percurso concluído!</div>
+    <div class="completion__text">
+      Você completou todas as ferramentas do percurso.<br>
+      Compare seu código D-X com o F-X para medir sua evolução.<br>
+      Não esqueça de procurar o NIT para seus próximos passos em PI!
+    </div>
+  </div>
+
+  <!-- Ferramentas de apoio -->
+  <div class="apoio" id="apoioContainer"></div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCRIPTS
+     ═══════════════════════════════════════ -->
+
+<!-- Firebase SDK (compat — carregamento via CDN) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<!-- Módulos PI Thinking -->
+<script src="js/firebase-config.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/aluno-engine.js"></script>
+
+<script>
+/* ================================================================
+   MÓDULO DO ALUNO — Controller de Interface
+   ================================================================
+   Este script conecta a UI (HTML/CSS acima) com os módulos
+   sync.js e aluno-engine.js. Não contém lógica de negócio,
+   apenas renderização e handlers de eventos.
+   ================================================================ */
+
+/* ══════════════════════════════════════
+   LOGIN
+   ══════════════════════════════════════ */
+
+function handleLogin() {
+    var name = document.getElementById('loginName').value.trim();
+    var session = document.getElementById('loginSession').value.trim().toUpperCase();
+    var percurso = document.getElementById('loginPercurso').value;
+
+    // Validação
+    if (!name || name.length < 3) {
+        showLoginError('Informe seu nome completo (mínimo 3 caracteres).');
+        document.getElementById('loginName').focus();
+        return;
+    }
+
+    if (!session || session.length < 3) {
+        showLoginError('Informe o código da oficina fornecido pelo facilitador.');
+        document.getElementById('loginSession').focus();
+        return;
+    }
+
+    // Desabilitar botão durante conexão
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Conectando...';
+
+    // Inicializar Firebase
+    PISync.init(FIREBASE_CONFIG).then(function (online) {
+
+        // Entrar na sessão
+        PISync.joinSession(session, name, percurso);
+
+        // Inicializar motor do aluno
+        AlunoEngine.init(percurso);
+
+        // Mostrar app
+        showApp();
+
+    }).catch(function () {
+        // Mesmo sem Firebase, permite usar offline
+        AlunoEngine.init(percurso);
+        localStorage.setItem('pi-session-id', session);
+        localStorage.setItem('pi-participant-name', name);
+        showApp();
+    });
+}
+
+function showLoginError(msg) {
+    var el = document.getElementById('loginError');
+    el.textContent = msg;
+    el.classList.add('visible');
+    setTimeout(function () { el.classList.remove('visible'); }, 4000);
+}
+
+/* ══════════════════════════════════════
+   APP — MOSTRAR E RENDERIZAR
+   ══════════════════════════════════════ */
+
+function showApp() {
+    document.getElementById('loginScreen').style.display = 'none';
+    var app = document.getElementById('appScreen');
+    app.classList.add('visible');
+    renderApp();
+
+    // Escutar atualizações de controle do facilitador
+    window.addEventListener('pi-controls-updated', function () {
+        renderApp();
+    });
+}
+
+function renderApp() {
+    var state = AlunoEngine.getState();
+    if (!state) return;
+
+    var info = PISync.getSessionInfo();
+
+    // ── Barra superior ──
+    var initials = (info.participantName || '?').split(' ')
+        .map(function (w) { return w.charAt(0); }).join('').substring(0, 2).toUpperCase();
+
+    document.getElementById('appAvatar').textContent = initials;
+    document.getElementById('appName').textContent = info.participantName || 'Participante';
+    document.getElementById('appMeta').textContent =
+        'Oficina ' + (info.sessionId || '—') +
+        '  ·  Percurso ' + state.percurso +
+        '  ·  ' + state.totalConcluidas + '/' + state.totalFerramentas;
+
+    // ── Progresso circular ──
+    var circumference = 2 * Math.PI * 20; // r=20
+    var offset = circumference - (state.progresso / 100) * circumference;
+    var arc = document.getElementById('progressArc');
+    arc.style.strokeDasharray = circumference;
+    arc.style.strokeDashoffset = offset;
+    document.getElementById('progressText').textContent = state.progresso + '%';
+
+    // ── Progresso linear ──
+    document.getElementById('progressFill').style.width = state.progresso + '%';
+
+    // ── Fases e ferramentas ──
+    var faseGroups = {};
+    state.ferramentas.forEach(function (f) {
+        if (!faseGroups[f.fase]) faseGroups[f.fase] = [];
+        faseGroups[f.fase].push(f);
+    });
+
+    var html = '';
+
+    state.fases.forEach(function (fase) {
+        var tools = faseGroups[fase.num];
+        if (!tools || tools.length === 0) return;
+
+        var doneCount = tools.filter(function (t) { return t.concluida; }).length;
+
+        html += '<div class="phase">';
+        html += '<div class="phase__header phase__header--' + fase.num + '">';
+        html += '<span>' + fase.icone + '</span>';
+        html += '<span>Fase ' + fase.num + ' — ' + fase.nome + '</span>';
+        html += '<span class="phase__count">' + doneCount + '/' + tools.length + '</span>';
+        html += '</div>';
+
+        tools.forEach(function (t) {
+            var isNext = state.proximaFerramenta && state.proximaFerramenta.id === t.id;
+
+            var toolClass = 'tool';
+            if (t.concluida) toolClass += ' tool--completed';
+            else if (isNext) toolClass += ' tool--next';
+            else if (t.desbloqueada) toolClass += ' tool--active';
+            else toolClass += ' tool--locked';
+
+            // URL com parâmetros
+            var toolUrl = t.url + '?modo=oficina&tool=' + t.id;
+
+            // Botão
+            var btnHtml = '';
+            if (t.concluida) {
+                btnHtml = '<span class="tool__btn tool__btn--done">✓ Concluída</span>';
+            } else if (isNext) {
+                btnHtml = '<a href="' + toolUrl + '" class="tool__btn tool__btn--start">▶ Iniciar</a>';
+            } else if (t.desbloqueada) {
+                btnHtml = '<a href="' + toolUrl + '" class="tool__btn tool__btn--start">Abrir</a>';
+            } else {
+                btnHtml = '<span class="tool__btn tool__btn--locked">🔒 Bloqueada</span>';
+            }
+
+            html += '<div class="' + toolClass + '">';
+
+            // Check de conclusão
+            if (t.concluida) {
+                html += '<div class="tool__check">✓</div>';
+            }
+
+            html += '<div class="tool__icon">' + t.icone + '</div>';
+            html += '<div class="tool__info">';
+            html += '<div class="tool__name">';
+            html += t.nome;
+            html += ' <span class="tool__badge tool__badge--' + t.tipo + '">' + t.tipo + '</span>';
+            html += '</div>';
+            html += '<div class="tool__meta">';
+            html += '<span>⏱ ' + t.duracao + '</span>';
+            html += '<span>Fase ' + t.fase + '</span>';
+            html += '</div>';
+            html += '</div>';
+            html += '<div class="tool__action">' + btnHtml + '</div>';
+            html += '</div>';
+        });
+
+        html += '</div>';
+    });
+
+    document.getElementById('phasesContainer').innerHTML = html;
+
+    // ── Mensagem de conclusão ──
+    var completionEl = document.getElementById('completionMsg');
+    if (state.concluido) {
+        completionEl.classList.add('visible');
+    } else {
+        completionEl.classList.remove('visible');
+    }
+
+    // ── Ferramentas de apoio ──
+    var apoioHtml = '<div class="apoio__title">Ferramentas de Apoio — Consulta Livre</div>';
+    apoioHtml += '<div class="apoio__grid">';
+    state.apoio.forEach(function (a) {
+        apoioHtml += '<a href="' + a.url + '" class="apoio__link">' +
+            a.icone + ' ' + a.nome + '</a>';
+    });
+    apoioHtml += '</div>';
+    document.getElementById('apoioContainer').innerHTML = apoioHtml;
+}
+
+/* ══════════════════════════════════════
+   SAIR DA OFICINA
+   ══════════════════════════════════════ */
+
+function handleExit() {
+    if (!confirm('Tem certeza que deseja sair da oficina?\n\nSeu progresso está salvo e você pode voltar depois.')) {
+        return;
+    }
+
+    // Não apaga dados — apenas volta à tela de login
+    document.getElementById('appScreen').classList.remove('visible');
+    document.getElementById('appScreen').style.display = '';
+    document.getElementById('loginScreen').style.display = '';
+
+    // Restaurar botão
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = false;
+    btn.textContent = 'Entrar na Oficina';
+
+    // Preencher campos com dados anteriores
+    var info = PISync.getSessionInfo();
+    if (info.participantName) document.getElementById('loginName').value = info.participantName;
+    if (info.sessionId) document.getElementById('loginSession').value = info.sessionId;
+}
+
+/* ══════════════════════════════════════
+   RETORNO DE FERRAMENTA
+   ══════════════════════════════════════ */
+
+function checkReturnFromTool() {
+    var params = new URLSearchParams(window.location.search);
+    var completedTool = params.get('completed');
+
+    if (completedTool) {
+        // Marcar como concluída no engine local
+        AlunoEngine.completeTool(completedTool);
+
+        // Limpar URL (remover parâmetro)
+        var cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        return true;
+    }
+
+    return false;
+}
+
+/* ══════════════════════════════════════
+   STATUS DE CONEXÃO
+   ══════════════════════════════════════ */
+
+function updateConnectionStatus(online) {
+    var container = document.getElementById('connectionStatus');
+    if (online) {
+        container.innerHTML =
+            '<div class="connection-badge connection-badge--online">' +
+            '<span class="connection-badge__dot"></span> Conectado ao servidor' +
+            '</div>';
+    } else {
+        container.innerHTML =
+            '<div class="connection-badge connection-badge--offline">' +
+            '<span class="connection-badge__dot"></span> Modo offline — dados salvos localmente' +
+            '</div>';
+    }
+}
+
+/* ══════════════════════════════════════
+   INICIALIZAÇÃO
+   ══════════════════════════════════════ */
+
+(function boot() {
+
+    // Escutar mudanças de conexão
+    PISync.onConnectionChange(updateConnectionStatus);
+
+    // Tentar restaurar sessão anterior
+    PISync.init(FIREBASE_CONFIG).then(function (online) {
+
+        updateConnectionStatus(online);
+
+        var hasSession = PISync.restoreSession();
+        var hasPercurso = AlunoEngine.restore();
+
+        if (hasSession && hasPercurso) {
+            // Verificar se voltando de uma ferramenta
+            checkReturnFromTool();
+            showApp();
+        }
+        // Se não tem sessão, fica na tela de login
+
+    }).catch(function () {
+
+        updateConnectionStatus(false);
+
+        // Tentar restaurar offline
+        var hasPercurso = AlunoEngine.restore();
+        if (hasPercurso) {
+            checkReturnFromTool();
+            showApp();
+        }
+    });
+
+})();
+</script>
+
+</body>
+</html>
