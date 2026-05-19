@@ -3,1309 +3,1721 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guia do Facilitador v3.0 — PI Thinking</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="description" content="Guia completo do Facilitador — PI Thinking Toolkit. Instruções detalhadas para conduzir oficinas de Propriedade Intelectual com Design Thinking.">
+<meta name="author" content="PROFNIT · UFRR · INOVARR">
+<title>Guia do Facilitador — PI Thinking</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
 <style>
+/* ══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ══════════════════════════════════════════════════════════════ */
 :root {
-  --cor-fase1: #E91E63;
-  --cor-fase2: #FF9800;
-  --cor-fase3: #2196F3;
-  --cor-fase4: #9C27B0;
-  --cor-fase5: #4CAF50;
-  --cor-primaria: #1a1a2e;
-  --cor-fundo: #f8f9fa;
-  --cor-card: #ffffff;
-  --cor-texto: #2d3436;
-  --cor-texto-leve: #636e72;
-  --cor-borda: #e0e0e0;
-  --cor-destaque: #0984e3;
-  --badge-e: #1B5E20;
-  --badge-e-bg: #E8F5E9;
-  --badge-r: #E65100;
-  --badge-r-bg: #FFF3E0;
-  --badge-o: #616161;
-  --badge-o-bg: #F5F5F5;
-  --sombra-card: 0 2px 12px rgba(0,0,0,.08);
-  --sombra-hover: 0 8px 30px rgba(0,0,0,.12);
-  --radius: 12px;
-  --max-w: 960px;
-  --transition: .3s ease;
+  /* Cores base */
+  --bg:          #F8F9FC;
+  --surface:     #FFFFFF;
+  --text:        #1E293B;
+  --text-mid:    #475569;
+  --text-light:  #94A3B8;
+  --border:      #E2E8F0;
+  --accent:      #4361EE;
+  --accent-dark: #3451D1;
+  --accent-bg:   rgba(67,97,238,.06);
+
+  /* Semânticas */
+  --green:     #16A34A;
+  --green-bg:  rgba(22,163,74,.08);
+  --orange:    #EA580C;
+  --orange-bg: rgba(234,88,12,.08);
+  --red:       #DC2626;
+  --red-bg:    rgba(220,38,38,.08);
+  --purple:    #7C3AED;
+  --purple-bg: rgba(124,58,237,.08);
+  --gold:      #D97706;
+
+  /* Fases */
+  --f1: #E91E63;
+  --f2: #FF9800;
+  --f3: #2196F3;
+  --f4: #9C27B0;
+  --f5: #4CAF50;
+
+  /* Layout */
+  --radius:    16px;
+  --radius-sm: 8px;
+  --shadow:    0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.10);
+  --max-w:     960px;
+
+  /* Tipografia */
+  --font:    'Inter', system-ui, -apple-system, sans-serif;
+  --heading: 'Poppins', sans-serif;
+  --display: 'Playfair Display', serif;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   RESET
+   ══════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 16px; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--cor-fundo); color: var(--cor-texto);
-  line-height: 1.75; -webkit-font-smoothing: antialiased;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; height: auto; }
+code {
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: .88em;
+  background: var(--accent-bg);
+  color: var(--accent-dark);
+  padding: .15em .4em;
+  border-radius: 4px;
 }
 
-/* NAV */
-.side-nav {
-  position: fixed; left: 0; top: 0; bottom: 0;
-  width: 290px; background: var(--cor-primaria);
-  color: #fff; overflow-y: auto; z-index: 100;
-  padding: 2rem 1.2rem; transition: transform var(--transition);
+/* ══════════════════════════════════════════════════════════════
+   TOP NAVIGATION
+   ══════════════════════════════════════════════════════════════ */
+.topnav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(248,249,252,.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow .3s;
 }
-.side-nav.collapsed { transform: translateX(-290px); }
-.side-nav h2 {
-  font-size: .72rem; text-transform: uppercase;
-  letter-spacing: .12em; color: rgba(255,255,255,.4);
-  margin-bottom: .6rem; margin-top: 1.4rem;
-  padding-top: .6rem; border-top: 1px solid rgba(255,255,255,.08);
+.topnav.scrolled { box-shadow: var(--shadow-md); }
+.topnav__inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
 }
-.side-nav h2:first-of-type { margin-top: 0; border-top: none; padding-top: 0; }
-.side-nav a {
+.topnav__brand {
   display: flex; align-items: center; gap: .5rem;
-  color: rgba(255,255,255,.75); text-decoration: none;
-  font-size: .82rem; padding: .35rem .6rem; border-radius: 6px;
-  transition: background var(--transition);
+  text-decoration: none; color: var(--text);
 }
-.side-nav a:hover, .side-nav a.active {
-  background: rgba(255,255,255,.12); color: #fff;
+.topnav__icon { font-size: 1.4rem; }
+.topnav__title {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: .92rem;
 }
-.side-nav .logo {
-  font-size: 1.1rem; font-weight: 700;
-  margin-bottom: 1.4rem; display: flex;
-  align-items: center; gap: .5rem;
+.topnav__toggle {
+  display: none;
+  background: none; border: none;
+  font-size: 1.4rem; cursor: pointer;
+  color: var(--text);
 }
-.side-nav .logo span { font-size: 1.4rem; }
-.nav-badge {
-  display: inline-block; padding: .08rem .35rem; border-radius: 3px;
-  font-size: .55rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .04em; margin-left: auto; flex-shrink: 0;
+.topnav__links {
+  display: flex; gap: .2rem; align-items: center;
+  overflow-x: auto;
 }
-.nav-badge--e { background: rgba(76,175,80,.25); color: #81C784; }
-.nav-badge--r { background: rgba(255,152,0,.25); color: #FFB74D; }
-.nav-badge--o { background: rgba(255,255,255,.12); color: rgba(255,255,255,.4); }
-.nav-badge--new { background: rgba(0,150,255,.3); color: #64B5F6; }
-
-.nav-toggle {
-  position: fixed; left: 16px; top: 16px; z-index: 200;
-  background: var(--cor-primaria); color: #fff;
-  border: none; border-radius: 8px; width: 42px; height: 42px;
-  font-size: 1.3rem; cursor: pointer; display: none;
-  align-items: center; justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,.2);
+.topnav__links a {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-mid);
+  padding: .4rem .6rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background .15s, color .15s;
 }
-.nav-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.5);
-  z-index: 99; opacity: 0; visibility: hidden;
-  transition: opacity .3s, visibility .3s;
-}
-.nav-overlay.active { opacity: 1; visibility: visible; }
-
-/* MAIN */
-.main {
-  margin-left: 290px; padding: 2.5rem 3rem 4rem;
-  max-width: calc(var(--max-w) + 6rem);
-  transition: margin-left var(--transition);
-}
-.main.expanded { margin-left: 0; }
-
-/* HERO */
-.hero {
-  background: linear-gradient(135deg, var(--cor-primaria) 0%, #16213e 100%);
-  color: #fff; padding: 3.5rem 3rem; border-radius: var(--radius);
-  margin-bottom: 3rem; position: relative; overflow: hidden;
-}
-.hero::after {
-  content: ''; position: absolute; right: -60px; top: -60px;
-  width: 260px; height: 260px; border-radius: 50%;
-  background: rgba(255,255,255,.04);
-}
-.hero .badge {
-  display: inline-block; background: rgba(255,255,255,.15);
-  padding: .3rem .9rem; border-radius: 20px;
-  font-size: .78rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .08em;
-  margin-bottom: 1rem;
-}
-.hero h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: .8rem; }
-.hero p { font-size: 1.05rem; opacity: .85; max-width: 640px; }
-.hero .version { margin-top: 1rem; font-size: .82rem; opacity: .55; }
-
-/* SECTIONS */
-section { margin-bottom: 3rem; scroll-margin-top: 1rem; }
-h2.section-title {
-  font-size: 1.55rem; font-weight: 700;
-  border-bottom: 3px solid var(--cor-destaque);
-  padding-bottom: .5rem; margin-bottom: 1.4rem;
-}
-h3 { font-size: 1.15rem; font-weight: 600; margin: 1.6rem 0 .6rem; color: var(--cor-texto); }
-h4 { font-size: 1rem; font-weight: 600; margin: 1.2rem 0 .4rem; }
-p { margin-bottom: 1rem; }
-
-/* FASE HEADERS */
-.fase-header {
-  display: flex; align-items: center; gap: .8rem;
-  padding: 1rem 1.4rem; border-radius: var(--radius);
-  color: #fff; margin: 2.5rem 0 1.2rem; font-weight: 700;
-  font-size: 1.3rem;
-}
-.fase-header.f1 { background: var(--cor-fase1); }
-.fase-header.f2 { background: var(--cor-fase2); }
-.fase-header.f3 { background: var(--cor-fase3); }
-.fase-header.f4 { background: var(--cor-fase4); }
-.fase-header.f5 { background: var(--cor-fase5); }
-.fase-header .icon { font-size: 1.6rem; }
-
-/* MATERIAL CARDS */
-.material-card {
-  background: var(--cor-card); border-radius: var(--radius);
-  box-shadow: var(--sombra-card); padding: 1.8rem;
-  margin-bottom: 1.6rem; border-left: 5px solid var(--cor-destaque);
-  transition: box-shadow var(--transition); position: relative;
-}
-.material-card:hover { box-shadow: var(--sombra-hover); }
-.material-card.f1 { border-color: var(--cor-fase1); }
-.material-card.f2 { border-color: var(--cor-fase2); }
-.material-card.f3 { border-color: var(--cor-fase3); }
-.material-card.f4 { border-color: var(--cor-fase4); }
-.material-card.f5 { border-color: var(--cor-fase5); }
-.material-card.sistema { border-color: #0288D1; }
-.material-card h4 { margin-top: 0; }
-.material-card .meta {
-  display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: .8rem;
-}
-.material-card .meta span {
-  font-size: .75rem; background: #f0f0f0;
-  padding: .2rem .6rem; border-radius: 20px;
-  color: var(--cor-texto-leve); font-weight: 500;
-}
-.mat-class {
-  position: absolute; top: 1rem; right: 1rem;
-  padding: .2rem .6rem; border-radius: 4px;
-  font-size: .65rem; font-weight: 800;
-  text-transform: uppercase; letter-spacing: .06em;
-}
-.mat-class--e { background: var(--badge-e-bg); color: var(--badge-e); }
-.mat-class--r { background: var(--badge-r-bg); color: var(--badge-r); }
-.mat-class--o { background: var(--badge-o-bg); color: var(--badge-o); }
-.mat-class--new { background: #E3F2FD; color: #0288D1; }
-
-/* TABLES */
-.table-wrap { overflow-x: auto; margin: 1.2rem 0; }
-table {
-  width: 100%; border-collapse: collapse;
-  font-size: .88rem; background: var(--cor-card);
-  border-radius: var(--radius); overflow: hidden;
-  box-shadow: var(--sombra-card);
-}
-thead { background: var(--cor-primaria); color: #fff; }
-th, td { padding: .65rem 1rem; text-align: left; }
-th { font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
-tbody tr { border-bottom: 1px solid var(--cor-borda); }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:nth-child(even) { background: #fafafa; }
-.badge-fase {
-  display: inline-block; color: #fff; padding: .15rem .55rem;
-  border-radius: 4px; font-size: .72rem; font-weight: 600;
-}
-.badge-fase.f1 { background: var(--cor-fase1); }
-.badge-fase.f2 { background: var(--cor-fase2); }
-.badge-fase.f3 { background: var(--cor-fase3); }
-.badge-fase.f4 { background: var(--cor-fase4); }
-.badge-fase.f5 { background: var(--cor-fase5); }
-.badge-class {
-  display: inline-block; padding: .12rem .45rem;
-  border-radius: 3px; font-size: .65rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .04em;
-}
-.badge-class--e { background: var(--badge-e-bg); color: var(--badge-e); }
-.badge-class--r { background: var(--badge-r-bg); color: var(--badge-r); }
-.badge-class--o { background: var(--badge-o-bg); color: var(--badge-o); }
-
-/* CALLOUTS */
-.callout {
-  padding: 1.2rem 1.4rem; border-radius: var(--radius);
-  margin: 1.2rem 0; font-size: .92rem;
-}
-.callout.dica { background: #e8f5e9; border-left: 4px solid var(--cor-fase5); }
-.callout.atencao { background: #fff3e0; border-left: 4px solid var(--cor-fase2); }
-.callout.info { background: #e3f2fd; border-left: 4px solid var(--cor-fase3); }
-.callout.novo { background: #E3F2FD; border-left: 4px solid #0288D1; }
-.callout .label {
-  font-weight: 700; text-transform: uppercase;
-  font-size: .75rem; letter-spacing: .06em; margin-bottom: .3rem;
+.topnav__links a:hover,
+.topnav__links a.active {
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
-/* SPEECH */
-.speech {
-  background: #FFFDE7; border-left: 4px solid #FFC107;
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.4rem; margin: 1rem 0;
-  font-size: .92rem; position: relative;
+@media (max-width: 860px) {
+  .topnav__toggle { display: block; }
+  .topnav__links {
+    display: none;
+    position: absolute;
+    top: 56px; left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    padding: .5rem 1rem;
+    box-shadow: var(--shadow-md);
+  }
+  .topnav__links.open { display: flex; }
+  .topnav__links a { padding: .6rem .8rem; }
 }
-.speech::before {
-  content: '🎤'; position: absolute; left: -1.6rem; top: .8rem;
+
+/* ══════════════════════════════════════════════════════════════
+   COVER
+   ══════════════════════════════════════════════════════════════ */
+.cover {
+  background: linear-gradient(135deg, #4361EE 0%, #7C3AED 50%, #E91E63 100%);
+  color: #fff;
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-conic-gradient(rgba(255,255,255,.03) 0% 25%, transparent 0% 50%) 0 0 / 50px 50px;
+}
+.cover__overline {
+  font-family: var(--heading);
+  font-size: .82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  opacity: .85;
+  position: relative;
+}
+.cover__title {
+  font-family: var(--display);
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  margin: .5rem 0;
+  position: relative;
+}
+.cover__sub {
   font-size: 1.1rem;
+  opacity: .92;
+  max-width: 640px;
+  margin: .5rem auto 0;
+  position: relative;
 }
-.speech .speech-label {
-  font-weight: 700; font-size: .72rem; text-transform: uppercase;
-  letter-spacing: .08em; color: #F57F17; margin-bottom: .3rem;
+.cover__meta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.8rem;
+  font-size: .85rem;
+  position: relative;
 }
-.speech p { margin-bottom: .5rem; font-style: italic; color: #5D4037; }
-.speech p:last-child { margin-bottom: 0; }
+.cover__meta span {
+  background: rgba(255,255,255,.15);
+  padding: .35rem .9rem;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
 
-/* STEPS */
-.steps { counter-reset: step; margin: 1.2rem 0; }
+/* ══════════════════════════════════════════════════════════════
+   CONTAINER / SECTION
+   ══════════════════════════════════════════════════════════════ */
+.container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+.section {
+  margin-bottom: 3rem;
+  padding-top: 1rem;
+}
+.section__badge {
+  display: inline-block;
+  font-family: var(--heading);
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: .3rem .8rem;
+  border-radius: 20px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  margin-bottom: .8rem;
+}
+.section__title {
+  font-family: var(--heading);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  margin-bottom: .5rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+.section__subtitle {
+  font-size: 1.05rem;
+  color: var(--text-mid);
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+/* Faixa lateral colorida nas fases */
+.section--phase {
+  border-left: 4px solid var(--phase-color, var(--accent));
+  padding-left: 1.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PROSE (blocos de texto corrido)
+   ══════════════════════════════════════════════════════════════ */
+.prose { margin-bottom: 1.5rem; }
+.prose p { margin-bottom: .8rem; }
+.prose h3, .prose h4 {
+  font-family: var(--heading);
+  margin-top: 1.5rem;
+  margin-bottom: .5rem;
+}
+h3 {
+  font-family: var(--heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: .6rem;
+  color: var(--text);
+}
+h4 {
+  font-family: var(--heading);
+  font-size: 1.02rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: .4rem;
+  color: var(--text);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CALLOUTS
+   ══════════════════════════════════════════════════════════════ */
+.callout {
+  display: flex; gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  border-radius: var(--radius);
+  margin: 1.5rem 0;
+  font-size: .92rem;
+  line-height: 1.6;
+}
+.callout__icon { font-size: 1.3rem; flex-shrink: 0; margin-top: .1rem; }
+.callout__body { flex: 1; }
+.callout__body strong { font-weight: 700; }
+
+.callout--tip     { background: var(--green-bg);  border-left: 4px solid var(--green); }
+.callout--warning { background: var(--orange-bg); border-left: 4px solid var(--orange); }
+.callout--info    { background: var(--accent-bg); border-left: 4px solid var(--accent); }
+.callout--danger  { background: var(--red-bg);    border-left: 4px solid var(--red); }
+
+/* ══════════════════════════════════════════════════════════════
+   CARDS & CARD GRID
+   ══════════════════════════════════════════════════════════════ */
+.card-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.card-grid--2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.card-grid--3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  transition: transform .2s, box-shadow .2s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.card--phase { border-top: 4px solid var(--accent); }
+.card__header {
+  display: flex; align-items: center; gap: .6rem;
+  margin-bottom: .6rem;
+}
+.card__header h4 {
+  margin: 0;
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: .95rem;
+}
+.card__icon { font-size: 1.4rem; }
+.card p {
+  font-size: .9rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FEATURE GRID (Dashboard abas, Apoio)
+   ══════════════════════════════════════════════════════════════ */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.feature {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+.feature__icon {
+  font-size: 2rem;
+  margin-bottom: .5rem;
+  display: block;
+}
+.feature h5 {
+  font-family: var(--heading);
+  font-size: .95rem;
+  font-weight: 700;
+  margin-bottom: .4rem;
+}
+.feature p {
+  font-size: .88rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STEP SEQUENCE (passos numerados)
+   ══════════════════════════════════════════════════════════════ */
+.step-sequence {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  margin: 1.5rem 0;
+  padding-left: .5rem;
+}
 .step {
-  counter-increment: step; padding: 1rem 1rem 1rem 3.4rem;
-  position: relative; margin-bottom: .8rem;
-  background: var(--cor-card); border-radius: var(--radius);
-  box-shadow: var(--sombra-card);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
 }
-.step::before {
-  content: counter(step); position: absolute; left: 1rem; top: 1rem;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--cor-destaque); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: .85rem;
+.step__number {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--heading);
+  font-weight: 800;
+  font-size: .95rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.step strong { display: block; margin-bottom: .2rem; }
+.step__content {
+  flex: 1;
+  font-size: .92rem;
+  line-height: 1.65;
+  padding-top: .3rem;
+}
+.step__content strong { font-weight: 700; }
 
-/* CHECKLIST */
-.checklist { list-style: none; padding: 0; margin: 1rem 0; }
-.checklist li {
-  padding: .5rem 0 .5rem 2rem; position: relative;
-  border-bottom: 1px dashed var(--cor-borda);
+/* ══════════════════════════════════════════════════════════════
+   TOOL BLOCK (bloco de ferramenta)
+   ══════════════════════════════════════════════════════════════ */
+.tool-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
-.checklist li::before {
-  content: '☐'; position: absolute; left: 0; top: .5rem; font-size: 1.1rem;
+.tool-block__header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.tool-block__header h3 {
+  font-family: var(--heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: .3rem 0;
+  color: var(--text);
+}
+.tool-block__meta {
+  font-size: .82rem;
+  color: var(--text-light);
+}
+.tool-block__meta a { color: var(--accent); font-weight: 600; }
+.tool-block__badge {
+  display: inline-block;
+  font-family: var(--heading);
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: .2rem .6rem;
+  border-radius: 4px;
+  color: #fff;
+}
+.tool-block__badge--essential    { background: var(--green); }
+.tool-block__badge--recommended  { background: var(--accent); }
+.tool-block__badge--optional     { background: var(--orange); }
+
+.tool-block__body {
+  padding: 1.5rem;
+}
+.tool-block__body h4 {
+  font-family: var(--heading);
+  font-size: .95rem;
+  font-weight: 700;
+  margin-top: 1.2rem;
+  margin-bottom: .4rem;
+  color: var(--text);
+}
+.tool-block__body h4:first-child { margin-top: 0; }
+.tool-block__body p {
+  font-size: .92rem;
+  margin-bottom: .7rem;
+  line-height: 1.7;
 }
 
-/* PERCURSO CARDS */
-.percurso-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin: 1.5rem 0; }
-.percurso-card {
-  background: var(--cor-card); border: 2px solid var(--cor-borda);
-  border-radius: var(--radius); padding: 1.5rem; position: relative;
-  overflow: hidden; transition: var(--transition);
+/* ══════════════════════════════════════════════════════════════
+   TIMELINE MINI (cronogramas dos percursos)
+   ══════════════════════════════════════════════════════════════ */
+.timeline-mini {
+  margin-top: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--border);
 }
-.percurso-card:hover { border-color: var(--cor-destaque); box-shadow: var(--sombra-hover); }
-.percurso-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
-.percurso-card--2h::before { background: linear-gradient(90deg, var(--cor-fase1), var(--cor-fase3)); }
-.percurso-card--3h::before { background: linear-gradient(90deg, var(--cor-fase1), var(--cor-fase4)); }
-.percurso-card--4h::before { background: linear-gradient(90deg, var(--cor-fase1), var(--cor-fase5)); }
-.percurso-card__dur { font-size: 2rem; font-weight: 900; color: var(--cor-primaria); }
-.percurso-card__title { font-size: .95rem; font-weight: 700; margin-bottom: .3rem; }
-.percurso-card__desc { font-size: .82rem; color: var(--cor-texto-leve); margin-bottom: .8rem; }
-.percurso-card ol { padding-left: 1.2rem; }
-.percurso-card li { font-size: .8rem; padding: .2rem 0; color: var(--cor-texto); }
+.tm-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .8rem;
+  padding: .4rem 0;
+  font-size: .88rem;
+  position: relative;
+}
+.tm-item::before {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: .65rem;
+  width: 10px; height: 10px;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+.tm-time {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: .82rem;
+  color: var(--accent);
+  min-width: 40px;
+  flex-shrink: 0;
+}
+.tm-tool {
+  color: var(--text-mid);
+  line-height: 1.5;
+}
 
-/* CHANGE LOG */
-.changelog {
-  background: #FFF8E1; border: 2px solid #FFE082;
-  border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0;
+/* ══════════════════════════════════════════════════════════════
+   CHECKLIST
+   ══════════════════════════════════════════════════════════════ */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin: 1.5rem 0;
 }
-.changelog h4 { color: #F57F17; margin-bottom: .5rem; }
-.changelog ul { padding-left: 1.2rem; }
-.changelog li { font-size: .88rem; margin-bottom: .3rem; }
-.changelog .removed { color: #C62828; text-decoration: line-through; }
-.changelog .added { color: #2E7D32; font-weight: 600; }
-.changelog .changed { color: #E65100; }
+.checklist__item {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .92rem;
+  padding: .6rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.checklist__item:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.checklist__item input[type="checkbox"] {
+  width: 18px; height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+  cursor: pointer;
+}
 
-/* CONCEPT TABLE */
-.concept-table { font-size: .84rem; }
-.concept-table td:first-child { font-weight: 600; color: var(--cor-texto); min-width: 160px; }
-.concept-table td:nth-child(2) { color: var(--cor-texto-leve); }
-.concept-table td:last-child { font-family: 'Courier New', monospace; font-size: .78rem; color: var(--cor-destaque); min-width: 180px; }
+/* ══════════════════════════════════════════════════════════════
+   FOOTER
+   ══════════════════════════════════════════════════════════════ */
+.footer {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-size: .8rem;
+  color: var(--text-light);
+  border-top: 1px solid var(--border);
+}
+.footer p { margin-bottom: .4rem; }
+.footer a { color: var(--accent); }
 
-/* DETAILS/ACCORDION */
-details {
-  background: var(--cor-card); border-radius: var(--radius);
-  box-shadow: var(--sombra-card); margin-bottom: .8rem; overflow: hidden;
+/* ══════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ══════════════════════════════════════════════════════════════ */
+@media print {
+  :root { --bg: #fff; --surface: #fff; }
+  body { font-size: 10pt; line-height: 1.5; }
+  .topnav { display: none !important; }
+  .cover { padding: 2rem 1rem; break-after: page; }
+  .section { break-inside: avoid; }
+  .tool-block { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+  .card, .feature, .callout { break-inside: avoid; box-shadow: none; }
+  .checklist__item input { display: inline; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #666; }
+  @page { size: A4; margin: 2cm; }
 }
-details summary {
-  padding: 1rem 1.4rem; cursor: pointer;
-  font-weight: 600; font-size: .95rem;
-  list-style: none; display: flex; align-items: center; gap: .6rem;
-  transition: background var(--transition);
-}
-details summary:hover { background: #f5f5f5; }
-details summary::before { content: '▸'; transition: transform var(--transition); }
-details[open] summary::before { transform: rotate(90deg); }
-details .content { padding: 0 1.4rem 1.2rem; }
 
-/* FAQ */
-.faq-tech { margin: 1.5rem 0; }
-.faq-tech-item {
-  background: var(--cor-card); border: 1px solid var(--cor-borda);
-  border-radius: var(--radius); margin-bottom: .6rem; overflow: hidden;
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE FINE-TUNING
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .cover { padding: 3rem 1.2rem 2.5rem; }
+  .container { padding: 1.2rem 1rem; }
+  .section--phase { padding-left: 1rem; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .card-grid--3 { grid-template-columns: 1fr; }
+  .tool-block__header,
+  .tool-block__body { padding: 1rem; }
+  .step { gap: .6rem; }
+  .step__number { width: 30px; height: 30px; font-size: .82rem; }
 }
-.faq-tech-q {
-  width: 100%; padding: .9rem 1.2rem; background: none; border: none;
-  font-family: inherit; font-size: .9rem; font-weight: 600;
-  text-align: left; cursor: pointer; color: var(--cor-texto);
-  display: flex; justify-content: space-between; align-items: center;
-  transition: background var(--transition);
-}
-.faq-tech-q:hover { background: #f9f9f9; }
-.faq-tech-q svg { transition: transform .3s; flex-shrink: 0; }
-.faq-tech-q.open svg { transform: rotate(180deg); }
-.faq-tech-a {
-  max-height: 0; overflow: hidden; transition: max-height .4s;
-  padding: 0 1.2rem;
-}
-.faq-tech-a.open { max-height: 600px; padding: 0 1.2rem 1rem; }
-.faq-tech-a p { font-size: .88rem; color: var(--cor-texto-leve); margin-bottom: .5rem; }
-.faq-tech-a .legal { font-size: .8rem; color: var(--cor-destaque); font-style: italic; }
 
-/* REPORT */
-.report-tpl {
-  background: var(--cor-card); border: 2px dashed var(--cor-borda);
-  border-radius: var(--radius); padding: 2rem; margin: 1.5rem 0;
+
+/* ══════════════════════════════════════════════════════════════
+   PARTE 3 — REFINAMENTOS VISUAIS E ACESSIBILIDADE
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Sr-only (acessibilidade) ── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Focus visible global ── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Smooth transitions on interactive elements ── */
+.card,
+.feature,
+.checklist__item,
+.tool-block {
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+/* ── Tool block nesting: callouts inside tool-block body ── */
+.tool-block__body .callout {
+  margin: 1rem 0;
   font-size: .88rem;
 }
-.report-tpl h4 { color: var(--cor-destaque); margin-bottom: 1rem; border-bottom: 1px solid var(--cor-borda); padding-bottom: .5rem; }
-.report-tpl .field { margin-bottom: 1rem; }
-.report-tpl .field-label { font-weight: 700; font-size: .82rem; color: var(--cor-texto); margin-bottom: .2rem; }
-.report-tpl .field-line { border-bottom: 1px solid var(--cor-borda); padding: .3rem 0; min-height: 1.5rem; color: var(--cor-texto-leve); font-style: italic; }
 
-/* LOOP */
-.loop-box {
-  background: linear-gradient(135deg, #E8F5E9, #FFF3E0);
-  border: 2px solid var(--cor-fase5); border-radius: var(--radius);
-  padding: 1.5rem; margin: 1.5rem 0;
-}
-.loop-box h4 { color: var(--cor-fase5); margin-bottom: .5rem; }
-
-/* BACK TOP */
-.back-top {
-  position: fixed; bottom: 2rem; right: 2rem;
-  width: 44px; height: 44px; border-radius: 50%;
-  background: var(--cor-primaria); color: #fff;
-  border: none; font-size: 1.2rem; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
-  opacity: 0; pointer-events: none; transition: opacity var(--transition); z-index: 90;
-}
-.back-top.visible { opacity: 1; pointer-events: auto; }
-
-/* SISTEMA/TECH SECTION */
-.tech-diagram {
-  background: var(--cor-card); border: 2px solid var(--cor-borda);
-  border-radius: var(--radius); padding: 2rem; margin: 1.5rem 0;
-  font-family: 'Courier New', monospace; font-size: .82rem;
-  line-height: 1.5; overflow-x: auto; white-space: pre;
-  color: var(--cor-texto);
+/* ── Phase color inheritance for section badges ── */
+.section--phase .section__badge {
+  background: var(--phase-color, var(--accent));
+  color: #fff;
 }
 
-/* PRINT */
-@media print {
-  .side-nav, .nav-toggle, .back-top, .nav-overlay { display: none !important; }
-  .main { margin-left: 0 !important; padding: 1rem !important; }
-  .hero { break-after: page; }
-  .material-card, .step, details, .percurso-card { break-inside: avoid; }
-  body { font-size: 11pt; }
+/* ── Timeline mini: ☕ interval special styling ── */
+.tm-item:has(.tm-tool:empty),
+.tm-tool:contains("Intervalo") {
+  opacity: .7;
+  font-style: italic;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .side-nav { transform: translateX(-290px); }
-  .side-nav.open { transform: translateX(0); }
-  .nav-toggle { display: flex; }
-  .main { margin-left: 0; padding: 1.2rem; }
-  .percurso-grid { grid-template-columns: 1fr; }
+/* ── Card grid 2-col variant used nowhere yet but future-proof ── */
+.card-grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
-</style>
-</head>
-<body>
 
-<div class="nav-overlay" id="navOverlay"></div>
-<button class="nav-toggle" id="navToggle" aria-label="Abrir menu">☰</button>
+/* ── Permalink anchors smooth offset ── */
+.section[id]::before {
+  content: '';
+  display: block;
+  height: 0;
+  margin-top: 0;
+}
 
-<nav class="side-nav" id="sideNav">
-  <div class="logo"><span>🧠</span> PI Thinking v3</div>
+/* ── Callout links ── */
+.callout a {
+  color: var(--accent-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(67,97,238,.3);
+  text-underline-offset: 2px;
+}
+.callout a:hover {
+  text-decoration-color: var(--accent);
+}
 
-  <h2>Fundamentos</h2>
-  <a href="#sobre">Sobre este Guia</a>
-  <a href="#mudancas">O que mudou na v3</a>
-  <a href="#classificacao">Sistema de Classificação</a>
-  <a href="#percursos">3 Percursos Pré-Montados</a>
-  <a href="#publico">Público e Pré-requisitos</a>
-  <a href="#objetivos">Objetivos de Aprendizagem</a>
-  <a href="#preparacao">Preparação Completa</a>
-  <a href="#conceitos">Mapa de Conceitos</a>
+/* ── Step sequence: connector line between steps ── */
+.step-sequence {
+  position: relative;
+}
+.step-sequence::before {
+  content: '';
+  position: absolute;
+  left: calc(.5rem + 18px);
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.step {
+  position: relative;
+  z-index: 1;
+}
 
-  <h2>Sistema de Oficina</h2>
-  <a href="#sistema-visao">Visão Geral <span class="nav-badge nav-badge--new">Novo</span></a>
-  <a href="#sistema-dashboard">Dashboard do Facilitador <span class="nav-badge nav-badge--new">Novo</span></a>
-  <a href="#sistema-aluno">Módulo do Aluno <span class="nav-badge nav-badge--new">Novo</span></a>
-  <a href="#sistema-firebase">Configuração Firebase <span class="nav-badge nav-badge--new">Novo</span></a>
+/* ── Timeline mini dot improvements ── */
+.tm-item:first-child::before {
+  background: var(--green);
+}
+.tm-item:last-child::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
 
-  <h2>Fase 1 — Descobrir</h2>
-  <a href="#f1-visao">Visão Geral</a>
-  <a href="#f1-mat1">Quiz Diagnóstico <span class="nav-badge nav-badge--e">E</span></a>
-  <a href="#f1-mat2">Cartas Personas <span class="nav-badge nav-badge--e">E</span></a>
-  <a href="#f1-mat3">Mapa de Empatia <span class="nav-badge nav-badge--r">R</span></a>
+/* ── Tool block hover subtle accent ── */
+.tool-block:hover {
+  border-color: rgba(67,97,238,.2);
+}
 
-  <h2>Fase 2 — Diagnosticar</h2>
-  <a href="#f2-visao">Visão Geral</a>
-  <a href="#f2-mat1">Canvas Diagnóstico <span class="nav-badge nav-badge--e">E</span></a>
-  <a href="#f2-mat2">Árvore de Decisão <span class="nav-badge nav-badge--e">E</span></a>
-  <a href="#f2-mat3">Linha do Tempo <span class="nav-badge nav-badge--o">O</span></a>
+/* ── Feature grid: link styling inside features ── */
+.feature a {
+  display: inline-block;
+  margin-top: .4rem;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.feature a:hover {
+  text-decoration: underline;
+}
 
-  <h2>Fase 3 — Estrategar</h2>
-  <a href="#f3-visao">Visão Geral</a>
-  <a href="#f3-mat1">Busca de Anterioridade <span class="nav-badge nav-badge--r">R</span></a>
-  <a href="#f3-mat2">Storyboard <span class="nav-badge nav-badge--r">R</span></a>
-  <a href="#f3-mat3">Canvas Estratégia <span class="nav-badge nav-badge--e">E</span></a>
+/* ── Checklist completed state ── */
+.checklist__item:has(input:checked) {
+  background: var(--green-bg);
+  border-color: var(--green);
+  text-decoration: line-through;
+  text-decoration-color: var(--text-light);
+}
 
-  <h2>Fase 4 — Testar</h2>
-  <a href="#f4-visao">Visão Geral</a>
-  <a href="#f4-mat1">Simulador Depósito <span class="nav-badge nav-badge--e">E</span></a>
-  <a href="#f4-mat2">Baralho Dilemas <span class="nav-badge nav-badge--e">E</span></a>
-  <a href="#f4-mat3">Escape Room <span class="nav-badge nav-badge--o">O</span></a>
-  <a href="#loop">Revisão Estratégica</a>
+/* ── Dark mode support (optional, follows system preference) ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:          #0F172A;
+    --surface:     #1E293B;
+    --text:        #F1F5F9;
+    --text-mid:    #CBD5E1;
+    --text-light:  #64748B;
+    --border:      #334155;
+    --accent-bg:   rgba(67,97,238,.12);
+    --green-bg:    rgba(22,163,74,.12);
+    --orange-bg:   rgba(234,88,12,.12);
+    --red-bg:      rgba(220,38,38,.12);
+    --purple-bg:   rgba(124,58,237,.12);
+    --shadow:      0 1px 3px rgba(0,0,0,.3);
+    --shadow-md:   0 4px 12px rgba(0,0,0,.4);
+    --shadow-lg:   0 10px 25px rgba(0,0,0,.5);
+  }
 
-  <h2>Fase 5 — Evoluir</h2>
-  <a href="#f5-visao">Visão Geral</a>
-  <a href="#f5-mat1">Quiz Final <span class="nav-badge nav-badge--e">E</span></a>
-  <a href="#f5-mat2">Canvas Avaliação <span class="nav-badge nav-badge--r">R</span></a>
-  <a href="#f5-pos">Pós-Oficina: PI Quest</a>
+  .topnav {
+    background: rgba(15,23,42,.85);
+  }
 
-  <h2>Apêndices</h2>
-  <a href="#faq-tecnico">FAQ Técnico (20 perguntas)</a>
-  <a href="#referencias">Referências Legais</a>
-  <a href="#custos">Custos INPI 2025</a>
-  <a href="#relatorio">Modelo de Relatório</a>
-  <a href="#adaptacoes">Adaptações e Variantes</a>
-  <a href="#dicas-gerais">Dicas de Facilitação</a>
-</nav>
+  .cover {
+    background: linear-gradient(135deg, #2D3A8C 0%, #5B21B6 50%, #9D174D 100%);
+  }
 
-<div class="main" id="mainContent">
+  .tool-block__header {
+    background: rgba(0,0,0,.15);
+  }
 
-<!-- CAPA -->
-<header class="hero" id="sobre">
-  <span class="badge">Documento do Facilitador · v3.0</span>
-  <h1>Guia do Facilitador<br>Toolkit PI Thinking</h1>
-  <p>Manual completo para condução da oficina de Propriedade Intelectual. Inclui sistema de acompanhamento em tempo real (Dashboard + Módulo do Aluno), roteiros de fala, mapa de conceitos, FAQ técnico, 3 percursos pré-montados e modelo de relatório pós-oficina.</p>
-  <p class="version">Versão 3.0 — Maio 2026 · 15 ferramentas + sistema de oficina · PROFNIT/UFRR</p>
-</header>
+  code {
+    background: rgba(67,97,238,.15);
+    color: #93B4FF;
+  }
 
-<!-- O QUE MUDOU -->
-<section id="mudancas">
-  <h2 class="section-title">O que mudou na v3.0</h2>
+  .tm-item::before {
+    border-color: var(--surface);
+  }
 
-  <div class="changelog">
-    <h4>🔄 Registro de Mudanças — v2.0 → v3.0</h4>
-    <ul>
-      <li class="removed">Removido: Crazy 8s da PI — a técnica de brainstorm rápido não se mostrou eficaz no contexto de PI, onde os participantes ainda não possuem repertório suficiente para gerar 8 estratégias diversas em 8 minutos. Na prática, os grupos produziam variações superficiais ou travavam.</li>
-      <li class="added">Promovida: Busca de Anterioridade — elevada de "ferramenta de apoio" para "Recomendada" na Fase 3. A busca prática em bases reais (INPI, PatentScope) é a habilidade mais concreta que o participante pode levar da oficina.</li>
-      <li class="changed">Renomeada: Fase 4 de "Prototipar" para "Testar" — alinha com o que realmente acontece (simulação + debate + validação), sem criar expectativa de prototipagem física.</li>
-      <li class="changed">Reposicionado: PI Quest — movido de ferramenta opcional da Fase 5 para atividade assíncrona pós-oficina. O aluno acessa pelo Módulo do Aluno depois. Evita competição de tempo com o Escape Room.</li>
-      <li class="added">Novo: Sistema de Oficina — Dashboard do Facilitador (dashboard.html) + Módulo do Aluno (aluno.html) com acompanhamento em tempo real via Firebase, ranking, controle de fases e envio de resultados.</li>
-      <li class="changed">Reorganizado: Storyboard agora precede o Canvas de Estratégia como rascunho narrativo (não mais como ferramenta independente paralela). A sequência na Fase 3 fica: Busca → Storyboard → Canvas.</li>
-    </ul>
-  </div>
-
-  <h3>Justificativa pedagógica</h3>
-  <p>A versão 3.0 corrige três problemas identificados na aplicação prática da v2.0. O primeiro é a presença do Crazy 8s — uma técnica originada no Design Sprint do Google para geração rápida de soluções visuais de interface. No contexto de PI, os participantes estão no início do aprendizado e não possuem o domínio do espaço de soluções que a técnica exige. A busca de anterioridade prática é mais valiosa nesse ponto do percurso porque ensina uma habilidade concreta (consultar bases de dados) e alimenta diretamente a estratégia.</p>
-  <p>O segundo problema era a redundância entre Storyboard e Canvas de Estratégia — ambos cobriam planejamento de proteção, mas de formas diferentes. A solução foi sequenciá-los como um par complementar: o Storyboard como rascunho narrativo rápido, seguido pelo Canvas como formalização estruturada.</p>
-  <p>O terceiro era a ausência de documentação do sistema digital de oficina, que agora está totalmente integrado ao guia.</p>
-
-  <div class="table-wrap">
-  <table>
-    <thead><tr><th>Aspecto</th><th>v2.0</th><th>v3.0</th></tr></thead>
-    <tbody>
-      <tr><td>Total de ferramentas no percurso</td><td>16</td><td>15 (Crazy 8s removido, Busca promovida)</td></tr>
-      <tr><td>Ferramentas essenciais</td><td>8</td><td>8 (sem mudança)</td></tr>
-      <tr><td>Ferramentas recomendadas</td><td>4</td><td>4 (Busca entra, Crazy 8s sai)</td></tr>
-      <tr><td>Ferramentas opcionais</td><td>3</td><td>2 (PI Quest vira pós-oficina)</td></tr>
-      <tr><td>Nome da Fase 4</td><td>Prototipar</td><td>Testar</td></tr>
-      <tr><td>Sistema de oficina digital</td><td>Não documentado</td><td>Documentação completa</td></tr>
-      <tr><td>PI Quest</td><td>Opcional na Fase 5</td><td>Atividade pós-oficina (assíncrona)</td></tr>
-    </tbody>
-  </table>
-  </div>
-</section>
-
-<!-- SISTEMA DE CLASSIFICAÇÃO -->
-<section id="classificacao">
-  <h2 class="section-title">Sistema de Classificação das Ferramentas</h2>
-  <p>Todas as ferramentas estão organizadas em 3 níveis de prioridade. Se o tempo apertar, corte Opcionais primeiro, depois Recomendadas. As Essenciais nunca devem ser cortadas — formam a espinha dorsal da aprendizagem.</p>
-
-  <div class="table-wrap">
-  <table>
-    <thead><tr><th>Nível</th><th>Qtd</th><th>Critério</th><th>Quando usar</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><span class="badge-class badge-class--e">Essencial</span></td>
-        <td><strong>8</strong></td>
-        <td>Percurso mínimo viável. Garantem que o participante saia compreendendo tipos de PI, sabendo classificar criações e tendo simulado um depósito.</td>
-        <td>Sempre — em qualquer percurso.</td>
-      </tr>
-      <tr>
-        <td><span class="badge-class badge-class--r">Recomendada</span></td>
-        <td><strong>4</strong></td>
-        <td>Aprofundam empatia, busca prática, narrativa visual e feedback estruturado.</td>
-        <td>Oficinas de 3h ou mais.</td>
-      </tr>
-      <tr>
-        <td><span class="badge-class badge-class--o">Opcional</span></td>
-        <td><strong>2</strong></td>
-        <td>Gamificação e contextualização histórica. Alto engajamento mas dispensáveis.</td>
-        <td>Oficinas de 4h ou como bônus.</td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
-
-  <p>Adicionalmente, 3 ferramentas de <strong>Apoio</strong> (Calculadora de Vigência, Glossário, Painel de Busca como consulta livre) estão sempre disponíveis sem ocupar tempo do cronograma. O PI Quest fica disponível como atividade assíncrona pós-oficina.</p>
-
-  <h3>Classificação completa v3.0</h3>
-  <div class="table-wrap">
-  <table>
-    <thead><tr><th>Fase</th><th>Ferramenta</th><th>Nível</th><th>Arquivo</th></tr></thead>
-    <tbody>
-      <tr><td><span class="badge-fase f1">Fase 1</span></td><td>Quiz Diagnóstico</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>quiz-diagnostico.html</td></tr>
-      <tr><td><span class="badge-fase f1">Fase 1</span></td><td>Cartas Personas</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>cartas-personas.html</td></tr>
-      <tr><td><span class="badge-fase f1">Fase 1</span></td><td>Mapa de Empatia</td><td><span class="badge-class badge-class--r">Recomendada</span></td><td>mapa-empatia.html</td></tr>
-      <tr><td><span class="badge-fase f2">Fase 2</span></td><td>Canvas de Diagnóstico</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>canvas-diagnostico.html</td></tr>
-      <tr><td><span class="badge-fase f2">Fase 2</span></td><td>Árvore de Decisão</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>arvore.html</td></tr>
-      <tr><td><span class="badge-fase f2">Fase 2</span></td><td>Linha do Tempo</td><td><span class="badge-class badge-class--o">Opcional</span></td><td>linha-do-tempo.html</td></tr>
-      <tr><td><span class="badge-fase f3">Fase 3</span></td><td>Busca de Anterioridade</td><td><span class="badge-class badge-class--r">Recomendada</span></td><td>busca.html</td></tr>
-      <tr><td><span class="badge-fase f3">Fase 3</span></td><td>Storyboard de Proteção</td><td><span class="badge-class badge-class--r">Recomendada</span></td><td>storyboard.html</td></tr>
-      <tr><td><span class="badge-fase f3">Fase 3</span></td><td>Canvas de Estratégia</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>canvas-estrategia.html</td></tr>
-      <tr><td><span class="badge-fase f4">Fase 4</span></td><td>Simulador de Depósito</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>simulador-deposito.html</td></tr>
-      <tr><td><span class="badge-fase f4">Fase 4</span></td><td>Baralho de Dilemas</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>baralho-dilemas.html</td></tr>
-      <tr><td><span class="badge-fase f4">Fase 4</span></td><td>Escape Room</td><td><span class="badge-class badge-class--o">Opcional</span></td><td>escape-room.html</td></tr>
-      <tr><td><span class="badge-fase f5">Fase 5</span></td><td>Quiz Final</td><td><span class="badge-class badge-class--e">Essencial</span></td><td>quiz-final.html</td></tr>
-      <tr><td><span class="badge-fase f5">Fase 5</span></td><td>Canvas de Avaliação</td><td><span class="badge-class badge-class--r">Recomendada</span></td><td>canvas-avaliacao.html</td></tr>
-    </tbody>
-  </table>
-  </div>
-
-  <div class="table-wrap">
-  <table>
-    <thead><tr><th colspan="4">Ferramentas de Apoio (acesso livre) + Pós-Oficina</th></tr>
-    <tr><th>Tipo</th><th>Ferramenta</th><th>Arquivo</th><th>Observação</th></tr></thead>
-    <tbody>
-      <tr><td>Apoio</td><td>Calculadora de Vigência</td><td>calculadora.html</td><td>Consulta livre durante toda a oficina</td></tr>
-      <tr><td>Apoio</td><td>Glossário Dinâmico</td><td>glossario.html</td><td>Consulta livre durante toda a oficina</td></tr>
-      <tr><td>Apoio</td><td>Painel de Busca (consulta)</td><td>busca.html</td><td>Também usada como atividade na Fase 3</td></tr>
-      <tr><td>Pós-oficina</td><td>PI Quest</td><td>pi-quest.html</td><td>Jogo narrativo assíncrono — aluno acessa depois</td></tr>
-    </tbody>
-  </table>
-  </div>
-</section>
-
-<!-- PERCURSOS -->
-<section id="percursos">
-  <h2 class="section-title">3 Percursos Pré-Montados</h2>
-
-  <div class="percurso-grid">
-    <div class="percurso-card percurso-card--2h">
-      <div class="percurso-card__dur">2h</div>
-      <div class="percurso-card__title">Percurso Compacto</div>
-      <div class="percurso-card__desc">8 ferramentas essenciais. Ideal para palestras ou aulas com tempo restrito.</div>
-      <ol>
-        <li>0:00 — Abertura + configuração do sistema (5 min)</li>
-        <li>0:05 — Quiz Diagnóstico (10 min)</li>
-        <li>0:15 — Cartas Personas (10 min)</li>
-        <li>0:25 — Canvas de Diagnóstico (15 min)</li>
-        <li>0:40 — Árvore de Decisão (10 min)</li>
-        <li>0:50 — Canvas de Estratégia (15 min)</li>
-        <li>1:05 — Simulador de Depósito (20 min)</li>
-        <li>1:25 — Baralho de Dilemas — 2 cartas (15 min)</li>
-        <li>1:40 — Quiz Final (15 min)</li>
-        <li>1:55 — Encerramento (5 min)</li>
-      </ol>
-    </div>
-
-    <div class="percurso-card percurso-card--3h">
-      <div class="percurso-card__dur">3h</div>
-      <div class="percurso-card__title">Percurso Padrão</div>
-      <div class="percurso-card__desc">11 ferramentas (essenciais + recomendadas). Formato mais recomendado.</div>
-      <ol>
-        <li>0:00 — Abertura + configuração do sistema (5 min)</li>
-        <li>0:05 — Quiz Diagnóstico (10 min)</li>
-        <li>0:15 — Cartas Personas (15 min)</li>
-        <li>0:30 — Mapa de Empatia (15 min)</li>
-        <li>0:45 — Canvas de Diagnóstico (15 min)</li>
-        <li>1:00 — Árvore de Decisão (10 min)</li>
-        <li>1:10 — Busca de Anterioridade prática (15 min)</li>
-        <li>1:25 — Storyboard → Canvas de Estratégia (25 min)</li>
-        <li>1:50 — Intervalo (10 min)</li>
-        <li>2:00 — Simulador de Depósito (20 min)</li>
-        <li>2:20 — Baralho de Dilemas — 3 cartas (15 min)</li>
-        <li>2:35 — Quiz Final (10 min)</li>
-        <li>2:45 — Canvas de Avaliação (10 min)</li>
-        <li>2:55 — Encerramento (5 min)</li>
-      </ol>
-    </div>
-
-    <div class="percurso-card percurso-card--4h">
-      <div class="percurso-card__dur">4h</div>
-      <div class="percurso-card__title">Percurso Completo</div>
-      <div class="percurso-card__desc">14 ferramentas + revisão estratégica + ranking ao vivo.</div>
-      <ol>
-        <li>0:00 — Abertura + configuração do sistema (10 min)</li>
-        <li>0:10 — Quiz Diagnóstico (15 min)</li>
-        <li>0:25 — Cartas Personas (15 min)</li>
-        <li>0:40 — Mapa de Empatia (15 min)</li>
-        <li>0:55 — Canvas de Diagnóstico (15 min)</li>
-        <li>1:10 — Árvore de Decisão (15 min)</li>
-        <li>1:25 — Linha do Tempo (10 min)</li>
-        <li>1:35 — Intervalo (15 min)</li>
-        <li>1:50 — Busca de Anterioridade prática (15 min)</li>
-        <li>2:05 — Storyboard (10 min)</li>
-        <li>2:15 — Canvas de Estratégia (15 min)</li>
-        <li>2:30 — Simulador de Depósito (25 min)</li>
-        <li>2:55 — Baralho de Dilemas (15 min)</li>
-        <li>3:10 — Escape Room — versão curta (15 min)</li>
-        <li>3:25 — Revisão Estratégica (10 min)</li>
-        <li>3:35 — Quiz Final (10 min)</li>
-        <li>3:45 — Canvas de Avaliação + projeção do ranking (10 min)</li>
-        <li>3:55 — Encerramento (5 min)</li>
-      </ol>
-    </div>
-  </div>
-
-  <div class="callout dica">
-    <div class="label">Regra de ouro</div>
-    Se o tempo apertar, corte ferramentas Opcionais primeiro (Linha do Tempo, Escape Room), depois Recomendadas (Mapa de Empatia, Busca, Storyboard, Canvas de Avaliação). Nunca corte Essenciais.
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════
-     SISTEMA DE OFICINA
-     ═══════════════════════════════════════════ -->
-<section id="sistema-visao">
-  <h2 class="section-title">Sistema de Oficina — Visão Geral</h2>
-
-  <div class="callout novo">
-    <div class="label">Novidade da v3.0</div>
-    O toolkit agora inclui um sistema completo de acompanhamento em tempo real. O facilitador projeta o Dashboard na tela da sala e acompanha o progresso de cada participante. Os alunos usam o Módulo do Aluno em seus celulares ou notebooks. Os dados trafegam via Firebase Realtime Database.
-  </div>
-
-  <h3>Arquitetura</h3>
-  <p>O sistema é composto por 3 camadas que se comunicam pelo Firebase:</p>
-
-  <div class="tech-diagram">
-┌─────────────────────────────────────────────────────┐
-│                   GITHUB PAGES                       │
-│  (hospedagem estática — todos os arquivos HTML/JS)   │
-├──────────────┬──────────────┬───────────────────────┤
-│  index.html  │  aluno.html  │  dashboard.html       │
-│  (vitrine    │  (módulo do  │  (painel do           │
-│   pública)   │   aluno)     │   facilitador)        │
-├──────────────┴──────────────┴───────────────────────┤
-│                                                      │
-│  16 ferramentas .html                                │
-│  Cada uma com tool-bridge.js integrado               │
-│  Modo livre (via index) OU modo oficina (via aluno)  │
-│                                                      │
-├──────────────────────────────────────────────────────┤
-│                FIREBASE REALTIME DB                   │
-│                                                      │
-│  oficinas/[CODIGO]/                                  │
-│    config/        → percurso, facilitador             │
-│    controle/      → fases_liberadas, ferramentas     │
-│    participantes/ → nome, status, scores, progresso  │
-│      [ID]/diagnostico/ → score, respostas            │
-│      [ID]/final/       → score, respostas            │
-│      [ID]/ferramentas/ → dados por ferramenta        │
-└──────────────────────────────────────────────────────┘
-  </div>
-
-  <h3>Fluxo durante a oficina</h3>
-  <div class="steps">
-    <div class="step">
-      <strong>Facilitador cria a sessão</strong>
-      Acessa <code>dashboard.html</code>, informa código da oficina (ex: "UFRR-2026-05"), seu nome e o percurso. Clica "Criar / Entrar na Oficina". O dashboard fica projetado na tela da sala.
-    </div>
-    <div class="step">
-      <strong>Alunos entram na oficina</strong>
-      Acessam <code>aluno.html</code> no celular/notebook. Informam nome, código da oficina e percurso. A interface mostra a lista de ferramentas com a primeira desbloqueada.
-    </div>
-    <div class="step">
-      <strong>Aluno inicia uma ferramenta</strong>
-      Clica "Iniciar" no Módulo do Aluno. É redirecionado para a ferramenta com parâmetros <code>?modo=oficina&tool=ID</code>. Uma barra de contexto aparece no topo: "Oficina UFRR-2026-05 · Ferramenta: Quiz Diagnóstico".
-    </div>
-    <div class="step">
-      <strong>Aluno completa a ferramenta</strong>
-      Ao terminar, clica "Concluir e Enviar" (botão que aparece apenas em modo oficina). Os dados são enviados ao Firebase. Um overlay confirma "Dados enviados com sucesso!" e redireciona ao Módulo do Aluno.
-    </div>
-    <div class="step">
-      <strong>Dashboard atualiza em tempo real</strong>
-      O facilitador vê o ranking atualizar instantaneamente: scores do Quiz Diagnóstico, progresso por ferramenta, evolução. Sem necessidade de recarregar a página.
-    </div>
-    <div class="step">
-      <strong>Facilitador pode liberar fases</strong>
-      Na aba "Controle" do dashboard, o facilitador liga/desliga fases para todos os participantes. Se liberar a Fase 3, todos os alunos ganham acesso às ferramentas da Fase 3 mesmo sem ter completado a Fase 2.
-    </div>
-  </div>
-
-  <h3>Dois modos de operação</h3>
-  <p>Cada ferramenta funciona em dois modos, sem necessidade de arquivos separados:</p>
-  <div class="table-wrap">
-  <table>
-    <thead><tr><th>Aspecto</th><th>Modo Livre (via index.html)</th><th>Modo Oficina (via aluno.html)</th></tr></thead>
-    <tbody>
-      <tr><td>Como acessa</td><td>Clica no link do index.html</td><td>Clica "Iniciar" no aluno.html</td></tr>
-      <tr><td>URL</td><td><code>ferramenta.html</code></td><td><code>ferramenta.html?modo=oficina&tool=ID</code></td></tr>
-      <tr><td>Barra de contexto</td><td>Não aparece</td><td>Aparece no topo com nome da oficina</td></tr>
-      <tr><td>Botão "Concluir e Enviar"</td><td>Não aparece</td><td>Aparece no final</td></tr>
-      <tr><td>Envio de dados</td><td>Salva em localStorage apenas</td><td>Envia ao Firebase + salva local</td></tr>
-      <tr><td>Redirecionamento ao concluir</td><td>Permanece na ferramenta</td><td>Volta ao aluno.html</td></tr>
-    </tbody>
-  </table>
-  </div>
-</section>
-
-<section id="sistema-dashboard">
-  <h2 class="section-title">Dashboard do Facilitador</h2>
-
-  <div class="material-card sistema">
-    <span class="mat-class mat-class--new">Novo</span>
-    <h4>Dashboard — dashboard.html</h4>
-    <div class="meta">
-      <span>📊 Tempo real</span><span>🏆 Ranking</span><span>🎛️ Controle de fases</span><span>📥 Exportação CSV</span>
-    </div>
-
-    <h4>Como acessar</h4>
-    <p>Abra no navegador: <code>https://[seu-usuario].github.io/[repositorio]/dashboard.html</code>. Não há restrição de acesso — qualquer pessoa com a URL pode abrir. Na oficina, projete na tela principal da sala.</p>
-
-    <h4>4 abas do dashboard</h4>
-
-    <p><strong>Aba Ranking</strong> — Exibe ranking em tempo real com três visualizações: Quiz Diagnóstico (score D-X), Quiz Final (score F-X) e Evolução (diferença F-X menos D-X). Cada participante aparece com posição, nome, score e medalha. Ideal para projetar na tela durante toda a oficina — cria engajamento e competição saudável.</p>
-
-    <p><strong>Aba Participantes</strong> — Tabela completa com status de conexão (ativo, desconectado, saiu), nome, percurso, scores D-X e F-X, evolução, progresso percentual e indicadores visuais (dots coloridos) para cada uma das 15 ferramentas. Permite ao facilitador identificar quem está travado.</p>
-
-    <p><strong>Aba Análise</strong> — Quatro gráficos de barras: conclusão por ferramenta (quantos participantes completaram cada uma), taxa de erro por questão do Quiz Diagnóstico (identifica conceitos que a turma não domina), distribuição de TRL selecionado no Canvas de Diagnóstico, e média de estrelas por fase no Canvas de Avaliação.</p>
-
-    <p><strong>Aba Controle</strong> — Toggles para liberar ou bloquear cada uma das 5 fases. Quando o facilitador ativa uma fase, todos os participantes recebem acesso às ferramentas correspondentes, independente do progresso individual. Ao liberar a Fase 3, as Fases 1 e 2 são automaticamente liberadas também.</p>
-
-    <h4>Funcionalidades extras</h4>
-    <p>O botão "CSV" exporta todos os dados dos participantes em formato planilha. O botão "Imprimir" gera versão otimizada para papel (A4 paisagem). Os cards de estatísticas no topo mostram: total de participantes, ativos agora, média D-X, média F-X, evolução média e percentual de conclusão geral.</p>
-  </div>
-
-  <div class="callout dica">
-    <div class="label">Uso pedagógico do ranking</div>
-    Projete o ranking na tela durante o Quiz Diagnóstico para criar expectativa. Depois, na hora do Quiz Final, projete novamente — os participantes ficam ansiosos para ver sua evolução. A coluna "Evolução" (diferença entre F-X e D-X) é mais significativa que o score absoluto. Celebre quem mais evoluiu, não apenas quem tirou a nota mais alta.
-  </div>
-</section>
-
-<section id="sistema-aluno">
-  <h2 class="section-title">Módulo do Aluno</h2>
-
-  <div class="material-card sistema">
-    <span class="mat-class mat-class--new">Novo</span>
-    <h4>Módulo do Aluno — aluno.html</h4>
-    <div class="meta">
-      <span>📱 Responsivo</span><span>🔓 Desbloqueio progressivo</span><span>📊 Progresso visual</span><span>💾 Funciona offline</span>
-    </div>
-
-    <h4>Como acessar</h4>
-    <p>Alunos acessam: <code>https://[seu-usuario].github.io/[repositorio]/aluno.html</code>. Na tela de login, informam nome completo, código da oficina (fornecido pelo facilitador) e percurso (o facilitador diz qual selecionar).</p>
-
-    <h4>Interface do aluno</h4>
-    <p>Após login, o aluno vê uma lista vertical de todas as ferramentas do percurso selecionado, organizadas por fase. Cada ferramenta mostra nome, ícone, duração estimada, classificação (Essencial/Recomendada/Opcional) e um dos seguintes estados:</p>
-
-    <p><strong>Próxima</strong> (destaque azul pulsante + botão "Iniciar") — é a ferramenta que o aluno deve fazer agora. Apenas uma por vez está neste estado.</p>
-    <p><strong>Desbloqueada</strong> (borda azul + botão "Abrir") — disponível mas não é a próxima na sequência. Aparece quando o facilitador libera fases manualmente.</p>
-    <p><strong>Concluída</strong> (fundo verde + check) — aluno já completou e enviou os dados.</p>
-    <p><strong>Bloqueada</strong> (cinza + cadeado) — ainda não disponível. Será desbloqueada quando o aluno concluir as anteriores ou quando o facilitador liberar a fase correspondente.</p>
-
-    <p>No topo, um círculo de progresso mostra a porcentagem de conclusão. A barra linear abaixo replica o progresso com gradiente colorido.</p>
-
-    <h4>Desbloqueio dual</h4>
-    <p>As ferramentas são desbloqueadas por dois mecanismos independentes (o que ocorrer primeiro):</p>
-    <p><strong>Por progressão sequencial:</strong> Ao completar uma ferramenta, a próxima na lista é desbloqueada automaticamente.</p>
-    <p><strong>Por liberação do facilitador:</strong> Quando o facilitador ativa uma fase no Dashboard (aba Controle), todas as ferramentas daquela fase ficam disponíveis para todos os participantes.</p>
-
-    <h4>Modo offline</h4>
-    <p>Se o aluno perder conexão com a internet, o Módulo do Aluno continua funcionando com dados salvos em localStorage. Ao reconectar, os dados são sincronizados automaticamente com o Firebase. O indicador de conexão na tela de login mostra "Conectado ao servidor" ou "Modo offline — dados salvos localmente".</p>
-  </div>
-
-  <div class="speech">
-    <div class="speech-label">Instrução para os alunos — Abertura da oficina</div>
-    <p>"Abram o navegador no celular e acessem este endereço [projetar URL ou QR code]. Informem o nome de vocês e o código da oficina que está na tela: [CÓDIGO]. No campo percurso, selecionem [2h/3h/4h]. Quando aparecer a lista de ferramentas, a primeira já vai estar disponível. Sigam na ordem — cada vez que vocês terminam uma ferramenta e clicam 'Concluir e Enviar', a próxima desbloqueia automaticamente."</p>
-  </div>
-</section>
-
-<section id="sistema-firebase">
-  <h2 class="section-title">Configuração do Firebase</h2>
-
-  <p>O sistema usa o Firebase Realtime Database para comunicação em tempo real entre alunos e facilitador. A configuração já está embutida no arquivo <code>js/firebase-config.js</code>. Se precisar criar seu próprio projeto Firebase:</p>
-
-  <div class="steps">
-    <div class="step">
-      <strong>Criar projeto no Firebase Console</strong>
-      Acesse <code>console.firebase.google.com</code>. Crie um novo projeto. Ative o Realtime Database na região us-central1.
-    </div>
-    <div class="step">
-      <strong>Configurar regras de acesso</strong>
-      Em Realtime Database → Rules, cole:
-      <pre style="background:#f5f5f5;padding:.8rem;border-radius:6px;font-size:.82rem;margin-top:.5rem">
-{
-  "rules": {
-    "oficinas": {
-      "$oficina": {
-        ".read": true,
-        ".write": true
-      }
+  /* Print override: force light mode */
+  @media print {
+    :root {
+      --bg: #fff; --surface: #fff; --text: #1E293B;
+      --text-mid: #475569; --text-light: #94A3B8; --border: #E2E8F0;
     }
   }
-}</pre>
-      <p style="font-size:.85rem;color:var(--cor-texto-leve)">Para produção, restrinja com autenticação. As regras acima são para desenvolvimento e oficinas controladas.</p>
+}
+
+/* ── Animation for sections appearing on scroll (optional progressive enhancement) ── */
+@media (prefers-reduced-motion: no-preference) {
+  .section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: sectionAppear .6s ease forwards;
+  }
+  .section:nth-child(1)  { animation-delay: .05s; }
+  .section:nth-child(2)  { animation-delay: .1s; }
+  .section:nth-child(3)  { animation-delay: .15s; }
+  .section:nth-child(4)  { animation-delay: .2s; }
+  .section:nth-child(5)  { animation-delay: .25s; }
+  .section:nth-child(6)  { animation-delay: .3s; }
+  .section:nth-child(7)  { animation-delay: .35s; }
+  .section:nth-child(8)  { animation-delay: .4s; }
+  .section:nth-child(9)  { animation-delay: .45s; }
+  .section:nth-child(10) { animation-delay: .5s; }
+  .section:nth-child(11) { animation-delay: .55s; }
+
+  @keyframes sectionAppear {
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ── Print: ensure checklist checkboxes render ── */
+@media print {
+  .checklist__item input[type="checkbox"] {
+    -webkit-appearance: checkbox;
+    appearance: checkbox;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .callout, .tool-block, .card, .feature {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+  .cover__meta span {
+    border: 1px solid #ccc;
+    background: #f0f0f0;
+    color: #333;
+  }
+}
+
+
+</style>
+</head>
+
+
+
+
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BARRA DE NAVEGAÇÃO SUPERIOR
+     ═══════════════════════════════════════════════════════════════ -->
+<nav class="topnav" id="topnav">
+  <div class="topnav__inner">
+    <a href="index.html" class="topnav__brand">
+      <span class="topnav__icon">📘</span>
+      <span class="topnav__title">Guia do Facilitador</span>
+    </a>
+    <button class="topnav__toggle" onclick="document.getElementById('topnav-links').classList.toggle('open')" aria-label="Menu">☰</button>
+    <div class="topnav__links" id="topnav-links">
+      <a href="#visao-geral">Visão Geral</a>
+      <a href="#sistema-oficina">Sistema de Oficina</a>
+      <a href="#percursos">Percursos</a>
+      <a href="#fase1">Fase 1</a>
+      <a href="#fase2">Fase 2</a>
+      <a href="#fase3">Fase 3</a>
+      <a href="#fase4">Fase 4</a>
+      <a href="#fase5">Fase 5</a>
+      <a href="#apoio">Apoio</a>
+      <a href="#encerramento">Encerramento</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CAPA
+     ═══════════════════════════════════════════════════════════════ -->
+<header class="cover">
+  <div class="cover__overline">PROFNIT · UFRR · INOVARR</div>
+  <h1 class="cover__title">Guia do Facilitador</h1>
+  <p class="cover__sub">PI Thinking — Toolkit de Propriedade Intelectual com Design Thinking</p>
+  <div class="cover__meta">
+    <span>📘 Manual completo</span>
+    <span>🕐 Percursos de 2 h, 3 h e 4 h</span>
+    <span>🛠️ 16 ferramentas + 4 de apoio</span>
+    <span>📊 Dashboard em tempo real</span>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SEÇÃO 1 — VISÃO GERAL
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="visao-geral" class="section">
+  <div class="section__badge">Introdução</div>
+  <h2 class="section__title">O que é o PI Thinking?</h2>
+
+  <div class="prose">
+    <p>O <strong>PI Thinking</strong> é um toolkit educacional que aplica o Design Thinking ao ensino de Propriedade Intelectual. Ele foi desenvolvido no âmbito do PROFNIT — ponto focal UFRR, alinhado ao Eixo 2 da Estratégia Nacional de Propriedade Intelectual (ENPI 2021-2030). São <strong>16 ferramentas interativas</strong> organizadas em <strong>5 fases</strong> e classificadas em 3 níveis de prioridade, prontas para oficinas presenciais ou remotas de 2 a 4 horas.</p>
+
+    <p>Todas as ferramentas funcionam diretamente no navegador (celular, tablet ou computador), sem necessidade de instalação. Após o primeiro carregamento, a maioria funciona offline. A plataforma inclui um <strong>Módulo do Aluno</strong> (progressão guiada) e um <strong>Dashboard do Facilitador</strong> (acompanhamento em tempo real), conectados via Firebase.</p>
+  </div>
+
+  <div class="callout callout--tip">
+    <div class="callout__icon">💡</div>
+    <div class="callout__body">
+      <strong>Preparação mínima recomendada:</strong> Leia este guia com pelo menos 48 horas de antecedência. Teste o acesso ao Dashboard e percorra cada ferramenta do seu percurso escolhido para se familiarizar com a interface.
+    </div>
+  </div>
+
+  <h3>Objetivos de aprendizagem</h3>
+  <div class="prose">
+    <p>Ao final da oficina, o participante será capaz de: reconhecer os principais tipos de proteção de PI no Brasil (patentes, marcas, direito autoral, cultivares, indicação geográfica, software, segredo industrial, patrimônio genético); classificar uma criação real ou simulada no tipo de proteção mais adequado; esboçar uma estratégia de proteção com estimativa de custos e prazos; e argumentar sobre dilemas éticos comuns envolvendo PI.</p>
+  </div>
+
+  <h3>Níveis de prioridade</h3>
+  <div class="card-grid card-grid--3">
+    <div class="card card--phase" style="border-top-color: #4CAF50">
+      <div class="card__header">
+        <span class="card__icon">🟢</span>
+        <h4>Essencial</h4>
+      </div>
+      <p>8 ferramentas que formam o percurso mínimo viável. Garantem que o participante saia da oficina compreendendo os tipos de PI, sabendo classificar criações e tendo simulado um depósito.</p>
+    </div>
+    <div class="card card--phase" style="border-top-color: #2196F3">
+      <div class="card__header">
+        <span class="card__icon">🔵</span>
+        <h4>Recomendada</h4>
+      </div>
+      <p>4 ferramentas que enriquecem a experiência com ideação criativa (Crazy 8s), narrativa visual (Storyboard), empatia aprofundada (Mapa de Empatia) e feedback estruturado (Canvas de Avaliação).</p>
+    </div>
+    <div class="card card--phase" style="border-top-color: #FF9800">
+      <div class="card__header">
+        <span class="card__icon">🟠</span>
+        <h4>Opcional</h4>
+      </div>
+      <p>3 ferramentas gamificadas (Linha do Tempo, Escape Room, PI Quest) ideais para oficinas longas, atividades bônus ou engajamento extra. Podem ser usadas como "prêmio" para quem termina antes.</p>
+    </div>
+  </div>
+
+  <div class="callout callout--info">
+    <div class="callout__icon">📎</div>
+    <div class="callout__body">
+      <strong>Endereço do toolkit:</strong> <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/" target="_blank">https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SEÇÃO 2 — SISTEMA DE OFICINA (Dashboard + Módulo Aluno)
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="sistema-oficina" class="section">
+  <div class="section__badge">Infraestrutura Digital</div>
+  <h2 class="section__title">Sistema de Oficina: Dashboard e Módulo do Aluno</h2>
+
+  <div class="prose">
+    <p>O PI Thinking conta com um sistema integrado de acompanhamento em tempo real que conecta o facilitador aos participantes durante toda a oficina. Esse sistema é composto por dois módulos complementares que se comunicam via Firebase Realtime Database, sem necessidade de servidor próprio.</p>
+  </div>
+
+  <!-- ── Dashboard do Facilitador ── -->
+  <h3>📊 Dashboard do Facilitador</h3>
+  <div class="prose">
+    <p>O Dashboard é o centro de comando da oficina. Através dele, você acompanha cada participante individualmente, visualiza estatísticas coletivas e controla o ritmo da atividade.</p>
+  </div>
+
+  <div class="callout callout--info">
+    <div class="callout__icon">🔗</div>
+    <div class="callout__body">
+      <strong>Acesso:</strong> <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/dashboard.html" target="_blank">https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/dashboard.html</a>
+    </div>
+  </div>
+
+  <h4>Como iniciar uma sessão</h4>
+  <div class="step-sequence">
+    <div class="step">
+      <div class="step__number">1</div>
+      <div class="step__content">
+        <strong>Abra o Dashboard</strong> no navegador do seu computador ou tablet. Você verá a tela de configuração com três campos para preencher.
+      </div>
     </div>
     <div class="step">
-      <strong>Obter credenciais</strong>
-      Em Project Settings → General → Your apps → Web app, copie o objeto <code>firebaseConfig</code> e substitua no arquivo <code>js/firebase-config.js</code>.
+      <div class="step__number">2</div>
+      <div class="step__content">
+        <strong>Crie o código da oficina.</strong> Escolha algo descritivo e fácil de ditar, por exemplo: <code>UFRR-2026-05</code>, <code>PROFNIT-TURMA3</code> ou <code>OFICINA-PI-BOA-VISTA</code>. O código será convertido automaticamente para letras maiúsculas. Anote-o no quadro ou projete na tela — os alunos vão precisar dele.
+      </div>
     </div>
     <div class="step">
-      <strong>Testar</strong>
-      Abra <code>dashboard.html</code> e <code>aluno.html</code> em abas diferentes. Crie uma sessão no dashboard, entre com o aluno. Os dados devem aparecer em tempo real no dashboard.
+      <div class="step__number">3</div>
+      <div class="step__content">
+        <strong>Informe seu nome</strong> e selecione o <strong>percurso padrão</strong> (Compacto 2h, Padrão 3h ou Completo 4h). Esse percurso será sugerido aos alunos quando entrarem, mas eles podem alterar se necessário.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__number">4</div>
+      <div class="step__content">
+        <strong>Clique em "Criar / Entrar na Oficina".</strong> O Dashboard se conectará ao Firebase e você será levado à tela principal com as abas de monitoramento.
+      </div>
     </div>
   </div>
 
-  <div class="callout atencao">
-    <div class="label">Sobre segurança</div>
-    As credenciais do Firebase no arquivo firebase-config.js são públicas por design — o Firebase é projetado para expor essas chaves no client-side. A segurança é controlada pelas Security Rules do Realtime Database, não pela ocultação das credenciais. Para oficinas de curta duração com público controlado, as regras abertas são aceitáveis. Para uso contínuo, implemente regras mais restritivas com autenticação.
+  <h4>As quatro abas do Dashboard</h4>
+
+  <div class="feature-grid">
+    <div class="feature">
+      <div class="feature__icon">🏆</div>
+      <h5>Ranking</h5>
+      <p>Exibe a classificação dos participantes com três visões alternáveis: pelo <strong>Quiz Diagnóstico</strong> (nota D-X, de 0 a 10), pelo <strong>Quiz Final</strong> (nota F-X, de 0 a 20) e pela <strong>Evolução</strong> (diferença F-X menos D-X). Os três primeiros colocados recebem medalhas visuais (ouro, prata, bronze). Use o ranking projetado na tela para estimular uma competição saudável entre os participantes, especialmente após o Quiz Final.</p>
+    </div>
+    <div class="feature">
+      <div class="feature__icon">👥</div>
+      <h5>Participantes</h5>
+      <p>Tabela detalhada com o nome de cada aluno, o percurso escolhido, status de conexão (ativo, desconectado ou saiu), notas dos dois quizzes, badge de evolução e uma barra visual de <strong>progresso por ferramenta</strong> (pontos coloridos por fase). Permite identificar rapidamente quem está travado, quem avançou e quem precisa de ajuda. Ordene mentalmente por progresso para saber onde intervir primeiro.</p>
+    </div>
+    <div class="feature">
+      <div class="feature__icon">📈</div>
+      <h5>Análise</h5>
+      <p>Quatro gráficos de barras em tempo real: taxa de conclusão por ferramenta (veja quais estão sendo puladas), taxa de erro por questão do Quiz Diagnóstico (identifique os temas que a turma mais desconhece), distribuição de TRL informada no Canvas de Diagnóstico (entenda a maturidade das criações da turma) e avaliação por estrelas do Canvas de Avaliação (feedback direto sobre cada fase). Use esses dados para adaptar sua explicação — se 80% errou a questão sobre Indicação Geográfica, dedique um momento para explicá-la antes de prosseguir.</p>
+    </div>
+    <div class="feature">
+      <div class="feature__icon">🎛️</div>
+      <h5>Controle</h5>
+      <p>Painel com cinco chaves de alternância (toggles), uma para cada fase. Por padrão, apenas a Fase 1 vem desbloqueada. Conforme a oficina avança, você ativa as fases seguintes — isso libera as ferramentas correspondentes na tela de todos os alunos simultaneamente, independentemente do progresso individual. Se um participante já completou a Fase 1 sozinho, a Fase 2 estará desbloqueada para ele mesmo sem sua intervenção. Ao ativar uma fase, todas as anteriores são automaticamente liberadas também.</p>
+    </div>
+  </div>
+
+  <h4>Indicadores resumidos (cabeçalho)</h4>
+  <div class="prose">
+    <p>No topo do Dashboard, seis cartões de resumo ficam sempre visíveis: o total de participantes conectados, quantos estão ativos naquele momento, a média do Quiz Diagnóstico (D-X), a média do Quiz Final (F-X), a evolução média da turma e o percentual geral de conclusão das ferramentas. Esses números se atualizam automaticamente a cada envio dos alunos, sem necessidade de recarregar a página.</p>
+  </div>
+
+  <h4>Exportação de dados</h4>
+  <div class="prose">
+    <p>O botão <strong>"CSV"</strong> no canto superior do Dashboard gera um arquivo de planilha com todos os dados de cada participante (nome, percurso, status, notas, evolução, total de ferramentas concluídas e percentual). Esse arquivo pode ser aberto no Excel, Google Sheets ou LibreOffice Calc e serve como registro documental da oficina para relatórios acadêmicos, prestação de contas de projetos ou análise posterior.</p>
+  </div>
+
+  <div class="callout callout--warning">
+    <div class="callout__icon">⚠️</div>
+    <div class="callout__body">
+      <strong>Requisito de conexão:</strong> O Dashboard precisa de internet ativa para receber dados do Firebase. Se a conexão cair, um badge "Offline" aparecerá no topo. Os dados já recebidos continuam na tela, mas não serão atualizados até a reconexão. Os alunos, por sua vez, salvam progresso localmente no navegador, então uma queda breve de Wi-Fi não causa perda de trabalho.
+    </div>
+  </div>
+
+  <!-- ── Módulo do Aluno ── -->
+  <h3>🎓 Módulo do Aluno</h3>
+  <div class="prose">
+    <p>O Módulo do Aluno é a interface individual de cada participante durante a oficina. Ele funciona como um "roteiro digital" que apresenta as ferramentas na ordem correta, controla o desbloqueio progressivo e envia os resultados automaticamente ao Dashboard.</p>
+  </div>
+
+  <div class="callout callout--info">
+    <div class="callout__icon">🔗</div>
+    <div class="callout__body">
+      <strong>Acesso dos alunos:</strong> <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/aluno.html" target="_blank">https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/aluno.html</a>
+    </div>
+  </div>
+
+  <h4>Como orientar os alunos</h4>
+  <div class="step-sequence">
+    <div class="step">
+      <div class="step__number">1</div>
+      <div class="step__content">
+        <strong>Projete ou dite a URL</strong> do Módulo do Aluno. No celular, os participantes podem acessar diretamente pelo navegador (Chrome, Safari, Firefox). Se preferir, crie um QR Code antecipadamente e imprima-o em A4 para deixar nas mesas.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__number">2</div>
+      <div class="step__content">
+        <strong>Cada aluno informa seu nome</strong> e digita o <strong>código da oficina</strong> que você criou no Dashboard. Isso conecta o participante à sessão e faz com que seu nome apareça automaticamente na aba "Participantes" do seu Dashboard.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__number">3</div>
+      <div class="step__content">
+        <strong>O percurso é pré-selecionado</strong> de acordo com o que você definiu na criação da sessão, mas o aluno pode alterar. A tela exibirá a sequência de ferramentas com ícones coloridos por fase e indicação de status: desbloqueada, concluída ou bloqueada.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__number">4</div>
+      <div class="step__content">
+        <strong>Progressão automática:</strong> ao concluir uma ferramenta, a próxima é desbloqueada automaticamente. Se você liberar uma fase pelo Dashboard, todas as ferramentas daquela fase ficam acessíveis para todos imediatamente.
+      </div>
+    </div>
+  </div>
+
+  <h4>Como funciona o envio de resultados</h4>
+  <div class="prose">
+    <p>Cada ferramenta do toolkit inclui um componente invisível chamado <strong>Tool Bridge</strong> (<code>js/tool-bridge.js</code>). Quando o aluno está em sessão de oficina, esse componente detecta automaticamente a conexão Firebase e envia os dados da ferramenta (respostas do quiz, conteúdo dos canvas, votos do Crazy 8s, resultado da Árvore de Decisão, etc.) ao banco de dados em tempo real. O aluno não precisa fazer nada além de usar a ferramenta normalmente — o envio é transparente.</p>
+    <p>Além do Firebase, o progresso é salvo no <code>localStorage</code> do navegador. Isso significa que, se o aluno fechar a aba e reabrir, ele retoma de onde parou. Se trocar de dispositivo, porém, o progresso local se perde (mas os dados já enviados estarão no Dashboard).</p>
+  </div>
+
+  <div class="callout callout--tip">
+    <div class="callout__icon">🎯</div>
+    <div class="callout__body">
+      <strong>Dica prática:</strong> Antes de começar a oficina, peça a 2 ou 3 alunos que acessem o Módulo do Aluno e confirme no Dashboard que os nomes aparecem. Isso valida a conexão Firebase e evita surpresas.
+    </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════
-     FASES — Conteúdo abreviado por espaço
-     (na versão final, cada fase teria o mesmo
-     nível de detalhe da v2.0 com as atualizações)
-     ═══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     SEÇÃO 3 — PERCURSOS
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="percursos" class="section">
+  <div class="section__badge">Planejamento</div>
+  <h2 class="section__title">Os Três Percursos</h2>
 
-<div class="fase-header f1" id="f1-visao">
-  <span class="icon">🔍</span> Fase 1 — Descobrir
-</div>
-
-<section>
-  <h3>Objetivo da Fase</h3>
-  <p>Mapear conhecimento prévio, despertar curiosidade e criar linha de base (score D-X). O facilitador atua como mediador socrático: faz perguntas, acolhe respostas sem julgamento. Evite corrigir erros neste momento.</p>
-  <p>Duração: 25 min (2h) a 45 min (4h). Ferramentas: Quiz Diagnóstico (E), Cartas Personas (E), Mapa de Empatia (R).</p>
-
-  <div class="speech">
-    <div class="speech-label">Abertura da Fase 1</div>
-    <p>"Vamos começar com um diagnóstico rápido. Quero descobrir o que vocês já sabem sobre Propriedade Intelectual. No Módulo do Aluno de vocês, a primeira ferramenta já está desbloqueada — é o Quiz Diagnóstico. Anotem o código D-X que vão receber no final."</p>
+  <div class="prose">
+    <p>Cada percurso é um subconjunto curado das 16 ferramentas, organizado para que mesmo a versão mais curta entregue uma experiência completa de aprendizagem. A diferença não é de qualidade, mas de profundidade: o percurso de 2 horas é direto ao ponto; o de 4 horas permite exploração criativa, gamificação e reflexão aprofundada.</p>
   </div>
 
-  <div class="callout novo">
-    <div class="label">Integração com o sistema</div>
-    Quando o aluno completa o Quiz Diagnóstico pelo Módulo do Aluno, o score D-X aparece automaticamente no ranking do Dashboard. Projete o ranking na tela após todos terminarem — gera engajamento imediato.
+  <!-- Percurso Compacto -->
+  <div class="card card--phase" style="border-top-color: #4CAF50">
+    <div class="card__header">
+      <span class="card__icon" style="font-size:1.5rem">⚡</span>
+      <h4>Percurso Compacto — 2 horas (8 ferramentas)</h4>
+    </div>
+    <p><strong>Indicado para:</strong> palestras com atividade prática, aulas de pós-graduação com tempo limitado, eventos de extensão.</p>
+    <div class="timeline-mini">
+      <div class="tm-item"><span class="tm-time">0:00</span><span class="tm-tool">📋 Quiz Diagnóstico (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:10</span><span class="tm-tool">🃏 Cartas Personas (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:20</span><span class="tm-tool">📐 Canvas de Diagnóstico (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:35</span><span class="tm-tool">🌳 Árvore de Decisão (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:45</span><span class="tm-tool">📐 Canvas de Estratégia (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:00</span><span class="tm-tool">📝 Simulador de Depósito (20 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:20</span><span class="tm-tool">🃏 Baralho de Dilemas (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:30</span><span class="tm-tool">🏆 Quiz Final (15 min) + Encerramento (15 min)</span></div>
+    </div>
   </div>
-</section>
 
-<section id="f1-mat1">
-  <div class="material-card f1">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>1.1 — Quiz Diagnóstico</h4>
-    <div class="meta"><span>⏱ 10–15 min</span><span>👤 Individual</span><span>💻 quiz-diagnostico.html</span></div>
-    <p>10 questões de múltipla escolha. Gera código D-X. No modo oficina, o score e as respostas individuais são enviados ao Firebase, permitindo que o Dashboard exiba o ranking em tempo real e a análise de erros por questão.</p>
-    <p><strong>Dados enviados ao Dashboard:</strong> score, total, código D-X, tempo gasto, e para cada questão: alternativa selecionada, alternativa correta, se acertou, categoria do conceito.</p>
+  <!-- Percurso Padrão -->
+  <div class="card card--phase" style="border-top-color: #2196F3">
+    <div class="card__header">
+      <span class="card__icon" style="font-size:1.5rem">📘</span>
+      <h4>Percurso Padrão — 3 horas (12 ferramentas)</h4>
+    </div>
+    <p><strong>Indicado para:</strong> oficinas de meio período, disciplinas do PROFNIT, capacitações de NIT.</p>
+    <div class="timeline-mini">
+      <div class="tm-item"><span class="tm-time">0:00</span><span class="tm-tool">📋 Quiz Diagnóstico (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:10</span><span class="tm-tool">🃏 Cartas Personas (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:25</span><span class="tm-tool">🗺️ Mapa de Empatia (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:40</span><span class="tm-tool">📐 Canvas de Diagnóstico (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:55</span><span class="tm-tool">🌳 Árvore de Decisão (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:05</span><span class="tm-tool">☕ Intervalo (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:15</span><span class="tm-tool">⚡ Crazy 8s da PI (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:30</span><span class="tm-tool">📐 Canvas de Estratégia (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:45</span><span class="tm-tool">🎬 Storyboard (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">2:00</span><span class="tm-tool">📝 Simulador de Depósito (20 min)</span></div>
+      <div class="tm-item"><span class="tm-time">2:20</span><span class="tm-tool">🃏 Baralho de Dilemas (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">2:35</span><span class="tm-tool">🏆 Quiz Final (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">2:50</span><span class="tm-tool">📊 Canvas de Avaliação (10 min)</span></div>
+    </div>
   </div>
-</section>
 
-<section id="f1-mat2">
-  <div class="material-card f1">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>1.2 — Cartas Personas</h4>
-    <div class="meta"><span>⏱ 10–15 min</span><span>👥 Grupos 3–5</span><span>💻 cartas-personas.html</span></div>
-    <p>10 cartas com perfis do ecossistema de PI amazônico. No modo oficina, a persona sorteada é registrada no Firebase para que o facilitador saiba qual grupo trabalha com qual perfil.</p>
-  </div>
-</section>
-
-<section id="f1-mat3">
-  <div class="material-card f1">
-    <span class="mat-class mat-class--r">Recomendada</span>
-    <h4>1.3 — Mapa de Empatia do Inventor</h4>
-    <div class="meta"><span>⏱ 15 min</span><span>👥 Grupos 3–5</span><span>💻 mapa-empatia.html</span></div>
-    <p>Canvas com 6 quadrantes. No modo oficina, os post-its de cada quadrante são enviados ao Firebase. O Dashboard pode exibir as dores mais mencionadas na aba Análise.</p>
-  </div>
-</section>
-
-<!-- FASE 2 -->
-<div class="fase-header f2" id="f2-visao">
-  <span class="icon">🧭</span> Fase 2 — Diagnosticar
-</div>
-
-<section>
-  <h3>Objetivo da Fase</h3>
-  <p>Classificar criações nos tipos corretos de PI e compreender o contexto. O facilitador muda para instrutor ativo — é o momento de transmitir conhecimento estruturado.</p>
-  <p>Duração: 25 min (2h) a 40 min (4h). Ferramentas: Canvas de Diagnóstico (E), Árvore de Decisão (E), Linha do Tempo (O).</p>
-</section>
-
-<section id="f2-mat1">
-  <div class="material-card f2">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>2.1 — Canvas de Diagnóstico de PI</h4>
-    <div class="meta"><span>⏱ 15 min</span><span>👥 Grupos</span><span>💻 canvas-diagnostico.html</span></div>
-    <p>8 campos incluindo slider TRL (1–9) e seleção múltipla de tipos de PI. No modo oficina, envia: todos os campos de texto, valor TRL, tipos selecionados. O Dashboard usa o TRL para o gráfico de distribuição na aba Análise.</p>
-  </div>
-</section>
-
-<section id="f2-mat2">
-  <div class="material-card f2">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>2.2 — Árvore de Decisão</h4>
-    <div class="meta"><span>⏱ 10–15 min</span><span>👥 Individual ou Grupos</span><span>💻 arvore.html</span></div>
-    <p>Wizard sim/não que identifica o tipo de proteção entre 10 modalidades. No modo oficina, o resultado final é enviado ao Firebase.</p>
-  </div>
-</section>
-
-<section id="f2-mat3">
-  <div class="material-card f2">
-    <span class="mat-class mat-class--o">Opcional</span>
-    <h4>2.3 — Linha do Tempo da PI no Brasil</h4>
-    <div class="meta"><span>⏱ 10 min</span><span>👥 Plenária</span><span>💻 linha-do-tempo.html</span></div>
-    <p>16 marcos históricos de 1809 a 2023. Use como tour guiado rápido — 5 a 6 marcos essenciais são suficientes.</p>
+  <!-- Percurso Completo -->
+  <div class="card card--phase" style="border-top-color: #9C27B0">
+    <div class="card__header">
+      <span class="card__icon" style="font-size:1.5rem">🎯</span>
+      <h4>Percurso Completo — 4 horas (16 ferramentas)</h4>
+    </div>
+    <p><strong>Indicado para:</strong> oficinas de dia inteiro, semanas acadêmicas, formações intensivas de agentes de inovação.</p>
+    <div class="timeline-mini">
+      <div class="tm-item"><span class="tm-time">0:00</span><span class="tm-tool">📋 Quiz Diagnóstico (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:15</span><span class="tm-tool">🃏 Cartas Personas (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:30</span><span class="tm-tool">🗺️ Mapa de Empatia (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">0:45</span><span class="tm-tool">📐 Canvas de Diagnóstico (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:00</span><span class="tm-tool">📅 Linha do Tempo (10 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:10</span><span class="tm-tool">🌳 Árvore de Decisão (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:25</span><span class="tm-tool">☕ Intervalo (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:40</span><span class="tm-tool">⚡ Crazy 8s da PI (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:55</span><span class="tm-tool">🎬 Storyboard (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">2:10</span><span class="tm-tool">📐 Canvas de Estratégia (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">2:25</span><span class="tm-tool">📝 Simulador de Depósito (30 min)</span></div>
+      <div class="tm-item"><span class="tm-time">2:55</span><span class="tm-tool">🃏 Baralho de Dilemas (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">3:10</span><span class="tm-tool">🔐 Escape Room (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">3:25</span><span class="tm-tool">🎲 PI Quest (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">3:40</span><span class="tm-tool">🏆 Quiz Final (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">3:55</span><span class="tm-tool">📊 Canvas de Avaliação (10 min) — simultaneamente ao encerramento</span></div>
+    </div>
   </div>
 </section>
 
-<!-- FASE 3 -->
-<div class="fase-header f3" id="f3-visao">
-  <span class="icon">📐</span> Fase 3 — Estrategar
-</div>
+<!-- ═══════════════════════════════════════════════════════════════
+     FASE 1 — DESCOBRIR
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="fase1" class="section section--phase" style="--phase-color: #E91E63">
+  <div class="section__badge" style="background: #E91E63; color: #fff">Fase 1</div>
+  <h2 class="section__title">🧠 Descobrir</h2>
+  <p class="section__subtitle">"O que os participantes já sabem sobre Propriedade Intelectual?"</p>
 
-<section>
-  <h3>Objetivo da Fase</h3>
-  <p>Transformar diagnóstico em plano de ação. A sequência é intencional: Busca de Anterioridade (descobrir o que já existe) → Storyboard (narrar o caminho de proteção) → Canvas de Estratégia (formalizar o plano com custos e prazos reais).</p>
-  <p>Duração: 15 min (2h, só Canvas) a 40 min (4h, sequência completa).</p>
-
-  <div class="callout info">
-    <div class="label">Por que o Crazy 8s foi removido</div>
-    A técnica Crazy 8s exige que o participante já domine o espaço de soluções para gerar alternativas rapidamente. Em PI, neste ponto da oficina os participantes ainda estão construindo repertório — forçar 8 estratégias em 8 minutos produzia repetições superficiais. A Busca de Anterioridade prática é mais valiosa porque ensina uma habilidade concreta e alimenta diretamente o Canvas de Estratégia.
+  <div class="prose">
+    <p>A Fase 1 é o alicerce da oficina. Aqui você vai mapear o conhecimento prévio da turma e criar conexão emocional com o tema por meio de personas realistas. Pense nesta fase como o momento de "abrir a porta": o participante precisa perceber que PI não é um assunto distante e burocrático, mas algo que toca diretamente a vida de pesquisadores, artistas, agricultores e empreendedores. Reserve entre 30 e 45 minutos.</p>
   </div>
-</section>
 
-<section id="f3-mat1">
-  <div class="material-card f3">
-    <span class="mat-class mat-class--r">Recomendada</span>
-    <h4>3.1 — Busca de Anterioridade (atividade prática)</h4>
-    <div class="meta"><span>⏱ 15 min</span><span>👥 Grupos</span><span>💻 busca.html</span></div>
-    <p>Anteriormente classificada como "ferramenta de apoio", agora é uma atividade estruturada. Os grupos usam o Painel de Busca Guiada para fazer uma busca real nas bases do INPI e PatentScope para a criação da persona deles.</p>
+  <!-- Ferramenta 1.1: Quiz Diagnóstico -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>📋 Quiz Diagnóstico</h3>
+      <span class="tool-block__meta">⏱ 10–15 min · Individual · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/quiz-diagnostico.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>É a "fotografia inicial" do conhecimento da turma. São 10 questões de múltipla escolha que cobrem os tipos básicos de PI (patente, marca, direito autoral, cultivar, IG, software, segredo industrial). Ao final, cada participante recebe um código no formato <strong>D-X</strong> (onde X é a nota de 0 a 10). Esse código será comparado com o <strong>F-X</strong> do Quiz Final para medir a evolução.</p>
 
-    <div class="steps">
-      <div class="step">
-        <strong>Contextualizar (3 min)</strong>
-        <div class="speech">
-          <div class="speech-label">Você pode dizer</div>
-          <p>"Antes de proteger, precisamos saber o que já existe. Imaginem depositar uma patente e descobrir 2 anos depois que alguém já registrou a mesma coisa — vocês teriam desperdiçado tempo e dinheiro. A busca de anterioridade é como pesquisar no Google antes de comprar um domínio. Vamos fazer isso agora, de verdade."</p>
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Comece a oficina pedindo que todos acessem o Módulo do Aluno e informem nome e código da sessão. Assim que aparecerem no seu Dashboard, diga algo como: <em>"Vamos começar com um quiz rápido de 10 perguntas. Não se preocupe com a nota — é para eu saber de onde vocês partem, não para avaliar vocês. Respondam com sinceridade, sem consultar."</em></p>
+      <p>Enquanto os alunos respondem, observe no Dashboard (aba Análise) quais questões têm maior taxa de erro. Essas são as lacunas da turma. Anote mentalmente: se 70% errou a questão sobre Indicação Geográfica, você saberá que precisa reforçar esse tema quando chegar na Fase 2.</p>
+      <p>Quando a maioria terminar, peça que anotem (ou fotografem) o código D-X. No Dashboard, a média D-X já aparecerá no card de estatísticas. Compartilhe com a turma: <em>"A média da turma foi D-4,3. Vamos ver quanto isso muda até o final!"</em> Essa âncora cria expectativa e motivação.</p>
+
+      <div class="callout callout--tip">
+        <div class="callout__icon">🎯</div>
+        <div class="callout__body">
+          <strong>Se a média for muito alta (acima de 7):</strong> a turma já tem boa base. Considere acelerar as Fases 1 e 2 e dedicar mais tempo às Fases 3 e 4, onde o desafio é estratégico e não conceitual.
         </div>
       </div>
-      <div class="step">
-        <strong>Busca guiada (10 min)</strong>
-        Cada grupo abre busca.html e segue o mini-tutorial para o tipo de PI da persona. Para patentes: BuscaWeb do INPI ou PatentScope. Para marcas: base de marcas do INPI. Devem encontrar pelo menos 2 resultados relacionados e anotar no Canvas de Estratégia (bloco 9 — Riscos).
+    </div>
+  </div>
+
+  <!-- Ferramenta 1.2: Cartas Personas -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>🃏 Cartas Personas</h3>
+      <span class="tool-block__meta">⏱ 10–15 min · Grupos de 3–5 · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/cartas-personas.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>As 10 Cartas Personas apresentam personagens fictícios com dilemas reais de PI: um pesquisador que publicou antes de patentear, uma comunidade indígena com conhecimento tradicional, uma startup de biocosmético, um chef que quer proteger sua receita, entre outros. Cada persona está contextualizada na Amazônia e em Roraima, o que cria identificação imediata com os participantes.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Divida a turma em grupos de 3 a 5 pessoas. Na ferramenta digital, cada grupo clica em "Sortear Persona" para receber aleatoriamente uma carta. Peça que leiam a história da persona em voz alta dentro do grupo e discutam: <em>"Que tipo de PI está envolvido? O que essa pessoa deveria ter feito? Qual é o risco se ela não proteger?"</em></p>
+      <p>Após 5 minutos de discussão interna, faça uma rodada rápida: cada grupo apresenta sua persona em no máximo 1 minuto (nome, dilema, e o que eles acham que deveria ser feito). Não corrija as respostas agora — apenas registre as hipóteses. As ferramentas seguintes vão validar ou corrigir essas primeiras impressões.</p>
+      <p>Instrua os grupos a guardar a persona: <em>"Essa persona vai acompanhar vocês pela oficina inteira. Todas as ferramentas que usarem, apliquem ao caso dela."</em> Esse fio condutor transforma a oficina numa narrativa contínua em vez de atividades soltas.</p>
+
+      <div class="callout callout--warning">
+        <div class="callout__icon">⚠️</div>
+        <div class="callout__body">
+          <strong>Turma grande (mais de 30 pessoas):</strong> mais de um grupo pode receber a mesma persona, e tudo bem. Na discussão final, compare as abordagens diferentes para o mesmo dilema — isso enriquece o debate.
+        </div>
       </div>
-      <div class="step">
-        <strong>Compartilhamento (2 min)</strong>
-        Cada grupo relata: "Encontramos X resultados similares. O diferencial da nossa criação é Y."
+    </div>
+  </div>
+
+  <!-- Ferramenta 1.3: Mapa de Empatia -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
+      <h3>🗺️ Mapa de Empatia</h3>
+      <span class="tool-block__meta">⏱ 15 min · Grupos · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/mapa-empatia.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Aprofunda o trabalho com a persona, forçando os participantes a "calçar os sapatos" do personagem. O canvas de 6 quadrantes (O que pensa e sente? O que vê? O que ouve? O que fala e faz? Dores? Ganhos?) ajuda a entender as motivações, medos e barreiras reais de quem precisa proteger uma criação intelectual.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Mantenha os mesmos grupos da atividade anterior. Projetando ou ditando a URL do Mapa de Empatia, peça que abram a ferramenta. Cada grupo deve preencher os 6 quadrantes pensando na persona que sortearam.</p>
+      <p>Para guiar a reflexão, faça perguntas provocadoras em voz alta enquanto trabalham: <em>"O que essa persona sente quando descobre que alguém copiou sua criação?"</em>, <em>"Que tipo de conselho ela ouve dos colegas — protege ou não?"</em>, <em>"Quanto dinheiro ela tem para investir em proteção?"</em></p>
+      <p>Ao final, peça que 2 ou 3 grupos compartilhem os "Dores" e "Ganhos" de suas personas. Crie uma lista coletiva no quadro: geralmente aparecem medos como "não saber por onde começar", "custo alto" e "demora do processo". Essa lista será validada (ou desmistificada) nas fases seguintes.</p>
+
+      <div class="callout callout--tip">
+        <div class="callout__icon">💡</div>
+        <div class="callout__body">
+          <strong>Versão impressa:</strong> Se preferir trabalho analógico, imprima o Mapa de Empatia em tamanho A2 e use post-its coloridos para cada quadrante. Ao final, cole os mapas na parede do espaço — eles servem de referência visual durante toda a oficina.
+        </div>
       </div>
     </div>
   </div>
-</section>
 
-<section id="f3-mat2">
-  <div class="material-card f3">
-    <span class="mat-class mat-class--r">Recomendada</span>
-    <h4>3.2 — Storyboard de Proteção</h4>
-    <div class="meta"><span>⏱ 10–15 min</span><span>👥 Grupos</span><span>💻 storyboard.html</span></div>
-    <p>Narrativa visual em 6 cenas. Funciona como rascunho narrativo que antecede o Canvas de Estratégia. Os grupos contam a história da proteção antes de formalizá-la.</p>
-
-    <div class="speech">
-      <div class="speech-label">Você pode dizer</div>
-      <p>"Antes de preencher o plano formal, contem a história da proteção da criação de vocês em 6 cenas — como um mini-filme. A cena 2 é a mais importante: é onde o 'quase-erro' acontece. Isso vai ajudar vocês a enxergarem o caminho completo antes de formalizar."</p>
+  <div class="callout callout--info">
+    <div class="callout__icon">🎛️</div>
+    <div class="callout__body">
+      <strong>Ação no Dashboard ao encerrar a Fase 1:</strong> Vá até a aba "Controle" e ative a chave da <strong>Fase 2 — Diagnosticar</strong>. Todos os alunos receberão a liberação instantaneamente em seus dispositivos.
     </div>
   </div>
 </section>
 
-<section id="f3-mat3">
-  <div class="material-card f3">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>3.3 — Canvas de Estratégia de PI</h4>
-    <div class="meta"><span>⏱ 15 min</span><span>👥 Grupos</span><span>💻 canvas-estrategia.html</span></div>
-    <p>O produto principal da Fase 3. 10 blocos com auto-preenchimento de custos, prazos e legislação ao selecionar o tipo de PI. Os blocos 3–7 são preenchidos automaticamente. Os grupos focam nos blocos 8 (stakeholders), 9 (riscos — incluindo resultados da busca de anterioridade) e 10 (plano de ação com 5 passos concretos).</p>
+<!-- ═══════════════════════════════════════════════════════════════
+     FASE 2 — DIAGNOSTICAR
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="fase2" class="section section--phase" style="--phase-color: #FF9800">
+  <div class="section__badge" style="background: #FF9800; color: #fff">Fase 2</div>
+  <h2 class="section__title">🔍 Diagnosticar</h2>
+  <p class="section__subtitle">"Qual tipo de proteção se aplica a cada criação?"</p>
 
-    <div class="callout novo">
-      <div class="label">Integração com o sistema</div>
-      No modo oficina, o Canvas de Estratégia envia ao Firebase: tipo de PI selecionado, tipo complementar, texto de stakeholders, riscos identificados e todas as ações do plano (ação + responsável + prazo). O facilitador pode ver no Dashboard quais tipos de PI os grupos estão escolhendo.
+  <div class="prose">
+    <p>Agora que os participantes já se conectaram emocionalmente com uma persona e mapearam suas dores, é hora de trazer as ferramentas analíticas. Nesta fase, o grupo vai aprender a classificar uma criação no tipo correto de PI e entender os critérios que diferenciam uma patente de um registro de marca, um direito autoral de uma proteção de cultivar. Reserve entre 25 e 40 minutos.</p>
+  </div>
+
+  <!-- Ferramenta 2.1: Canvas de Diagnóstico -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>📐 Canvas de Diagnóstico</h3>
+      <span class="tool-block__meta">⏱ 15 min · Grupos · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/canvas-diagnostico.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>É um canvas de 8 campos que guia o grupo a descrever sistematicamente a criação da persona: o que é, quem criou, com que recursos, qual o grau de maturidade tecnológica (TRL), se já foi divulgada, etc. Funciona como um "raio-X da criação" que prepara o terreno para a decisão de proteção.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Cada grupo abre o Canvas de Diagnóstico e preenche os campos com base na persona. Circule pelas mesas (ou breakout rooms, se online) e ajude os grupos que tiverem dúvida no campo de TRL — esse conceito é novo para a maioria. Explique rapidamente: <em>"TRL 1 é quando você tem só a ideia. TRL 9 é quando o produto já está no mercado. Onde a criação da sua persona se encaixa?"</em></p>
+      <p>O campo mais importante é "Tipo de PI provável". Peça que os grupos arrisquem um palpite antes de ir para a Árvore de Decisão. Isso cria um efeito pedagógico poderoso: quando a Árvore confirmar ou corrigir o palpite, a aprendizagem se fixa melhor do que se a resposta viesse de graça.</p>
+      <p>No Dashboard, a aba Análise mostrará a distribuição de TRL da turma. Se a maioria indicou TRL baixo (1-3), reforce na discussão que proteção precoce é possível e muitas vezes desejável, especialmente para patentes (onde a publicação prematura pode inviabilizar o pedido).</p>
+    </div>
+  </div>
+
+  <!-- Ferramenta 2.2: Linha do Tempo -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--optional">Opcional</span>
+      <h3>📅 Linha do Tempo da PI no Brasil</h3>
+      <span class="tool-block__meta">⏱ 10 min · Coletivo · Percurso de 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/linha-do-tempo.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Mostra 16 marcos históricos da PI no Brasil (do Alvará de 1809 à Lei 13.123/2015 sobre patrimônio genético), criando contexto para as leis que serão referenciadas nas ferramentas seguintes.</p>
+
+      <h4>Como conduzir</h4>
+      <p>Projete a Linha do Tempo na tela e percorra os marcos mais relevantes para a turma. Não precisa cobrir todos — selecione 4 ou 5 que se conectem diretamente com as personas em jogo. Por exemplo, se algum grupo tem a persona "Dona Floresta" (conhecimento tradicional indígena), destaque o marco da Lei 13.123/2015 e explique: <em>"Essa é a lei que obriga qualquer pesquisador a cadastrar no SisGen quando acessa patrimônio genético ou conhecimento tradicional. A persona de vocês está diretamente afetada por ela."</em></p>
+      <p>Se o tempo estiver curto, use a Linha do Tempo como atividade de espera: enquanto grupos mais lentos terminam o Canvas de Diagnóstico, os que já finalizaram podem explorar a Linha do Tempo por conta própria.</p>
+    </div>
+  </div>
+
+  <!-- Ferramenta 2.3: Árvore de Decisão -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>🌳 Árvore de Decisão</h3>
+      <span class="tool-block__meta">⏱ 10–15 min · Grupos · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/arvore.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>É um wizard interativo de 10 perguntas de sim/não que guia o participante até o tipo de proteção mais adequado entre 10 modalidades de PI (patente de invenção, modelo de utilidade, marca, direito autoral, software, cultivar, indicação geográfica, desenho industrial, segredo industrial, patrimônio genético). Cada resultado vem com explicação legal e links para a legislação.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Após completar o Canvas de Diagnóstico, cada grupo abre a Árvore de Decisão e responde as perguntas pensando na criação da sua persona. O resultado será o tipo de PI recomendado.</p>
+      <p>Aqui vem o momento didático mais importante: peça que cada grupo compare o resultado da Árvore com o palpite que registraram no Canvas de Diagnóstico. Se o palpite estava certo, reforce com entusiasmo: <em>"Vocês já estão pensando como um agente de PI!"</em> Se o palpite estava errado, aproveite para explicar a diferença: <em>"Vocês acharam que era patente, mas a Árvore indicou direito autoral. Por quê? Porque a criação da persona é um software, e no Brasil, software é protegido por direito autoral, não por patente. A Lei 9.609/98 é clara sobre isso."</em></p>
+      <p>Essa correção imediata, baseada no próprio erro do grupo, é muito mais eficaz do que uma explicação teórica prévia.</p>
+
+      <div class="callout callout--tip">
+        <div class="callout__icon">💡</div>
+        <div class="callout__body">
+          <strong>Exercício extra (se houver tempo):</strong> Peça a cada grupo que refaça a Árvore de Decisão para uma persona diferente da que receberam. Isso mostra que criações distintas levam a tipos de proteção completamente diferentes, consolidando o aprendizado.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout--info">
+    <div class="callout__icon">🎛️</div>
+    <div class="callout__body">
+      <strong>Ação no Dashboard:</strong> Ative a <strong>Fase 3 — Estrategar</strong>. Se o percurso incluir intervalo (3h e 4h), este é o momento ideal para o coffee break.
     </div>
   </div>
 </section>
 
-<!-- FASE 4 -->
-<div class="fase-header f4" id="f4-visao">
-  <span class="icon">🔬</span> Fase 4 — Testar
-</div>
+<!-- ═══════════════════════════════════════════════════════════════
+     FASE 3 — ESTRATEGAR
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="fase3" class="section section--phase" style="--phase-color: #2196F3">
+  <div class="section__badge" style="background: #2196F3; color: #fff">Fase 3</div>
+  <h2 class="section__title">🚀 Estrategar</h2>
+  <p class="section__subtitle">"Como planejar a proteção de forma estratégica?"</p>
 
-<section>
-  <h3>Objetivo da Fase</h3>
-  <p>Confrontar a estratégia com a realidade: simular depósito, debater dilemas éticos, validar conhecimento. O nome "Testar" (e não mais "Prototipar") reflete melhor o que acontece: não há prototipagem física, mas sim teste e validação das estratégias formuladas na Fase 3.</p>
-  <p>Duração: 35 min (2h) a 55 min (4h). Ferramentas: Simulador de Depósito (E), Baralho de Dilemas (E), Escape Room (O).</p>
-</section>
-
-<section id="f4-mat1">
-  <div class="material-card f4">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>4.1 — Simulador de Depósito</h4>
-    <div class="meta"><span>⏱ 20–30 min</span><span>👥 Grupos</span><span>💻 simulador-deposito.html</span></div>
-    <p>Simula o processo completo de depósito para 9 tipos de proteção. No modo oficina, envia o tipo selecionado e se aplicou desconto de 50%.</p>
+  <div class="prose">
+    <p>Se a Fase 2 respondeu "o quê proteger", a Fase 3 responde "como proteger". Aqui os participantes passam de espectadores a estrategistas: vão gerar ideias de proteção, selecionar as melhores e construir um plano concreto. Esta é a fase mais criativa da oficina e onde o Design Thinking mais brilha. Reserve entre 30 e 45 minutos.</p>
   </div>
-</section>
 
-<section id="f4-mat2">
-  <div class="material-card f4">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>4.2 — Baralho de Dilemas</h4>
-    <div class="meta"><span>⏱ 10–15 min</span><span>👥 Plenária</span><span>💻 baralho-dilemas.html</span></div>
-    <p>16 cartas com dilemas éticos e estratégicos. No modo oficina, envia: quantidade discutida e anotações por dilema.</p>
+  <!-- Ferramenta 3.1: Crazy 8s da PI -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
+      <h3>⚡ Crazy 8s da PI</h3>
+      <span class="tool-block__meta">⏱ 15 min (8 min + 5 votação + 2 discussão) · Individual → Grupo · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/crazy8s.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>O Crazy 8s é uma técnica do Design Sprint (Google Ventures) adaptada para PI. O participante recebe um cenário de proteção e deve gerar <strong>8 estratégias diferentes em 8 minutos</strong> — uma por minuto. O objetivo não é encontrar a resposta perfeita, mas forçar o cérebro a ir além da primeira ideia óbvia. Quando você é obrigado a gerar 8 alternativas, naturalmente começa a combinar proteções (patente + marca), explorar rotas alternativas (nacional vs. PCT), considerar custos criativos (parceria com NIT para desconto), e pensar em estratégias defensivas (segredo industrial ao invés de patente). As ideias 6, 7 e 8 costumam ser as mais originais.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Antes de iniciar, contextualize a técnica: <em>"Agora vocês vão fazer um exercício que parece impossível: gerar 8 ideias diferentes em 8 minutos. A regra mais importante é: não se autocensure. Ideia ruim é melhor que nenhuma ideia. Vocês não precisam desenhar — podem escrever frases curtas."</em></p>
+      <p>Na ferramenta, o participante escolhe o cenário (pode usar um dos 8 pré-definidos — cada um correspondendo a uma persona — ou selecionar "cenário personalizado" para aplicar à persona do seu grupo). Ao selecionar um cenário, os 8 quadros ganham prompts orientadores (por exemplo, "Tipo de PI principal", "Estratégia de custo mínimo", "Rota internacional", "Ideia radical/fora da caixa"). Isso guia sem restringir.</p>
+      <p>Clique em "Iniciar" no cronômetro da ferramenta. O timer de 8 minutos começa e destaca automaticamente o quadro ativo (quadro 1 no primeiro minuto, quadro 2 no segundo, e assim por diante). Nos últimos 60 segundos, o timer fica vermelho e pulsa para criar urgência.</p>
+      <p>Quando o timer zerar, passe para a fase de votação: cada participante tem 3 votos (estrelas) e pode distribuí-los entre as ideias do grupo. Projetando a ferramenta na tela, clique em "Ver Votação" para revelar o gráfico de barras com o ranking das ideias.</p>
+      <p>As <strong>2 ideias mais votadas</strong> serão desenvolvidas no Canvas de Estratégia, a próxima ferramenta. Isso cria um funil natural: de 8 ideias brutas para 2 estratégias concretas.</p>
+
+      <div class="callout callout--warning">
+        <div class="callout__icon">⚠️</div>
+        <div class="callout__body">
+          <strong>Participantes inseguros:</strong> Alguns alunos travam por medo de "errar". Reforce que as ideias são anônimas durante a votação e que até profissionais de PI usam essa técnica para pensar fora da caixa. Se necessário, dê um exemplo no primeiro quadro: <em>"Para o caso do Chef Raízes: quadro 1, proteger a marca do restaurante no INPI. Viram? Pode ser simples assim."</em>
+        </div>
+      </div>
+    </div>
   </div>
-</section>
 
-<section id="f4-mat3">
-  <div class="material-card f4">
-    <span class="mat-class mat-class--o">Opcional</span>
-    <h4>4.3 — Escape Room da PI</h4>
-    <div class="meta"><span>⏱ 15 min (curta)</span><span>👥 Grupos</span><span>💻 escape-room.html</span></div>
-    <p>8 puzzles temáticos com timer. Para o percurso de 4h, use versão curta (puzzles 1–3). No modo oficina, envia: score, dicas usadas, tempo.</p>
+  <!-- Ferramenta 3.2: Canvas de Estratégia -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>📐 Canvas de Estratégia</h3>
+      <span class="tool-block__meta">⏱ 15 min · Grupos · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/canvas-estrategia.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>É o documento central da oficina: um canvas de 10 blocos onde o grupo formaliza a estratégia de proteção para a persona. Os blocos incluem: tipo de PI escolhido, justificativa legal, custos estimados (com tabela de taxas INPI 2025), prazos, responsáveis, riscos, estratégia de licenciamento, e próximos passos concretos. É onde a teoria vira plano de ação.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Se o grupo fez o Crazy 8s, instrua: <em>"Peguem as 2 ideias mais votadas e desenvolvam cada uma em profundidade aqui no Canvas."</em> Se o percurso não inclui o Crazy 8s (Compacto 2h), o grupo parte diretamente do resultado da Árvore de Decisão para preencher o Canvas.</p>
+      <p>O bloco de custos merece atenção especial. A ferramenta já traz as taxas atualizadas do INPI (2025), com desconto de 60% para ICTs e MEIs. Peça que calculem: <em>"Quanto custaria para a persona do grupo proteger essa criação? E se ela fosse MEI — qual seria o desconto?"</em></p>
+      <p>Enquanto os grupos trabalham, circule e faça perguntas desafiadoras: <em>"Vocês estão protegendo via patente, mas a persona publicou um artigo há 8 meses. Estão dentro do período de graça? Quanto tempo falta?"</em> Essas provocações forçam a aplicação prática dos conceitos.</p>
+      <p>Ao final, peça que 1 ou 2 grupos apresentem seu Canvas completo. Projete na tela e faça uma revisão coletiva: a turma toda pode sugerir melhorias ou identificar gaps no plano. Esse momento de revisão por pares é extremamente rico.</p>
+    </div>
   </div>
-</section>
 
-<!-- LOOP -->
-<section id="loop">
-  <div class="loop-box">
-    <h4>🔄 Revisão Estratégica (10 min) — apenas percurso 4h</h4>
-    <p>Após o Simulador e os Dilemas, os participantes reabrem o Canvas de Estratégia e atualizam os blocos 9 (Riscos) e 10 (Plano de Ação) com o que aprenderam. Esse loop iterativo é o que diferencia uma sequência linear de uma experiência de Design Thinking genuína.</p>
-    <div class="speech">
-      <div class="speech-label">Você pode dizer</div>
-      <p>"Voltem ao Canvas de Estratégia. Depois de simular o depósito e debater os dilemas, o que mudaria no plano de vocês? Atualizem pelo menos um risco novo e uma ação nova."</p>
+  <!-- Ferramenta 3.3: Storyboard -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
+      <h3>🎬 Storyboard de Proteção</h3>
+      <span class="tool-block__meta">⏱ 15 min · Grupos · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/storyboard.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Transforma a estratégia do Canvas em uma narrativa visual de 6 cenas, como uma história em quadrinhos. Cada cena representa um momento do processo de proteção: da criação inicial até o resultado final (depósito aprovado, produto no mercado, licenciamento). Essa ferramenta consolida o aprendizado de forma criativa e ajuda participantes mais visuais a internalizarem o processo.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Explique a dinâmica: <em>"Imaginem que vocês estão filmando um mini-documentário da jornada da persona. Em 6 cenas, contem a história do início ao fim: como ela criou algo, como descobriu que precisava proteger, os obstáculos que enfrentou, o que fez, e qual foi o resultado."</em></p>
+      <p>Cada cena tem um campo de texto e um espaço para esboço (pode ser um stick figure, um ícone ou apenas uma descrição visual). Incentive a criatividade, mas mantenha o foco: <em>"A cena 3 poderia ser: persona descobre no Google que alguém está vendendo um produto idêntico ao dela. Cena 4: persona vai ao NIT da universidade pedir ajuda com o depósito."</em></p>
+      <p>Se houver tempo, peça que os grupos troquem storyboards e deem feedback recíproco. Alternativamente, exponha os storyboards na parede (se impressos) ou projetados para votação do "melhor roteiro".</p>
+    </div>
+  </div>
+
+  <div class="callout callout--info">
+    <div class="callout__icon">🎛️</div>
+    <div class="callout__body">
+      <strong>Ação no Dashboard:</strong> Ative a <strong>Fase 4 — Prototipar</strong>. Os participantes agora vão simular na prática o que planejaram.
     </div>
   </div>
 </section>
 
-<!-- FASE 5 -->
-<div class="fase-header f5" id="f5-visao">
-  <span class="icon">📊</span> Fase 5 — Evoluir
-</div>
+<!-- ═══════════════════════════════════════════════════════════════
+     FASE 4 — PROTOTIPAR
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="fase4" class="section section--phase" style="--phase-color: #9C27B0">
+  <div class="section__badge" style="background: #9C27B0; color: #fff">Fase 4</div>
+  <h2 class="section__title">🛠️ Prototipar</h2>
+  <p class="section__subtitle">"Como simular e testar o plano de proteção?"</p>
 
-<section>
-  <h3>Objetivo da Fase</h3>
-  <p>Avaliar aprendizagem, comparar D-X com F-X, consolidar conhecimentos e orientar próximos passos.</p>
-  <p>Duração: 20 min (2h) a 25 min (4h). Ferramentas: Quiz Final (E), Canvas de Avaliação (R).</p>
-</section>
+  <div class="prose">
+    <p>Esta é a fase mais "mão na massa" da oficina. Os participantes vão simular o processo real de depósito de PI (com formulários inspirados nos do INPI), enfrentar dilemas éticos em rodadas de debate, e, no percurso completo, participar de um Escape Room temático. Reserve entre 30 e 60 minutos.</p>
+  </div>
 
-<section id="f5-mat1">
-  <div class="material-card f5">
-    <span class="mat-class mat-class--e">Essencial</span>
-    <h4>5.1 — Quiz Final</h4>
-    <div class="meta"><span>⏱ 10–15 min</span><span>👤 Individual</span><span>💻 quiz-final.html</span></div>
-    <p>20 questões avançadas. Gera código F-X. No modo oficina, o score é enviado ao Firebase e o ranking do Dashboard atualiza instantaneamente — este é o momento mais impactante da oficina. Projete o ranking na tela e compare as evoluções.</p>
+  <!-- Ferramenta 4.1: Simulador de Depósito -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>📝 Simulador de Depósito</h3>
+      <span class="tool-block__meta">⏱ 20–30 min · Individual ou em Dupla · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/simulador-deposito.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Simula o preenchimento de um pedido de depósito para 9 tipos de PI, com campos inspirados nos formulários reais do INPI, SNPC e Biblioteca Nacional. Inclui cálculo automático de custos com as GRUs (Guias de Recolhimento da União) atualizadas. Ao final, gera um "resumo do pedido" que pode ser salvo ou impresso.</p>
 
-    <div class="callout novo">
-      <div class="label">Momento de projeção do ranking</div>
-      Quando os últimos alunos terminarem o Quiz Final, mude o Dashboard para a visualização "Evolução". A turma toda verá quem mais evoluiu do D-X para o F-X. Celebre quem teve maior evolução, não apenas quem tirou a nota mais alta. Um aluno que foi de D-2 para F-8 (+6) evoluiu mais que um que foi de D-7 para F-9 (+2).
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Conecte diretamente com a ferramenta anterior: <em>"No Canvas de Estratégia, vocês definiram que a persona deveria registrar uma marca. Agora vão preencher o formulário como se estivessem fazendo isso de verdade."</em></p>
+      <p>O simulador pede que o participante selecione o tipo de PI e preencha campos como: nome do titular, título da criação, descrição, classe (para marcas), reivindicações (para patentes), etc. Cada campo tem um tooltip explicando o que deve ser preenchido e por quê.</p>
+      <p>Circule e esclareça dúvidas comuns: a diferença entre titular e inventor, a importância da redação das reivindicações, a classificação de Nice para marcas. Ao ver o custo final calculado, muitos participantes se surpreendem — aproveite para contextualizar: <em>"Uma patente completa pode custar R$ 1.000+ para pessoa física, mas com desconto de ICT cai para R$ 400. Se a persona é vinculada a uma universidade, o NIT pode auxiliar no processo e reduzir esses custos."</em></p>
+      <p>Peça que salvem o resumo gerado. Ele serve como "protótipo" do pedido real e pode ser utilizado em trabalhos de disciplina ou consultas futuras ao NIT.</p>
+    </div>
+  </div>
+
+  <!-- Ferramenta 4.2: Baralho de Dilemas -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>🃏 Baralho de Dilemas</h3>
+      <span class="tool-block__meta">⏱ 10–15 min · Grupos · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/baralho-dilemas.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Apresenta 16 dilemas éticos reais sobre PI em 7 categorias (biopirataria, plágio acadêmico, medicamentos genéricos, software livre vs. proprietário, IA e autoria, conhecimento tradicional, patentes de sementes). Cada carta traz um cenário provocador com argumentos dos dois lados, forçando o participante a tomar posição e justificar.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Este é o momento mais dinâmico da oficina. Organize a atividade como um "debate relâmpago": cada grupo sorteia uma carta, lê o dilema, e tem 2 minutos para preparar argumentos. Depois, um representante apresenta a posição do grupo em 1 minuto. O facilitador (ou outro grupo) faz o papel de "advogado do diabo".</p>
+      <p>Exemplo de dilema: <em>"Uma empresa farmacêutica brasileira quer produzir a versão genérica de um medicamento patenteado por multinacional que trata doença negligenciada na Amazônia. A patente ainda tem 8 anos de vigência. Deve haver licenciamento compulsório?"</em></p>
+      <p>Não busque consenso — o objetivo é que os participantes percebam que PI envolve tensões legítimas entre interesse público e direito do inventor, entre acesso ao conhecimento e incentivo à inovação. Essa nuance é essencial para uma compreensão madura do tema.</p>
+      <p>Se o tempo permitir, faça 2 ou 3 rodadas com dilemas de categorias diferentes. No Dashboard, observe se os participantes estão registrando suas respostas (o Tool Bridge envia os dados do debate automaticamente).</p>
+
+      <div class="callout callout--tip">
+        <div class="callout__icon">🎯</div>
+        <div class="callout__body">
+          <strong>Variação "Tribunal da PI":</strong> Para turmas engajadas, monte um mini-tribunal onde um grupo defende a proteção e outro defende o acesso aberto. O facilitador atua como juiz e dá o veredito final. Essa dinâmica gera memórias fortes sobre o tema.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ferramenta 4.3: Escape Room -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--optional">Opcional</span>
+      <h3>🔐 Escape Room da PI</h3>
+      <span class="tool-block__meta">⏱ 15 min · Grupos · Percurso de 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/escape-room.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Atividade gamificada com 8 puzzles que testam conhecimentos de PI adquiridos durante a oficina. Inclui timer regressivo, sistema de dicas progressivas e certificado de conclusão. É a forma mais divertida de revisar conteúdo antes do Quiz Final.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Apresente como um desafio competitivo: <em>"Vocês foram trancados em uma sala virtual e precisam resolver 8 enigmas sobre PI para escapar. Cada enigma usa o que aprendemos hoje. Quem escapar mais rápido ganha o troféu!"</em></p>
+      <p>Os grupos trabalham simultaneamente. Projetando o Dashboard, acompanhe quem está avançando mais rápido. Quando o primeiro grupo completar, anuncie em voz alta para motivar os demais. A pressão do timer (que fica vermelho nos últimos minutos) cria a urgência necessária para engajamento total.</p>
+      <p>O material completo (com versão para impressão caso prefira uma escape room presencial com envelopes e cadeados) está disponível no download: <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/download/Escape-Room-completo.pdf" target="_blank">Escape-Room-completo.pdf</a>.</p>
+    </div>
+  </div>
+
+  <div class="callout callout--info">
+    <div class="callout__icon">🎛️</div>
+    <div class="callout__body">
+      <strong>Ação no Dashboard:</strong> Ative a <strong>Fase 5 — Evoluir</strong>. É a reta final!
     </div>
   </div>
 </section>
 
-<section id="f5-mat2">
-  <div class="material-card f5">
-    <span class="mat-class mat-class--r">Recomendada</span>
-    <h4>5.2 — Canvas de Avaliação</h4>
-    <div class="meta"><span>⏱ 10 min</span><span>👤 Individual</span><span>💻 canvas-avaliacao.html</span></div>
-    <p>Avaliação de cada fase com estrelas (1–5), comentários por fase, e campos de pontos fortes, melhorias, aprendizado principal e próximos passos. No modo oficina, as estrelas aparecem no gráfico "Avaliação por Fase" na aba Análise do Dashboard.</p>
+<!-- ═══════════════════════════════════════════════════════════════
+     FASE 5 — EVOLUIR
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="fase5" class="section section--phase" style="--phase-color: #4CAF50">
+  <div class="section__badge" style="background: #4CAF50; color: #fff">Fase 5</div>
+  <h2 class="section__title">📈 Evoluir</h2>
+  <p class="section__subtitle">"Quanto aprendemos e como seguir em frente?"</p>
+
+  <div class="prose">
+    <p>A fase final fecha o ciclo com avaliação, reflexão e celebração. Aqui você vai medir concretamente o aprendizado (comparando D-X com F-X), coletar feedback dos participantes e encerrar com um senso de conquista. Reserve entre 25 e 45 minutos.</p>
+  </div>
+
+  <!-- Ferramenta 5.1: PI Quest -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--optional">Opcional</span>
+      <h3>🎲 PI Quest</h3>
+      <span class="tool-block__meta">⏱ 15 min · Individual · Percurso de 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/pi-quest.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Um jogo narrativo em 5 capítulos onde o participante assume o papel de um agente de PI que precisa resolver casos reais. Funciona como revisão gamificada de todo o conteúdo da oficina, cobrindo todos os tipos de PI em contextos práticos. Cada capítulo tem escolhas que levam a desfechos diferentes.</p>
+
+      <h4>Como conduzir</h4>
+      <p>Use como atividade de "aquecimento" antes do Quiz Final: <em>"Antes da prova final, vocês vão jogar 15 minutos de PI Quest para revisar tudo. Pensem nele como um treino."</em> Ou, se o tempo estiver apertado, ofereça como atividade bônus para quem terminar o Quiz Final antes dos colegas.</p>
+    </div>
+  </div>
+
+  <!-- Ferramenta 5.2: Quiz Final -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
+      <h3>🏆 Quiz Final</h3>
+      <span class="tool-block__meta">⏱ 15 min · Individual · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/quiz-final.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>São 20 questões que cobrem todo o conteúdo trabalhado, incluindo questões aplicadas (cenários de decisão, cálculo de prazo, identificação de tipo de PI). Gera o código <strong>F-X</strong> (de 0 a 20) que será comparado com o <strong>D-X</strong> do início. A diferença F-X menos D-X é a "evolução" do participante.</p>
+
+      <h4>Como conduzir — passo a passo</h4>
+      <p>Crie um momento solene: <em>"Agora é a hora da verdade. Lembram do Quiz Diagnóstico lá no início? A média da turma foi D-4,3. Vamos ver quanto vocês evoluíram. Respondam individualmente, sem consultar. Vocês têm 15 minutos."</em></p>
+      <p>Enquanto os alunos respondem, acompanhe no Dashboard (aba Ranking, filtro "Quiz Final") os resultados chegando em tempo real. Quando a maioria terminar, mude o filtro para "Evolução" e projete o ranking na tela.</p>
+      <p>Esse é o grande momento da oficina. Leia os resultados em voz alta: <em>"João: D-3, F-14, evolução +11. Maria: D-5, F-18, evolução +13!"</em> A turma geralmente reage com surpresa e orgulho ao ver a própria evolução. A média de evolução da turma aparece no card do Dashboard — compartilhe: <em>"A média subiu de D-4,3 para F-15,2 — uma evolução de +10,9 pontos!"</em></p>
+
+      <div class="callout callout--tip">
+        <div class="callout__icon">🏆</div>
+        <div class="callout__body">
+          <strong>Premiação simbólica:</strong> Reconheça os 3 primeiros no ranking de evolução (não de nota final — para valorizar o crescimento, não o ponto de partida). Pode ser um certificado especial, um badge digital, ou simplesmente aplausos da turma.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ferramenta 5.3: Canvas de Avaliação -->
+  <div class="tool-block">
+    <div class="tool-block__header">
+      <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
+      <h3>📊 Canvas de Avaliação</h3>
+      <span class="tool-block__meta">⏱ 10 min · Individual · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/canvas-avaliacao.html" target="_blank">Abrir ferramenta</a></span>
+    </div>
+    <div class="tool-block__body">
+      <h4>Para que serve</h4>
+      <p>Formulário de feedback onde o participante avalia cada fase da oficina com estrelas (1 a 5), escreve comentários livres e indica o que mais gostou e o que melhoraria. Os dados são enviados ao Dashboard e aparecem na aba Análise (gráfico "Avaliação por Fase"). Esse feedback é valioso para aprimorar futuras edições da oficina.</p>
+
+      <h4>Como conduzir</h4>
+      <p>Peça que preencham enquanto você faz o encerramento oral: <em>"Enquanto eu falo sobre os próximos passos, peço que abram o Canvas de Avaliação e me deem o feedback de vocês. Sejam honestos — isso vai me ajudar a melhorar a oficina."</em> Isso otimiza o tempo ao executar duas atividades em paralelo.</p>
+      <p>No Dashboard, observe as médias de estrelas por fase. Se a Fase 2 recebeu nota baixa, investigue nos comentários o motivo — talvez o Canvas de Diagnóstico precise de instruções mais claras, ou a Árvore de Decisão tenha confundido algum grupo.</p>
+    </div>
   </div>
 </section>
 
-<section id="f5-pos">
-  <h3>Pós-Oficina: PI Quest (atividade assíncrona)</h3>
-  <p>O PI Quest é um jogo narrativo interativo com 5 capítulos e 15 decisões. Na v3.0, ele deixa de ocupar tempo da oficina e passa a ser uma atividade que o aluno acessa pelo Módulo do Aluno depois, no ritmo dele. O Módulo do Aluno mantém o PI Quest disponível mesmo após a oficina terminar — basta o aluno voltar ao aluno.html com as mesmas credenciais.</p>
+<!-- ═══════════════════════════════════════════════════════════════
+     FERRAMENTAS DE APOIO
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="apoio" class="section">
+  <div class="section__badge">Consulta Permanente</div>
+  <h2 class="section__title">Ferramentas de Apoio</h2>
 
-  <div class="speech">
-    <div class="speech-label">Você pode dizer — No encerramento</div>
-    <p>"Uma última coisa: no Módulo do Aluno de vocês, tem um jogo narrativo chamado PI Quest que não fizemos hoje por falta de tempo. Acessem depois — é a história da Luma, uma pesquisadora da Amazônia que precisa proteger sua invenção. Vocês tomam as decisões por ela. É divertido e reforça tudo que aprenderam."</p>
+  <div class="prose">
+    <p>Quatro ferramentas estão disponíveis para consulta a qualquer momento da oficina, sem necessidade de desbloqueio. Elas não fazem parte do fluxo sequencial, mas enriquecem a experiência e resolvem dúvidas pontuais.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature">
+      <div class="feature__icon">📖</div>
+      <h5>Glossário Dinâmico</h5>
+      <p>Mais de 30 termos essenciais de PI com definição clara e busca instantânea. Ideal para quando um participante não entende uma palavra usada em alguma ferramenta. Incentive: <em>"Se encontrarem um termo que não conhecem, abram o Glossário — ele está sempre disponível."</em></p>
+      <p><a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/glossario.html" target="_blank">Abrir Glossário</a></p>
+    </div>
+    <div class="feature">
+      <div class="feature__icon">📅</div>
+      <h5>Calculadora de Vigência</h5>
+      <p>Calcula quando uma proteção de PI expira e cai em domínio público. Útil durante o Simulador de Depósito e o Canvas de Estratégia para responder perguntas como: <em>"Se eu depositar uma patente hoje, até quando ela vale?"</em> Cobre todos os tipos de PI com alertas visuais para prazos próximos do vencimento.</p>
+      <p><a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/calculadora.html" target="_blank">Abrir Calculadora</a></p>
+    </div>
+    <div class="feature">
+      <div class="feature__icon">🔍</div>
+      <h5>Busca de Anterioridade</h5>
+      <p>Links organizados e tutoriais passo-a-passo para consultar as bases oficiais: INPI (marcas e patentes), PatentScope (WIPO, busca internacional), SNPC (cultivares) e Biblioteca Nacional (direito autoral). Use durante o Simulador de Depósito para que os participantes verifiquem se o nome de marca que escolheram já existe.</p>
+      <p><a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/busca.html" target="_blank">Abrir Busca</a></p>
+    </div>
+    <div class="feature">
+      <div class="feature__icon">🌳</div>
+      <h5>Árvore de Decisão (como apoio)</h5>
+      <p>Embora faça parte da Fase 2, a Árvore de Decisão também funciona como ferramenta de consulta permanente. Sempre que alguém tiver dúvida sobre qual tipo de PI se aplica, pode recorrer a ela rapidamente.</p>
+      <p><a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/arvore.html" target="_blank">Abrir Árvore</a></p>
+    </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════
-     APÊNDICES (abreviados)
-     ═══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     ENCERRAMENTO
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="encerramento" class="section">
+  <div class="section__badge">Conclusão</div>
+  <h2 class="section__title">Encerramento da Oficina</h2>
 
-<section id="faq-tecnico">
-  <h2 class="section-title">FAQ Técnico — As 20 Perguntas</h2>
-  <p>As mesmas 20 perguntas da v2.0 estão mantidas. Consulte a seção FAQ na versão anterior ou mantenha este guia aberto durante a oficina.</p>
-  <div class="faq-tech" id="faqContainer"></div>
-</section>
+  <div class="prose">
+    <p>O encerramento é tão importante quanto a abertura. É onde você consolida a transformação de percepção e dá direcionamento para os próximos passos.</p>
+  </div>
 
-<section id="referencias">
-  <h2 class="section-title">Apêndice A — Referências Legais</h2>
-  <details><summary>Lei 9.279/1996 — Lei da Propriedade Industrial (LPI)</summary><div class="content"><p>Principal lei de PI do Brasil. Arts. mais citados: 8 (patenteabilidade), 10 (exclusões), 11 (novidade), 12 (período de graça), 40 (vigência), 122 (marca), 133 (vigência marca), 195 (segredo industrial). <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Texto integral</a></p></div></details>
-  <details><summary>Lei 9.610/1998 — Direitos Autorais</summary><div class="content"><p>Arts. 7, 8, 18, 41, 43, 46. <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">Texto integral</a></p></div></details>
-  <details><summary>Lei 9.609/1998 — Software</summary><div class="content"><p>Art. 2º (proteção autoral, 50 anos). <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank">Texto integral</a></p></div></details>
-  <details><summary>Lei 9.456/1997 — Cultivares</summary><div class="content"><p>Art. 11 (15/18 anos). <a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank">Texto integral</a></p></div></details>
-  <details><summary>Lei 13.123/2015 — Biodiversidade</summary><div class="content"><p>CPI + repartição de benefícios. <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">Texto integral</a></p></div></details>
-  <details><summary>Lei 10.973/2004 — Inovação + Lei 13.243/2016 — CT&I</summary><div class="content"><p>NITs, titularidade ICT, participação do inventor.</p></div></details>
-  <details><summary>Decreto 10.886/2021 — ENPI 2021–2030</summary><div class="content"><p>Eixo 2: Disseminação e Capacitação.</p></div></details>
-</section>
+  <h3>Roteiro de encerramento (10–15 minutos)</h3>
+  <div class="step-sequence">
+    <div class="step">
+      <div class="step__number">1</div>
+      <div class="step__content">
+        <strong>Projete o ranking de evolução</strong> do Dashboard e celebre os destaques. Reconheça publicamente quem mais evoluiu (diferença F-X menos D-X), não apenas quem tirou a nota mais alta. Isso valoriza o esforço de aprendizagem.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__number">2</div>
+      <div class="step__content">
+        <strong>Exporte o CSV</strong> pelo Dashboard para seu registro. Esse arquivo documenta o resultado da oficina e pode ser anexado a relatórios de projeto, prestações de contas para agências de fomento ou portfólios de extensão.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__number">3</div>
+      <div class="step__content">
+        <strong>Indique os próximos passos concretos:</strong> recomende que os participantes agendem uma visita ao NIT da universidade, consultem o portal do INPI para acompanhar taxas e prazos, e explorem as ferramentas de apoio (Glossário, Calculadora, Busca) por conta própria. As ferramentas continuam acessíveis online mesmo após a oficina.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__number">4</div>
+      <div class="step__content">
+        <strong>Se houver certificados,</strong> distribua-os neste momento. A Escape Room também gera um certificado digital automático para quem completar.
+      </div>
+    </div>
+  </div>
 
-<section id="custos">
-  <h2 class="section-title">Apêndice B — Custos INPI 2025</h2>
-  <p>Fonte: Portaria GM/MDIC nº 110/2025. Desconto de 50% para ICTs, PF, MEI, ME/EPP, cooperativas, entidades de ensino/pesquisa e sem fins lucrativos.</p>
-  <div class="table-wrap">
-  <table>
-    <thead><tr><th>Tipo</th><th>Serviço</th><th>Normal (R$)</th><th>Desconto (R$)</th></tr></thead>
-    <tbody>
-      <tr><td>Patente de Invenção</td><td>Depósito eletrônico</td><td>260,00</td><td>90,00</td></tr>
-      <tr><td>Patente de Invenção</td><td>Pedido de exame (até 10 reiv.)</td><td>870,00</td><td>435,00</td></tr>
-      <tr><td>Modelo de Utilidade</td><td>Depósito eletrônico</td><td>260,00</td><td>90,00</td></tr>
-      <tr><td>Marca</td><td>Pedido (espec. pré-aprovada)</td><td>360,00</td><td>180,00</td></tr>
-      <tr><td>Marca</td><td>1º decênio + certificado</td><td>750,00</td><td>375,00</td></tr>
-      <tr><td>Desenho Industrial</td><td>Pedido de registro</td><td>350,00</td><td>175,00</td></tr>
-      <tr><td>Software</td><td>Registro eletrônico</td><td>185,00</td><td>90,00</td></tr>
-      <tr><td>IG</td><td>Pedido de IP</td><td colspan="2" style="text-align:center">870,00</td></tr>
-    </tbody>
-  </table>
+  <div class="callout callout--tip">
+    <div class="callout__icon">💡</div>
+    <div class="callout__body">
+      <strong>Frase de fechamento sugerida:</strong> <em>"Vocês entraram aqui sabendo D-4 e saem sabendo F-15. Mas o mais importante não é o número: é que agora vocês sabem que toda criação pode ser protegida, que existem caminhos acessíveis para isso, e que o NIT da universidade está aí para ajudar. PI não é burocracia — é estratégia."</em>
+    </div>
   </div>
 </section>
 
-<section id="relatorio">
-  <h2 class="section-title">Apêndice C — Modelo de Relatório Pós-Oficina</h2>
-  <div class="report-tpl">
-    <h4>📊 Relatório Pós-Oficina — PI Thinking v3.0</h4>
-    <div class="field"><div class="field-label">Data e local</div><div class="field-line">____/____/________ — Local: ___________________________________</div></div>
-    <div class="field"><div class="field-label">Facilitador(es)</div><div class="field-line">_________________________________________________________________</div></div>
-    <div class="field"><div class="field-label">Percurso</div><div class="field-line">☐ 2h Compacto (8 ferramentas) ☐ 3h Padrão (11 ferramentas) ☐ 4h Completo (14 ferramentas)</div></div>
-    <div class="field"><div class="field-label">Participantes</div><div class="field-line">Total: _______ · Grupos: _______</div></div>
-    <div class="field"><div class="field-label">Scores (exportar do Dashboard via CSV)</div><div class="field-line">Quiz Diagnóstico — média D-_______ (mín D-____ / máx D-____)</div><div class="field-line">Quiz Final — média F-_______ (mín F-____ / máx F-____)</div><div class="field-line">Evolução média: +_______ pontos (meta: +2 a +4)</div></div>
-    <div class="field"><div class="field-label">Canvas de Avaliação (se aplicado)</div><div class="field-line">Média geral: _______/5,0 · Melhor fase: _________________ · Pior fase: _________________</div></div>
-    <div class="field"><div class="field-label">Ações de melhoria</div><div class="field-line">1. ________________________________________________________________</div><div class="field-line">2. ________________________________________________________________</div></div>
-    <div class="field"><div class="field-label">Encaminhamentos ao NIT</div><div class="field-line">Participantes com interesse em depósito real: _______ · Casos: ________________________</div></div>
+<!-- ═══════════════════════════════════════════════════════════════
+     CHECKLIST PRÉ-OFICINA
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section__badge">Preparação</div>
+  <h2 class="section__title">Checklist Pré-Oficina</h2>
+
+  <div class="checklist">
+    <label class="checklist__item"><input type="checkbox"> Li este guia completo com pelo menos 48 horas de antecedência</label>
+    <label class="checklist__item"><input type="checkbox"> Testei todas as ferramentas do percurso escolhido no meu navegador</label>
+    <label class="checklist__item"><input type="checkbox"> Criei a sessão no Dashboard e confirmei que o Firebase conecta corretamente</label>
+    <label class="checklist__item"><input type="checkbox"> Preparei o código da oficina e o QR Code de acesso ao Módulo do Aluno</label>
+    <label class="checklist__item"><input type="checkbox"> Verifiquei a conexão Wi-Fi do espaço (mínimo 5 Mbps para a turma)</label>
+    <label class="checklist__item"><input type="checkbox"> Tenho projetor/tela para compartilhar o Dashboard e ferramentas</label>
+    <label class="checklist__item"><input type="checkbox"> Preparei post-its, canetas e impressões A2 (se usar versão híbrida)</label>
+    <label class="checklist__item"><input type="checkbox"> Defini os tempos de cada atividade no percurso e configurei alarmes</label>
+    <label class="checklist__item"><input type="checkbox"> Imprimi a versão PDF da Escape Room (se aplicável)</label>
+    <label class="checklist__item"><input type="checkbox"> Preparei certificados de participação (se aplicável)</label>
   </div>
-
-  <div class="callout novo">
-    <div class="label">Novo na v3.0 — Exportação automatizada</div>
-    Use o botão "CSV" no Dashboard para exportar todos os dados em planilha. Isso substitui a coleta manual e permite preencher o relatório rapidamente com dados reais.
-  </div>
 </section>
 
-<section id="adaptacoes">
-  <h2 class="section-title">Apêndice D — Adaptações e Variantes</h2>
-  <details><summary>Oficina 100% online (síncrona)</summary><div class="content"><p>Compartilhe o link do aluno.html pelo chat. Use breakout rooms para trabalhos em grupo. O Dashboard funciona identicamente online. Aumente a duração em 15–20%.</p></div></details>
-  <details><summary>Sem internet / modo offline</summary><div class="content"><p>Copie todos os arquivos para um servidor local ou pen drive. As ferramentas funcionam 100% offline (apenas o Firebase não estará disponível). Nesse caso, use o modo livre via index.html e colete dados manualmente.</p></div></details>
-  <details><summary>Versão assíncrona / autoestudo</summary><div class="content"><p>O aluno acessa aluno.html, cria uma "oficina individual" com código pessoal, e segue o Percurso Compacto no próprio ritmo. O PI Quest é especialmente valioso nesse contexto.</p></div></details>
-</section>
+</main>
 
-<section id="dicas-gerais">
-  <h2 class="section-title">Apêndice E — Dicas de Facilitação</h2>
-  <details><summary>Gestão de tempo</summary><div class="content"><p>Use o Dashboard projetado como cronômetro visual — quando os alunos veem o progresso dos colegas, se auto-regulam. Regra: se precisa encurtar, reduza apresentações de grupo, não o trabalho individual.</p></div></details>
-  <details><summary>Problemas técnicos</summary><div class="content"><p>Plano B: cópias impressas dos Canvas em A3, versão oral do Quiz. Se o Firebase cair, as ferramentas continuam funcionando — apenas o ranking em tempo real fica indisponível.</p></div></details>
-  <details><summary>Turma muito grande (+20 pessoas)</summary><div class="content"><p>O Dashboard suporta qualquer número de participantes. Com 20+, tenha um cofacilitador para cada 10 adicionais. Use o Módulo do Aluno para que todos avancem no próprio ritmo, e sincronize com a turma apenas nos momentos de apresentação.</p></div></details>
-</section>
-
-<!-- FOOTER -->
-<footer style="text-align:center; padding:2.5rem 0; color:var(--cor-texto-leve); font-size:.85rem; border-top:1px solid var(--cor-borda); margin-top:3rem;">
-  <p><strong>Toolkit PI Thinking</strong> — Guia do Facilitador v3.0</p>
-  <p>14 ferramentas + sistema de oficina · 3 percursos · 5 fases</p>
-  <p style="margin-top:.5rem;">Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank">CC BY-NC-SA 4.0</a></p>
-  <p>PROFNIT / UFRR / InovaRR — Maio 2026</p>
+<!-- ═══════════════════════════════════════════════════════════════
+     RODAPÉ
+     ═══════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <p>© 2025 PI Thinking — PROFNIT / UFRR · Licença <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></p>
+  <p>Legislação base: <a href="https://www.planalto.gov.br/ccivil_03/leis/l9279.htm" target="_blank">Lei 9.279/96 (PI)</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9609.htm" target="_blank">Lei 9.609/98 (Software)</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9610.htm" target="_blank">Lei 9.610/98 (Direito Autoral)</a> · <a href="https://www.planalto.gov.br/ccivil_03/leis/l9456.htm" target="_blank">Lei 9.456/97 (Cultivares)</a> · <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13123.htm" target="_blank">Lei 13.123/2015 (Patrimônio Genético)</a></p>
+  <p><a href="index.html">← Voltar ao Toolkit</a> · <a href="dashboard.html">📊 Dashboard</a> · <a href="aluno.html">🎓 Módulo do Aluno</a></p>
 </footer>
 
-</div>
-
-<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
-
 <script>
-/* FAQ DATA */
-var faqData = [
-  { q: "Posso patentear uma ideia?", a: "Não. A Lei 9.279/96 (Art. 10) exclui ideias, conceitos abstratos e descobertas. O que se patenteia é a SOLUÇÃO TÉCNICA concreta.", legal: "Lei 9.279/96, Art. 10, inciso I" },
-  { q: "Publiquei no congresso há 6 meses — perdi a chance de patentear?", a: "No Brasil, não necessariamente. Período de graça de 12 meses (Art. 12, LPI). Você ainda tem 6 meses. MAS: na maioria dos outros países NÃO existe período de graça.", legal: "Lei 9.279/96, Art. 12" },
-  { q: "O nome da minha empresa já é marca registrada?", a: "Não automaticamente. Registrar CNPJ na Junta Comercial NÃO registra marca. Só o INPI protege nacionalmente.", legal: "Lei 9.279/96, Art. 129" },
-  { q: "Software é patenteável no Brasil?", a: "Software 'em si' NÃO (Art. 10, VIII). Mas processo técnico inovador executado por software PODE ser, se gera efeito técnico novo.", legal: "Lei 9.279/96, Art. 10, VIII; Lei 9.609/98" },
-  { q: "Quanto custa registrar uma marca?", a: "Pedido: R$ 360 (normal) / R$ 180 (desconto). Concessão: R$ 750 / R$ 375. Total mínimo com desconto: ~R$ 555.", legal: "Portaria GM/MDIC nº 110/2025" },
-  { q: "Quanto tempo leva para obter uma patente?", a: "3 a 5 anos (reduzido de 10+). Marcas: 6–12 meses. Software: 7–30 dias. DI: 1–3 meses.", legal: "Dados INPI 2023–2025" },
-  { q: "Receita culinária é patenteável?", a: "Não. Melhor proteção: segredo industrial (NDA com funcionários) + marca para o nome do produto.", legal: "Lei 9.279/96, Art. 10, Art. 195" },
-  { q: "Quem é o dono da invenção feita na universidade?", a: "Titularidade é da ICT (universidade). Inventor é pessoa física com direito a 5–33% dos ganhos.", legal: "Lei 10.973/2004, Arts. 11, 13" },
-  { q: "Meu orientador é coinventor?", a: "Depende. Orientar NÃO é suficiente. Coinventor é quem contribuiu para a SOLUÇÃO TÉCNICA.", legal: "Lei 9.279/96, Art. 6º, §4º" },
-  { q: "Preciso de advogado para depositar?", a: "Não é obrigatório para PJ com sede no Brasil. Mas para patentes complexas, o NIT ajuda gratuitamente.", legal: "Lei 9.279/96, Art. 216" },
-  { q: "Direito autoral precisa ser registrado?", a: "NÃO. Proteção nasce automaticamente. Registro na BN é facultativo mas fortalece prova.", legal: "Lei 9.610/98, Art. 18" },
-  { q: "O que é busca de anterioridade?", a: "Pesquisar se alguém já registrou algo parecido. Não é obrigatória mas é ESSENCIAL na prática.", legal: "Boas práticas; bases: INPI, PatentScope" },
-  { q: "O que acontece se não pagar anuidade?", a: "Patente EXTINTA. 6 meses com multa, depois domínio público irreversível.", legal: "Lei 9.279/96, Arts. 78, 84, 87" },
-  { q: "Posso proteger o design da embalagem?", a: "Sim: Desenho Industrial (forma) + Marca figurativa/mista (rótulo). Proteção em camadas.", legal: "Lei 9.279/96, Arts. 95–121, Art. 122" },
-  { q: "O que é Indicação Geográfica?", a: "Proteção coletiva para produtos vinculados à origem. IP (reputação) ou DO (qualidade única). Vigência indeterminada.", legal: "Lei 9.279/96, Arts. 176–182" },
-  { q: "Comunidades indígenas podem proteger seus conhecimentos?", a: "Sim. Lei 13.123/2015 exige CPI e repartição de benefícios. Uso sem consentimento = biopirataria.", legal: "Lei 13.123/2015; Protocolo de Nagoya" },
-  { q: "O que é licença compulsória?", a: "Governo autoriza uso de patente sem acordo do titular em emergências. Legal (Art. 71 LPI + TRIPS Art. 31).", legal: "Lei 9.279/96, Art. 71" },
-  { q: "Posso usar logo de outra empresa no meu material?", a: "Uso referencial/informativo geralmente sim. Uso que causa confusão ou associação indevida, não.", legal: "Lei 9.279/96, Arts. 189–190" },
-  { q: "Uma IA pode ser inventora?", a: "Atualmente NÃO. LPI exige pessoa física (Art. 6º). Humano que usa IA como ferramenta pode ser inventor.", legal: "Lei 9.279/96, Art. 6º; Caso DABUS" },
-  { q: "Diferença entre Patente de Invenção e Modelo de Utilidade?", a: "PI: alto grau de inventividade, 20 anos. MU: melhoria funcional prática, menor inventividade, 15 anos.", legal: "Lei 9.279/96, Art. 8 (PI) e Art. 9 (MU)" }
-];
-
-var faqContainer = document.getElementById('faqContainer');
-if (faqContainer) {
-  faqData.forEach(function(item, i) {
-    var div = document.createElement('div');
-    div.className = 'faq-tech-item';
-    div.innerHTML =
-      '<button class="faq-tech-q" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\')">' +
-        '<span>' + (i+1) + '. ' + item.q + '</span>' +
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
-      '</button>' +
-      '<div class="faq-tech-a"><p>' + item.a + '</p><p class="legal">📜 ' + item.legal + '</p></div>';
-    faqContainer.appendChild(div);
-  });
-}
-
-/* NAV */
-var navToggle = document.getElementById('navToggle');
-var sideNav = document.getElementById('sideNav');
-var navOverlay = document.getElementById('navOverlay');
-if (navToggle && sideNav) {
-  navToggle.addEventListener('click', function() {
-    sideNav.classList.toggle('open');
-    if (navOverlay) navOverlay.classList.toggle('active');
-  });
-}
-if (navOverlay) {
-  navOverlay.addEventListener('click', function() {
-    sideNav.classList.remove('open');
-    navOverlay.classList.remove('active');
-  });
-}
-if (sideNav) {
-  sideNav.querySelectorAll('a').forEach(function(a) {
-    a.addEventListener('click', function() {
-      if (window.innerWidth <= 900) {
-        sideNav.classList.remove('open');
-        if (navOverlay) navOverlay.classList.remove('active');
+/* Smooth scroll for nav links */
+document.querySelectorAll('.topnav__links a').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var href = this.getAttribute('href');
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      var target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('topnav-links').classList.remove('open');
       }
-    });
+    }
   });
-}
+});
 
-/* ACTIVE NAV LINK */
-var allSections = document.querySelectorAll('section[id], div.fase-header[id]');
-var navLinks = sideNav ? sideNav.querySelectorAll('a[href^="#"]') : [];
-if (navLinks.length > 0) {
-  var scrollObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        var id = entry.target.id;
-        if (!id) return;
-        navLinks.forEach(function(l) { l.classList.remove('active'); });
-        var activeLink = sideNav.querySelector('a[href="#' + id + '"]');
-        if (activeLink) activeLink.classList.add('active');
-      }
-    });
-  }, { rootMargin: '-15% 0px -75% 0px' });
-  allSections.forEach(function(s) { if (s.id) scrollObserver.observe(s); });
-}
-
-/* BACK TO TOP */
-var backTop = document.getElementById('backTop');
-if (backTop) {
-  window.addEventListener('scroll', function() {
-    backTop.classList.toggle('visible', window.scrollY > 600);
-  }, { passive: true });
-  backTop.addEventListener('click', function() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+/* Intersection Observer for active nav link */
+var sections = document.querySelectorAll('.section[id]');
+var navLinks = document.querySelectorAll('.topnav__links a[href^="#"]');
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      navLinks.forEach(function(link) { link.classList.remove('active'); });
+      var activeLink = document.querySelector('.topnav__links a[href="#' + entry.target.id + '"]');
+      if (activeLink) activeLink.classList.add('active');
+    }
   });
-}
+}, { rootMargin: '-20% 0px -60% 0px' });
+sections.forEach(function(s) { observer.observe(s); });
+
+/* Scroll spy for top nav background */
+window.addEventListener('scroll', function() {
+  document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 60);
+});
 </script>
+
 </body>
 </html>
