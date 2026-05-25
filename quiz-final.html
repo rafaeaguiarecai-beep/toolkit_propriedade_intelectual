@@ -288,6 +288,53 @@
       .qf-review__item { break-inside: avoid; }
       @page { size: A4 portrait; margin: 1.5cm; }
     }
+  
+    .pi-brand-strip {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem 1rem;
+      background: rgba(15,23,42,.88);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 24px rgba(15,23,42,.12);
+    }
+    .pi-brand-strip__meta { display:flex; align-items:center; gap:.85rem; flex-wrap:wrap; }
+    .pi-brand-strip__eyebrow { font: 800 .72rem/1 'Poppins',sans-serif; letter-spacing:.18em; text-transform:uppercase; opacity:.72; }
+    .pi-brand-strip__title { font: 700 1rem/1.2 'Poppins',sans-serif; }
+    .pi-brand-strip__sub { font: 500 .8rem/1.2 'Inter',sans-serif; opacity:.82; }
+    .pi-brand-strip__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-brand-strip__logos img { width:34px; height:34px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; box-shadow:0 4px 14px rgba(0,0,0,.16); }
+    .pi-brand-strip__nav { display:flex; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
+    .pi-brand-pill { color:#fff; text-decoration:none; padding:.38rem .72rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); font: 600 .78rem/1 'Inter',sans-serif; }
+    .pi-brand-pill:hover { background:rgba(255,255,255,.16); }
+    .pi-footer-signature {
+      max-width: 1120px;
+      margin: 1rem auto 0;
+      padding: 1rem 1.25rem 0;
+      border-top: 1px solid rgba(148,163,184,.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font: 600 .8rem/1.4 'Inter',sans-serif;
+      color: inherit;
+      opacity: .92;
+    }
+    .pi-footer-signature__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-footer-signature__logos img { width:30px; height:30px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; }
+    @media (max-width: 920px) {
+      .pi-brand-strip { position: relative; }
+      .pi-brand-strip, .pi-footer-signature { flex-direction: column; align-items: flex-start; }
+      .pi-brand-strip__nav { justify-content:flex-start; }
+    }
+
   </style>
 </head>
 <body class="qf-page">
@@ -300,7 +347,7 @@
 
   <!-- Cover -->
   <header class="qf-cover">
-    <div class="qf-cover__overline">Fase 5 — Refletir</div>
+    <div class="qf-cover__overline">Fase 5 — Evoluir</div>
     <h1 class="qf-cover__title">Quiz Final</h1>
     <p class="qf-cover__sub">20 questões para avaliar seus conhecimentos em Propriedade Intelectual após completar o toolkit PI Thinking.</p>
     <div class="qf-cover__meta">
@@ -376,7 +423,7 @@
         <button class="qf-btn qf-btn--gold" onclick="window.print()" aria-label="Imprimir resultado">🖨️ Imprimir</button>
         <button class="qf-btn qf-btn--outline" onclick="restartQuiz()" aria-label="Refazer o quiz">🔄 Refazer</button>
         <a href="canvas-avaliacao.html" class="qf-btn qf-btn--outline">📋 Canvas de Avaliação</a>
-        <a href="pi-quest.html" class="qf-btn qf-btn--outline">🎮 PI Quest</a>
+        <a href="pi-quest.html" class="qf-btn qf-btn--outline">🎮 Jornada da PI</a>
         <a href="index.html" class="qf-btn qf-btn--outline">🏠 Toolkit</a>
       </div>
     </div>
@@ -399,9 +446,9 @@
        QUIZ FINAL — PI Thinking
        ================================================================ */
 
-    const questions = [
+    let questions = [
       {
-        id:1, phase:'Fase 1 — Sentir', icon:'👤',
+        id:1, phase:'Fase 1 — Descobrir', icon:'👤',
         text:'No Mapa de Empatia, o quadrante "O que PENSA e SENTE" refere-se a:',
         options:[
           {letter:'A',text:'O que a persona fala em público sobre PI.'},
@@ -415,7 +462,7 @@
         tool:{name:'Mapa de Empatia',url:'mapa-empatia.html'}
       },
       {
-        id:2, phase:'Fase 1 — Sentir', icon:'🎴',
+        id:2, phase:'Fase 1 — Descobrir', icon:'🎴',
         text:'Qual é o principal objetivo das Cartas Personas no toolkit PI Thinking?',
         options:[
           {letter:'A',text:'Definir os tipos de proteção de PI disponíveis.'},
@@ -425,7 +472,7 @@
         ],
         correct:'B',
         feedback:'As Cartas Personas criam <strong>empatia</strong> com perfis diversos de criadores, ajudando a entender suas dores, contextos e necessidades de proteção.',
-        legal:'Metodologia PI Thinking — Fase Sentir',
+        legal:'Metodologia PI Thinking — Fase Descobrir',
         tool:{name:'Cartas Personas',url:'cartas-personas.html'}
       },
       {
@@ -499,18 +546,18 @@
         tool:{name:'Linha do Tempo',url:'linha-do-tempo.html'}
       },
       {
-        id:8, phase:'Fase 3 — Estrategar', icon:'⚡',
-        text:'No Crazy 8s da PI, o objetivo principal é:',
+        id:8, phase:'Fase 3 — Estrategar', icon:'🧩',
+        text:'No Canvas de Estratégia de PI, qual é a principal função do bloco “Plano de ação”?',
         options:[
-          {letter:'A',text:'Escrever 8 páginas de relatório de patente.'},
-          {letter:'B',text:'Gerar 8 estratégias diferentes de proteção em 8 minutos, priorizando quantidade sobre qualidade.'},
-          {letter:'C',text:'Avaliar 8 tipos de proteção de PI.'},
-          {letter:'D',text:'Registrar 8 marcas diferentes.'}
+          {letter:'A',text:'Gerar automaticamente o número do processo no INPI.'},
+          {letter:'B',text:'Transformar a estratégia escolhida em próximos passos concretos, com responsáveis e prazos.'},
+          {letter:'C',text:'Substituir a busca de anterioridade por votação do grupo.'},
+          {letter:'D',text:'Encerrar a oficina sem necessidade de validação posterior.'}
         ],
         correct:'B',
-        feedback:'O Crazy 8s força a <strong>geração rápida de ideias</strong> — 8 estratégias em 8 minutos — priorizando quantidade e criatividade antes da avaliação.',
-        legal:'Técnica adaptada do Design Sprint (Google)',
-        tool:{name:'Crazy 8s',url:'crazy8s.html'}
+        feedback:'O <strong>Plano de ação</strong> traduz a estratégia em execução: o grupo define o que fazer, quem fará e em qual prazo, reduzindo o risco de a rota de proteção ficar apenas no discurso.',
+        legal:'Metodologia PI Thinking — Canvas de Estratégia de PI',
+        tool:{name:'Canvas de Estratégia',url:'canvas-estrategia.html'}
       },
       {
         id:9, phase:'Fase 3 — Estrategar', icon:'📐',
@@ -528,7 +575,7 @@
       },
       {
         id:10, phase:'Fase 3 — Estrategar', icon:'🎬',
-        text:'O Storyboard de Proteção serve para:',
+        text:'O Roteiro de Proteção serve para:',
         options:[
           {letter:'A',text:'Criar animações sobre PI.'},
           {letter:'B',text:'Construir uma narrativa visual passo a passo do processo de proteção, da ideia ao registro.'},
@@ -536,12 +583,12 @@
           {letter:'D',text:'Filmar o processo de depósito.'}
         ],
         correct:'B',
-        feedback:'O Storyboard cria uma <strong>narrativa visual sequencial</strong> do processo de proteção, facilitando a compreensão e o planejamento das etapas.',
+        feedback:'O Roteiro cria uma <strong>narrativa visual sequencial</strong> do processo de proteção, facilitando a compreensão e o planejamento das etapas.',
         legal:'Metodologia PI Thinking — Fase Estrategar',
-        tool:{name:'Storyboard',url:'storyboard.html'}
+        tool:{name:'Roteiro de Proteção',url:'storyboard.html'}
       },
       {
-        id:11, phase:'Fase 4 — Proteger', icon:'📋',
+        id:11, phase:'Fase 4 — Testar', icon:'📋',
         text:'No Simulador de Depósito, qual tipo de proteção tem vigência indeterminada?',
         options:[
           {letter:'A',text:'Patente de Invenção.'},
@@ -555,7 +602,7 @@
         tool:{name:'Simulador de Depósito',url:'simulador-deposito.html'}
       },
       {
-        id:12, phase:'Fase 4 — Proteger', icon:'💻',
+        id:12, phase:'Fase 4 — Testar', icon:'💻',
         text:'O registro de software no INPI protege:',
         options:[
           {letter:'A',text:'A funcionalidade e a ideia do programa.'},
@@ -569,7 +616,7 @@
         tool:{name:'Glossário',url:'glossario.html'}
       },
       {
-        id:13, phase:'Fase 4 — Proteger', icon:'💰',
+        id:13, phase:'Fase 4 — Testar', icon:'💰',
         text:'Quem tem direito ao desconto de 50% nas taxas do INPI (Portaria GM/MDIC nº 110/2025)?',
         options:[
           {letter:'A',text:'Qualquer empresa brasileira.'},
@@ -583,7 +630,7 @@
         tool:{name:'Simulador de Depósito',url:'simulador-deposito.html'}
       },
       {
-        id:14, phase:'Fase 4 — Proteger', icon:'🔒',
+        id:14, phase:'Fase 4 — Testar', icon:'🔒',
         text:'O segredo industrial (trade secret) se diferencia da patente porque:',
         options:[
           {letter:'A',text:'Tem prazo definido de 20 anos.'},
@@ -597,7 +644,7 @@
         tool:{name:'Baralho de Dilemas',url:'baralho-dilemas.html'}
       },
       {
-        id:15, phase:'Fase 5 — Refletir', icon:'🌿',
+        id:15, phase:'Fase 5 — Evoluir', icon:'🌿',
         text:'A Lei 13.123/2015 (Marco Legal da Biodiversidade) exige, para acesso a conhecimento tradicional associado:',
         options:[
           {letter:'A',text:'Apenas pagamento de royalties ao governo federal.'},
@@ -611,7 +658,7 @@
         tool:{name:'Baralho de Dilemas',url:'baralho-dilemas.html'}
       },
       {
-        id:16, phase:'Fase 5 — Refletir', icon:'⚖️',
+        id:16, phase:'Fase 5 — Evoluir', icon:'⚖️',
         text:'A licença compulsória (Art. 71, LPI) pode ser concedida quando:',
         options:[
           {letter:'A',text:'O titular não paga as anuidades.'},
@@ -667,7 +714,7 @@
         tool:{name:'Calculadora de Vigência',url:'calculadora.html'}
       },
       {
-        id:20, phase:'Fase 5 — Refletir', icon:'🎓',
+        id:20, phase:'Fase 5 — Evoluir', icon:'🎓',
         text:'O PI Thinking toolkit é baseado em qual abordagem metodológica?',
         options:[
           {letter:'A',text:'Lean Startup.'},
@@ -676,7 +723,7 @@
           {letter:'D',text:'Análise SWOT tradicional.'}
         ],
         correct:'B',
-        feedback:'O PI Thinking é baseado em <strong>Design Thinking aplicado à Propriedade Intelectual</strong>, com 5 fases: Sentir, Diagnosticar, Estrategar, Proteger e Refletir.',
+        feedback:'O PI Thinking é baseado em <strong>Design Thinking aplicado à Propriedade Intelectual</strong>, com 5 fases: Descobrir, Diagnosticar, Estrategar, Testar e Evoluir.',
         legal:'Metodologia PI Thinking — PROFNIT/UFRR',
         tool:{name:'Guia do Facilitador',url:'guia-facilitador.html'}
       }
@@ -945,6 +992,136 @@
     loadSaved();
   </script>
 
+
+<script>
+(function () {
+  var letters = ['A', 'B', 'C', 'D'];
+  var originalQuestionBank = JSON.parse(JSON.stringify(questions || []));
+
+  function shuffleArray(list) {
+    var arr = list.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function buildShuffledQuestion(question) {
+    var clone = JSON.parse(JSON.stringify(question));
+    var shuffled = shuffleArray(clone.options.map(function (opt) {
+      return { original: opt.letter, text: opt.text };
+    }));
+    clone.options = shuffled.map(function (opt, index) {
+      return { letter: letters[index], text: opt.text };
+    });
+    var correctIndex = shuffled.findIndex(function (opt) { return opt.original === clone.correct; });
+    clone.correct = letters[correctIndex];
+    return clone;
+  }
+
+  function prepareQuestionSet(saved) {
+    if (saved && Array.isArray(saved.questionSet) && saved.questionSet.length) {
+      questions = JSON.parse(JSON.stringify(saved.questionSet));
+    } else {
+      questions = shuffleArray(originalQuestionBank.map(buildShuffledQuestion));
+    }
+  }
+
+  var _startQuiz = startQuiz;
+  var _autoSave = autoSave;
+  var _endQuiz = endQuiz;
+  var _restartQuiz = restartQuiz;
+
+  startQuiz = function () {
+    prepareQuestionSet(null);
+    _startQuiz();
+  };
+
+  autoSave = function () {
+    _autoSave();
+    if (window.PIThinking && typeof window.PIThinking.saveProgress === 'function') {
+      window.PIThinking.saveProgress('quiz-final', {
+        quizName: quizName,
+        quizMode: quizMode,
+        currentQ: currentQ,
+        correctCount: correctCount,
+        wrongCount: wrongCount,
+        answers: answers,
+        timerSeconds: timerSeconds,
+        quizStarted: quizStarted,
+        questionSet: questions,
+        atualizadoEm: new Date().toISOString()
+      });
+    }
+  };
+
+  endQuiz = function () {
+    _endQuiz();
+    var pct = Math.round((correctCount / questions.length) * 100);
+    if (window.PISync && typeof window.PISync.saveQuizResult === 'function' && window.PISync.isInSession && window.PISync.isInSession()) {
+      window.PISync.saveQuizResult('quiz-final', {
+        pontuacao: correctCount,
+        percentual: pct,
+        codigo: 'F-' + correctCount,
+        respostas: answers,
+        total: questions.length,
+        nome: quizName,
+        modo: quizMode,
+        atualizadoEm: new Date().toISOString()
+      });
+    }
+    if (window.PIThinking && typeof window.PIThinking.markComplete === 'function') {
+      window.PIThinking.markComplete('quiz-final', {
+        pontuacao: correctCount,
+        percentual: pct,
+        codigo: 'F-' + correctCount,
+        respostas: answers
+      });
+    }
+  };
+
+  restartQuiz = function () {
+    if (window.PIThinking && typeof window.PIThinking.clearProgress === 'function') {
+      window.PIThinking.clearProgress('quiz-final-result');
+    }
+    _restartQuiz();
+  };
+
+  function restoreEnhancedState() {
+    if (!window.PIThinking || typeof window.PIThinking.loadProgress !== 'function') return;
+    var saved = window.PIThinking.loadProgress('quiz-final');
+    if (!saved || !saved.quizStarted) return;
+    prepareQuestionSet(saved);
+    quizName = saved.quizName || '';
+    quizMode = saved.quizMode || 'timed';
+    currentQ = saved.currentQ || 0;
+    correctCount = saved.correctCount || 0;
+    wrongCount = saved.wrongCount || 0;
+    answers = saved.answers || {};
+    timerSeconds = saved.timerSeconds || (quizMode === 'timed' ? 1800 : 0);
+    quizStarted = true;
+    var nameInput = document.getElementById('quizName');
+    if (nameInput) nameInput.value = quizName;
+    var modeSelect = document.getElementById('quizMode');
+    if (modeSelect) modeSelect.value = quizMode;
+    document.getElementById('setupSection').style.display = 'none';
+    document.getElementById('quizArea').style.display = 'block';
+    document.getElementById('resultSection').classList.remove('show');
+    document.getElementById('reviewSection').classList.remove('show');
+    document.getElementById('reviewSection').innerHTML = '';
+    if (quizMode === 'timed') startTimer(); else document.getElementById('timerDisplay').textContent = '∞';
+    renderQuestion();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(restoreEnhancedState, 0); });
+  } else {
+    setTimeout(restoreEnhancedState, 0);
+  }
+})();
+</script>
+
 <!-- PI Thinking — Tool Bridge (modo oficina) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -954,5 +1131,6 @@
 
 
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

@@ -20,7 +20,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PI Quest — PI Thinking</title>
+  <title>Jornada da PI — PI Thinking</title>
   <meta name="description" content="Jogo narrativo interativo sobre Propriedade Intelectual. Ajude um inventor a proteger sua criação em 5 capítulos baseados nas fases do PI Thinking.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -306,6 +306,53 @@
       .pq-result { border: 2px solid #d4a017; box-shadow: none; }
       @page { size: A4 portrait; margin: 1.5cm; }
     }
+  
+    .pi-brand-strip {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem 1rem;
+      background: rgba(15,23,42,.88);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 24px rgba(15,23,42,.12);
+    }
+    .pi-brand-strip__meta { display:flex; align-items:center; gap:.85rem; flex-wrap:wrap; }
+    .pi-brand-strip__eyebrow { font: 800 .72rem/1 'Poppins',sans-serif; letter-spacing:.18em; text-transform:uppercase; opacity:.72; }
+    .pi-brand-strip__title { font: 700 1rem/1.2 'Poppins',sans-serif; }
+    .pi-brand-strip__sub { font: 500 .8rem/1.2 'Inter',sans-serif; opacity:.82; }
+    .pi-brand-strip__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-brand-strip__logos img { width:34px; height:34px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; box-shadow:0 4px 14px rgba(0,0,0,.16); }
+    .pi-brand-strip__nav { display:flex; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
+    .pi-brand-pill { color:#fff; text-decoration:none; padding:.38rem .72rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); font: 600 .78rem/1 'Inter',sans-serif; }
+    .pi-brand-pill:hover { background:rgba(255,255,255,.16); }
+    .pi-footer-signature {
+      max-width: 1120px;
+      margin: 1rem auto 0;
+      padding: 1rem 1.25rem 0;
+      border-top: 1px solid rgba(148,163,184,.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font: 600 .8rem/1.4 'Inter',sans-serif;
+      color: inherit;
+      opacity: .92;
+    }
+    .pi-footer-signature__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-footer-signature__logos img { width:30px; height:30px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; }
+    @media (max-width: 920px) {
+      .pi-brand-strip { position: relative; }
+      .pi-brand-strip, .pi-footer-signature { flex-direction: column; align-items: flex-start; }
+      .pi-brand-strip__nav { justify-content:flex-start; }
+    }
+
   </style>
 </head>
 <body class="pq-page">
@@ -319,7 +366,7 @@
   <!-- Cover -->
   <header class="pq-cover">
     <div class="pq-cover__overline">Jogo Narrativo</div>
-    <h1 class="pq-cover__title">PI Quest</h1>
+    <h1 class="pq-cover__title">Jornada da PI</h1>
     <p class="pq-cover__sub">Uma aventura interativa sobre Propriedade Intelectual. Ajude a inventora Luma a proteger sua criação em 5 capítulos épicos.</p>
     <div class="pq-cover__meta">
       <span>📖 5 capítulos</span>
@@ -339,7 +386,7 @@
       <label for="heroName" class="sr-only">Nome do jogador</label>
       <input type="text" id="heroName" placeholder="Seu nome (opcional)" aria-label="Nome do jogador para personalização" maxlength="40">
       <br><br>
-      <button class="pq-btn pq-btn--primary" onclick="startGame()" aria-label="Iniciar a PI Quest">🚀 Iniciar Quest</button>
+      <button class="pq-btn pq-btn--primary" onclick="startGame()" aria-label="Iniciar a Jornada da PI">🚀 Iniciar Quest</button>
     </section>
 
     <!-- Game area -->
@@ -377,7 +424,7 @@
 
       <!-- Actions -->
       <div class="pq-actions" id="gameActions">
-        <button class="pq-btn pq-btn--danger" onclick="restartGame()" aria-label="Reiniciar a PI Quest">🔄 Reiniciar</button>
+        <button class="pq-btn pq-btn--danger" onclick="restartGame()" aria-label="Reiniciar a Jornada da PI">🔄 Reiniciar</button>
         <a href="index.html" class="pq-btn pq-btn--outline">🏠 Toolkit</a>
       </div>
     </div>
@@ -417,9 +464,9 @@
 
     // ── Story data ──
     var story = [
-      // ── CAPÍTULO 1: SENTIR ──
+      // ── CAPÍTULO 1: DESCOBRIR ──
       {
-        chapter: 1, chapterName: 'Sentir', icon: '❤️', id: 's1',
+        chapter: 1, chapterName: 'Descobrir', icon: '🧠', id: 's1',
         title: 'O Laboratório',
         narrative: 'Luma trabalha no laboratório de biotecnologia da universidade em Roraima. Após meses de pesquisa, ela desenvolveu um biossensor inovador que detecta contaminantes na água usando nanopartículas de pigmentos extraídos de plantas amazônicas. O sensor muda de cor quando identifica metais pesados. Sua orientadora, Dra. Marina, diz: "Isso pode mudar vidas nas comunidades ribeirinhas. Mas primeiro, precisamos entender quem vai usar isso e o que eles precisam."',
         question: 'Como Luma deve começar a entender seus potenciais usuários?',
@@ -442,7 +489,7 @@
         ]
       },
       {
-        chapter: 1, chapterName: 'Sentir', icon: '❤️', id: 's2',
+        chapter: 1, chapterName: 'Descobrir', icon: '🧠', id: 's2',
         title: 'A Comunidade',
         narrative: 'Luma visita a comunidade ribeirinha de São José. Dona Raimunda, líder comunitária, mostra os pontos de coleta de água e conta que as crianças frequentemente adoecem. "Se existisse um jeito simples de testar a água antes de beber...", suspira. Luma percebe que a solução dela pode ter um impacto real. Mas também descobre que a comunidade já usa um extrato de planta local para "testar" a água — um conhecimento tradicional passado por gerações.',
         question: 'Como Luma deve lidar com o conhecimento tradicional da comunidade?',
@@ -465,7 +512,7 @@
         ]
       },
       {
-        chapter: 1, chapterName: 'Sentir', icon: '❤️', id: 's3',
+        chapter: 1, chapterName: 'Descobrir', icon: '🧠', id: 's3',
         title: 'A Persona',
         narrative: 'De volta ao laboratório, Luma precisa sintetizar tudo que aprendeu sobre os possíveis usuários do biossensor. A Dra. Marina sugere criar uma persona para guiar o desenvolvimento e a estratégia de proteção.',
         question: 'Qual persona Luma deve priorizar?',
@@ -563,7 +610,7 @@
       {
         chapter: 3, chapterName: 'Estrategar', icon: '⚡', id: 'e1',
         title: 'O Brainstorm',
-        narrative: 'Luma reúne sua equipe para um Crazy 8s: 8 estratégias de proteção em 8 minutos. As ideias variam: patente nacional, PCT internacional, segredo da formulação, licenciamento social, marca forte, parceria com startup, registro de software, e proteção de cultivar para a planta fonte do pigmento.',
+        narrative: 'Luma reúne sua equipe para uma rodada guiada de priorização estratégica no Canvas de Estratégia. As ideias variam: patente nacional, PCT internacional, segredo da formulação, licenciamento social, marca forte, parceria com startup, registro de software, e proteção de cultivar para a planta fonte do pigmento.',
         question: 'Qual estratégia principal Luma deve priorizar, dado o orçamento limitado?',
         choices: [
           {
@@ -608,13 +655,13 @@
       },
       {
         chapter: 3, chapterName: 'Estrategar', icon: '⚡', id: 'e3',
-        title: 'O Storyboard',
-        narrative: 'A equipe cria um Storyboard de Proteção com 6 cenas: (1) Ideia no laboratório, (2) Busca de anterioridade, (3) Redação do pedido, (4) Depósito no INPI, (5) Publicação do artigo, (6) Licenciamento.',
+        title: 'O Roteiro de Proteção',
+        narrative: 'A equipe cria um Roteiro de Proteção com 6 cenas: (1) Ideia no laboratório, (2) Busca de anterioridade, (3) Redação do pedido, (4) Depósito no INPI, (5) Publicação do artigo, (6) Licenciamento.',
         question: 'Qual ordem é a mais estratégica para Luma?',
         choices: [
           {
             icon: '📋', text: 'Busca → Redação → Depósito → Publicação → Licenciamento. Artigo DEPOIS do depósito.',
-            points: 25, quality: 'good', item: '🎬 Storyboard',
+            points: 25, quality: 'good', item: '🎬 Roteiro de Proteção',
             feedback: 'Ordem correta! A regra de ouro: <strong>depositar ANTES de publicar</strong>. Após o depósito, Luma tem a data de prioridade garantida e pode publicar com tranquilidade.'
           },
           {
@@ -632,7 +679,7 @@
 
       // ── CAPÍTULO 4: PROTEGER ──
       {
-        chapter: 4, chapterName: 'Proteger', icon: '🛡️', id: 'p1',
+        chapter: 4, chapterName: 'Testar', icon: '🧪', id: 'p1',
         title: 'O Depósito',
         narrative: 'Chegou o dia do depósito. Carlos preparou toda a documentação: relatório descritivo, reivindicações, resumo, desenhos e o formulário do e-INPI. Luma está ansiosa. A Dra. Marina revisou e assinou como coinventora. A universidade é a titular (conforme a política de PI da ICT e a Lei de Inovação).',
         question: 'Quem deve constar como inventor e titular no pedido de patente?',
@@ -655,7 +702,7 @@
         ]
       },
       {
-        chapter: 4, chapterName: 'Proteger', icon: '🛡️', id: 'p2',
+        chapter: 4, chapterName: 'Testar', icon: '🧪', id: 'p2',
         title: 'O Software e a Marca',
         narrative: 'Após o depósito da patente, Luma registra o software embarcado do biossensor no INPI (R$92,50 com desconto de ICT) e deposita o pedido de marca "AquaGuarda" (R$177,50 com desconto). Carlos lembra: "Temos 12 meses de prioridade unionista para decidir sobre o PCT."',
         question: 'Após 6 meses, uma empresa multinacional oferece parceria para produção em escala. O que Luma deve fazer?',
@@ -680,7 +727,7 @@
 
       // ── CAPÍTULO 5: REFLETIR ──
       {
-        chapter: 5, chapterName: 'Refletir', icon: '🪞', id: 'r1',
+        chapter: 5, chapterName: 'Evoluir', icon: '📈', id: 'r1',
         title: 'O Dilema Ético',
         narrative: 'A empresa parceira sugere uma modificação: remover a referência à comunidade ribeirinha do produto e patentear a versão modificada como invenção própria em outros países. "É mais simples comercialmente", argumentam. Luma lembra do compromisso com Dona Raimunda e a comunidade.',
         question: 'O que Luma deve fazer?',
@@ -703,7 +750,7 @@
         ]
       },
       {
-        chapter: 5, chapterName: 'Refletir', icon: '🪞', id: 'r2',
+        chapter: 5, chapterName: 'Evoluir', icon: '📈', id: 'r2',
         title: 'O Legado',
         narrative: 'Dois anos depois: o AquaGuarda está em 50 comunidades ribeirinhas. A patente foi concedida. A comunidade de São José recebe royalties e virou referência em monitoramento ambiental comunitário. Luma recebeu o Prêmio Jovem Cientista. Dona Raimunda diz: "A ciência da Luma e o saber da floresta juntos. É assim que deve ser."',
         question: 'Qual é a principal lição da jornada de Luma sobre PI?',
@@ -750,11 +797,11 @@
     function renderMap() {
       var map = document.getElementById('progressMap');
       var chapters = [
-        { num: 1, icon: '❤️', name: 'Sentir' },
+        { num: 1, icon: '🧠', name: 'Descobrir' },
         { num: 2, icon: '🔍', name: 'Diagnosticar' },
         { num: 3, icon: '⚡', name: 'Estrategar' },
-        { num: 4, icon: '🛡️', name: 'Proteger' },
-        { num: 5, icon: '🪞', name: 'Refletir' }
+        { num: 4, icon: '🧪', name: 'Testar' },
+        { num: 5, icon: '📈', name: 'Evoluir' }
       ];
       var currentChapter = currentScene < story.length ? story[currentScene].chapter : 6;
       var html = '';
@@ -925,7 +972,7 @@
 
     // ── Restart ──
     function restartGame() {
-      if (!confirm('Reiniciar a PI Quest? Todo o progresso será perdido.')) return;
+      if (!confirm('Reiniciar a Jornada da PI? Todo o progresso será perdido.')) return;
       document.getElementById('gameArea').style.display = 'none';
       document.getElementById('resultSection').classList.remove('show');
       document.getElementById('startSection').style.display = 'block';
@@ -972,6 +1019,40 @@
     loadSaved();
   </script>
 
+
+<script>
+(function () {
+  var _endGame = endGame;
+  var _restartGame = restartGame;
+
+  endGame = function () {
+    _endGame();
+    var maxScore = 0;
+    story.forEach(function (scene) {
+      var best = 0;
+      scene.choices.forEach(function (choice) { if (choice.points > best) best = choice.points; });
+      maxScore += best;
+    });
+    var pct = Math.round((score / maxScore) * 100);
+    if (window.PIThinking && typeof window.PIThinking.markComplete === 'function') {
+      window.PIThinking.markComplete('pi-quest', {
+        pontuacao: score,
+        percentual: pct,
+        inventario: inventory,
+        decisoes: decisions
+      });
+    }
+  };
+
+  restartGame = function () {
+    _restartGame();
+    if (window.PIThinking && typeof window.PIThinking.clearProgress === 'function') {
+      window.PIThinking.clearProgress('pi-quest-result');
+    }
+  };
+})();
+</script>
+
 <!-- PI Thinking — Tool Bridge (modo oficina) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -980,5 +1061,6 @@
 <script src="js/tool-bridge.js"></script>
 
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

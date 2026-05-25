@@ -1,528 +1,565 @@
 /* ================================================================
-   PI THINKING — Sync Module (Firebase Realtime Database)
+   PI THINKING — Sync Module
    ================================================================
-   Responsabilidades:
-   - Conectar ao Firebase
-   - Registrar participante na oficina
-   - Enviar progresso e dados de ferramentas
-   - Enviar resultados de quizzes
-   - Ler controles do facilitador (fases liberadas)
-   - Fornecer API de escuta para o dashboard
-   
-   Dependências:
-   - Firebase SDK (compat) carregado via <script> no HTML
-   - js/firebase-config.js carregado antes deste arquivo
+   Camada de sincronização para o modo oficina.
+   - Funciona com Firebase Realtime Database quando disponível
+   - Mantém fallback local para testes e operação degradada
+   - Expõe ranking, progresso, controles do facilitador e estado do aluno
    ================================================================ */
 
-var PISync = (function () {
+(function (global) {
     'use strict';
 
-    /* ── Estado interno ── */
-    var db = null;
-    var sessionId = null;
-    var participantId = null;
-    var participantName = '';
+    var STORAGE_PREFIX = 'pi-sync';
     var initialized = false;
-    var connectionListeners = [];
+    var firebaseReady = false;
+    var db = null;
+    var app = null;
+    var sessionId = '';
+    var participantId = '';
+    var participantName = '';
+    var participantPercurso = '';
 
-    /* ══════════════════════════════════════
-       INICIALIZAÇÃO
-       ══════════════════════════════════════ */
+    var watchers = {
+        controls: [],
+        participants: [],
+        ranking: [],
+        connection: []
+    };
 
-    /**
-     * Inicializa a conexão com o Firebase.
-     * Deve ser chamado uma vez, antes de qualquer operação.
-     * @param {Object} config - Objeto FIREBASE_CONFIG
-     * @returns {Promise}
-     */
+    var firebaseSubscriptions = {
+        controls: null,
+        participants: null,
+        connection: null
+    };
+
+    function localKey() {
+        return [STORAGE_PREFIX].concat([].slice.call(arguments)).join(':');
+    }
+
+    function nowIso() {
+        return new Date().toISOString();
+    }
+
+    function readJson(key, fallback) {
+        try {
+            var raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (error) {
+            return fallback;
+        }
+    }
+
+    function writeJson(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+        return value;
+    }
+
+    function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+    }
+
+    function safeMerge(target, source) {
+        var output = Object.assign({}, target || {});
+        Object.keys(source || {}).forEach(function (key) {
+            var src = source[key];
+            var tgt = output[key];
+            if (src && typeof src === 'object' && !Array.isArray(src) && tgt && typeof tgt === 'object' && !Array.isArray(tgt)) {
+                output[key] = safeMerge(tgt, src);
+            } else {
+                output[key] = src;
+            }
+        });
+        return output;
+    }
+
+    function sanitizeSessionCode(code) {
+        return String(code || '')
+            .trim()
+            .toUpperCase()
+            .replace(/[^A-Z0-9\-]/g, '');
+    }
+
+    function generateId(prefix) {
+        return (prefix || 'pi') + '-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    }
+
+    function getDefaultControls() {
+        return {
+            fases_liberadas: [1],
+            ferramentas_liberadas: [],
+            atualizadoEm: nowIso(),
+            atualizadoPor: 'sistema'
+        };
+    }
+
+    function getCurrentSessionData() {
+        if (!sessionId) return null;
+        return readJson(localKey('session', sessionId), {
+            sessionId: sessionId,
+            controls: getDefaultControls(),
+            participants: {},
+            updatedAt: nowIso()
+        });
+    }
+
+    function saveCurrentSessionData(payload) {
+        if (!sessionId) return null;
+        var data = safeMerge(getCurrentSessionData() || {}, payload || {});
+        data.sessionId = sessionId;
+        data.updatedAt = nowIso();
+        writeJson(localKey('session', sessionId), data);
+        global.dispatchEvent(new CustomEvent('pi-sync-local-updated', {
+            detail: { sessionId: sessionId, data: data }
+        }));
+        return data;
+    }
+
+    function emitConnectionState(connected) {
+        watchers.connection.forEach(function (callback) {
+            callback(!!connected);
+        });
+    }
+
+    function setupFirebaseConnectionWatch() {
+        if (!firebaseReady || !db || firebaseSubscriptions.connection) return;
+        firebaseSubscriptions.connection = db.ref('.info/connected');
+        firebaseSubscriptions.connection.on('value', function (snapshot) {
+            emitConnectionState(snapshot.val() === true);
+        });
+    }
+
     function init(config) {
-        if (initialized) return Promise.resolve(true);
+        if (initialized) return Promise.resolve(firebaseReady);
 
         return new Promise(function (resolve) {
+            initialized = true;
             try {
-                if (typeof firebase === 'undefined') {
-                    console.warn('[PISync] Firebase SDK não carregado. Modo offline.');
+                if (typeof global.firebase === 'undefined' || !config) {
+                    firebaseReady = false;
+                    emitConnectionState(false);
                     resolve(false);
                     return;
                 }
 
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(config);
+                if (!global.firebase.apps.length) {
+                    app = global.firebase.initializeApp(config);
+                } else {
+                    app = global.firebase.app();
                 }
 
-                db = firebase.database();
-                initialized = true;
-
-                // Monitorar estado de conexão
-                db.ref('.info/connected').on('value', function (snap) {
-                    var connected = snap.val() === true;
-                    connectionListeners.forEach(function (fn) { fn(connected); });
-                });
-
-                console.log('[PISync] Firebase inicializado com sucesso.');
+                db = global.firebase.database(app);
+                firebaseReady = true;
+                setupFirebaseConnectionWatch();
                 resolve(true);
-
-            } catch (e) {
-                console.error('[PISync] Erro ao inicializar:', e);
+            } catch (error) {
+                console.warn('[PISync] Falha ao inicializar Firebase. Fallback local ativo.', error);
+                firebaseReady = false;
+                emitConnectionState(false);
                 resolve(false);
             }
         });
     }
 
-    /**
-     * Verifica se o Firebase foi inicializado com sucesso.
-     * @returns {boolean}
-     */
+    function initFromWindow() {
+        if (typeof global.getPIFirebaseConfig === 'function') {
+            return init(global.getPIFirebaseConfig());
+        }
+        return init(global.FIREBASE_CONFIG || global.PI_FIREBASE_CONFIG || null);
+    }
+
     function isOnline() {
-        return initialized && db !== null;
+        return !!firebaseReady;
     }
 
-    /**
-     * Registra listener para mudanças de conexão.
-     * @param {Function} callback - Recebe boolean (conectado/desconectado)
-     */
     function onConnectionChange(callback) {
-        connectionListeners.push(callback);
-    }
-
-    /* ══════════════════════════════════════
-       SESSÃO DO PARTICIPANTE
-       ══════════════════════════════════════ */
-
-    /**
-     * Entra em uma sessão de oficina.
-     * Registra o participante no Firebase e no localStorage.
-     * @param {string} officeCode - Código da oficina (ex: "UFRR-2026-05")
-     * @param {string} name - Nome completo do participante
-     * @param {string} percurso - Percurso selecionado ("2h", "3h", "4h")
-     * @returns {Object} { sessionId, participantId }
-     */
-    function joinSession(officeCode, name, percurso) {
-        sessionId = officeCode.toUpperCase().trim().replace(/[^A-Z0-9\-]/g, '');
-        participantName = name.trim();
-        percurso = percurso || '3h';
-
-        // Gerar ou recuperar ID único do participante
-        participantId = localStorage.getItem('pi-participant-id');
-        if (!participantId) {
-            participantId = generateId();
-            localStorage.setItem('pi-participant-id', participantId);
-        }
-
-        // Salvar no localStorage para restauração
-        localStorage.setItem('pi-session-id', sessionId);
-        localStorage.setItem('pi-participant-name', participantName);
-        localStorage.setItem('pi-percurso', percurso);
-
-        // Registrar no Firebase
-        if (isOnline()) {
-            var ref = db.ref('oficinas/' + sessionId + '/participantes/' + participantId);
-
-            ref.update({
-                nome: participantName,
-                percurso: percurso,
-                entrou_em: firebase.database.ServerValue.TIMESTAMP,
-                status: 'ativo',
-                ultimo_acesso: firebase.database.ServerValue.TIMESTAMP
-            });
-
-            // Marcar como desconectado quando sair
-            ref.child('status').onDisconnect().set('desconectado');
-            ref.child('desconectou_em').onDisconnect().set(
-                firebase.database.ServerValue.TIMESTAMP
-            );
-        }
-
-        return {
-            sessionId: sessionId,
-            participantId: participantId
+        if (typeof callback === 'function') watchers.connection.push(callback);
+        callback(isOnline());
+        return function unsubscribe() {
+            watchers.connection = watchers.connection.filter(function (fn) { return fn !== callback; });
         };
     }
 
-    /**
-     * Tenta restaurar uma sessão anterior a partir do localStorage.
-     * Útil quando o aluno recarrega a página ou volta de uma ferramenta.
-     * @returns {boolean} true se restaurou com sucesso
-     */
-    function restoreSession() {
-        var savedSession = localStorage.getItem('pi-session-id');
-        var savedId = localStorage.getItem('pi-participant-id');
-        var savedName = localStorage.getItem('pi-participant-name');
+    function setParticipantIdentity(name, percurso) {
+        participantName = String(name || participantName || '').trim();
+        participantPercurso = String(percurso || participantPercurso || '').trim();
 
-        if (!savedSession || !savedId || !savedName) return false;
-
-        sessionId = savedSession;
-        participantId = savedId;
-        participantName = savedName;
-
-        // Atualizar status no Firebase
-        if (isOnline()) {
-            var ref = db.ref('oficinas/' + sessionId + '/participantes/' + participantId);
-            ref.update({
-                status: 'ativo',
-                ultimo_acesso: firebase.database.ServerValue.TIMESTAMP
-            });
-            ref.child('status').onDisconnect().set('desconectado');
-            ref.child('desconectou_em').onDisconnect().set(
-                firebase.database.ServerValue.TIMESTAMP
-            );
-        }
-
-        return true;
+        participantId = localStorage.getItem('pi-participant-id') || generateId('participant');
+        localStorage.setItem('pi-participant-id', participantId);
+        localStorage.setItem('pi-participant-name', participantName);
+        localStorage.setItem('pi-percurso', participantPercurso);
     }
 
-    /**
-     * Verifica se o participante está em uma sessão ativa.
-     * @returns {boolean}
-     */
-    function isInSession() {
-        return !!(sessionId && participantId && participantName);
-    }
+    function joinSession(code, name, percurso, extra) {
+        sessionId = sanitizeSessionCode(code);
+        if (!sessionId) throw new Error('Código da oficina inválido.');
 
-    /**
-     * Retorna informações da sessão atual.
-     * @returns {Object}
-     */
-    function getSessionInfo() {
+        setParticipantIdentity(name, percurso || '3h');
+        localStorage.setItem('pi-session-id', sessionId);
+
+        var payload = {
+            id: participantId,
+            nome: participantName,
+            percurso: participantPercurso,
+            status: 'ativo',
+            entrouEm: nowIso(),
+            ultimoAcessoEm: nowIso(),
+            progresso: 0,
+            totalConcluidas: 0,
+            ferramentaAtual: '',
+            quiz: {},
+            toolStates: {},
+            extras: extra || {}
+        };
+
+        upsertParticipant(payload);
+        ensureControlsExists();
+        notifyControlsWatchers();
+        notifyParticipantsWatchers();
+
         return {
             sessionId: sessionId,
             participantId: participantId,
             participantName: participantName,
-            percurso: localStorage.getItem('pi-percurso') || ''
+            percurso: participantPercurso
         };
     }
 
-    /**
-     * Encerra a sessão do participante.
-     */
+    function restoreSession() {
+        var storedSession = sanitizeSessionCode(localStorage.getItem('pi-session-id') || '');
+        var storedParticipant = localStorage.getItem('pi-participant-id') || '';
+        var storedName = localStorage.getItem('pi-participant-name') || '';
+        var storedPercurso = localStorage.getItem('pi-percurso') || '';
+
+        if (!storedSession || !storedParticipant) return false;
+
+        sessionId = storedSession;
+        participantId = storedParticipant;
+        participantName = storedName;
+        participantPercurso = storedPercurso;
+
+        ensureControlsExists();
+        touchParticipant();
+        notifyControlsWatchers();
+        notifyParticipantsWatchers();
+        return true;
+    }
+
     function leaveSession() {
-        if (isOnline() && sessionId && participantId) {
-            db.ref('oficinas/' + sessionId + '/participantes/' + participantId).update({
-                status: 'saiu',
-                saiu_em: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-        sessionId = null;
-        participantId = null;
-        participantName = '';
+        if (!sessionId || !participantId) return false;
+        upsertParticipant({ status: 'desconectado', saiuEm: nowIso(), ultimoAcessoEm: nowIso() });
         localStorage.removeItem('pi-session-id');
-        localStorage.removeItem('pi-participant-id');
-        localStorage.removeItem('pi-participant-name');
-        localStorage.removeItem('pi-percurso');
-        localStorage.removeItem('pi-completed-tools');
+        sessionId = '';
+        return true;
     }
 
-    /* ══════════════════════════════════════
-       ENVIO DE DADOS (ALUNO → FIREBASE)
-       ══════════════════════════════════════ */
+    function isInSession() {
+        return !!sessionId;
+    }
 
-    /**
-     * Marca uma ferramenta como concluída e envia os dados.
-     * Esta é a função principal chamada pelo botão "Concluir e Enviar".
-     * @param {string} toolId - ID da ferramenta (ex: "quiz-diagnostico")
-     * @param {Object} data - Dados específicos da ferramenta
-     * @returns {Promise}
-     */
-    function sendToolCompletion(toolId, data) {
-        if (!toolId) return Promise.reject('toolId obrigatório');
-
-        var payload = {
-            concluido: true,
-            em: firebase.database.ServerValue.TIMESTAMP,
-            dados: data || {}
+    function getSessionMeta() {
+        return {
+            sessionId: sessionId,
+            participantId: participantId,
+            participantName: participantName,
+            percurso: participantPercurso,
+            online: isOnline()
         };
+    }
 
-        // Salvar localmente (funciona offline)
-        saveLocalCompletion(toolId, data);
+    function ensureControlsExists() {
+        var data = getCurrentSessionData();
+        if (!data) return null;
+        if (!data.controls) {
+            saveCurrentSessionData({ controls: getDefaultControls() });
+        }
+        return getControls();
+    }
 
-        // Enviar para Firebase
-        if (!isOnline() || !sessionId || !participantId) {
-            console.warn('[PISync] Offline. Dados salvos localmente.');
-            return Promise.resolve(false);
+    function getControls() {
+        var data = getCurrentSessionData();
+        return data && data.controls ? data.controls : getDefaultControls();
+    }
+
+    function setControls(controls) {
+        var next = safeMerge(getDefaultControls(), controls || {});
+        next.atualizadoEm = nowIso();
+        next.atualizadoPor = participantId || 'facilitador';
+        saveCurrentSessionData({ controls: next });
+        notifyControlsWatchers();
+
+        if (firebaseReady && db && sessionId) {
+            db.ref('oficinas/' + sessionId + '/controls').set(next);
         }
 
-        var path = 'oficinas/' + sessionId + '/participantes/' + participantId +
-                   '/ferramentas/' + toolId;
+        return next;
+    }
 
-        return db.ref(path).set(payload).then(function () {
-            console.log('[PISync] Ferramenta enviada:', toolId);
+    function setReleasedPhases(phases) {
+        return setControls({ fases_liberadas: Array.isArray(phases) ? phases.slice() : [1] });
+    }
 
-            // Atualizar último acesso
-            db.ref('oficinas/' + sessionId + '/participantes/' + participantId)
-              .child('ultimo_acesso')
-              .set(firebase.database.ServerValue.TIMESTAMP);
+    function setReleasedTools(toolIds) {
+        return setControls({ ferramentas_liberadas: Array.isArray(toolIds) ? toolIds.slice() : [] });
+    }
 
-            return true;
-        }).catch(function (e) {
-            console.error('[PISync] Erro ao enviar:', e);
-            return false;
+    function notifyControlsWatchers() {
+        var controls = getControls();
+        watchers.controls.forEach(function (callback) {
+            callback(clone(controls));
         });
     }
 
-    /**
-     * Envia resultado de quiz (diagnóstico ou final).
-     * Salva em nó separado para acesso rápido pelo dashboard/ranking.
-     * @param {string} quizType - "diagnostico" ou "final"
-     * @param {Object} result - { score, total, codigo, tempo_segundos, respostas[] }
-     * @returns {Promise}
-     */
-    function sendQuizResult(quizType, result) {
-        if (!result) return Promise.reject('result obrigatório');
-
-        // Formatar respostas com indicação de acerto
-        var respostasFormatadas = null;
-        if (result.respostas && Array.isArray(result.respostas)) {
-            respostasFormatadas = {};
-            result.respostas.forEach(function (r, i) {
-                respostasFormatadas[i] = {
-                    questao: r.questao || (i + 1),
-                    selecionada: r.selecionada || '',
-                    correta: r.correta || '',
-                    acertou: r.acertou || false
-                };
-            });
-        }
-
-        var payload = {
-            score: result.score || 0,
-            total: result.total || 0,
-            codigo: result.codigo || '',
-            tempo_segundos: result.tempo_segundos || 0,
-            concluido_em: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        if (respostasFormatadas) {
-            payload.respostas = respostasFormatadas;
-        }
-
-        // Salvar localmente
-        localStorage.setItem('pi-quiz-' + quizType, JSON.stringify(payload));
-
-        if (!isOnline() || !sessionId || !participantId) {
-            return Promise.resolve(false);
-        }
-
-        var basePath = 'oficinas/' + sessionId + '/participantes/' + participantId;
-
-        // Salvar no nó do quiz (acesso rápido para ranking)
-        var quizPromise = db.ref(basePath + '/' + quizType).set(payload);
-
-        // Também marcar a ferramenta como concluída
-        var toolId = quizType === 'diagnostico' ? 'quiz-diagnostico' : 'quiz-final';
-        var toolPromise = sendToolCompletion(toolId, {
-            score: result.score,
-            total: result.total,
-            codigo: result.codigo
-        });
-
-        return Promise.all([quizPromise, toolPromise]).then(function () {
-            return true;
-        }).catch(function (e) {
-            console.error('[PISync] Erro ao enviar quiz:', e);
-            return false;
+    function notifyParticipantsWatchers() {
+        var participants = getParticipants();
+        watchers.participants.forEach(function (callback) {
+            callback(clone(participants));
         });
     }
 
-    /* ══════════════════════════════════════
-       LEITURA DE CONTROLES DO FACILITADOR
-       ══════════════════════════════════════ */
-
-    /**
-     * Escuta as fases e ferramentas liberadas pelo facilitador.
-     * O módulo do aluno usa isso para desbloquear ferramentas.
-     * @param {Function} callback - Recebe { fases_liberadas: [], ferramentas_liberadas: [] }
-     */
     function watchControls(callback) {
-        if (!isOnline() || !sessionId) return;
+        if (typeof callback !== 'function') return function () {};
+        watchers.controls.push(callback);
+        callback(clone(getControls()));
 
-        db.ref('oficinas/' + sessionId + '/controle').on('value', function (snap) {
-            var data = snap.val() || {};
-            callback({
-                fases_liberadas: data.fases_liberadas || [],
-                ferramentas_liberadas: data.ferramentas_liberadas || []
+        if (firebaseReady && db && sessionId && !firebaseSubscriptions.controls) {
+            firebaseSubscriptions.controls = db.ref('oficinas/' + sessionId + '/controls');
+            firebaseSubscriptions.controls.on('value', function (snapshot) {
+                var value = snapshot.val() || getDefaultControls();
+                saveCurrentSessionData({ controls: value });
+                notifyControlsWatchers();
             });
-        });
-    }
+        }
 
-    /**
-     * Para de escutar controles.
-     */
-    function stopWatchingControls() {
-        if (!isOnline() || !sessionId) return;
-        db.ref('oficinas/' + sessionId + '/controle').off();
-    }
-
-    /* ══════════════════════════════════════
-       API DO DASHBOARD (FACILITADOR)
-       ══════════════════════════════════════ */
-
-    /**
-     * Cria uma nova sessão de oficina.
-     * Chamado pelo facilitador ao configurar o dashboard.
-     * @param {string} officeCode - Código da oficina
-     * @param {Object} config - { percurso, facilitador }
-     * @returns {Promise}
-     */
-    function createSession(officeCode, config) {
-        if (!isOnline()) return Promise.reject('Firebase não conectado');
-
-        var code = officeCode.toUpperCase().trim().replace(/[^A-Z0-9\-]/g, '');
-
-        return db.ref('oficinas/' + code + '/config').set({
-            percurso: config.percurso || '3h',
-            facilitador: config.facilitador || '',
-            criada_em: firebase.database.ServerValue.TIMESTAMP
-        }).then(function () {
-            // Inicializar controle
-            return db.ref('oficinas/' + code + '/controle').set({
-                fases_liberadas: [1],
-                ferramentas_liberadas: []
-            });
-        }).then(function () {
-            sessionId = code;
-            return code;
-        });
-    }
-
-    /**
-     * Escuta todos os participantes de uma oficina em tempo real.
-     * Chamado pelo dashboard para atualizar visualizações.
-     * @param {string} officeCode - Código da oficina
-     * @param {Function} callback - Recebe objeto com todos os participantes
-     */
-    function watchParticipants(officeCode, callback) {
-        if (!isOnline()) return;
-
-        var code = officeCode.toUpperCase().trim();
-        db.ref('oficinas/' + code + '/participantes').on('value', function (snap) {
-            callback(snap.val() || {});
-        });
-    }
-
-    /**
-     * Para de escutar participantes.
-     * @param {string} officeCode
-     */
-    function stopWatchingParticipants(officeCode) {
-        if (!isOnline()) return;
-        var code = officeCode.toUpperCase().trim();
-        db.ref('oficinas/' + code + '/participantes').off();
-    }
-
-    /**
-     * Libera fases para todos os participantes.
-     * @param {string} officeCode
-     * @param {number[]} phases - Array de números de fases (ex: [1, 2, 3])
-     * @returns {Promise}
-     */
-    function releasePhases(officeCode, phases) {
-        if (!isOnline()) return Promise.reject('Offline');
-        var code = officeCode.toUpperCase().trim();
-        return db.ref('oficinas/' + code + '/controle/fases_liberadas').set(phases);
-    }
-
-    /**
-     * Libera ferramentas específicas para todos os participantes.
-     * @param {string} officeCode
-     * @param {string[]} toolIds - Array de IDs de ferramentas
-     * @returns {Promise}
-     */
-    function releaseTools(officeCode, toolIds) {
-        if (!isOnline()) return Promise.reject('Offline');
-        var code = officeCode.toUpperCase().trim();
-        return db.ref('oficinas/' + code + '/controle/ferramentas_liberadas').set(toolIds);
-    }
-
-    /**
-     * Escuta a configuração de uma oficina.
-     * @param {string} officeCode
-     * @param {Function} callback
-     */
-    function watchConfig(officeCode, callback) {
-        if (!isOnline()) return;
-        var code = officeCode.toUpperCase().trim();
-        db.ref('oficinas/' + code + '/config').on('value', function (snap) {
-            callback(snap.val() || {});
-        });
-    }
-
-    /* ══════════════════════════════════════
-       UTILITÁRIOS INTERNOS
-       ══════════════════════════════════════ */
-
-    /**
-     * Gera ID único para o participante.
-     * Formato: P-timestamp36-random5
-     */
-    function generateId() {
-        return 'P-' + Date.now().toString(36) + '-' +
-               Math.random().toString(36).substr(2, 5);
-    }
-
-    /**
-     * Salva conclusão de ferramenta no localStorage.
-     * Funciona como backup offline.
-     */
-    function saveLocalCompletion(toolId, data) {
-        var completed = {};
-        try {
-            completed = JSON.parse(localStorage.getItem('pi-completed-tools') || '{}');
-        } catch (e) { completed = {}; }
-
-        completed[toolId] = {
-            concluido: true,
-            em: new Date().toISOString(),
-            dados: data || {}
+        return function stop() {
+            watchers.controls = watchers.controls.filter(function (fn) { return fn !== callback; });
         };
-
-        localStorage.setItem('pi-completed-tools', JSON.stringify(completed));
     }
 
-    /**
-     * Retorna ferramentas concluídas do localStorage.
-     * @returns {Object}
-     */
+    function stopWatchingControls() {
+        watchers.controls = [];
+        if (firebaseSubscriptions.controls) {
+            firebaseSubscriptions.controls.off();
+            firebaseSubscriptions.controls = null;
+        }
+    }
+
+    function getParticipants() {
+        var data = getCurrentSessionData();
+        return data && data.participants ? data.participants : {};
+    }
+
+    function listParticipants() {
+        var participants = getParticipants();
+        return Object.keys(participants).map(function (id) {
+            return safeMerge({ id: id }, participants[id]);
+        });
+    }
+
+    function upsertParticipant(patch) {
+        if (!sessionId || !participantId) return null;
+
+        var data = getCurrentSessionData() || saveCurrentSessionData({});
+        var current = (data.participants && data.participants[participantId]) || {};
+        var next = safeMerge(current, patch || {});
+        next.id = participantId;
+        next.nome = next.nome || participantName;
+        next.percurso = next.percurso || participantPercurso;
+        next.ultimoAcessoEm = nowIso();
+
+        data.participants = data.participants || {};
+        data.participants[participantId] = next;
+        saveCurrentSessionData({ participants: data.participants });
+
+        if (firebaseReady && db) {
+            db.ref('oficinas/' + sessionId + '/participantes/' + participantId).update(next);
+        }
+
+        return next;
+    }
+
+    function touchParticipant() {
+        if (!sessionId || !participantId) return null;
+        return upsertParticipant({ status: 'ativo', ultimoAcessoEm: nowIso() });
+    }
+
+    function watchParticipants(callback) {
+        if (typeof callback !== 'function') return function () {};
+        watchers.participants.push(callback);
+        callback(clone(getParticipants()));
+
+        if (firebaseReady && db && sessionId && !firebaseSubscriptions.participants) {
+            firebaseSubscriptions.participants = db.ref('oficinas/' + sessionId + '/participantes');
+            firebaseSubscriptions.participants.on('value', function (snapshot) {
+                saveCurrentSessionData({ participants: snapshot.val() || {} });
+                notifyParticipantsWatchers();
+            });
+        }
+
+        return function stop() {
+            watchers.participants = watchers.participants.filter(function (fn) { return fn !== callback; });
+        };
+    }
+
+    function stopWatchingParticipants() {
+        watchers.participants = [];
+        if (firebaseSubscriptions.participants) {
+            firebaseSubscriptions.participants.off();
+            firebaseSubscriptions.participants = null;
+        }
+    }
+
+    function computeProgressFromToolStates(toolStates) {
+        var keys = Object.keys(toolStates || {});
+        if (!keys.length) return { totalConcluidas: 0, progresso: 0 };
+        var concluidas = keys.filter(function (key) {
+            return !!(toolStates[key] && toolStates[key].metadados && toolStates[key].metadados.concluido);
+        }).length;
+        return {
+            totalConcluidas: concluidas,
+            progresso: concluidas > 0 ? concluidas : 0
+        };
+    }
+
+    function sendToolState(toolId, state) {
+        var id = String(toolId || '').trim();
+        if (!sessionId || !participantId || !id) return null;
+
+        var current = getParticipants()[participantId] || {};
+        var toolStates = safeMerge(current.toolStates || {}, {});
+        toolStates[id] = state;
+        var progressSummary = computeProgressFromToolStates(toolStates);
+
+        return upsertParticipant({
+            ferramentaAtual: id,
+            toolStates: toolStates,
+            totalConcluidas: progressSummary.totalConcluidas,
+            progresso: progressSummary.progresso
+        });
+    }
+
+    function sendToolReset(toolId) {
+        if (!sessionId || !participantId) return null;
+        var current = getParticipants()[participantId] || {};
+        var toolStates = safeMerge(current.toolStates || {}, {});
+        delete toolStates[String(toolId || '').trim()];
+        var progressSummary = computeProgressFromToolStates(toolStates);
+        return upsertParticipant({
+            toolStates: toolStates,
+            totalConcluidas: progressSummary.totalConcluidas,
+            progresso: progressSummary.progresso
+        });
+    }
+
+    function updateParticipantProgress(payload) {
+        if (!sessionId || !participantId) return null;
+        return upsertParticipant(payload || {});
+    }
+
+    function saveQuizResult(quizId, result) {
+        if (!sessionId || !participantId) return null;
+        var current = getParticipants()[participantId] || {};
+        var quiz = safeMerge(current.quiz || {}, {});
+        quiz[quizId] = safeMerge(quiz[quizId] || {}, result || {}, {
+            atualizadoEm: nowIso()
+        });
+        return upsertParticipant({ quiz: quiz });
+    }
+
+    function calculateEvolution(participant) {
+        var quiz = (participant && participant.quiz) || {};
+        var diagnostico = Number(quiz['quiz-diagnostico'] && quiz['quiz-diagnostico'].pontuacao) || 0;
+        var final = Number(quiz['quiz-final'] && quiz['quiz-final'].pontuacao) || 0;
+        return final - diagnostico;
+    }
+
+    function buildRanking(options) {
+        var opts = options || {};
+        var quizId = opts.quizId || '';
+        var evolution = !!opts.evolution;
+
+        return listParticipants()
+            .map(function (participant) {
+                var quiz = participant.quiz || {};
+                var value = evolution
+                    ? calculateEvolution(participant)
+                    : Number(quiz[quizId] && quiz[quizId].pontuacao) || 0;
+
+                return {
+                    id: participant.id,
+                    nome: participant.nome || 'Participante',
+                    percurso: participant.percurso || '',
+                    status: participant.status || 'ativo',
+                    pontuacao: value,
+                    percentual: quiz[quizId] && quiz[quizId].percentual,
+                    totalConcluidas: participant.totalConcluidas || 0,
+                    evolucao: calculateEvolution(participant)
+                };
+            })
+            .sort(function (a, b) {
+                if (b.pontuacao !== a.pontuacao) return b.pontuacao - a.pontuacao;
+                return (b.totalConcluidas || 0) - (a.totalConcluidas || 0);
+            })
+            .map(function (item, index) {
+                item.posicao = index + 1;
+                return item;
+            });
+    }
+
+    function watchRanking(options, callback) {
+        if (typeof callback !== 'function') return function () {};
+        var job = {
+            options: options || {},
+            callback: callback
+        };
+        watchers.ranking.push(job);
+        callback(buildRanking(job.options));
+
+        var stopParticipants = watchParticipants(function () {
+            callback(buildRanking(job.options));
+        });
+
+        return function stop() {
+            stopParticipants();
+            watchers.ranking = watchers.ranking.filter(function (entry) { return entry !== job; });
+        };
+    }
+
     function getLocalCompletions() {
-        try {
-            return JSON.parse(localStorage.getItem('pi-completed-tools') || '{}');
-        } catch (e) { return {}; }
+        var completed = readJson('pi-thinking:completed-index', {});
+        return completed || {};
     }
 
-    /* ══════════════════════════════════════
-       API PÚBLICA
-       ══════════════════════════════════════ */
-
-    return {
-        // Inicialização
+    var api = {
+        version: '3.0.0',
         init: init,
+        initFromWindow: initFromWindow,
         isOnline: isOnline,
         onConnectionChange: onConnectionChange,
-
-        // Sessão do participante
         joinSession: joinSession,
         restoreSession: restoreSession,
-        isInSession: isInSession,
-        getSessionInfo: getSessionInfo,
         leaveSession: leaveSession,
-
-        // Envio de dados (aluno)
-        sendToolCompletion: sendToolCompletion,
-        sendQuizResult: sendQuizResult,
-
-        // Leitura de controles (aluno)
+        isInSession: isInSession,
+        getSessionMeta: getSessionMeta,
+        getControls: getControls,
+        setControls: setControls,
+        setReleasedPhases: setReleasedPhases,
+        setReleasedTools: setReleasedTools,
         watchControls: watchControls,
         stopWatchingControls: stopWatchingControls,
-
-        // API do dashboard (facilitador)
-        createSession: createSession,
+        getParticipants: getParticipants,
+        listParticipants: listParticipants,
         watchParticipants: watchParticipants,
         stopWatchingParticipants: stopWatchingParticipants,
-        releasePhases: releasePhases,
-        releaseTools: releaseTools,
-        watchConfig: watchConfig,
-
-        // Utilitários
-        getLocalCompletions: getLocalCompletions
+        updateParticipantProgress: updateParticipantProgress,
+        sendToolState: sendToolState,
+        sendToolReset: sendToolReset,
+        saveQuizResult: saveQuizResult,
+        buildRanking: buildRanking,
+        watchRanking: watchRanking,
+        getLocalCompletions: getLocalCompletions,
+        calculateEvolution: calculateEvolution
     };
 
-})();
+    global.PISync = api;
+})(window);

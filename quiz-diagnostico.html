@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Diagnóstico — PI Thinking</title>
+    <meta name="description" content="Quiz Diagnóstico atualizado para o PI Thinking v3, com embaralhamento de questões e sincronização de ranking em tempo real.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -720,7 +721,54 @@
             font-size: 1rem;
         }
     }
-    </style>
+    
+    .pi-brand-strip {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem 1rem;
+      background: rgba(15,23,42,.88);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 24px rgba(15,23,42,.12);
+    }
+    .pi-brand-strip__meta { display:flex; align-items:center; gap:.85rem; flex-wrap:wrap; }
+    .pi-brand-strip__eyebrow { font: 800 .72rem/1 'Poppins',sans-serif; letter-spacing:.18em; text-transform:uppercase; opacity:.72; }
+    .pi-brand-strip__title { font: 700 1rem/1.2 'Poppins',sans-serif; }
+    .pi-brand-strip__sub { font: 500 .8rem/1.2 'Inter',sans-serif; opacity:.82; }
+    .pi-brand-strip__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-brand-strip__logos img { width:34px; height:34px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; box-shadow:0 4px 14px rgba(0,0,0,.16); }
+    .pi-brand-strip__nav { display:flex; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
+    .pi-brand-pill { color:#fff; text-decoration:none; padding:.38rem .72rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); font: 600 .78rem/1 'Inter',sans-serif; }
+    .pi-brand-pill:hover { background:rgba(255,255,255,.16); }
+    .pi-footer-signature {
+      max-width: 1120px;
+      margin: 1rem auto 0;
+      padding: 1rem 1.25rem 0;
+      border-top: 1px solid rgba(148,163,184,.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font: 600 .8rem/1.4 'Inter',sans-serif;
+      color: inherit;
+      opacity: .92;
+    }
+    .pi-footer-signature__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-footer-signature__logos img { width:30px; height:30px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; }
+    @media (max-width: 920px) {
+      .pi-brand-strip { position: relative; }
+      .pi-brand-strip, .pi-footer-signature { flex-direction: column; align-items: flex-start; }
+      .pi-brand-strip__nav { justify-content:flex-start; }
+    }
+
+  </style>
 </head>
 <body>
     <div class="reading-progress" id="readingProgress"></div>
@@ -1232,6 +1280,184 @@
     }
     </script>
 
+
+<script>
+(function () {
+  var letters = ['A', 'B', 'C', 'D'];
+  var originalQuestionBank = JSON.parse(JSON.stringify(questions || []));
+  var diagnosticReady = false;
+
+  function shuffleArray(list) {
+    var arr = list.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function buildShuffledQuestion(question) {
+    var clone = JSON.parse(JSON.stringify(question));
+    var shuffled = shuffleArray(clone.options.map(function (opt) {
+      return { original: opt.letter, text: opt.text };
+    }));
+    clone.options = shuffled.map(function (opt, index) {
+      return { letter: letters[index], text: opt.text };
+    });
+    var correctIndex = shuffled.findIndex(function (opt) { return opt.original === clone.correct; });
+    clone.correct = letters[correctIndex];
+    return clone;
+  }
+
+  function prepareQuestionSet(saved) {
+    if (saved && Array.isArray(saved.questionSet) && saved.questionSet.length) {
+      questions = JSON.parse(JSON.stringify(saved.questionSet));
+    } else {
+      questions = shuffleArray(originalQuestionBank.map(buildShuffledQuestion));
+    }
+  }
+
+  function resetStateFromQuestions() {
+    answered = 0;
+    score = 0;
+    answers = {};
+    Object.keys(categories).forEach(function (key) {
+      categories[key].total = 0;
+      categories[key].correct = 0;
+    });
+    questions.forEach(function (q) {
+      if (categories[q.category]) categories[q.category].total++;
+    });
+  }
+
+  function enableFinishIfReady() {
+    if (answered === questions.length) {
+      document.getElementById('finishBtn').disabled = false;
+      document.getElementById('finishHint').textContent = 'Todas as questões respondidas. Clique para ver seu resultado!';
+    }
+  }
+
+  function persistDiagnostic(finalizado) {
+    if (typeof window.PIThinking === 'undefined' || !window.PIThinking.saveProgress) return;
+    window.PIThinking.saveProgress('quiz-diagnostico', {
+      quizStarted: document.getElementById('startScreen').style.display === 'none',
+      questionSet: questions,
+      answers: answers,
+      answered: answered,
+      score: score,
+      categories: categories,
+      finalizado: !!finalizado,
+      codigo: 'D-' + score,
+      percentual: questions.length ? Math.round((score / questions.length) * 100) : 0,
+      atualizadoEm: new Date().toISOString()
+    });
+  }
+
+  function restoreAnswerUI(qId, letter) {
+    var q = questions.find(function (item) { return item.id === qId; });
+    if (!q) return;
+    var isCorrect = letter === q.correct;
+    answers[qId] = letter;
+    answered += 1;
+    if (isCorrect) {
+      score += 1;
+      if (categories[q.category]) categories[q.category].correct += 1;
+    }
+    var allOptions = document.querySelectorAll('#options-' + qId + ' .q-option');
+    allOptions.forEach(function (opt) {
+      opt.classList.add('disabled');
+      opt.setAttribute('tabindex', '-1');
+      if (opt.dataset.letter === q.correct) {
+        opt.classList.add('correct');
+        opt.querySelector('.q-option__icon').textContent = '✓';
+      }
+      if (opt.dataset.letter === letter && !isCorrect) {
+        opt.classList.add('wrong');
+        opt.querySelector('.q-option__icon').textContent = '✗';
+      }
+    });
+    var explanation = document.getElementById('explanation-' + qId);
+    explanation.classList.add('visible');
+    explanation.classList.add(isCorrect ? 'q-explanation--correct' : 'q-explanation--wrong');
+    explanation.querySelector('.q-explanation__title').textContent = isCorrect ? '✅ Correto!' : '❌ Incorreto — veja o comentário:';
+    document.getElementById('qcard-' + qId).classList.add('q-card--answered');
+  }
+
+  var _startQuiz = startQuiz;
+  var _selectOption = selectOption;
+  var _showResults = showResults;
+  var _restartQuiz = restartQuiz;
+
+  startQuiz = function (savedState) {
+    prepareQuestionSet(savedState || null);
+    resetStateFromQuestions();
+    _startQuiz();
+    if (savedState && savedState.answers) {
+      Object.keys(savedState.answers).forEach(function (key) {
+        restoreAnswerUI(Number(key), savedState.answers[key]);
+      });
+      updateProgress();
+      enableFinishIfReady();
+    } else {
+      updateProgress();
+      persistDiagnostic(false);
+    }
+    diagnosticReady = true;
+  };
+
+  selectOption = function (el) {
+    _selectOption(el);
+    persistDiagnostic(false);
+  };
+
+  showResults = function () {
+    _showResults();
+    var percentual = questions.length ? Math.round((score / questions.length) * 100) : 0;
+    if (window.PISync && typeof window.PISync.saveQuizResult === 'function' && window.PISync.isInSession && window.PISync.isInSession()) {
+      window.PISync.saveQuizResult('quiz-diagnostico', {
+        pontuacao: score,
+        percentual: percentual,
+        codigo: 'D-' + score,
+        respostas: answers,
+        total: questions.length,
+        atualizadoEm: new Date().toISOString()
+      });
+    }
+    if (window.PIThinking && typeof window.PIThinking.markComplete === 'function') {
+      window.PIThinking.markComplete('quiz-diagnostico', {
+        pontuacao: score,
+        percentual: percentual,
+        codigo: 'D-' + score,
+        respostas: answers
+      });
+    }
+    persistDiagnostic(true);
+  };
+
+  restartQuiz = function () {
+    if (window.PIThinking && typeof window.PIThinking.clearProgress === 'function') {
+      window.PIThinking.clearProgress('quiz-diagnostico');
+    }
+    diagnosticReady = false;
+    _restartQuiz();
+  };
+
+  function restoreSavedDiagnostic() {
+    if (!window.PIThinking || typeof window.PIThinking.loadProgress !== 'function' || diagnosticReady) return;
+    var saved = window.PIThinking.loadProgress('quiz-diagnostico');
+    if (saved && saved.quizStarted && !saved.finalizado) {
+      startQuiz(saved);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', restoreSavedDiagnostic);
+  } else {
+    setTimeout(restoreSavedDiagnostic, 0);
+  }
+})();
+</script>
+
 <!-- PI Thinking — Tool Bridge (modo oficina) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1241,5 +1467,6 @@
 
 
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

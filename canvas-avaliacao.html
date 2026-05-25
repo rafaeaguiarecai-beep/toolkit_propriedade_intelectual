@@ -144,11 +144,11 @@
       font-size: .72rem; font-weight: 600; text-transform: uppercase;
       letter-spacing: 1px; padding: .15rem .5rem; border-radius: 10px;
     }
-    .ca-phase__tag--sentir { background: var(--ca-red-bg); color: var(--ca-red); }
+    .ca-phase__tag--descobrir { background: var(--ca-red-bg); color: var(--ca-red); }
     .ca-phase__tag--diagnosticar { background: var(--ca-blue-bg); color: var(--ca-blue); }
     .ca-phase__tag--estrategar { background: var(--ca-orange-bg); color: var(--ca-orange); }
-    .ca-phase__tag--proteger { background: var(--ca-purple-bg); color: var(--ca-purple); }
-    .ca-phase__tag--refletir { background: var(--ca-accent-bg); color: var(--ca-accent); }
+    .ca-phase__tag--testar { background: var(--ca-purple-bg); color: var(--ca-purple); }
+    .ca-phase__tag--evoluir { background: var(--ca-accent-bg); color: var(--ca-accent); }
 
     .ca-phase__tools {
       font-size: .82rem; color: var(--ca-text-light); margin-bottom: .8rem;
@@ -206,11 +206,11 @@
       padding-right: .5rem; font-family: 'Poppins', sans-serif;
       font-size: .75rem; font-weight: 700; color: #fff;
     }
-    .ca-chart__fill--sentir { background: linear-gradient(90deg, #EF5350, #E53935); }
+    .ca-chart__fill--descobrir { background: linear-gradient(90deg, #EF5350, #E53935); }
     .ca-chart__fill--diagnosticar { background: linear-gradient(90deg, #42A5F5, #1E88E5); }
     .ca-chart__fill--estrategar { background: linear-gradient(90deg, #FFA726, #F57C00); }
-    .ca-chart__fill--proteger { background: linear-gradient(90deg, #AB47BC, #7B1FA2); }
-    .ca-chart__fill--refletir { background: linear-gradient(90deg, #66BB6A, #388E3C); }
+    .ca-chart__fill--testar { background: linear-gradient(90deg, #AB47BC, #7B1FA2); }
+    .ca-chart__fill--evoluir { background: linear-gradient(90deg, #66BB6A, #388E3C); }
     .ca-chart__value {
       font-family: 'Poppins', sans-serif; font-weight: 700; font-size: .85rem;
       min-width: 40px;
@@ -279,6 +279,53 @@
       .ca-section { box-shadow: none; border: 1px solid #ccc; }
       @page { size: A4 portrait; margin: 1.5cm; }
     }
+  
+    .pi-brand-strip {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem 1rem;
+      background: rgba(15,23,42,.88);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 24px rgba(15,23,42,.12);
+    }
+    .pi-brand-strip__meta { display:flex; align-items:center; gap:.85rem; flex-wrap:wrap; }
+    .pi-brand-strip__eyebrow { font: 800 .72rem/1 'Poppins',sans-serif; letter-spacing:.18em; text-transform:uppercase; opacity:.72; }
+    .pi-brand-strip__title { font: 700 1rem/1.2 'Poppins',sans-serif; }
+    .pi-brand-strip__sub { font: 500 .8rem/1.2 'Inter',sans-serif; opacity:.82; }
+    .pi-brand-strip__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-brand-strip__logos img { width:34px; height:34px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; box-shadow:0 4px 14px rgba(0,0,0,.16); }
+    .pi-brand-strip__nav { display:flex; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
+    .pi-brand-pill { color:#fff; text-decoration:none; padding:.38rem .72rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); font: 600 .78rem/1 'Inter',sans-serif; }
+    .pi-brand-pill:hover { background:rgba(255,255,255,.16); }
+    .pi-footer-signature {
+      max-width: 1120px;
+      margin: 1rem auto 0;
+      padding: 1rem 1.25rem 0;
+      border-top: 1px solid rgba(148,163,184,.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font: 600 .8rem/1.4 'Inter',sans-serif;
+      color: inherit;
+      opacity: .92;
+    }
+    .pi-footer-signature__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-footer-signature__logos img { width:30px; height:30px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; }
+    @media (max-width: 920px) {
+      .pi-brand-strip { position: relative; }
+      .pi-brand-strip, .pi-footer-signature { flex-direction: column; align-items: flex-start; }
+      .pi-brand-strip__nav { justify-content:flex-start; }
+    }
+
   </style>
 </head>
 <body class="ca-page">
@@ -291,7 +338,7 @@
 
   <!-- Cover -->
   <header class="ca-cover">
-    <div class="ca-cover__overline">Fase 5 — Refletir</div>
+    <div class="ca-cover__overline">Fase 5 — Evoluir</div>
     <h1 class="ca-cover__title">Canvas de Avaliação</h1>
     <p class="ca-cover__sub">Avalie seu percurso nas 5 fases do PI Thinking. Identifique pontos fortes, oportunidades de melhoria e defina próximos passos.</p>
     <div class="ca-cover__meta">
@@ -358,7 +405,7 @@
       <button class="ca-btn ca-btn--outline" onclick="window.print()" aria-label="Imprimir canvas de avaliação">🖨️ Imprimir</button>
       <button class="ca-btn ca-btn--danger" onclick="clearCanvas()" aria-label="Limpar todo o canvas de avaliação">🗑️ Limpar</button>
       <a href="quiz-final.html" class="ca-btn ca-btn--outline">🏆 Quiz Final</a>
-      <a href="pi-quest.html" class="ca-btn ca-btn--outline">🎮 PI Quest</a>
+      <a href="pi-quest.html" class="ca-btn ca-btn--outline">🎮 Jornada da PI</a>
       <a href="index.html" class="ca-btn ca-btn--outline">🏠 Toolkit</a>
     </div>
 
@@ -382,8 +429,8 @@
 
     var phases = [
       {
-        id: 'sentir', name: 'Fase 1 — Sentir', icon: '❤️', tag: 'sentir',
-        desc: 'Empatia com criadores e suas dores de PI.',
+        id: 'descobrir', name: 'Fase 1 — Descobrir', icon: '🧠', tag: 'descobrir',
+        desc: 'Compreensão inicial da criação, do contexto e das pessoas envolvidas.',
         tools: [
           { name: 'Cartas Personas', url: 'cartas-personas.html' },
           { name: 'Mapa de Empatia', url: 'mapa-empatia.html' },
@@ -399,33 +446,33 @@
           { name: 'Calculadora de Vigência', url: 'calculadora.html' },
           { name: 'Linha do Tempo', url: 'linha-do-tempo.html' },
           { name: 'Glossário', url: 'glossario.html' },
-          { name: 'Busca de Anterioridade', url: 'busca.html' }
+          { name: 'Painel de Busca Guiada', url: 'busca.html' }
         ]
       },
       {
         id: 'estrategar', name: 'Fase 3 — Estrategar', icon: '⚡', tag: 'estrategar',
-        desc: 'Geração e seleção de estratégias de proteção.',
+        desc: 'Exploração de rotas, referências e estratégias de proteção intelectual.',
         tools: [
-          { name: 'Crazy 8s', url: 'crazy8s.html' },
-          { name: 'Storyboard', url: 'storyboard.html' },
+          { name: 'Painel de Busca Guiada', url: 'busca.html' },
+          { name: 'Roteiro de Proteção', url: 'storyboard.html' },
           { name: 'Canvas de Estratégia', url: 'canvas-estrategia.html' }
         ]
       },
       {
-        id: 'proteger', name: 'Fase 4 — Proteger', icon: '🛡️', tag: 'proteger',
-        desc: 'Simulação e planejamento do depósito real.',
+        id: 'testar', name: 'Fase 4 — Testar', icon: '🧪', tag: 'testar',
+        desc: 'Validação da estratégia escolhida com simulações, cálculos e decisões críticas.',
         tools: [
           { name: 'Simulador de Depósito', url: 'simulador-deposito.html' }
         ]
       },
       {
-        id: 'refletir', name: 'Fase 5 — Refletir', icon: '🪞', tag: 'refletir',
-        desc: 'Debate ético, avaliação e consolidação de conhecimentos.',
+        id: 'evoluir', name: 'Fase 5 — Evoluir', icon: '📈', tag: 'evoluir',
+        desc: 'Síntese da aprendizagem, avaliação crítica e planejamento dos próximos passos.',
         tools: [
           { name: 'Baralho de Dilemas', url: 'baralho-dilemas.html' },
           { name: 'Escape Room', url: 'escape-room.html' },
           { name: 'Quiz Final', url: 'quiz-final.html' },
-          { name: 'PI Quest', url: 'pi-quest.html' }
+          { name: 'Jornada da PI', url: 'pi-quest.html' }
         ]
       }
     ];
@@ -530,7 +577,7 @@
         if (r > 0) { total += r; count++; }
 
         html += '<div class="ca-chart__bar">';
-        html += '<div class="ca-chart__label">' + phase.icon + ' ' + phase.tag.charAt(0).toUpperCase() + phase.tag.slice(1) + '</div>';
+        html += '<div class="ca-chart__label">' + phase.icon + ' ' + phase.name.replace(/^Fase \d+ — /, "") + '</div>';
         html += '<div class="ca-chart__track">';
         html += '<div class="ca-chart__fill ca-chart__fill--' + phase.tag + '" style="width:' + pct + '%">';
         html += r > 0 ? r + '/5' : '';
@@ -668,5 +715,6 @@
 <script src="js/tool-bridge.js"></script>
 
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

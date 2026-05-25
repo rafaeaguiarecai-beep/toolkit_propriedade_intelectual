@@ -1,383 +1,303 @@
 /* ================================================================
    PI THINKING — Aluno Engine
    ================================================================
-   Responsabilidades:
-   - Definir os percursos (2h, 3h, 4h) com ferramentas ordenadas
-   - Controlar progressão (desbloqueio por conclusão)
-   - Integrar com controles do facilitador (desbloqueio remoto)
-   - Fornecer estado completo para renderização da UI
-   
-   Dependências:
-   - js/sync.js (para leitura de controles do facilitador)
+   Motor do módulo do aluno.
+   - Usa PIConfig como fonte única de dados
+   - Usa PIToolBridge para persistência local
+   - Usa PISync para modo oficina quando disponível
    ================================================================ */
 
-var AlunoEngine = (function () {
+(function (global) {
     'use strict';
 
-    /* ══════════════════════════════════════
-       DEFINIÇÃO DOS PERCURSOS
-       ══════════════════════════════════════ */
-
-    var PERCURSOS = {
-        '2h': {
-            nome: 'Compacto',
-            descricao: '8 ferramentas essenciais — 2 horas',
-            ferramentas: [
-                { id: 'quiz-diagnostico',   nome: 'Quiz Diagnóstico',      fase: 1, tipo: 'essencial',    url: 'quiz-diagnostico.html',   icone: '📋', duracao: '10 min' },
-                { id: 'cartas-personas',     nome: 'Cartas Personas',       fase: 1, tipo: 'essencial',    url: 'cartas-personas.html',    icone: '🃏', duracao: '10 min' },
-                { id: 'canvas-diagnostico',  nome: 'Canvas de Diagnóstico', fase: 2, tipo: 'essencial',    url: 'canvas-diagnostico.html', icone: '📐', duracao: '15 min' },
-                { id: 'arvore',              nome: 'Árvore de Decisão',     fase: 2, tipo: 'essencial',    url: 'arvore.html',             icone: '🌳', duracao: '10 min' },
-                { id: 'canvas-estrategia',   nome: 'Canvas de Estratégia',  fase: 3, tipo: 'essencial',    url: 'canvas-estrategia.html',  icone: '📐', duracao: '15 min' },
-                { id: 'simulador-deposito',  nome: 'Simulador de Depósito', fase: 4, tipo: 'essencial',    url: 'simulador-deposito.html', icone: '📝', duracao: '20 min' },
-                { id: 'baralho-dilemas',     nome: 'Baralho de Dilemas',    fase: 4, tipo: 'essencial',    url: 'baralho-dilemas.html',    icone: '🃏', duracao: '10 min' },
-                { id: 'quiz-final',          nome: 'Quiz Final',            fase: 5, tipo: 'essencial',    url: 'quiz-final.html',         icone: '🏆', duracao: '15 min' }
-            ]
-        },
-        '3h': {
-            nome: 'Padrão',
-            descricao: '12 ferramentas (essenciais + recomendadas) — 3 horas',
-            ferramentas: [
-                { id: 'quiz-diagnostico',   nome: 'Quiz Diagnóstico',      fase: 1, tipo: 'essencial',    url: 'quiz-diagnostico.html',   icone: '📋', duracao: '10 min' },
-                { id: 'cartas-personas',     nome: 'Cartas Personas',       fase: 1, tipo: 'essencial',    url: 'cartas-personas.html',    icone: '🃏', duracao: '15 min' },
-                { id: 'mapa-empatia',        nome: 'Mapa de Empatia',       fase: 1, tipo: 'recomendada',  url: 'mapa-empatia.html',       icone: '🗺️', duracao: '15 min' },
-                { id: 'canvas-diagnostico',  nome: 'Canvas de Diagnóstico', fase: 2, tipo: 'essencial',    url: 'canvas-diagnostico.html', icone: '📐', duracao: '15 min' },
-                { id: 'arvore',              nome: 'Árvore de Decisão',     fase: 2, tipo: 'essencial',    url: 'arvore.html',             icone: '🌳', duracao: '10 min' },
-                { id: 'crazy8s',             nome: 'Crazy 8s da PI',        fase: 3, tipo: 'recomendada',  url: 'crazy8s.html',            icone: '⚡', duracao: '15 min' },
-                { id: 'canvas-estrategia',   nome: 'Canvas de Estratégia',  fase: 3, tipo: 'essencial',    url: 'canvas-estrategia.html',  icone: '📐', duracao: '15 min' },
-                { id: 'storyboard',          nome: 'Storyboard',            fase: 3, tipo: 'recomendada',  url: 'storyboard.html',         icone: '🎬', duracao: '15 min' },
-                { id: 'simulador-deposito',  nome: 'Simulador de Depósito', fase: 4, tipo: 'essencial',    url: 'simulador-deposito.html', icone: '📝', duracao: '20 min' },
-                { id: 'baralho-dilemas',     nome: 'Baralho de Dilemas',    fase: 4, tipo: 'essencial',    url: 'baralho-dilemas.html',    icone: '🃏', duracao: '15 min' },
-                { id: 'quiz-final',          nome: 'Quiz Final',            fase: 5, tipo: 'essencial',    url: 'quiz-final.html',         icone: '🏆', duracao: '10 min' },
-                { id: 'canvas-avaliacao',    nome: 'Canvas de Avaliação',   fase: 5, tipo: 'recomendada',  url: 'canvas-avaliacao.html',   icone: '📊', duracao: '10 min' }
-            ]
-        },
-        '4h': {
-            nome: 'Completo',
-            descricao: 'Todas as 16 ferramentas — 4 horas',
-            ferramentas: [
-                { id: 'quiz-diagnostico',   nome: 'Quiz Diagnóstico',      fase: 1, tipo: 'essencial',    url: 'quiz-diagnostico.html',   icone: '📋', duracao: '15 min' },
-                { id: 'cartas-personas',     nome: 'Cartas Personas',       fase: 1, tipo: 'essencial',    url: 'cartas-personas.html',    icone: '🃏', duracao: '15 min' },
-                { id: 'mapa-empatia',        nome: 'Mapa de Empatia',       fase: 1, tipo: 'recomendada',  url: 'mapa-empatia.html',       icone: '🗺️', duracao: '15 min' },
-                { id: 'canvas-diagnostico',  nome: 'Canvas de Diagnóstico', fase: 2, tipo: 'essencial',    url: 'canvas-diagnostico.html', icone: '📐', duracao: '15 min' },
-                { id: 'linha-do-tempo',      nome: 'Linha do Tempo',        fase: 2, tipo: 'opcional',     url: 'linha-do-tempo.html',     icone: '📅', duracao: '10 min' },
-                { id: 'arvore',              nome: 'Árvore de Decisão',     fase: 2, tipo: 'essencial',    url: 'arvore.html',             icone: '🌳', duracao: '15 min' },
-                { id: 'crazy8s',             nome: 'Crazy 8s da PI',        fase: 3, tipo: 'recomendada',  url: 'crazy8s.html',            icone: '⚡', duracao: '15 min' },
-                { id: 'storyboard',          nome: 'Storyboard',            fase: 3, tipo: 'recomendada',  url: 'storyboard.html',         icone: '🎬', duracao: '15 min' },
-                { id: 'canvas-estrategia',   nome: 'Canvas de Estratégia',  fase: 3, tipo: 'essencial',    url: 'canvas-estrategia.html',  icone: '📐', duracao: '15 min' },
-                { id: 'simulador-deposito',  nome: 'Simulador de Depósito', fase: 4, tipo: 'essencial',    url: 'simulador-deposito.html', icone: '📝', duracao: '30 min' },
-                { id: 'baralho-dilemas',     nome: 'Baralho de Dilemas',    fase: 4, tipo: 'essencial',    url: 'baralho-dilemas.html',    icone: '🃏', duracao: '15 min' },
-                { id: 'escape-room',         nome: 'Escape Room',           fase: 4, tipo: 'opcional',     url: 'escape-room.html',        icone: '🔐', duracao: '15 min' },
-                { id: 'pi-quest',            nome: 'PI Quest',              fase: 5, tipo: 'opcional',     url: 'pi-quest.html',           icone: '🎲', duracao: '15 min' },
-                { id: 'quiz-final',          nome: 'Quiz Final',            fase: 5, tipo: 'essencial',    url: 'quiz-final.html',         icone: '🏆', duracao: '15 min' },
-                { id: 'canvas-avaliacao',    nome: 'Canvas de Avaliação',   fase: 5, tipo: 'recomendada',  url: 'canvas-avaliacao.html',   icone: '📊', duracao: '10 min' }
-            ]
+    var state = {
+        percursoKey: '',
+        percurso: null,
+        ferramentas: [],
+        completions: {},
+        controls: {
+            fases_liberadas: [1],
+            ferramentas_liberadas: []
         }
     };
 
-    var FASES = [
-        { num: 1, nome: 'Descobrir',    icone: '🧠', cor: '#E91E63' },
-        { num: 2, nome: 'Diagnosticar', icone: '🔍', cor: '#FF9800' },
-        { num: 3, nome: 'Estrategar',   icone: '🚀', cor: '#2196F3' },
-        { num: 4, nome: 'Prototipar',   icone: '🛠️', cor: '#9C27B0' },
-        { num: 5, nome: 'Evoluir',      icone: '📈', cor: '#4CAF50' }
-    ];
+    var subscribers = [];
+    var stopControlsWatcher = null;
 
-    var APOIO = [
-        { id: 'glossario',    nome: 'Glossário Dinâmico',      url: 'glossario.html',    icone: '📖' },
-        { id: 'calculadora',  nome: 'Calculadora de Vigência',  url: 'calculadora.html',  icone: '📅' },
-        { id: 'busca',        nome: 'Busca de Anterioridade',   url: 'busca.html',        icone: '🔍' }
-    ];
-
-    /* ── Estado ── */
-    var currentPercurso = null;
-    var currentPercursoKey = null;
-    var completedTools = {};
-    var facilitatorControls = {
-        fases_liberadas: [1],
-        ferramentas_liberadas: []
-    };
-
-    /* ══════════════════════════════════════
-       INICIALIZAÇÃO E RESTAURAÇÃO
-       ══════════════════════════════════════ */
-
-    /**
-     * Inicializa com um percurso específico.
-     * @param {string} percursoKey - "2h", "3h" ou "4h"
-     * @returns {Object|null} O percurso ou null se inválido
-     */
-    function init(percursoKey) {
-        if (!PERCURSOS[percursoKey]) {
-            console.error('[AlunoEngine] Percurso inválido:', percursoKey);
-            return null;
-        }
-
-        currentPercursoKey = percursoKey;
-        currentPercurso = PERCURSOS[percursoKey];
-        localStorage.setItem('pi-percurso', percursoKey);
-
-        // Carregar conclusões locais
-        loadLocalCompletions();
-
-        // Começar a escutar controles do facilitador
-        startWatchingControls();
-
-        return currentPercurso;
+    function clone(value) {
+        return JSON.parse(JSON.stringify(value));
     }
 
-    /**
-     * Restaura sessão anterior.
-     * @returns {Object|null}
-     */
-    function restore() {
-        var key = localStorage.getItem('pi-percurso');
-        if (key && PERCURSOS[key]) {
-            return init(key);
+    function normalizeId(id) {
+        return global.PIConfig && typeof global.PIConfig.normalizeId === 'function'
+            ? global.PIConfig.normalizeId(id)
+            : String(id || '').trim().replace(/\.html$/i, '').toLowerCase();
+    }
+
+    function notify() {
+        var snapshot = getState();
+        subscribers.forEach(function (callback) {
+            callback(snapshot);
+        });
+        global.dispatchEvent(new CustomEvent('pi-aluno-engine-updated', {
+            detail: snapshot
+        }));
+    }
+
+    function loadCompletions() {
+        var localIndex = global.PIToolBridge && typeof global.PIToolBridge.getCompletedIndex === 'function'
+            ? global.PIToolBridge.getCompletedIndex()
+            : {};
+
+        if (global.PISync && typeof global.PISync.getLocalCompletions === 'function') {
+            state.completions = Object.assign({}, global.PISync.getLocalCompletions(), localIndex);
+        } else {
+            state.completions = Object.assign({}, localIndex);
+        }
+    }
+
+    function resolvePercurso(percursoKey) {
+        var key = percursoKey || localStorage.getItem('pi-percurso') || '3h';
+        var percurso = global.PIConfig && typeof global.PIConfig.buildPercurso === 'function'
+            ? global.PIConfig.buildPercurso(key)
+            : null;
+
+        if (!percurso) {
+            key = '3h';
+            percurso = global.PIConfig.buildPercurso('3h');
+        }
+
+        state.percursoKey = key;
+        state.percurso = percurso;
+        state.ferramentas = percurso ? percurso.ferramentasDetalhadas.slice() : [];
+        localStorage.setItem('pi-percurso', key);
+    }
+
+    function isCompleted(toolId) {
+        var id = normalizeId(toolId);
+        return !!(state.completions[id] && state.completions[id].concluido);
+    }
+
+    function getLastCompletedIndex() {
+        var last = -1;
+        state.ferramentas.forEach(function (tool, index) {
+            if (isCompleted(tool.id)) last = index;
+        });
+        return last;
+    }
+
+    function isPhaseReleased(phaseNumber) {
+        return state.controls.fases_liberadas.indexOf(Number(phaseNumber)) !== -1;
+    }
+
+    function isToolReleased(toolId) {
+        return state.controls.ferramentas_liberadas.indexOf(normalizeId(toolId)) !== -1;
+    }
+
+    function isUnlocked(index) {
+        var tool = state.ferramentas[index];
+        if (!tool) return false;
+        if (index === 0) return true;
+        if (isCompleted(tool.id)) return true;
+        if (isToolReleased(tool.id)) return true;
+        if (isPhaseReleased(tool.fase)) return true;
+        var previous = state.ferramentas[index - 1];
+        return !!(previous && isCompleted(previous.id));
+    }
+
+    function computeFerramentas() {
+        return state.ferramentas.map(function (tool, index) {
+            var unlocked = isUnlocked(index);
+            var completed = isCompleted(tool.id);
+            var prevNext = global.PIConfig && typeof global.PIConfig.getPrevNext === 'function'
+                ? global.PIConfig.getPrevNext(tool.id, state.percursoKey)
+                : { anterior: null, proxima: null };
+
+            return Object.assign({}, tool, {
+                indice: index,
+                concluida: completed,
+                desbloqueada: unlocked,
+                bloqueada: !unlocked,
+                anterior: prevNext.anterior,
+                proxima: prevNext.proxima
+            });
+        });
+    }
+
+    function getCurrentPhase(ferramentas) {
+        var list = ferramentas || computeFerramentas();
+        var nextOpen = list.find(function (tool) {
+            return tool.desbloqueada && !tool.concluida;
+        });
+        if (nextOpen) return nextOpen.fase;
+        var lastCompletedIndex = getLastCompletedIndex();
+        if (lastCompletedIndex >= 0) {
+            return list[lastCompletedIndex] ? list[lastCompletedIndex].fase : 1;
+        }
+        return 1;
+    }
+
+    function getProximaFerramenta(ferramentas) {
+        var list = ferramentas || computeFerramentas();
+        for (var i = 0; i < list.length; i += 1) {
+            if (list[i].desbloqueada && !list[i].concluida) return list[i];
         }
         return null;
     }
 
-    /* ══════════════════════════════════════
-       CONTROLE DE PROGRESSÃO
-       ══════════════════════════════════════ */
-
-    /**
-     * Marca ferramenta como concluída localmente.
-     * O envio ao Firebase é feito pelo sync.js separadamente.
-     * @param {string} toolId
-     */
-    function completeTool(toolId) {
-        completedTools[toolId] = {
-            concluido: true,
-            em: new Date().toISOString()
-        };
-        saveLocalCompletions();
+    function getJornadaDisponivel(ferramentas) {
+        var list = ferramentas || computeFerramentas();
+        if (!list.length) return false;
+        return list.every(function (tool) { return tool.concluida; });
     }
 
-    /**
-     * Verifica se uma ferramenta está concluída.
-     * @param {string} toolId
-     * @returns {boolean}
-     */
-    function isCompleted(toolId) {
-        return !!(completedTools[toolId] && completedTools[toolId].concluido);
-    }
-
-    /**
-     * Verifica se uma ferramenta está desbloqueada.
-     * Uma ferramenta é desbloqueada se:
-     * 1) É a primeira do percurso, OU
-     * 2) A ferramenta anterior foi concluída, OU
-     * 3) A fase da ferramenta foi liberada pelo facilitador, OU
-     * 4) A ferramenta específica foi liberada pelo facilitador
-     * @param {number} toolIndex - Índice da ferramenta no percurso
-     * @returns {boolean}
-     */
-    function isUnlocked(toolIndex) {
-        if (!currentPercurso) return false;
-
-        var tool = currentPercurso.ferramentas[toolIndex];
-        if (!tool) return false;
-
-        // Primeira ferramenta sempre desbloqueada
-        if (toolIndex === 0) return true;
-
-        // Ferramenta anterior concluída
-        var prevTool = currentPercurso.ferramentas[toolIndex - 1];
-        if (isCompleted(prevTool.id)) return true;
-
-        // Fase liberada pelo facilitador
-        if (facilitatorControls.fases_liberadas.indexOf(tool.fase) !== -1) {
-            // Verificar se TODAS as ferramentas de fases ANTERIORES estão
-            // concluídas OU se a fase anterior também está liberada
-            var fasesAnteriores = [];
-            for (var f = 1; f < tool.fase; f++) {
-                fasesAnteriores.push(f);
-            }
-            var todasFasesAnterioresLiberadas = fasesAnteriores.every(function (fase) {
-                return facilitatorControls.fases_liberadas.indexOf(fase) !== -1;
-            });
-            if (todasFasesAnterioresLiberadas) return true;
-        }
-
-        // Ferramenta específica liberada pelo facilitador
-        if (facilitatorControls.ferramentas_liberadas.indexOf(tool.id) !== -1) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /* ══════════════════════════════════════
-       CONTROLES DO FACILITADOR
-       ══════════════════════════════════════ */
-
-    /**
-     * Inicia escuta dos controles do facilitador via Firebase.
-     */
-    function startWatchingControls() {
-        if (typeof PISync !== 'undefined' && PISync.isInSession()) {
-            PISync.watchControls(function (controls) {
-                facilitatorControls = controls;
-                // Disparar evento para que a UI atualize
-                if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('pi-controls-updated', {
-                        detail: controls
-                    }));
-                }
-            });
-        }
-    }
-
-    /**
-     * Para de escutar controles.
-     */
-    function stopWatchingControls() {
-        if (typeof PISync !== 'undefined') {
-            PISync.stopWatchingControls();
-        }
-    }
-
-    /* ══════════════════════════════════════
-       ESTADO PARA RENDERIZAÇÃO
-       ══════════════════════════════════════ */
-
-    /**
-     * Retorna o estado completo do percurso para renderizar a UI.
-     * @returns {Object|null}
-     */
     function getState() {
-        if (!currentPercurso) return null;
+        if (!state.percurso) return null;
 
-        var ferramentas = currentPercurso.ferramentas.map(function (f, i) {
-            var concluida = isCompleted(f.id);
-            var desbloqueada = isUnlocked(i);
-
-            return {
-                id: f.id,
-                nome: f.nome,
-                fase: f.fase,
-                tipo: f.tipo,
-                url: f.url,
-                icone: f.icone,
-                duracao: f.duracao,
-                concluida: concluida,
-                desbloqueada: desbloqueada,
-                indice: i
-            };
-        });
-
-        var totalConcluidas = ferramentas.filter(function (f) {
-            return f.concluida;
-        }).length;
-
-        // Determinar fase atual
-        var faseAtual = 1;
-        for (var i = ferramentas.length - 1; i >= 0; i--) {
-            if (ferramentas[i].concluida) {
-                var nextIndex = i + 1;
-                if (nextIndex < ferramentas.length) {
-                    faseAtual = ferramentas[nextIndex].fase;
-                } else {
-                    faseAtual = 5;
-                }
-                break;
-            }
-        }
-
-        // Próxima ferramenta a fazer
-        var proximaFerramenta = null;
-        for (var j = 0; j < ferramentas.length; j++) {
-            if (!ferramentas[j].concluida && ferramentas[j].desbloqueada) {
-                proximaFerramenta = ferramentas[j];
-                break;
-            }
-        }
+        var ferramentas = computeFerramentas();
+        var concluidas = ferramentas.filter(function (tool) { return tool.concluida; }).length;
+        var total = ferramentas.length;
+        var progresso = total ? Math.round((concluidas / total) * 100) : 0;
+        var faseAtual = getCurrentPhase(ferramentas);
+        var jornadaDisponivel = getJornadaDisponivel(ferramentas);
 
         return {
-            percurso: currentPercurso.nome,
-            percursoKey: currentPercursoKey,
-            descricao: currentPercurso.descricao,
+            percursoKey: state.percursoKey,
+            percurso: clone(state.percurso),
+            fases: clone(global.PIConfig ? global.PIConfig.FASES : []),
             ferramentas: ferramentas,
-            fases: FASES,
-            apoio: APOIO,
-            totalFerramentas: ferramentas.length,
-            totalConcluidas: totalConcluidas,
-            progresso: Math.round((totalConcluidas / ferramentas.length) * 100),
+            apoio: global.PIConfig && typeof global.PIConfig.getSupportTools === 'function'
+                ? global.PIConfig.getSupportTools()
+                : [],
+            jornada: global.PIConfig && typeof global.PIConfig.getPostWorkshopTool === 'function'
+                ? global.PIConfig.getPostWorkshopTool()
+                : null,
+            jornadaDisponivel: jornadaDisponivel,
+            controls: clone(state.controls),
+            totalFerramentas: total,
+            totalConcluidas: concluidas,
+            progresso: progresso,
             faseAtual: faseAtual,
-            concluido: totalConcluidas === ferramentas.length,
-            proximaFerramenta: proximaFerramenta,
-            controlesDoFacilitador: facilitatorControls
+            concluido: total > 0 && concluidas === total,
+            proximaFerramenta: getProximaFerramenta(ferramentas),
+            perfil: {
+                participantId: localStorage.getItem('pi-participant-id') || '',
+                participantName: localStorage.getItem('pi-participant-name') || '',
+                percurso: state.percursoKey,
+                sessionId: localStorage.getItem('pi-session-id') || ''
+            }
         };
     }
 
-    /* ══════════════════════════════════════
-       PERSISTÊNCIA LOCAL
-       ══════════════════════════════════════ */
+    function completeTool(toolId, payload) {
+        var id = normalizeId(toolId);
+        state.completions[id] = {
+            concluido: true,
+            concluidoEm: new Date().toISOString(),
+            payload: payload || {}
+        };
 
-    function loadLocalCompletions() {
-        try {
-            completedTools = JSON.parse(
-                localStorage.getItem('pi-completed-tools') || '{}'
-            );
-        } catch (e) {
-            completedTools = {};
+        if (global.PIToolBridge && typeof global.PIToolBridge.markComplete === 'function' && !global.PIToolBridge.isCompleted(id)) {
+            global.PIToolBridge.markComplete(id, payload || {}, { skipSync: false });
         }
 
-        // Também carregar do PISync se disponível
-        if (typeof PISync !== 'undefined') {
-            var syncCompletions = PISync.getLocalCompletions();
-            Object.keys(syncCompletions).forEach(function (key) {
-                if (!completedTools[key]) {
-                    completedTools[key] = syncCompletions[key];
-                }
+        if (global.PISync && typeof global.PISync.updateParticipantProgress === 'function' && global.PISync.isInSession && global.PISync.isInSession()) {
+            var snapshot = getState();
+            global.PISync.updateParticipantProgress({
+                progresso: snapshot.progresso,
+                totalConcluidas: snapshot.totalConcluidas,
+                faseAtual: snapshot.faseAtual,
+                ferramentaAtual: id
+            });
+        }
+
+        notify();
+        return getState();
+    }
+
+    function reset() {
+        state.completions = {};
+        state.controls = {
+            fases_liberadas: [1],
+            ferramentas_liberadas: []
+        };
+        notify();
+        return true;
+    }
+
+    function subscribe(callback) {
+        if (typeof callback !== 'function') return function () {};
+        subscribers.push(callback);
+        callback(getState());
+        return function unsubscribe() {
+            subscribers = subscribers.filter(function (fn) { return fn !== callback; });
+        };
+    }
+
+    function startWatchingControls() {
+        if (stopControlsWatcher) {
+            stopControlsWatcher();
+            stopControlsWatcher = null;
+        }
+
+        if (global.PISync && typeof global.PISync.watchControls === 'function' && global.PISync.isInSession && global.PISync.isInSession()) {
+            stopControlsWatcher = global.PISync.watchControls(function (controls) {
+                state.controls = Object.assign({
+                    fases_liberadas: [1],
+                    ferramentas_liberadas: []
+                }, controls || {});
+                notify();
             });
         }
     }
 
-    function saveLocalCompletions() {
-        localStorage.setItem('pi-completed-tools', JSON.stringify(completedTools));
+    function init(percursoKey) {
+        if (!global.PIConfig) {
+            throw new Error('PIConfig não carregado.');
+        }
+        resolvePercurso(percursoKey || localStorage.getItem('pi-percurso') || '3h');
+        loadCompletions();
+        startWatchingControls();
+        notify();
+        return getState();
     }
 
-    /* ══════════════════════════════════════
-       RESET
-       ══════════════════════════════════════ */
-
-    /**
-     * Reseta todo o progresso do aluno.
-     */
-    function reset() {
-        completedTools = {};
-        currentPercurso = null;
-        currentPercursoKey = null;
-        facilitatorControls = { fases_liberadas: [1], ferramentas_liberadas: [] };
-        localStorage.removeItem('pi-completed-tools');
-        localStorage.removeItem('pi-percurso');
-        stopWatchingControls();
+    function restore() {
+        var saved = localStorage.getItem('pi-percurso');
+        if (!saved) return init('3h');
+        return init(saved);
     }
 
-    /* ══════════════════════════════════════
-       API PÚBLICA
-       ══════════════════════════════════════ */
+    function setPercurso(percursoKey) {
+        return init(percursoKey);
+    }
 
-    return {
-        // Constantes
-        PERCURSOS: PERCURSOS,
-        FASES: FASES,
-        APOIO: APOIO,
+    function getFerramenta(toolId) {
+        var id = normalizeId(toolId);
+        return getState().ferramentas.find(function (tool) {
+            return tool.id === id;
+        }) || null;
+    }
 
-        // Inicialização
+    function getFerramentasPorFase(phaseNumber) {
+        return getState().ferramentas.filter(function (tool) {
+            return Number(tool.fase) === Number(phaseNumber);
+        });
+    }
+
+    var api = {
         init: init,
         restore: restore,
         reset: reset,
-
-        // Progressão
+        subscribe: subscribe,
+        getState: getState,
+        setPercurso: setPercurso,
         completeTool: completeTool,
         isCompleted: isCompleted,
         isUnlocked: isUnlocked,
-
-        // Estado
-        getState: getState
+        getFerramenta: getFerramenta,
+        getFerramentasPorFase: getFerramentasPorFase
     };
 
-})();
+    global.AlunoEngine = api;
+})(window);

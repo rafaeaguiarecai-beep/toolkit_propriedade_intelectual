@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Storyboard de Proteção — PI Thinking</title>
+  <title>Roteiro de Proteção — PI Thinking</title>
   <meta name="description" content="Construa uma narrativa visual passo a passo do processo de proteção da sua criação intelectual, da ideia ao registro.">
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -239,13 +239,60 @@
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
+  
+    .pi-brand-strip {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem 1rem;
+      background: rgba(15,23,42,.88);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 24px rgba(15,23,42,.12);
+    }
+    .pi-brand-strip__meta { display:flex; align-items:center; gap:.85rem; flex-wrap:wrap; }
+    .pi-brand-strip__eyebrow { font: 800 .72rem/1 'Poppins',sans-serif; letter-spacing:.18em; text-transform:uppercase; opacity:.72; }
+    .pi-brand-strip__title { font: 700 1rem/1.2 'Poppins',sans-serif; }
+    .pi-brand-strip__sub { font: 500 .8rem/1.2 'Inter',sans-serif; opacity:.82; }
+    .pi-brand-strip__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-brand-strip__logos img { width:34px; height:34px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; box-shadow:0 4px 14px rgba(0,0,0,.16); }
+    .pi-brand-strip__nav { display:flex; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
+    .pi-brand-pill { color:#fff; text-decoration:none; padding:.38rem .72rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); font: 600 .78rem/1 'Inter',sans-serif; }
+    .pi-brand-pill:hover { background:rgba(255,255,255,.16); }
+    .pi-footer-signature {
+      max-width: 1120px;
+      margin: 1rem auto 0;
+      padding: 1rem 1.25rem 0;
+      border-top: 1px solid rgba(148,163,184,.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font: 600 .8rem/1.4 'Inter',sans-serif;
+      color: inherit;
+      opacity: .92;
+    }
+    .pi-footer-signature__logos { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .pi-footer-signature__logos img { width:30px; height:30px; object-fit:contain; background:#fff; border-radius:999px; padding:4px; }
+    @media (max-width: 920px) {
+      .pi-brand-strip { position: relative; }
+      .pi-brand-strip, .pi-footer-signature { flex-direction: column; align-items: flex-start; }
+      .pi-brand-strip__nav { justify-content:flex-start; }
+    }
+
   </style>
 </head>
 <body class="sb-page">
 
   <header class="sb-cover">
     <div class="sb-cover__overline">Fase 3 — Estrategar</div>
-    <h1 class="sb-cover__title">Storyboard de Proteção</h1>
+    <h1 class="sb-cover__title">Roteiro de Proteção</h1>
     <p class="sb-cover__sub">Conte a história da proteção da sua criação — da ideia ao registro — em 6 cenas visuais.</p>
     <div class="sb-cover__meta">
       <span>🎬 6 cenas</span>
@@ -258,9 +305,9 @@
   <main class="sb-container">
 
     <section class="sb-intro">
-      <h2>🎯 O que é o Storyboard de Proteção?</h2>
-      <p>O <strong>Storyboard</strong> é uma ferramenta narrativa que transforma o plano de proteção em uma <strong>história visual</strong> com início, meio e fim. Cada cena representa uma etapa do processo: da identificação da criação até a manutenção da proteção concedida.</p>
-      <p>Diferente do Canvas de Estratégia (analítico), o Storyboard é <strong>narrativo e sequencial</strong> — ajuda o participante a visualizar o caminho completo e identificar gargalos, custos e decisões em cada momento.</p>
+      <h2>🎯 O que é o Roteiro de Proteção?</h2>
+      <p>O <strong>Roteiro de Proteção</strong> é uma ferramenta narrativa que transforma o plano de proteção em uma <strong>história visual</strong> com início, meio e fim. Cada cena representa uma etapa do processo: da identificação da criação até a manutenção da proteção concedida.</p>
+      <p>Diferente do Canvas de Estratégia (analítico), o Roteiro de Proteção é <strong>narrativo e sequencial</strong> — ajuda o participante a visualizar o caminho completo e identificar gargalos, custos e decisões em cada momento.</p>
     </section>
 
     <div class="sb-example-toggle">
@@ -275,7 +322,7 @@
       <button class="sb-btn sb-btn--primary" onclick="window.print()" aria-label="Imprimir ou salvar como PDF">🖨️ Imprimir / PDF</button>
       <button class="sb-btn sb-btn--danger" onclick="clearStory()" aria-label="Limpar todo o storyboard">🗑️ Limpar</button>
       <a href="canvas-estrategia.html" class="sb-btn sb-btn--outline">📐 Canvas de Estratégia</a>
-      <a href="crazy8s.html" class="sb-btn sb-btn--outline">⚡ Crazy 8s</a>
+      <a href="busca.html" class="sb-btn sb-btn--outline">🔍 Busca de Anterioridade</a>
       <a href="index.html" class="sb-btn sb-btn--outline">🏠 Toolkit</a>
     </div>
 
@@ -417,6 +464,93 @@
     renderFrames();
   </script>
 
+
+<script>
+(function () {
+  var storyDraft = {};
+
+  function canPersistStoryboard() {
+    return window.PIThinking && typeof window.PIThinking.saveProgress === 'function' && typeof window.PIThinking.loadProgress === 'function';
+  }
+
+  function captureDraft() {
+    var data = {};
+    document.querySelectorAll('.sb-frame textarea').forEach(function (textarea) {
+      data[textarea.id] = textarea.value;
+    });
+    return data;
+  }
+
+  function persistStoryboard() {
+    if (!canPersistStoryboard()) return;
+    storyDraft = captureDraft();
+    window.PIThinking.saveProgress('storyboard', {
+      showExample: showExample,
+      storyDraft: storyDraft,
+      atualizadoEm: new Date().toISOString()
+    });
+    if (typeof window.PIThinking.saveFormData === 'function') {
+      window.PIThinking.saveFormData('storyboard', storyDraft);
+    }
+  }
+
+  function bindAutosave() {
+    document.querySelectorAll('.sb-frame textarea').forEach(function (textarea) {
+      textarea.addEventListener('input', persistStoryboard);
+    });
+  }
+
+  function applyDraftValues() {
+    Object.keys(storyDraft || {}).forEach(function (key) {
+      var field = document.getElementById(key);
+      if (field) field.value = storyDraft[key];
+    });
+  }
+
+  var _renderFrames = renderFrames;
+  var _toggleExample = toggleExample;
+  var _clearStory = clearStory;
+
+  renderFrames = function () {
+    _renderFrames();
+    applyDraftValues();
+    bindAutosave();
+  };
+
+  toggleExample = function () {
+    _toggleExample();
+    persistStoryboard();
+  };
+
+  clearStory = function () {
+    if (!confirm('Limpar todo o roteiro de proteção?')) return;
+    storyDraft = {};
+    if (window.PIThinking && typeof window.PIThinking.clearProgress === 'function') {
+      window.PIThinking.clearProgress('storyboard');
+    }
+    showExample = false;
+    var btn = document.getElementById('btnToggleExample');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    renderFrames();
+  };
+
+  function loadStoryboardState() {
+    if (!canPersistStoryboard()) return;
+    var saved = window.PIThinking.loadProgress('storyboard');
+    if (!saved) return;
+    showExample = !!saved.showExample;
+    storyDraft = saved.storyDraft || {};
+    renderFrames();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(loadStoryboardState, 0); });
+  } else {
+    setTimeout(loadStoryboardState, 0);
+  }
+})();
+</script>
+
 <!-- PI Thinking — Tool Bridge (modo oficina) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -425,5 +559,6 @@
 <script src="js/tool-bridge.js"></script>
 
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

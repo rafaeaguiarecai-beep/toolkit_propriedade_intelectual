@@ -902,14 +902,14 @@ select:focus-visible {
         <span class="card__icon">🔵</span>
         <h4>Recomendada</h4>
       </div>
-      <p>4 ferramentas que enriquecem a experiência com ideação criativa (Crazy 8s), narrativa visual (Storyboard), empatia aprofundada (Mapa de Empatia) e feedback estruturado (Canvas de Avaliação).</p>
+      <p>4 ferramentas que enriquecem a experiência com investigação guiada (Painel de Busca Guiada), narrativa visual (Roteiro de Proteção), empatia aprofundada (Mapa de Empatia) e feedback estruturado (Canvas de Avaliação).</p>
     </div>
     <div class="card card--phase" style="border-top-color: #FF9800">
       <div class="card__header">
         <span class="card__icon">🟠</span>
         <h4>Opcional</h4>
       </div>
-      <p>3 ferramentas gamificadas (Linha do Tempo, Escape Room, PI Quest) ideais para oficinas longas, atividades bônus ou engajamento extra. Podem ser usadas como "prêmio" para quem termina antes.</p>
+      <p>3 ferramentas de aprofundamento (Linha do Tempo, Escape Room e Jornada da PI) ideais para oficinas longas, atividades bônus ou continuidade pós-oficina. Podem ser usadas como reforço para quem termina antes ou como trilha complementar.</p>
     </div>
   </div>
 
@@ -1058,7 +1058,7 @@ select:focus-visible {
 
   <h4>Como funciona o envio de resultados</h4>
   <div class="prose">
-    <p>Cada ferramenta do toolkit inclui um componente invisível chamado <strong>Tool Bridge</strong> (<code>js/tool-bridge.js</code>). Quando o aluno está em sessão de oficina, esse componente detecta automaticamente a conexão Firebase e envia os dados da ferramenta (respostas do quiz, conteúdo dos canvas, votos do Crazy 8s, resultado da Árvore de Decisão, etc.) ao banco de dados em tempo real. O aluno não precisa fazer nada além de usar a ferramenta normalmente — o envio é transparente.</p>
+    <p>Cada ferramenta do toolkit inclui um componente invisível chamado <strong>Tool Bridge</strong> (<code>js/tool-bridge.js</code>). Quando o aluno está em sessão de oficina, esse componente detecta automaticamente a conexão Firebase e envia os dados da ferramenta (respostas do quiz, conteúdo dos canvas, registros do Painel de Busca Guiada, resultado da Árvore de Decisão, etc.) ao banco de dados em tempo real. O aluno não precisa fazer nada além de usar a ferramenta normalmente — o envio é transparente.</p>
     <p>Além do Firebase, o progresso é salvo no <code>localStorage</code> do navegador. Isso significa que, se o aluno fechar a aba e reabrir, ele retoma de onde parou. Se trocar de dispositivo, porém, o progresso local se perde (mas os dados já enviados estarão no Dashboard).</p>
   </div>
 
@@ -1114,9 +1114,9 @@ select:focus-visible {
       <div class="tm-item"><span class="tm-time">0:40</span><span class="tm-tool">📐 Canvas de Diagnóstico (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">0:55</span><span class="tm-tool">🌳 Árvore de Decisão (10 min)</span></div>
       <div class="tm-item"><span class="tm-time">1:05</span><span class="tm-tool">☕ Intervalo (10 min)</span></div>
-      <div class="tm-item"><span class="tm-time">1:15</span><span class="tm-tool">⚡ Crazy 8s da PI (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:15</span><span class="tm-tool">🔍 Painel de Busca Guiada (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">1:30</span><span class="tm-tool">📐 Canvas de Estratégia (15 min)</span></div>
-      <div class="tm-item"><span class="tm-time">1:45</span><span class="tm-tool">🎬 Storyboard (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:45</span><span class="tm-tool">🎬 Roteiro de Proteção (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">2:00</span><span class="tm-tool">📝 Simulador de Depósito (20 min)</span></div>
       <div class="tm-item"><span class="tm-time">2:20</span><span class="tm-tool">🃏 Baralho de Dilemas (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">2:35</span><span class="tm-tool">🏆 Quiz Final (15 min)</span></div>
@@ -1139,13 +1139,13 @@ select:focus-visible {
       <div class="tm-item"><span class="tm-time">1:00</span><span class="tm-tool">📅 Linha do Tempo (10 min)</span></div>
       <div class="tm-item"><span class="tm-time">1:10</span><span class="tm-tool">🌳 Árvore de Decisão (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">1:25</span><span class="tm-tool">☕ Intervalo (15 min)</span></div>
-      <div class="tm-item"><span class="tm-time">1:40</span><span class="tm-tool">⚡ Crazy 8s da PI (15 min)</span></div>
-      <div class="tm-item"><span class="tm-time">1:55</span><span class="tm-tool">🎬 Storyboard (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:40</span><span class="tm-tool">🔍 Painel de Busca Guiada (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">1:55</span><span class="tm-tool">🎬 Roteiro de Proteção (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">2:10</span><span class="tm-tool">📐 Canvas de Estratégia (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">2:25</span><span class="tm-tool">📝 Simulador de Depósito (30 min)</span></div>
       <div class="tm-item"><span class="tm-time">2:55</span><span class="tm-tool">🃏 Baralho de Dilemas (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">3:10</span><span class="tm-tool">🔐 Escape Room (15 min)</span></div>
-      <div class="tm-item"><span class="tm-time">3:25</span><span class="tm-tool">🎲 PI Quest (15 min)</span></div>
+      <div class="tm-item"><span class="tm-time">3:25</span><span class="tm-tool">🎲 Jornada da PI (pós-oficina)</span></div>
       <div class="tm-item"><span class="tm-time">3:40</span><span class="tm-tool">🏆 Quiz Final (15 min)</span></div>
       <div class="tm-item"><span class="tm-time">3:55</span><span class="tm-tool">📊 Canvas de Avaliação (10 min) — simultaneamente ao encerramento</span></div>
     </div>
@@ -1339,28 +1339,26 @@ select:focus-visible {
     <p>Se a Fase 2 respondeu "o quê proteger", a Fase 3 responde "como proteger". Aqui os participantes passam de espectadores a estrategistas: vão gerar ideias de proteção, selecionar as melhores e construir um plano concreto. Esta é a fase mais criativa da oficina e onde o Design Thinking mais brilha. Reserve entre 30 e 45 minutos.</p>
   </div>
 
-  <!-- Ferramenta 3.1: Crazy 8s da PI -->
+  <!-- Ferramenta 3.1: Painel de Busca Guiada -->
   <div class="tool-block">
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
-      <h3>⚡ Crazy 8s da PI</h3>
-      <span class="tool-block__meta">⏱ 15 min (8 min + 5 votação + 2 discussão) · Individual → Grupo · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/crazy8s.html" target="_blank">Abrir ferramenta</a></span>
+      <h3>🔍 Painel de Busca Guiada</h3>
+      <span class="tool-block__meta">⏱ 15 min · Individual ou em dupla · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/busca.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
-      <p>O Crazy 8s é uma técnica do Design Sprint (Google Ventures) adaptada para PI. O participante recebe um cenário de proteção e deve gerar <strong>8 estratégias diferentes em 8 minutos</strong> — uma por minuto. O objetivo não é encontrar a resposta perfeita, mas forçar o cérebro a ir além da primeira ideia óbvia. Quando você é obrigado a gerar 8 alternativas, naturalmente começa a combinar proteções (patente + marca), explorar rotas alternativas (nacional vs. PCT), considerar custos criativos (parceria com NIT para desconto), e pensar em estratégias defensivas (segredo industrial ao invés de patente). As ideias 6, 7 e 8 costumam ser as mais originais.</p>
+      <p>Ajuda os participantes a investigar anterioridade, bases oficiais e referências técnicas antes de consolidar a estratégia. Em vez de começar por ideação livre, a turma aprende a buscar evidências em fontes como INPI, WIPO, Google Patents e bases correlatas para sustentar as decisões do Canvas de Estratégia.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Antes de iniciar, contextualize a técnica: <em>"Agora vocês vão fazer um exercício que parece impossível: gerar 8 ideias diferentes em 8 minutos. A regra mais importante é: não se autocensure. Ideia ruim é melhor que nenhuma ideia. Vocês não precisam desenhar — podem escrever frases curtas."</em></p>
-      <p>Na ferramenta, o participante escolhe o cenário (pode usar um dos 8 pré-definidos — cada um correspondendo a uma persona — ou selecionar "cenário personalizado" para aplicar à persona do seu grupo). Ao selecionar um cenário, os 8 quadros ganham prompts orientadores (por exemplo, "Tipo de PI principal", "Estratégia de custo mínimo", "Rota internacional", "Ideia radical/fora da caixa"). Isso guia sem restringir.</p>
-      <p>Clique em "Iniciar" no cronômetro da ferramenta. O timer de 8 minutos começa e destaca automaticamente o quadro ativo (quadro 1 no primeiro minuto, quadro 2 no segundo, e assim por diante). Nos últimos 60 segundos, o timer fica vermelho e pulsa para criar urgência.</p>
-      <p>Quando o timer zerar, passe para a fase de votação: cada participante tem 3 votos (estrelas) e pode distribuí-los entre as ideias do grupo. Projetando a ferramenta na tela, clique em "Ver Votação" para revelar o gráfico de barras com o ranking das ideias.</p>
-      <p>As <strong>2 ideias mais votadas</strong> serão desenvolvidas no Canvas de Estratégia, a próxima ferramenta. Isso cria um funil natural: de 8 ideias brutas para 2 estratégias concretas.</p>
+      <p>Introduza a atividade com uma pergunta prática: <em>"Antes de decidir como proteger, precisamos descobrir se já existe algo parecido. Onde buscar? Como interpretar o que encontramos?"</em></p>
+      <p>Peça que cada grupo use o painel para investigar a criação da persona ou do caso trabalhado. Oriente a registrar termos-chave, classes, palavras equivalentes e resultados úteis. O foco não é esgotar a busca, mas aprender a construir uma trilha mínima de validação.</p>
+      <p>Ao final, peça que os grupos compartilhem uma descoberta relevante: um pedido semelhante, uma solução concorrente, uma lacuna de mercado ou uma evidência de novidade. Essas pistas alimentam diretamente o Canvas de Estratégia e tornam a discussão muito mais concreta.</p>
 
       <div class="callout callout--warning">
         <div class="callout__icon">⚠️</div>
         <div class="callout__body">
-          <strong>Participantes inseguros:</strong> Alguns alunos travam por medo de "errar". Reforce que as ideias são anônimas durante a votação e que até profissionais de PI usam essa técnica para pensar fora da caixa. Se necessário, dê um exemplo no primeiro quadro: <em>"Para o caso do Chef Raízes: quadro 1, proteger a marca do restaurante no INPI. Viram? Pode ser simples assim."</em>
+          <strong>Armadilha comum:</strong> muitos participantes param na primeira busca simples. Reforce que vale testar sinônimos, variações técnicas, nomes de produto, classes e combinações diferentes. A aprendizagem aqui está em refinar a consulta, não apenas em clicar em buscar.
         </div>
       </div>
     </div>
@@ -1378,18 +1376,18 @@ select:focus-visible {
       <p>É o documento central da oficina: um canvas de 10 blocos onde o grupo formaliza a estratégia de proteção para a persona. Os blocos incluem: tipo de PI escolhido, justificativa legal, custos estimados (com tabela de taxas INPI 2025), prazos, responsáveis, riscos, estratégia de licenciamento, e próximos passos concretos. É onde a teoria vira plano de ação.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Se o grupo fez o Crazy 8s, instrua: <em>"Peguem as 2 ideias mais votadas e desenvolvam cada uma em profundidade aqui no Canvas."</em> Se o percurso não inclui o Crazy 8s (Compacto 2h), o grupo parte diretamente do resultado da Árvore de Decisão para preencher o Canvas.</p>
+      <p>Se o grupo usou o Painel de Busca Guiada, instrua: <em>"Transformem os achados mais relevantes da busca em critérios para decidir a rota de proteção."</em> Se o percurso não incluir essa etapa, o grupo pode partir diretamente do resultado da Árvore de Decisão e do Canvas de Diagnóstico para preencher o Canvas.</p>
       <p>O bloco de custos merece atenção especial. A ferramenta já traz as taxas atualizadas do INPI (2025), com desconto de 60% para ICTs e MEIs. Peça que calculem: <em>"Quanto custaria para a persona do grupo proteger essa criação? E se ela fosse MEI — qual seria o desconto?"</em></p>
       <p>Enquanto os grupos trabalham, circule e faça perguntas desafiadoras: <em>"Vocês estão protegendo via patente, mas a persona publicou um artigo há 8 meses. Estão dentro do período de graça? Quanto tempo falta?"</em> Essas provocações forçam a aplicação prática dos conceitos.</p>
       <p>Ao final, peça que 1 ou 2 grupos apresentem seu Canvas completo. Projete na tela e faça uma revisão coletiva: a turma toda pode sugerir melhorias ou identificar gaps no plano. Esse momento de revisão por pares é extremamente rico.</p>
     </div>
   </div>
 
-  <!-- Ferramenta 3.3: Storyboard -->
+  <!-- Ferramenta 3.3: Roteiro de Proteção -->
   <div class="tool-block">
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
-      <h3>🎬 Storyboard de Proteção</h3>
+      <h3>🎬 Roteiro de Proteção</h3>
       <span class="tool-block__meta">⏱ 15 min · Grupos · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/storyboard.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
@@ -1406,7 +1404,7 @@ select:focus-visible {
   <div class="callout callout--info">
     <div class="callout__icon">🎛️</div>
     <div class="callout__body">
-      <strong>Ação no Dashboard:</strong> Ative a <strong>Fase 4 — Prototipar</strong>. Os participantes agora vão simular na prática o que planejaram.
+      <strong>Ação no Dashboard:</strong> Ative a <strong>Fase 4 — Testar</strong>. Os participantes agora vão validar na prática o que planejaram.
     </div>
   </div>
 </section>
@@ -1416,7 +1414,7 @@ select:focus-visible {
      ═══════════════════════════════════════════════════════════════ -->
 <section id="fase4" class="section section--phase" style="--phase-color: #9C27B0">
   <div class="section__badge" style="background: #9C27B0; color: #fff">Fase 4</div>
-  <h2 class="section__title">🛠️ Prototipar</h2>
+  <h2 class="section__title">🛠️ Testar</h2>
   <p class="section__subtitle">"Como simular e testar o plano de proteção?"</p>
 
   <div class="prose">
@@ -1489,7 +1487,7 @@ select:focus-visible {
   <div class="callout callout--info">
     <div class="callout__icon">🎛️</div>
     <div class="callout__body">
-      <strong>Ação no Dashboard:</strong> Ative a <strong>Fase 5 — Evoluir</strong>. É a reta final!
+      <strong>Ação no Dashboard:</strong> Ative a <strong>Fase 5 — Evoluir</strong>. É a reta final — e a Jornada da PI pode ficar liberada como continuidade pós-oficina!
     </div>
   </div>
 </section>
@@ -1506,11 +1504,11 @@ select:focus-visible {
     <p>A fase final fecha o ciclo com avaliação, reflexão e celebração. Aqui você vai medir concretamente o aprendizado (comparando D-X com F-X), coletar feedback dos participantes e encerrar com um senso de conquista. Reserve entre 25 e 45 minutos.</p>
   </div>
 
-  <!-- Ferramenta 5.1: PI Quest -->
+  <!-- Ferramenta 5.1: Jornada da PI -->
   <div class="tool-block">
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--optional">Opcional</span>
-      <h3>🎲 PI Quest</h3>
+      <h3>🎲 Jornada da PI</h3>
       <span class="tool-block__meta">⏱ 15 min · Individual · Percurso de 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/pi-quest.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
@@ -1518,7 +1516,7 @@ select:focus-visible {
       <p>Um jogo narrativo em 5 capítulos onde o participante assume o papel de um agente de PI que precisa resolver casos reais. Funciona como revisão gamificada de todo o conteúdo da oficina, cobrindo todos os tipos de PI em contextos práticos. Cada capítulo tem escolhas que levam a desfechos diferentes.</p>
 
       <h4>Como conduzir</h4>
-      <p>Use como atividade de "aquecimento" antes do Quiz Final: <em>"Antes da prova final, vocês vão jogar 15 minutos de PI Quest para revisar tudo. Pensem nele como um treino."</em> Ou, se o tempo estiver apertado, ofereça como atividade bônus para quem terminar o Quiz Final antes dos colegas.</p>
+      <p>Use como trilha assíncrona de reforço: <em>"Ao final da oficina, vocês terão acesso à Jornada da PI para revisar casos, retomar conceitos e continuar praticando depois do encontro."</em> Se houver tempo no percurso completo, também pode ser oferecida como atividade bônus para quem concluir o Quiz Final antes dos colegas.</p>
     </div>
   </div>
 
@@ -1719,5 +1717,6 @@ window.addEventListener('scroll', function() {
 });
 </script>
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

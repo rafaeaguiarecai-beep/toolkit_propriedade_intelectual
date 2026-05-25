@@ -1,0 +1,35 @@
+# PI Thinking — arquivos locais e sensíveis
+# Mantém o repositório seguro e pronto para publicação estática.
+
+# Configurações sensíveis do Firebase
+firebase-config.js
+js/firebase-config.js
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Dependências e builds locais
+node_modules/
+dist/
+build/
+coverage/
+
+# Ferramentas e caches
+.firebase/
+.cache/
+.vscode/
+.idea/
+*.log
+*.tmp
+*.swp
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Backups e artefatos temporários
+*.bak
+*.orig
+*.rej
