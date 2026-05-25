@@ -428,9 +428,6 @@ a { color:inherit; text-decoration:none; }
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     SETUP SCREEN
-     ═══════════════════════════════════════ -->
 <div class="setup" id="setupScreen">
   <div class="setup__card">
     <div class="setup__logo">
@@ -468,12 +465,8 @@ a { color:inherit; text-decoration:none; }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     DASHBOARD
-     ═══════════════════════════════════════ -->
 <div class="dash" id="dashScreen">
 
-  <!-- Top Bar -->
   <div class="dash-top">
     <div class="dash-top__left">
       <span class="dash-top__logo">📊</span>
@@ -495,7 +488,6 @@ a { color:inherit; text-decoration:none; }
     </div>
   </div>
 
-  <!-- Stats -->
   <div class="stats">
     <div class="stat">
       <div class="stat__value stat__value--accent" id="sTotal">0</div>
@@ -523,7 +515,6 @@ a { color:inherit; text-decoration:none; }
     </div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('ranking',this)">🏆 Ranking</button>
     <button class="tab" onclick="switchTab('participantes',this)">👥 Participantes</button>
@@ -531,7 +522,6 @@ a { color:inherit; text-decoration:none; }
     <button class="tab" onclick="switchTab('controle',this)">🎛️ Controle</button>
   </div>
 
-  <!-- Panel: Ranking -->
   <div class="panel active" id="panel-ranking">
     <div class="ranking">
       <div class="ranking__header">
@@ -548,7 +538,6 @@ a { color:inherit; text-decoration:none; }
     </div>
   </div>
 
-  <!-- Panel: Participantes -->
   <div class="panel" id="panel-participantes">
     <div class="table-wrap">
       <table class="ptable" id="participantsTable">
@@ -571,7 +560,6 @@ a { color:inherit; text-decoration:none; }
     </div>
   </div>
 
-  <!-- Panel: Análise -->
   <div class="panel" id="panel-analise">
     <div class="analysis-grid">
       <div class="analysis-card">
@@ -593,7 +581,6 @@ a { color:inherit; text-decoration:none; }
     </div>
   </div>
 
-  <!-- Panel: Controle -->
   <div class="panel" id="panel-controle">
     <div class="control-section">
       <div class="control-section__title">🎛️ Liberação de Fases</div>
@@ -607,12 +594,8 @@ a { color:inherit; text-decoration:none; }
 
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ═══════════════════════════════════════
-     SCRIPTS
-     ═══════════════════════════════════════ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="js/firebase-config.js"></script>
@@ -671,15 +654,24 @@ function createOffice() {
     btn.disabled = true; btn.textContent = 'Conectando...';
 
     PISync.init(FIREBASE_CONFIG).then(function(online) {
-        if (!online) { showSetupError('Não foi possível conectar ao servidor.'); btn.disabled = false; btn.textContent = 'Criar / Entrar na Oficina'; return; }
+        if (!online) {
+            showSetupError('Modo offline: os dados não serão sincronizados na nuvem.');
+        }
 
-        return PISync.createSession(code, { percurso: percurso, facilitador: name });
-    }).then(function() {
-        officeCode = code;
-        localStorage.setItem('pi-dash-office', code);
-        localStorage.setItem('pi-dash-name', name);
-        showDashboard();
-        startListening();
+        try {
+            // Correção de API: O método correto no sync.js é joinSession e ele é síncrono.
+            PISync.joinSession(code, name, percurso, { role: 'facilitador' });
+            
+            officeCode = code;
+            localStorage.setItem('pi-dash-office', code);
+            localStorage.setItem('pi-dash-name', name);
+            
+            showDashboard();
+            startListening();
+        } catch(e) {
+            showSetupError('Erro: ' + (e.message || e));
+            btn.disabled = false; btn.textContent = 'Criar / Entrar na Oficina';
+        }
     }).catch(function(e) {
         showSetupError('Erro: ' + (e.message || e));
         btn.disabled = false; btn.textContent = 'Criar / Entrar na Oficina';
@@ -701,7 +693,12 @@ function showDashboard() {
 
 function exitDash() {
     if (!confirm('Sair do dashboard?')) return;
-    PISync.stopWatchingParticipants(officeCode);
+    
+    // Correção de API: Funções sem parâmetros pois o sessionId é interno no sync.js
+    PISync.stopWatchingParticipants();
+    PISync.stopWatchingControls();
+    PISync.leaveSession();
+    
     document.getElementById('dashScreen').classList.remove('visible');
     document.getElementById('setupScreen').style.display = '';
     var btn = document.querySelector('.setup__btn');
@@ -713,9 +710,18 @@ function exitDash() {
    ══════════════════════════════════════ */
 
 function startListening() {
-    PISync.watchParticipants(officeCode, function(data) {
+    // Correção de API: Passa apenas o callback
+    PISync.watchParticipants(function(data) {
         participants = data || {};
         renderAll();
+    });
+
+    // Correção de API: Para acompanhar os controles da oficina (fases liberadas)
+    PISync.watchControls(function(controls) {
+        if(controls && controls.fases_liberadas) {
+            releasedPhases = controls.fases_liberadas;
+            renderPhaseControls();
+        }
     });
 
     PISync.onConnectionChange(function(online) {
@@ -1081,12 +1087,9 @@ function togglePhase(phaseNum, checked) {
 
     releasedPhases.sort();
 
-    if (PISync.isOnline()) {
-        PISync.releasePhases(officeCode, releasedPhases).then(function() {
-            showToast('Fases atualizadas: ' + releasedPhases.join(', '));
-        });
-    }
-
+    // Correção de API: A função correta do sync.js para alterar fases
+    PISync.setReleasedPhases(releasedPhases);
+    showToast('Fases atualizadas: ' + releasedPhases.join(', '));
     renderPhaseControls();
 }
 
@@ -1166,17 +1169,7 @@ function sum(arr) { return arr.reduce(function(a,b){ return a+b; }, 0); }
         document.getElementById('setupName').value = savedName;
     }
 
-    // Escutar controles se já houver sessão
-    PISync.init(FIREBASE_CONFIG).then(function(online) {
-        if (!online) return;
-
-        if (savedCode) {
-            // Carregar fases liberadas
-            PISync.watchConfig(savedCode, function(config) {
-                // config loaded
-            });
-        }
-    });
+    PISync.init(FIREBASE_CONFIG);
 })();
 </script>
 
