@@ -695,9 +695,6 @@ img { max-width: 100%; display: block; }
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     TELA DE LOGIN
-     ═══════════════════════════════════════ -->
 <div class="login" id="loginScreen">
   <div class="login__card">
     <div class="login__logo">
@@ -744,12 +741,8 @@ img { max-width: 100%; display: block; }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     APP PRINCIPAL
-     ═══════════════════════════════════════ -->
 <div class="app" id="appScreen">
 
-  <!-- Barra superior -->
   <div class="app-bar">
     <div class="app-bar__left">
       <div class="app-bar__avatar" id="appAvatar">—</div>
@@ -771,15 +764,12 @@ img { max-width: 100%; display: block; }
     </div>
   </div>
 
-  <!-- Progresso linear -->
   <div class="progress-track">
     <div class="progress-track__fill" id="progressFill" style="width:0%"></div>
   </div>
 
-  <!-- Container das fases e ferramentas -->
   <div id="phasesContainer"></div>
 
-  <!-- Mensagem de conclusão -->
   <div class="completion" id="completionMsg">
     <div class="completion__icon">🎉</div>
     <div class="completion__title">Parabéns! Percurso concluído!</div>
@@ -790,21 +780,16 @@ img { max-width: 100%; display: block; }
     </div>
   </div>
 
-  <!-- Ferramentas de apoio -->
   <div class="apoio" id="apoioContainer"></div>
 
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCRIPTS
-     ═══════════════════════════════════════ -->
-
-<!-- Firebase SDK (compat — carregamento via CDN) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- Módulos PI Thinking -->
 <script src="js/firebase-config.js"></script>
+<script src="js/config-ferramentas.js"></script>
+<script src="js/tool-bridge.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/aluno-engine.js"></script>
 
@@ -892,16 +877,18 @@ function renderApp() {
     var state = AlunoEngine.getState();
     if (!state) return;
 
-    var info = PISync.getSessionInfo();
+    var info = PISync.getSessionInfo ? PISync.getSessionInfo() : PISync.getSessionMeta();
 
     // ── Barra superior ──
-    var initials = (info.participantName || '?').split(' ')
+    var participantName = info.participantName || localStorage.getItem('pi-participant-name') || 'Participante';
+    var sessionId = info.sessionId || localStorage.getItem('pi-session-id') || '—';
+    var initials = participantName.split(' ')
         .map(function (w) { return w.charAt(0); }).join('').substring(0, 2).toUpperCase();
 
     document.getElementById('appAvatar').textContent = initials;
-    document.getElementById('appName').textContent = info.participantName || 'Participante';
+    document.getElementById('appName').textContent = participantName;
     document.getElementById('appMeta').textContent =
-        'Oficina ' + (info.sessionId || '—') +
+        'Oficina ' + sessionId +
         '  ·  Percurso ' + state.percurso +
         '  ·  ' + state.totalConcluidas + '/' + state.totalFerramentas;
 
@@ -1028,7 +1015,7 @@ function handleExit() {
     btn.textContent = 'Entrar na Oficina';
 
     // Preencher campos com dados anteriores
-    var info = PISync.getSessionInfo();
+    var info = PISync.getSessionMeta();
     if (info.participantName) document.getElementById('loginName').value = info.participantName;
     if (info.sessionId) document.getElementById('loginSession').value = info.sessionId;
 }
