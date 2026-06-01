@@ -147,11 +147,12 @@
      o estado interno do PISync sem precisar chamar joinSession() novamente.
      Isso garante que isInSession() retorne true em qualquer página do toolkit.
   ── */
-  function _tryAutoRestore() {
-    if (sessionId) return true; // já restaurado
+
+function _tryAutoRestore() {
+    if (sessionId) return true;
 
     var storedSession = sanitizeSessionCode(localStorage.getItem('pi-session-id') || '');
-    var storedParticipant = localStorage.getItem('pi-participant-id') || '';
+    var storedParticipant = localStorage.getItem('pi-session-participant-id') || '';
     var storedName = localStorage.getItem('pi-participant-name') || '';
     var storedPercurso = localStorage.getItem('pi-percurso') || '';
 
@@ -162,13 +163,10 @@
     participantName = storedName;
     participantPercurso = storedPercurso;
 
-    // Reconectar listeners do Firebase se disponível
-    if (firebaseReady && db) {
-      _bindFirebaseListeners();
-    }
-
+    if (firebaseReady && db) _bindFirebaseListeners();
     return true;
-  }
+}
+
 
   function _bindFirebaseListeners() {
     if (!firebaseReady || !db || !sessionId) return;
@@ -208,14 +206,22 @@
     return function () { watchers.connection = watchers.connection.filter(function (fn) { return fn !== callback; }); };
   }
 
-  function setParticipantIdentity(name, percurso) {
+
+function setParticipantIdentity(name, percurso) {
     participantName = String(name || participantName || '').trim();
     participantPercurso = String(percurso || participantPercurso || '').trim();
-    participantId = localStorage.getItem('pi-participant-id') || generateId('participant');
-    localStorage.setItem('pi-participant-id', participantId);
+
+    // ── FIX: gera sempre um novo ID por login, sem reutilizar do dispositivo ──
+    // O ID antigo (pi-participant-id) era permanente no dispositivo.
+    // Agora usamos pi-session-participant-id que é limpo a cada novo joinSession.
+    var storedId = localStorage.getItem('pi-session-participant-id');
+    participantId = storedId || generateId('participant');
+
+    localStorage.setItem('pi-session-participant-id', participantId);
     localStorage.setItem('pi-participant-name', participantName);
     localStorage.setItem('pi-percurso', participantPercurso);
-  }
+}
+
 
   function joinSession(code, name, percurso, extra) {
     sessionId = sanitizeSessionCode(code);
@@ -251,13 +257,17 @@
     return true;
   }
 
-  function leaveSession() {
+
+function leaveSession() {
     if (!sessionId || !participantId) return false;
     upsertParticipant({ status: 'desconectado', saiuEm: nowIso(), ultimoAcessoEm: nowIso() });
     localStorage.removeItem('pi-session-id');
+    localStorage.removeItem('pi-session-participant-id');  // ← usa nova chave
     sessionId = '';
+    participantId = '';
     return true;
-  }
+}
+  
 
   function isInSession() { return !!sessionId; }
 

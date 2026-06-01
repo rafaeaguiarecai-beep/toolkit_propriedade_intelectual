@@ -36,6 +36,17 @@
         return [STORAGE_PREFIX].concat([].slice.call(arguments)).join(':');
     }
 
+    // ── FIX: chave de ferramenta agora inclui o participant-id para isolar por aluno ──
+    function toolStorageKey(toolId) {
+        var pid = localStorage.getItem('pi-session-participant-id') || 'anon';
+        return storageKey('tool', pid, String(toolId || '').trim());
+    }
+
+    function completedIndexKey() {
+        var pid = localStorage.getItem('pi-session-participant-id') || 'anon';
+        return storageKey('completed-index', pid);
+    }
+
     function read(key, fallback) {
         try {
             return safeJsonParse(localStorage.getItem(key), fallback);
@@ -100,7 +111,7 @@
 
     function getToolStore(toolId) {
         var id = normalizeToolId(toolId || getPageToolId());
-        return read(storageKey('tool', id), defaultToolStore(id));
+        return read(toolStorageKey(id), defaultToolStore(id));
     }
 
     function defaultToolStore(toolId) {
@@ -127,7 +138,7 @@
         next.metadados = merge(current.metadados || {}, next.metadados || {});
         next.metadados.atualizadoEm = nowIso();
         next.metadados.ultimaOrigem = (options && options.origin) || 'local';
-        write(storageKey('tool', id), next);
+        write(toolStorageKey(id), next);
         notifyToolUpdated(id, next);
         syncToolState(id, next, options);
         return next;
@@ -224,7 +235,7 @@
 
     function clearProgress(toolId, options) {
         var id = normalizeToolId(toolId || getPageToolId());
-        remove(storageKey('tool', id));
+        remove(toolStorageKey(id));
         remove(storageKey('autosave', id));
         clearCompletionIndex(id);
         notifyToolUpdated(id, defaultToolStore(id));
@@ -235,22 +246,22 @@
     }
 
     function updateCompletionIndex(toolId, store) {
-        var index = read(storageKey('completed-index'), {});
+        var index = read(completedIndexKey(), {});
         index[toolId] = {
             concluido: !!(store && store.metadados && store.metadados.concluido),
             concluidoEm: store && store.metadados ? store.metadados.concluidoEm || nowIso() : nowIso()
         };
-        write(storageKey('completed-index'), index);
+        write(completedIndexKey(), index);
     }
 
     function clearCompletionIndex(toolId) {
-        var index = read(storageKey('completed-index'), {});
+        var index = read(completedIndexKey(), {});
         delete index[normalizeToolId(toolId)];
-        write(storageKey('completed-index'), index);
+        write(completedIndexKey(), index);
     }
 
     function getCompletedIndex() {
-        return read(storageKey('completed-index'), {});
+        return read(completedIndexKey(), {});
     }
 
     function serializeForm(container) {
@@ -367,13 +378,13 @@
             completions: getCompletedIndex(),
             ferramentas: {}
         };
-
+        var pid = localStorage.getItem('pi-session-participant-id') || 'anon';
+        var prefix = STORAGE_PREFIX + ':tool:' + pid + ':';
         Object.keys(localStorage).forEach(function (key) {
-            if (key.indexOf(STORAGE_PREFIX + ':tool:') === 0) {
-                exportData.ferramentas[key.replace(STORAGE_PREFIX + ':tool:', '')] = read(key, {});
+            if (key.indexOf(prefix) === 0) {
+                exportData.ferramentas[key.replace(prefix, '')] = read(key, {});
             }
         });
-
         return exportData;
     }
 
@@ -383,7 +394,7 @@
             saveToolStore(toolId, data.ferramentas[toolId], Object.assign({}, options || {}, { skipSync: true, origin: 'import' }));
         });
         if (data.completions) {
-            write(storageKey('completed-index'), data.completions);
+            write(completedIndexKey(), data.completions);
         }
         return true;
     }

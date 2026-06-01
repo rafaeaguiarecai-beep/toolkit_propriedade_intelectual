@@ -925,7 +925,7 @@ function handleResume() {
 function handleSwitchSession() {
     // Limpa apenas os dados de sessão, preservando progresso local das ferramentas
     localStorage.removeItem('pi-session-id');
-    localStorage.removeItem('pi-participant-id');
+    localStorage.removeItem('pi-session-participant-id');
     localStorage.removeItem('pi-participant-name');
     localStorage.removeItem('pi-percurso');
 
@@ -1110,7 +1110,7 @@ function handleExit() {
 
     // Limpa os dados de sessão do localStorage
     localStorage.removeItem('pi-session-id');
-    localStorage.removeItem('pi-participant-id');
+    localStorage.removeItem('pi-session-participant-id');
     localStorage.removeItem('pi-participant-name');
     localStorage.removeItem('pi-percurso');
 
@@ -1169,6 +1169,28 @@ function updateConnectionStatus(online) {
             '</div>';
     }
 }
+
+/* ══════════════════════════════════════
+   MIGRAÇÃO DE SESSÃO LEGACY
+   ══════════════════════════════════════ */
+
+(function migrateLegacySessionKey() {
+    // Migra a chave antiga (pi-participant-id) para a nova (pi-session-participant-id)
+    // apenas se ainda não foi migrada e existe uma sessão ativa
+    var oldId = localStorage.getItem('pi-participant-id');
+    var newId = localStorage.getItem('pi-session-participant-id');
+    var sessionId = localStorage.getItem('pi-session-id');
+
+    if (oldId && !newId && sessionId) {
+        // Existe sessão antiga válida — migra o ID
+        localStorage.setItem('pi-session-participant-id', oldId);
+        // Remove a chave antiga para não interferir no futuro
+        localStorage.removeItem('pi-participant-id');
+    } else if (oldId && !sessionId) {
+        // Existe ID antigo mas sem sessão — limpa resíduo
+        localStorage.removeItem('pi-participant-id');
+    }
+})();
 
 /* ══════════════════════════════════════
    INICIALIZAÇÃO
