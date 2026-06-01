@@ -703,36 +703,96 @@ img { max-width: 100%; display: block; }
       <div class="login__logo-sub">Módulo do Aluno</div>
     </div>
 
-    <p class="login__desc">
-      Bem-vindo à oficina de Propriedade Intelectual.<br>
-      Informe seus dados para iniciar o percurso.
-    </p>
-
-    <div class="login__field">
-      <label for="loginName">Seu nome completo</label>
-      <input type="text" id="loginName" placeholder="Ex: Maria da Silva" maxlength="60" autocomplete="name">
+    <!-- ── PAINEL DE SESSÃO ANTERIOR (aparece quando já existe sessão salva) ── -->
+    <div id="resumePanel" style="display:none;">
+      <div style="
+        background: var(--green-bg);
+        border: 1px solid var(--green-border);
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+        margin-bottom: 1.2rem;
+        text-align: left;
+      ">
+        <p style="font-size:.82rem; font-weight:700; color:var(--green); margin-bottom:.5rem;">
+          ✅ Sessão anterior encontrada
+        </p>
+        <p style="font-size:.88rem; color:var(--text-mid); margin-bottom:.3rem;">
+          👤 <strong id="resumeName">—</strong>
+        </p>
+        <p style="font-size:.88rem; color:var(--text-mid); margin-bottom:.8rem;">
+          🔑 Oficina: <strong id="resumeCode">—</strong>
+        </p>
+        <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+          <button
+            class="login__btn"
+            style="flex:1; margin-top:0; background:var(--green);"
+            onclick="handleResume()"
+            aria-label="Continuar na mesma oficina"
+          >
+            ▶ Continuar nesta oficina
+          </button>
+          <button
+            class="login__btn"
+            style="flex:1; margin-top:0; background:transparent; border:2px solid var(--border); color:var(--text-mid);"
+            onclick="handleSwitchSession()"
+            aria-label="Entrar em outra oficina com novo código"
+          >
+            🔄 Trocar de oficina
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="login__field">
-      <label for="loginSession">Código da oficina</label>
-      <input type="text" id="loginSession" placeholder="Informe o código do facilitador" maxlength="30" style="text-transform:uppercase" autocomplete="off">
-    </div>
+    <!-- ── FORMULÁRIO DE NOVO LOGIN ── -->
+    <div id="loginForm">
+      <p class="login__desc">
+        Bem-vindo à oficina de Propriedade Intelectual.<br>
+        Informe seus dados para iniciar o percurso.
+      </p>
 
-    <div class="login__field">
-      <label for="loginPercurso">Percurso da oficina</label>
-      <select id="loginPercurso">
-        <option value="2h">Compacto — 2h (8 ferramentas essenciais)</option>
-        <option value="3h" selected>Padrão — 3h (12 ferramentas)</option>
-        <option value="4h">Completo — 4h (16 ferramentas)</option>
-      </select>
-    </div>
+      <div class="login__field">
+        <label for="loginName">Seu nome completo</label>
+        <input
+          type="text"
+          id="loginName"
+          placeholder="Ex: Maria da Silva"
+          maxlength="60"
+          autocomplete="name"
+        >
+      </div>
 
-    <button class="login__btn" id="loginBtn" onclick="handleLogin()">
-      Entrar na Oficina
-    </button>
+      <div class="login__field">
+        <label for="loginSession">Código da oficina</label>
+        <input
+          type="text"
+          id="loginSession"
+          placeholder="Informe o código do facilitador"
+          maxlength="30"
+          style="text-transform:uppercase"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="login__field">
+        <label for="loginPercurso">Percurso da oficina</label>
+        <select id="loginPercurso">
+          <option value="2h">Compacto — 2h (8 ferramentas essenciais)</option>
+          <option value="3h" selected>Padrão — 3h (12 ferramentas)</option>
+          <option value="4h">Completo — 4h (16 ferramentas)</option>
+        </select>
+      </div>
+
+      <button
+        class="login__btn"
+        id="loginBtn"
+        onclick="handleLogin()"
+        aria-label="Entrar na oficina com os dados preenchidos"
+      >
+        Entrar na Oficina
+      </button>
+    </div>
 
     <p class="login__error" id="loginError"></p>
-
     <div id="connectionStatus" style="text-align:center"></div>
 
     <div class="login__footer">
@@ -740,6 +800,7 @@ img { max-width: 100%; display: block; }
     </div>
   </div>
 </div>
+
 
 <div class="app" id="appScreen">
 
@@ -811,44 +872,79 @@ function handleLogin() {
     var session = document.getElementById('loginSession').value.trim().toUpperCase();
     var percurso = document.getElementById('loginPercurso').value;
 
-    // Validação
     if (!name || name.length < 3) {
         showLoginError('Informe seu nome completo (mínimo 3 caracteres).');
         document.getElementById('loginName').focus();
         return;
     }
-
     if (!session || session.length < 3) {
         showLoginError('Informe o código da oficina fornecido pelo facilitador.');
         document.getElementById('loginSession').focus();
         return;
     }
 
-    // Desabilitar botão durante conexão
     var btn = document.getElementById('loginBtn');
     btn.disabled = true;
     btn.textContent = 'Conectando...';
 
-    // Inicializar Firebase
     PISync.init(FIREBASE_CONFIG).then(function (online) {
-
-        // Entrar na sessão
         PISync.joinSession(session, name, percurso);
-
-        // Inicializar motor do aluno
         AlunoEngine.init(percurso);
-
-        // Mostrar app
         showApp();
-
     }).catch(function () {
-        // Mesmo sem Firebase, permite usar offline
         AlunoEngine.init(percurso);
         localStorage.setItem('pi-session-id', session);
         localStorage.setItem('pi-participant-name', name);
         showApp();
     });
 }
+
+
+/* Continua na sessão anterior sem precisar preencher o formulário */
+function handleResume() {
+    var btn = document.getElementById('loginBtn');
+    if (btn) { btn.disabled = true; }
+
+    PISync.init(FIREBASE_CONFIG).then(function () {
+        var restored = PISync.restoreSession();
+        var hasPercurso = AlunoEngine.restore();
+
+        if (restored && hasPercurso) {
+            showApp();
+        } else {
+            // Dados corrompidos — volta para o formulário limpo
+            handleSwitchSession();
+        }
+    }).catch(function () {
+        AlunoEngine.restore();
+        showApp();
+    });
+}
+
+/* Limpa a sessão atual e exibe o formulário de login para nova oficina */
+function handleSwitchSession() {
+    // Limpa apenas os dados de sessão, preservando progresso local das ferramentas
+    localStorage.removeItem('pi-session-id');
+    localStorage.removeItem('pi-participant-id');
+    localStorage.removeItem('pi-participant-name');
+    localStorage.removeItem('pi-percurso');
+
+    // Reseta o estado interno do PISync sem recarregar a página
+    if (window.PISync && typeof PISync.leaveSession === 'function') {
+        try { PISync.leaveSession(); } catch(e) {}
+    }
+
+    // Esconde o painel de retomada e exibe o formulário limpo
+    document.getElementById('resumePanel').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('loginName').value = '';
+    document.getElementById('loginSession').value = '';
+
+    var btn = document.getElementById('loginBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Entrar na Oficina'; }
+}
+
+
 
 function showLoginError(msg) {
     var el = document.getElementById('loginError');
@@ -1003,25 +1099,35 @@ function renderApp() {
    ══════════════════════════════════════ */
 
 function handleExit() {
-    if (!confirm('Tem certeza que deseja sair da oficina?\n\nSeu progresso está salvo e você pode voltar depois.')) {
+    if (!confirm('Sair da oficina?\n\nSeu progresso nas ferramentas fica salvo.\nVocê pode voltar depois com o mesmo nome e código.')) {
         return;
     }
 
-    // Não apaga dados — apenas volta à tela de login
+    // Notifica o Firebase que o participante saiu
+    if (window.PISync && typeof PISync.leaveSession === 'function') {
+        try { PISync.leaveSession(); } catch(e) {}
+    }
+
+    // Limpa os dados de sessão do localStorage
+    localStorage.removeItem('pi-session-id');
+    localStorage.removeItem('pi-participant-id');
+    localStorage.removeItem('pi-participant-name');
+    localStorage.removeItem('pi-percurso');
+
+    // Esconde o app e volta para a tela de login
     document.getElementById('appScreen').classList.remove('visible');
-    document.getElementById('appScreen').style.display = '';
     document.getElementById('loginScreen').style.display = '';
 
-    // Restaurar botão
-    var btn = document.getElementById('loginBtn');
-    btn.disabled = false;
-    btn.textContent = 'Entrar na Oficina';
+    // Reseta o formulário
+    document.getElementById('loginName').value = '';
+    document.getElementById('loginSession').value = '';
+    document.getElementById('resumePanel').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
 
-    // Preencher campos com dados anteriores
-    var info = PISync.getSessionMeta();
-    if (info.participantName) document.getElementById('loginName').value = info.participantName;
-    if (info.sessionId) document.getElementById('loginSession').value = info.sessionId;
+    var btn = document.getElementById('loginBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Entrar na Oficina'; }
 }
+
 
 /* ══════════════════════════════════════
    RETORNO DE FERRAMENTA
@@ -1069,38 +1175,35 @@ function updateConnectionStatus(online) {
    ══════════════════════════════════════ */
 
 (function boot() {
+    var savedCode = localStorage.getItem('pi-session-id');
+    var savedName = localStorage.getItem('pi-participant-name');
 
-    // Escutar mudanças de conexão
-    PISync.onConnectionChange(updateConnectionStatus);
+    if (savedCode && savedName) {
+        // Existe sessão anterior: mostra o painel de retomada
+        document.getElementById('resumeName').textContent = savedName;
+        document.getElementById('resumeCode').textContent = savedCode;
+        document.getElementById('resumePanel').style.display = 'block';
+        document.getElementById('loginForm').style.display = 'none';
 
-    // Tentar restaurar sessão anterior
+        // Pré-preenche os campos para caso o usuário queira trocar de oficina
+        document.getElementById('loginName').value = savedName;
+        document.getElementById('loginSession').value = savedCode;
+    } else {
+        // Nenhuma sessão anterior: mostra apenas o formulário normal
+        document.getElementById('resumePanel').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    }
+
+    // Inicializa Firebase em segundo plano para atualizar o status de conexão
     PISync.init(FIREBASE_CONFIG).then(function (online) {
-
         updateConnectionStatus(online);
-
-        var hasSession = PISync.restoreSession();
-        var hasPercurso = AlunoEngine.restore();
-
-        if (hasSession && hasPercurso) {
-            // Verificar se voltando de uma ferramenta
-            checkReturnFromTool();
-            showApp();
-        }
-        // Se não tem sessão, fica na tela de login
-
     }).catch(function () {
-
         updateConnectionStatus(false);
-
-        // Tentar restaurar offline
-        var hasPercurso = AlunoEngine.restore();
-        if (hasPercurso) {
-            checkReturnFromTool();
-            showApp();
-        }
     });
 
+    PISync.onConnectionChange(updateConnectionStatus);
 })();
+
 </script>
 
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
