@@ -1197,33 +1197,44 @@ function updateConnectionStatus(online) {
    ══════════════════════════════════════ */
 
 (function boot() {
-    var savedCode = localStorage.getItem('pi-session-id');
-    var savedName = localStorage.getItem('pi-participant-name');
+  /* ── Migração de chaves legadas ──
+     Remove o pi-participant-id permanente que causava colisão entre alunos.
+     A nova chave pi-session-participant-id é gerada por login e apagada no logout. */
+  (function migrateLegacyKeys() {
+    var oldId = localStorage.getItem('pi-participant-id');
+    var newId = localStorage.getItem('pi-session-participant-id');
+    var sid   = localStorage.getItem('pi-session-id');
 
-    if (savedCode && savedName) {
-        // Existe sessão anterior: mostra o painel de retomada
-        document.getElementById('resumeName').textContent = savedName;
-        document.getElementById('resumeCode').textContent = savedCode;
-        document.getElementById('resumePanel').style.display = 'block';
-        document.getElementById('loginForm').style.display = 'none';
-
-        // Pré-preenche os campos para caso o usuário queira trocar de oficina
-        document.getElementById('loginName').value = savedName;
-        document.getElementById('loginSession').value = savedCode;
-    } else {
-        // Nenhuma sessão anterior: mostra apenas o formulário normal
-        document.getElementById('resumePanel').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
+    if (oldId && !newId && sid) {
+      // Sessão ativa com chave antiga — migra para nova chave
+      localStorage.setItem('pi-session-participant-id', oldId);
     }
+    // Remove sempre a chave permanente antiga
+    localStorage.removeItem('pi-participant-id');
+  })();
 
-    // Inicializa Firebase em segundo plano para atualizar o status de conexão
-    PISync.init(FIREBASE_CONFIG).then(function (online) {
-        updateConnectionStatus(online);
-    }).catch(function () {
-        updateConnectionStatus(false);
-    });
+  var savedCode = localStorage.getItem('pi-session-id');
+  var savedName = localStorage.getItem('pi-participant-name');
 
-    PISync.onConnectionChange(updateConnectionStatus);
+  if (savedCode && savedName) {
+    document.getElementById('resumeName').textContent = savedName;
+    document.getElementById('resumeCode').textContent = savedCode;
+    document.getElementById('resumePanel').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('loginName').value = savedName;
+    document.getElementById('loginSession').value = savedCode;
+  } else {
+    document.getElementById('resumePanel').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+  }
+
+  PISync.init(FIREBASE_CONFIG).then(function (online) {
+    updateConnectionStatus(online);
+  }).catch(function () {
+    updateConnectionStatus(false);
+  });
+
+  PISync.onConnectionChange(updateConnectionStatus);
 })();
 
 </script>
