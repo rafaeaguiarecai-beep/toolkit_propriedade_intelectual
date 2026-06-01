@@ -212,6 +212,18 @@
   function joinSession(code, name, percurso, extra) {
     sessionId = sanitizeCode(code);
     if (!sessionId) throw new Error('Código da oficina inválido.');
+
+    /* ── FIX: reset de listeners do Firebase ao trocar de sessão/aluno ──
+       Sem isso, o segundo aluno reutiliza os listeners do primeiro */
+    if (firebaseSubscriptions.participants) {
+      firebaseSubscriptions.participants.off();
+      firebaseSubscriptions.participants = null;
+    }
+    if (firebaseSubscriptions.controls) {
+      firebaseSubscriptions.controls.off();
+      firebaseSubscriptions.controls = null;
+    }
+
     setIdentity(name, percurso || '3h');
     localStorage.setItem('pi-session-id', sessionId);
 
@@ -494,7 +506,12 @@
     return function () { stop(); watchers.ranking = watchers.ranking.filter(function (e) { return e !== job; }); };
   }
 
-  function getLocalCompletions() { return readJson('pi-thinking:completed-index', {}); }
+  function getLocalCompletions() {
+    /* ── FIX: usa a mesma chave com participant-id que o tool-bridge ──
+       Evita contaminar loadCompletions do aluno-engine com dados de outros alunos */
+    var pid = localStorage.getItem('pi-session-participant-id') || 'anon';
+    return readJson('pi-thinking:completed-index:' + pid, {});
+  }
 
   /* ── boot automático ── */
   (function () {

@@ -887,14 +887,20 @@ function handleLogin() {
     btn.disabled = true;
     btn.textContent = 'Conectando...';
 
+    /* ── FIX: limpa estado em memória antes de novo login ──
+       Garante que o AlunoEngine não herda completions do aluno anterior */
+    if (window.AlunoEngine && typeof AlunoEngine.reset === 'function') {
+        AlunoEngine.reset();
+    }
+
     PISync.init(FIREBASE_CONFIG).then(function (online) {
         PISync.joinSession(session, name, percurso);
         AlunoEngine.init(percurso);
         showApp();
     }).catch(function () {
-        AlunoEngine.init(percurso);
         localStorage.setItem('pi-session-id', session);
         localStorage.setItem('pi-participant-name', name);
+        AlunoEngine.init(percurso);
         showApp();
     });
 }
