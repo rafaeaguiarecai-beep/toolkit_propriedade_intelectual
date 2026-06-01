@@ -867,10 +867,13 @@ function showApp() {
     app.classList.add('visible');
     renderApp();
 
-    // Escutar atualizações de controle do facilitador
-    window.addEventListener('pi-controls-updated', function () {
-        renderApp();
-    });
+    // Escutar atualizações de controle do facilitador apenas uma vez
+    if (!window.__piAlunoControlsBound) {
+        window.addEventListener('pi-controls-updated', function () {
+            renderApp();
+        });
+        window.__piAlunoControlsBound = true;
+    }
 }
 
 function renderApp() {

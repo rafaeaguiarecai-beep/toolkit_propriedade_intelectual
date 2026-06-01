@@ -1189,6 +1189,21 @@
         document.getElementById('progressCount').textContent = answered + ' / ' + questions.length;
     }
 
+    function buildDetailedAnswers() {
+        var details = {};
+        questions.forEach(function (q) {
+            if (typeof answers[q.id] === 'undefined') return;
+            details[q.id] = {
+                questao: q.id,
+                categoria: q.category,
+                selecionada: answers[q.id],
+                correta: q.correct,
+                acertou: answers[q.id] === q.correct
+            };
+        });
+        return details;
+    }
+
     function showResults() {
         // Hide quiz
         document.getElementById('questionsContainer').style.display = 'none';
@@ -1413,12 +1428,13 @@
   showResults = function () {
     _showResults();
     var percentual = questions.length ? Math.round((score / questions.length) * 100) : 0;
+    var respostasDetalhadas = buildDetailedAnswers();
     if (window.PISync && typeof window.PISync.saveQuizResult === 'function' && window.PISync.isInSession && window.PISync.isInSession()) {
       window.PISync.saveQuizResult('quiz-diagnostico', {
         pontuacao: score,
         percentual: percentual,
         codigo: 'D-' + score,
-        respostas: answers,
+        respostas: respostasDetalhadas,
         total: questions.length,
         atualizadoEm: new Date().toISOString()
       });
@@ -1428,7 +1444,7 @@
         pontuacao: score,
         percentual: percentual,
         codigo: 'D-' + score,
-        respostas: answers
+        respostas: respostasDetalhadas
       });
     }
     persistDiagnostic(true);

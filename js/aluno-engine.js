@@ -264,7 +264,7 @@
 
     function restore() {
         var saved = localStorage.getItem('pi-percurso');
-        if (!saved) return init('3h');
+        if (!saved) return false;
         return init(saved);
     }
 

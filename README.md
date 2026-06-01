@@ -10,7 +10,7 @@
 
 ## 1. Visão geral
 
-O **PI Thinking** é um kit de ferramentas web em **HTML, CSS e JavaScript vanilla**, com sincronização opcional via **Firebase Realtime Database**, criado para apoiar oficinas presenciais, híbridas e atividades assíncronas sobre Propriedade Intelectual.
+O **PI Thinking** é um kit de ferramentas web em **HTML, CSS e JavaScript vanilla**, criado para apoiar oficinas presenciais, híbridas e atividades assíncronas sobre Propriedade Intelectual.
 
 A proposta combina:
 
@@ -26,13 +26,13 @@ A proposta combina:
 
 ### Fases e ferramentas
 
-| Fase | Nome | Ferramentas | Bloom |
+| Fase | Nome | Ferramentas | Bloom | Modelo de trabalho |
 |---|---|---|---|
-| 1 | **Descobrir** | Quiz Diagnóstico (E), Cartas Personas (E), Mapa de Empatia (R) | Lembrar, Compreender |
-| 2 | **Diagnosticar** | Canvas de Diagnóstico (E), Árvore de Decisão (E), Linha do Tempo (O) | Compreender, Aplicar |
-| 3 | **Estrategar** | Busca de Anterioridade (R), Roteiro de Proteção (R), Canvas de Estratégia (E) | Aplicar, Analisar |
-| 4 | **Testar** | Simulador de Depósito (E), Baralho de Dilemas (E), Escape Room (O) | Analisar, Avaliar |
-| 5 | **Evoluir** | Quiz Final (E), Canvas de Avaliação (R) | Avaliar, Criar |
+| 1 | **Descobrir** | Quiz Diagnóstico (E), Cartas Personas (E), Mapa de Empatia (R) | Lembrar, Compreender | Individual + pausa curta de discussão |
+| 2 | **Diagnosticar** | Canvas de Diagnóstico (E), Árvore de Decisão (E), Linha do Tempo (O) | Compreender, Aplicar | Individual + pausa curta de discussão |
+| 3 | **Estrategar** | Busca de Anterioridade (R), Roteiro de Proteção (R), Canvas de Estratégia (E) | Aplicar, Analisar | Individual + pausa curta de discussão |
+| 4 | **Testar** | Simulador de Depósito (E), Baralho de Dilemas (E), Escape Room (O) | Analisar, Avaliar | Individual, com debate opcional nas ferramentas críticas |
+| 5 | **Evoluir** | Quiz Final (E), Canvas de Avaliação (R) | Avaliar, Criar | Individual |
 
 **Legenda:** E = Essencial · R = Recomendada · O = Opcional
 
@@ -47,6 +47,12 @@ A proposta combina:
 - Glossário Dinâmico
 - Calculadora de Vigência
 - Árvore de Decisão
+
+### Modelo pedagógico recomendado
+
+- interação principal sempre individual;
+- discussões em dupla ou pequenos pares apenas como pausas curtas, sem exigir reconfiguração formal da turma;
+- registro e acompanhamento mantidos por participante, o que simplifica o uso do dashboard e a leitura do progresso.
 
 ---
 

@@ -84,6 +84,63 @@
         return (prefix || 'pi') + '-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
     }
 
+
+    function countKeys(obj) {
+        return Object.keys(obj || {}).length;
+    }
+
+    function buildLegacyFerramentas(toolStates) {
+        var source = toolStates || {};
+        var legacy = {};
+        Object.keys(source).forEach(function (toolId) {
+            var store = source[toolId] || {};
+            var meta = store.metadados || {};
+            if (!meta.concluido) return;
+
+            var dados = safeMerge({}, store.formulario || {});
+            dados = safeMerge(dados, store.progresso || {});
+
+            if (store.respostas && countKeys(store.respostas)) {
+                dados.respostas = store.respostas;
+            }
+
+            legacy[toolId] = {
+                dados: dados,
+                respostas: store.respostas || {},
+                progresso: store.progresso || {},
+                formulario: store.formulario || {},
+                concluido: true,
+                atualizadoEm: meta.atualizadoEm || nowIso(),
+                concluidoEm: meta.concluidoEm || meta.atualizadoEm || nowIso()
+            };
+        });
+        return legacy;
+    }
+
+    function normalizeQuizSnapshot(entry, prefix) {
+        if (!entry) return null;
+        var score = entry.pontuacao;
+        if (typeof score === 'undefined') score = entry.score;
+        score = Number(score || 0);
+        return {
+            score: score,
+            pontuacao: score,
+            percentual: typeof entry.percentual !== 'undefined' ? Number(entry.percentual || 0) : 0,
+            codigo: entry.codigo || (prefix ? prefix + '-' + score : ''),
+            respostas: entry.respostas || {},
+            total: entry.total || 0,
+            atualizadoEm: entry.atualizadoEm || nowIso()
+        };
+    }
+
+    function buildLegacyQuizAliases(quiz) {
+        var source = quiz || {};
+        return {
+            diagnostico: normalizeQuizSnapshot(source['quiz-diagnostico'], 'D'),
+            final: normalizeQuizSnapshot(source['quiz-final'], 'F')
+        };
+    }
+
     function getDefaultControls() {
         return {
             fases_liberadas: [1],
@@ -366,6 +423,13 @@
         next.nome = next.nome || participantName;
         next.percurso = next.percurso || participantPercurso;
         next.ultimoAcessoEm = nowIso();
+        next.toolStates = safeMerge({}, next.toolStates || {});
+        next.quiz = safeMerge({}, next.quiz || {});
+        next.ferramentas = buildLegacyFerramentas(next.toolStates);
+
+        var aliases = buildLegacyQuizAliases(next.quiz);
+        next.diagnostico = aliases.diagnostico;
+        next.final = aliases.final;
 
         data.participants = data.participants || {};
         data.participants[participantId] = next;

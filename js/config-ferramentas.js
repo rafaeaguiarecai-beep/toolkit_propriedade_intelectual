@@ -110,7 +110,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 1,
-            resumo: 'Diagnóstico inicial de conhecimentos prévios sobre PI.'
+            resumo: 'Diagnóstico inicial de conhecimentos prévios sobre PI.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'cartas-personas',
@@ -123,7 +129,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 2,
-            resumo: 'Explora perfis de usuários e situações de criação.'
+            resumo: 'Explora perfis de usuários e situações de criação.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: true,
+                duracaoPausa: '2–3 min',
+                rotulo: 'Pausa para Discussão'
+            }
         },
         {
             id: 'mapa-empatia',
@@ -136,7 +148,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 3,
-            resumo: 'Aprofunda a compreensão do inventor e do contexto da criação.'
+            resumo: 'Aprofunda a compreensão do inventor e do contexto da criação.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: true,
+                duracaoPausa: '2–3 min',
+                rotulo: 'Pausa para Discussão'
+            }
         },
         {
             id: 'canvas-diagnostico',
@@ -149,7 +167,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 4,
-            resumo: 'Organiza evidências para análise do problema de PI.'
+            resumo: 'Organiza evidências para análise do problema de PI.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: true,
+                duracaoPausa: '2–3 min',
+                rotulo: 'Pausa para Discussão'
+            }
         },
         {
             id: 'arvore',
@@ -162,7 +186,13 @@
             sincrona: true,
             apoio: true,
             ordemCompleta: 5,
-            resumo: 'Ajuda a decidir caminhos de proteção conforme o tipo de criação.'
+            resumo: 'Ajuda a decidir caminhos de proteção conforme o tipo de criação.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'linha-do-tempo',
@@ -175,7 +205,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 6,
-            resumo: 'Contextualiza a evolução histórica da PI no Brasil.'
+            resumo: 'Contextualiza a evolução histórica da PI no Brasil.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'busca',
@@ -188,7 +224,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 7,
-            resumo: 'Estimula investigação de anterioridade e referência tecnológica.'
+            resumo: 'Estimula investigação de anterioridade e referência tecnológica.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'storyboard',
@@ -201,7 +243,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 8,
-            resumo: 'Constrói a narrativa visual da ideia até o registro.'
+            resumo: 'Constrói a narrativa visual da ideia até o registro.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: true,
+                duracaoPausa: '2–3 min',
+                rotulo: 'Pausa para Discussão'
+            }
         },
         {
             id: 'canvas-estrategia',
@@ -214,7 +262,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 9,
-            resumo: 'Consolida a estratégia de proteção e encaminhamento.'
+            resumo: 'Consolida a estratégia de proteção e encaminhamento.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: true,
+                duracaoPausa: '2–3 min',
+                rotulo: 'Pausa para Discussão'
+            }
         },
         {
             id: 'simulador-deposito',
@@ -227,7 +281,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 10,
-            resumo: 'Simula o depósito com etapas, custos e documentação.'
+            resumo: 'Simula o depósito com etapas, custos e documentação.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'baralho-dilemas',
@@ -240,7 +300,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 11,
-            resumo: 'Promove debate ético e estratégico sobre decisões em PI.'
+            resumo: 'Promove debate ético e estratégico sobre decisões em PI.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: true,
+                duracaoPausa: '3–4 min',
+                rotulo: 'Pausa para Discussão'
+            }
         },
         {
             id: 'escape-room',
@@ -253,7 +319,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 12,
-            resumo: 'Desafia a equipe com enigmas de PI em formato lúdico.'
+            resumo: 'Desafia a equipe com enigmas de PI em formato lúdico.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'quiz-final',
@@ -266,7 +338,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 13,
-            resumo: 'Avaliação final da oficina e comparação com o diagnóstico.'
+            resumo: 'Avaliação final da oficina e comparação com o diagnóstico.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'canvas-avaliacao',
@@ -279,7 +357,13 @@
             sincrona: true,
             apoio: false,
             ordemCompleta: 14,
-            resumo: 'Sistematiza aprendizados, melhorias e próximos passos.'
+            resumo: 'Sistematiza aprendizados, melhorias e próximos passos.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'pi-quest',
@@ -293,7 +377,13 @@
             posOficina: true,
             apoio: false,
             ordemCompleta: 15,
-            resumo: 'Trilha assíncrona pós-oficina liberada após a conclusão do percurso.'
+            resumo: 'Trilha assíncrona pós-oficina liberada após a conclusão do percurso.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'glossario',
@@ -306,7 +396,13 @@
             sincrona: false,
             apoio: true,
             ordemCompleta: 0,
-            resumo: 'Consulta rápida a conceitos de PI.'
+            resumo: 'Consulta rápida a conceitos de PI.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'calculadora',
@@ -319,7 +415,13 @@
             sincrona: false,
             apoio: true,
             ordemCompleta: 0,
-            resumo: 'Cálculo de vigência e prazos de proteção.'
+            resumo: 'Cálculo de vigência e prazos de proteção.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         },
         {
             id: 'crazy8s',
@@ -333,7 +435,13 @@
             legado: true,
             apoio: false,
             ordemCompleta: 999,
-            resumo: 'Arquivo legado mantido apenas para referência histórica.'
+            resumo: 'Arquivo legado mantido apenas para referência histórica.',
+            modoTrabalho: {
+                modo: 'individual',
+                pausaDiscussao: false,
+                duracaoPausa: '',
+                rotulo: ''
+            }
         }
     ];
 

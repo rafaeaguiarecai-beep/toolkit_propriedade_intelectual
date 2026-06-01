@@ -659,6 +659,7 @@ function createOffice() {
         }
 
         try {
+            // Correção de API: O método correto no sync.js é joinSession e ele é síncrono.
             PISync.joinSession(code, name, percurso, { role: 'facilitador' });
             
             officeCode = code;
@@ -693,6 +694,7 @@ function showDashboard() {
 function exitDash() {
     if (!confirm('Sair do dashboard?')) return;
     
+    // Correção de API: Funções sem parâmetros pois o sessionId é interno no sync.js
     PISync.stopWatchingParticipants();
     PISync.stopWatchingControls();
     PISync.leaveSession();
@@ -708,11 +710,13 @@ function exitDash() {
    ══════════════════════════════════════ */
 
 function startListening() {
+    // Correção de API: Passa apenas o callback
     PISync.watchParticipants(function(data) {
         participants = data || {};
         renderAll();
     });
 
+    // Correção de API: Para acompanhar os controles da oficina (fases liberadas)
     PISync.watchControls(function(controls) {
         if(controls && controls.fases_liberadas) {
             releasedPhases = controls.fases_liberadas;
@@ -734,8 +738,56 @@ function refreshData() { showToast('Dados atualizados em tempo real'); }
    RENDER ALL
    ══════════════════════════════════════ */
 
+function normalizeQuizEntry(entry, prefix) {
+    if (!entry) return null;
+    var score = entry.score;
+    if (typeof score === 'undefined') score = entry.pontuacao;
+    score = Number(score || 0);
+    return {
+        score: score,
+        pontuacao: score,
+        percentual: typeof entry.percentual !== 'undefined' ? Number(entry.percentual || 0) : 0,
+        codigo: entry.codigo || (prefix ? prefix + '-' + score : ''),
+        respostas: entry.respostas || {}
+    };
+}
+
+function buildFerramentasView(toolStates) {
+    var source = toolStates || {};
+    var output = {};
+    Object.keys(source).forEach(function (toolId) {
+        var store = source[toolId] || {};
+        var meta = store.metadados || {};
+        if (!meta.concluido) return;
+        var dados = Object.assign({}, store.formulario || {}, store.progresso || {});
+        if (store.respostas && Object.keys(store.respostas).length) {
+            dados.respostas = store.respostas;
+        }
+        output[toolId] = {
+            dados: dados,
+            respostas: store.respostas || {}
+        };
+    });
+    return output;
+}
+
+function normalizeParticipantData(participant) {
+    var p = participant || {};
+    var diagnostico = p.diagnostico || (p.quiz && p.quiz['quiz-diagnostico']) || null;
+    var finalQuiz = p.final || (p.quiz && p.quiz['quiz-final']) || null;
+    return Object.assign({}, p, {
+        diagnostico: normalizeQuizEntry(diagnostico, 'D'),
+        final: normalizeQuizEntry(finalQuiz, 'F'),
+        ferramentas: p.ferramentas || buildFerramentasView(p.toolStates || {})
+    });
+}
+
 function renderAll() {
-    var pList = Object.values(participants);
+    var pList = Object.values(participants)
+        .map(normalizeParticipantData)
+        .filter(function (p) {
+            return !(p.extras && p.extras.role === 'facilitador');
+        });
     renderStats(pList);
     renderRanking(pList);
     renderParticipants(pList);
@@ -744,34 +796,26 @@ function renderAll() {
 }
 
 /* ══════════════════════════════════════
-   STATS (Refatorado para a estrutura do sync.js)
+   STATS
    ══════════════════════════════════════ */
 
 function renderStats(pList) {
     var total = pList.length;
     var ativos = pList.filter(function(p){ return p.status === 'ativo'; }).length;
 
-    var diagScores = pList.filter(function(p){ 
-        return p.quiz && p.quiz['quiz-diagnostico'] && p.quiz['quiz-diagnostico'].pontuacao !== undefined; 
-    }).map(function(p){ return p.quiz['quiz-diagnostico'].pontuacao; });
-    
-    var finalScores = pList.filter(function(p){ 
-        return p.quiz && p.quiz['quiz-final'] && p.quiz['quiz-final'].pontuacao !== undefined; 
-    }).map(function(p){ return p.quiz['quiz-final'].pontuacao; });
+    var diagScores = pList.filter(function(p){ return p.diagnostico && p.diagnostico.score !== undefined; })
+        .map(function(p){ return p.diagnostico.score; });
+    var finalScores = pList.filter(function(p){ return p.final && p.final.score !== undefined; })
+        .map(function(p){ return p.final.score; });
 
     var avgD = diagScores.length ? (sum(diagScores)/diagScores.length).toFixed(1) : '—';
     var avgF = finalScores.length ? (sum(finalScores)/finalScores.length).toFixed(1) : '—';
 
-    var evos = pList.filter(function(p){ 
-        return p.quiz && p.quiz['quiz-diagnostico'] && p.quiz['quiz-diagnostico'].pontuacao !== undefined && 
-               p.quiz['quiz-final'] && p.quiz['quiz-final'].pontuacao !== undefined; 
-    }).map(function(p){ 
-        return p.quiz['quiz-final'].pontuacao - p.quiz['quiz-diagnostico'].pontuacao; 
-    });
-    
+    var evos = pList.filter(function(p){ return p.diagnostico && p.final; })
+        .map(function(p){ return p.final.score - p.diagnostico.score; });
     var avgE = evos.length ? (sum(evos)/evos.length).toFixed(1) : '—';
 
-    var toolCounts = pList.map(function(p){ return p.toolStates ? Object.keys(p.toolStates).length : 0; });
+    var toolCounts = pList.map(function(p){ return p.ferramentas ? Object.keys(p.ferramentas).length : 0; });
     var avgC = total ? Math.round(sum(toolCounts)/(total*ALL_TOOLS.length)*100) : 0;
 
     document.getElementById('sTotal').textContent = total;
@@ -786,7 +830,7 @@ function renderStats(pList) {
 }
 
 /* ══════════════════════════════════════
-   RANKING (Refatorado)
+   RANKING
    ══════════════════════════════════════ */
 
 function setRankingType(type) {
@@ -803,18 +847,16 @@ function renderRanking(pList) {
 
     pList.forEach(function(p) {
         var entry = { nome: p.nome || '?', score: null, extra: '' };
-        var dQuiz = p.quiz ? p.quiz['quiz-diagnostico'] : null;
-        var fQuiz = p.quiz ? p.quiz['quiz-final'] : null;
 
-        if (rankingType === 'diagnostico' && dQuiz && dQuiz.pontuacao !== undefined) {
-            entry.score = dQuiz.pontuacao;
-            entry.extra = dQuiz.percentual ? dQuiz.percentual + '%' : '';
-        } else if (rankingType === 'final' && fQuiz && fQuiz.pontuacao !== undefined) {
-            entry.score = fQuiz.pontuacao;
-            entry.extra = fQuiz.percentual ? fQuiz.percentual + '%' : '';
-        } else if (rankingType === 'evolucao' && dQuiz && fQuiz && dQuiz.pontuacao !== undefined && fQuiz.pontuacao !== undefined) {
-            entry.score = fQuiz.pontuacao - dQuiz.pontuacao;
-            entry.extra = 'D-'+dQuiz.pontuacao+' → F-'+fQuiz.pontuacao;
+        if (rankingType === 'diagnostico' && p.diagnostico) {
+            entry.score = p.diagnostico.score;
+            entry.extra = p.diagnostico.codigo || '';
+        } else if (rankingType === 'final' && p.final) {
+            entry.score = p.final.score;
+            entry.extra = p.final.codigo || '';
+        } else if (rankingType === 'evolucao' && p.diagnostico && p.final) {
+            entry.score = p.final.score - p.diagnostico.score;
+            entry.extra = 'D-'+p.diagnostico.score+' → F-'+p.final.score;
         }
 
         if (entry.score !== null) entries.push(entry);
@@ -860,7 +902,7 @@ function renderRanking(pList) {
 }
 
 /* ══════════════════════════════════════
-   PARTICIPANTES TABLE (Refatorado)
+   PARTICIPANTES TABLE
    ══════════════════════════════════════ */
 
 function renderParticipants(pList) {
@@ -875,15 +917,11 @@ function renderParticipants(pList) {
     var html = '';
     pList.forEach(function(p) {
         var status = p.status || 'desconectado';
-        
-        var dQuiz = p.quiz ? p.quiz['quiz-diagnostico'] : null;
-        var fQuiz = p.quiz ? p.quiz['quiz-final'] : null;
-        
-        var dScore = (dQuiz && dQuiz.pontuacao !== undefined) ? dQuiz.pontuacao : null;
-        var fScore = (fQuiz && fQuiz.pontuacao !== undefined) ? fQuiz.pontuacao : null;
+        var dScore = p.diagnostico ? p.diagnostico.score : null;
+        var fScore = p.final ? p.final.score : null;
         var evo = (dScore !== null && fScore !== null) ? fScore - dScore : null;
 
-        var ferramentas = p.toolStates || {};
+        var ferramentas = p.ferramentas || {};
         var doneCount = Object.keys(ferramentas).length;
         var pct = Math.round((doneCount/ALL_TOOLS.length)*100);
 
@@ -920,7 +958,7 @@ function renderParticipants(pList) {
 }
 
 /* ══════════════════════════════════════
-   ANÁLISE (Refatorado)
+   ANÁLISE
    ══════════════════════════════════════ */
 
 function renderAnalysis(pList) {
@@ -939,7 +977,7 @@ function renderToolChart(pList) {
     var html = '';
 
     ALL_TOOLS.forEach(function(t) {
-        var count = pList.filter(function(p){ return p.toolStates && p.toolStates[t.id]; }).length;
+        var count = pList.filter(function(p){ return p.ferramentas && p.ferramentas[t.id]; }).length;
         var pct = Math.round((count/total)*100);
         html += '<div class="bar-row">';
         html += '<div class="bar-label">'+t.nome+'</div>';
@@ -956,8 +994,8 @@ function renderErrorChart(pList) {
     var questionStats = {};
 
     pList.forEach(function(p) {
-        if (!p.quiz || !p.quiz['quiz-diagnostico'] || !p.quiz['quiz-diagnostico'].respostas) return;
-        var resps = p.quiz['quiz-diagnostico'].respostas;
+        if (!p.diagnostico || !p.diagnostico.respostas) return;
+        var resps = p.diagnostico.respostas;
         Object.keys(resps).forEach(function(key) {
             var r = resps[key];
             var qNum = r.questao || (parseInt(key)+1);
@@ -991,11 +1029,10 @@ function renderTRLChart(pList) {
     var trlCounts = {};
 
     pList.forEach(function(p) {
-        if (!p.toolStates || !p.toolStates['canvas-diagnostico']) return;
-        var ferramenta = p.toolStates['canvas-diagnostico'];
-        var dados = ferramenta.dados || ferramenta.metadados || {};
-        var trl = dados.trl || ferramenta.trl;
-        if (!trl) return;
+        if (!p.ferramentas || !p.ferramentas['canvas-diagnostico']) return;
+        var dados = p.ferramentas['canvas-diagnostico'].dados;
+        if (!dados || !dados.trl) return;
+        var trl = dados.trl;
         trlCounts[trl] = (trlCounts[trl] || 0) + 1;
     });
 
@@ -1023,14 +1060,12 @@ function renderStarsChart(pList) {
     var faseCounts = {};
 
     pList.forEach(function(p) {
-        if (!p.toolStates || !p.toolStates['canvas-avaliacao']) return;
-        var ferramenta = p.toolStates['canvas-avaliacao'];
-        var dados = ferramenta.dados || ferramenta.metadados || {};
-        var estrelas = dados.estrelas || ferramenta.estrelas;
-        if (!estrelas) return;
+        if (!p.ferramentas || !p.ferramentas['canvas-avaliacao']) return;
+        var dados = p.ferramentas['canvas-avaliacao'].dados;
+        if (!dados || !dados.estrelas) return;
 
-        Object.keys(estrelas).forEach(function(fase) {
-            var val = estrelas[fase];
+        Object.keys(dados.estrelas).forEach(function(fase) {
+            var val = dados.estrelas[fase];
             if (val > 0) {
                 faseStars[fase] = (faseStars[fase] || 0) + val;
                 faseCounts[fase] = (faseCounts[fase] || 0) + 1;
@@ -1089,15 +1124,18 @@ function renderPhaseControls() {
 function togglePhase(phaseNum, checked) {
     if (checked) {
         if (releasedPhases.indexOf(phaseNum) === -1) releasedPhases.push(phaseNum);
+        // Liberar também todas as fases anteriores
         for (var i = 1; i < phaseNum; i++) {
             if (releasedPhases.indexOf(i) === -1) releasedPhases.push(i);
         }
     } else {
+        // Bloquear esta e todas as fases posteriores
         releasedPhases = releasedPhases.filter(function(p) { return p < phaseNum; });
     }
 
     releasedPhases.sort();
 
+    // Correção de API: A função correta do sync.js para alterar fases
     PISync.setReleasedPhases(releasedPhases);
     showToast('Fases atualizadas: ' + releasedPhases.join(', '));
     renderPhaseControls();
@@ -1116,25 +1154,25 @@ function switchTab(tabId, element) {
 }
 
 /* ══════════════════════════════════════
-   EXPORT CSV (Refatorado)
+   EXPORT CSV
    ══════════════════════════════════════ */
 
 function exportCSV() {
-    var pList = Object.values(participants);
+    var pList = Object.values(participants)
+        .map(normalizeParticipantData)
+        .filter(function (p) {
+            return !(p.extras && p.extras.role === 'facilitador');
+        });
     if (!pList.length) { showToast('Nenhum dado para exportar'); return; }
 
-    var header = 'Nome,Percurso,Status,Quiz Diagnostico,Quiz Final,Evolucao,Ferramentas Concluidas,Total,Progresso %\n';
+    var header = 'Nome,Percurso,Status,Quiz Diagnostico,Quiz Final,Evolução,Ferramentas Concluídas,Total,Progresso %\n';
     var rows = '';
 
     pList.forEach(function(p) {
-        var dQuiz = p.quiz ? p.quiz['quiz-diagnostico'] : null;
-        var fQuiz = p.quiz ? p.quiz['quiz-final'] : null;
-        
-        var dScore = (dQuiz && dQuiz.pontuacao !== undefined) ? dQuiz.pontuacao : '';
-        var fScore = (fQuiz && fQuiz.pontuacao !== undefined) ? fQuiz.pontuacao : '';
+        var dScore = p.diagnostico ? p.diagnostico.score : '';
+        var fScore = p.final ? p.final.score : '';
         var evo = (dScore !== '' && fScore !== '') ? (fScore - dScore) : '';
-        
-        var ferrCount = p.toolStates ? Object.keys(p.toolStates).length : 0;
+        var ferrCount = p.ferramentas ? Object.keys(p.ferramentas).length : 0;
         var pct = Math.round((ferrCount/ALL_TOOLS.length)*100);
 
         rows += '"'+(p.nome||'')+'",'+(p.percurso||'')+','+(p.status||'')+',';
@@ -1174,6 +1212,7 @@ function sum(arr) { return arr.reduce(function(a,b){ return a+b; }, 0); }
    ══════════════════════════════════════ */
 
 (function boot() {
+    // Tentar restaurar sessão anterior
     var savedCode = localStorage.getItem('pi-dash-office');
     var savedName = localStorage.getItem('pi-dash-name');
 

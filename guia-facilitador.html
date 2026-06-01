@@ -299,10 +299,11 @@ h4 {
 .callout__body { flex: 1; }
 .callout__body strong { font-weight: 700; }
 
-.callout--tip     { background: var(--green-bg);  border-left: 4px solid var(--green); }
-.callout--warning { background: var(--orange-bg); border-left: 4px solid var(--orange); }
-.callout--info    { background: var(--accent-bg); border-left: 4px solid var(--accent); }
-.callout--danger  { background: var(--red-bg);    border-left: 4px solid var(--red); }
+.callout--tip        { background: var(--green-bg);  border-left: 4px solid var(--green); }
+.callout--warning    { background: var(--orange-bg); border-left: 4px solid var(--orange); }
+.callout--info       { background: var(--accent-bg); border-left: 4px solid var(--accent); }
+.callout--danger     { background: var(--red-bg);    border-left: 4px solid var(--red); }
+.callout--discussion { background: #f3e8ff; border-left: 4px solid #7c3aed; }
 
 /* ══════════════════════════════════════════════════════════════
    CARDS & CARD GRID
@@ -873,7 +874,7 @@ select:focus-visible {
   <div class="prose">
     <p>O <strong>PI Thinking</strong> é um toolkit educacional que aplica o Design Thinking ao ensino de Propriedade Intelectual. Ele foi desenvolvido no âmbito do PROFNIT — ponto focal UFRR, alinhado ao Eixo 2 da Estratégia Nacional de Propriedade Intelectual (ENPI 2021-2030). São <strong>16 ferramentas interativas</strong> organizadas em <strong>5 fases</strong> e classificadas em 3 níveis de prioridade, prontas para oficinas presenciais ou remotas de 2 a 4 horas.</p>
 
-    <p>Todas as ferramentas funcionam diretamente no navegador (celular, tablet ou computador), sem necessidade de instalação. Após o primeiro carregamento, a maioria funciona offline. A plataforma inclui um <strong>Módulo do Aluno</strong> (progressão guiada) e um <strong>Dashboard do Facilitador</strong> (acompanhamento em tempo real), conectados via Firebase.</p>
+    <p>Todas as ferramentas funcionam diretamente no navegador (celular, tablet ou computador), sem necessidade de instalação. Após o primeiro carregamento, a maioria funciona offline. A plataforma inclui um <strong>Módulo do Aluno</strong> (progressão guiada) e um <strong>Dashboard do Facilitador</strong> (acompanhamento em tempo real), conectados automaticamente durante a oficina.</p>
   </div>
 
   <div class="callout callout--tip">
@@ -929,7 +930,7 @@ select:focus-visible {
   <h2 class="section__title">Sistema de Oficina: Dashboard e Módulo do Aluno</h2>
 
   <div class="prose">
-    <p>O PI Thinking conta com um sistema integrado de acompanhamento em tempo real que conecta o facilitador aos participantes durante toda a oficina. Esse sistema é composto por dois módulos complementares que se comunicam via Firebase Realtime Database, sem necessidade de servidor próprio.</p>
+    <p>O PI Thinking conta com um sistema integrado de acompanhamento em tempo real que conecta o facilitador aos participantes durante toda a oficina. Esse sistema é composto por dois módulos complementares que mantêm a oficina sincronizada sem exigir nenhuma configuração técnica por parte da turma.</p>
   </div>
 
   <!-- ── Dashboard do Facilitador ── -->
@@ -968,7 +969,7 @@ select:focus-visible {
     <div class="step">
       <div class="step__number">4</div>
       <div class="step__content">
-        <strong>Clique em "Criar / Entrar na Oficina".</strong> O Dashboard se conectará ao Firebase e você será levado à tela principal com as abas de monitoramento.
+        <strong>Clique em "Criar / Entrar na Oficina".</strong> O Dashboard abrirá a sala da oficina e você será levado à tela principal com as abas de monitoramento.
       </div>
     </div>
   </div>
@@ -1011,14 +1012,14 @@ select:focus-visible {
   <div class="callout callout--warning">
     <div class="callout__icon">⚠️</div>
     <div class="callout__body">
-      <strong>Requisito de conexão:</strong> O Dashboard precisa de internet ativa para receber dados do Firebase. Se a conexão cair, um badge "Offline" aparecerá no topo. Os dados já recebidos continuam na tela, mas não serão atualizados até a reconexão. Os alunos, por sua vez, salvam progresso localmente no navegador, então uma queda breve de Wi-Fi não causa perda de trabalho.
+      <strong>Requisito de conexão:</strong> O Dashboard precisa de internet ativa para receber os registros dos participantes. Se a conexão cair, um badge "Offline" aparecerá no topo. Os dados já recebidos continuam na tela e novos envios voltam a aparecer quando a conexão se restabelece.
     </div>
   </div>
 
   <!-- ── Módulo do Aluno ── -->
   <h3>🎓 Módulo do Aluno</h3>
   <div class="prose">
-    <p>O Módulo do Aluno é a interface individual de cada participante durante a oficina. Ele funciona como um "roteiro digital" que apresenta as ferramentas na ordem correta, controla o desbloqueio progressivo e envia os resultados automaticamente ao Dashboard.</p>
+    <p>O Módulo do Aluno é a interface individual de cada participante durante a oficina. Ele funciona como um roteiro digital que apresenta as ferramentas na ordem correta, controla o desbloqueio progressivo e registra os resultados automaticamente no Dashboard.</p>
   </div>
 
   <div class="callout callout--info">
@@ -1056,16 +1057,16 @@ select:focus-visible {
     </div>
   </div>
 
-  <h4>Como funciona o envio de resultados</h4>
+  <h4>Como funciona o registro de resultados</h4>
   <div class="prose">
-    <p>Cada ferramenta do toolkit inclui um componente invisível chamado <strong>Tool Bridge</strong> (<code>js/tool-bridge.js</code>). Quando o aluno está em sessão de oficina, esse componente detecta automaticamente a conexão Firebase e envia os dados da ferramenta (respostas do quiz, conteúdo dos canvas, registros do Painel de Busca Guiada, resultado da Árvore de Decisão, etc.) ao banco de dados em tempo real. O aluno não precisa fazer nada além de usar a ferramenta normalmente — o envio é transparente.</p>
-    <p>Além do Firebase, o progresso é salvo no <code>localStorage</code> do navegador. Isso significa que, se o aluno fechar a aba e reabrir, ele retoma de onde parou. Se trocar de dispositivo, porém, o progresso local se perde (mas os dados já enviados estarão no Dashboard).</p>
+    <p>Ao usar uma ferramenta, o participante não precisa apertar nenhum botão extra para enviar dados. O sistema registra automaticamente o andamento da atividade, o que permite ao facilitador acompanhar a turma em tempo real no Dashboard.</p>
+    <p>Se o aluno recarregar a página no mesmo dispositivo, a oficina tende a retomar do ponto em que ele estava. Por isso, a orientação prática é simples: cada participante entra com nome e código da oficina, usa as ferramentas normalmente e o facilitador acompanha os avanços pela tela do Dashboard.</p>
   </div>
 
   <div class="callout callout--tip">
     <div class="callout__icon">🎯</div>
     <div class="callout__body">
-      <strong>Dica prática:</strong> Antes de começar a oficina, peça a 2 ou 3 alunos que acessem o Módulo do Aluno e confirme no Dashboard que os nomes aparecem. Isso valida a conexão Firebase e evita surpresas.
+      <strong>Dica prática:</strong> Antes de começar a oficina, peça a 2 ou 3 alunos que acessem o Módulo do Aluno e confirme no Dashboard que os nomes aparecem. Isso valida o fluxo da oficina e evita surpresas.
     </div>
   </div>
 </section>
@@ -1152,6 +1153,42 @@ select:focus-visible {
   </div>
 </section>
 
+<section id="modelo-trabalho" class="section">
+  <div class="section__badge">Condução Didática</div>
+  <h2 class="section__title">Modelo de Trabalho: Individual + Pausa para Discussão</h2>
+
+  <div class="prose">
+    <p>Para reduzir reconfigurações constantes da turma, o curso passa a adotar um princípio simples: <strong>cada interação na ferramenta é individual</strong>, e os momentos coletivos entram apenas como pausas curtas de discussão conduzidas pelo facilitador.</p>
+    <p>Na prática, isso evita a troca repetida entre trabalho individual e trabalho formal em grupo. Cada participante responde, registra e avança no próprio dispositivo; em pontos estratégicos, o facilitador interrompe por 2 a 4 minutos para que vizinhos comparem raciocínios, hipóteses e decisões.</p>
+  </div>
+
+  <div class="card-grid card-grid--3">
+    <div class="card">
+      <div class="card__header"><span class="card__icon">👤</span><h4>Base do percurso</h4></div>
+      <p>Cada ferramenta é preenchida individualmente. Isso preserva autoria, facilita o acompanhamento e reduz dúvidas sobre quem respondeu o quê.</p>
+    </div>
+    <div class="card">
+      <div class="card__header"><span class="card__icon">💬</span><h4>Pausa para Discussão</h4></div>
+      <p>Em seis momentos do percurso, o facilitador propõe uma troca breve entre participantes próximos. O foco é comparar ideias, não produzir um artefato coletivo obrigatório.</p>
+    </div>
+    <div class="card">
+      <div class="card__header"><span class="card__icon">🎯</span><h4>Vantagem pedagógica</h4></div>
+      <p>Você mantém o engajamento social sem alterar a arquitetura do curso nem exigir reagrupamentos demorados ao longo da oficina.</p>
+    </div>
+  </div>
+
+  <div class="callout callout--discussion">
+    <div class="callout__icon">💬</div>
+    <div class="callout__body">
+      <strong>Como anunciar a pausa:</strong> “Finalize sua resposta individual. Agora faça uma pausa para discussão de 2 a 3 minutos com quem está ao seu lado: comparem decisões, diferenças e dúvidas. Depois cada pessoa volta ao seu próprio registro.”
+    </div>
+  </div>
+
+  <div class="prose">
+    <p><strong>Ferramentas com pausa sugerida:</strong> Cartas Personas, Mapa de Empatia, Canvas de Diagnóstico, Canvas de Estratégia, Roteiro de Proteção e Baralho de Dilemas.</p>
+  </div>
+</section>
+
 <!-- ═══════════════════════════════════════════════════════════════
      FASE 1 — DESCOBRIR
      ═══════════════════════════════════════════════════════════════ -->
@@ -1194,15 +1231,15 @@ select:focus-visible {
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
       <h3>🃏 Cartas Personas</h3>
-      <span class="tool-block__meta">⏱ 10–15 min · Grupos de 3–5 · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/cartas-personas.html" target="_blank">Abrir ferramenta</a></span>
+      <span class="tool-block__meta">⏱ 10–15 min · Individual · 💬 Pausa para Discussão (2–3 min) · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/cartas-personas.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
       <p>As 10 Cartas Personas apresentam personagens fictícios com dilemas reais de PI: um pesquisador que publicou antes de patentear, uma comunidade indígena com conhecimento tradicional, uma startup de biocosmético, um chef que quer proteger sua receita, entre outros. Cada persona está contextualizada na Amazônia e em Roraima, o que cria identificação imediata com os participantes.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Divida a turma em grupos de 3 a 5 pessoas. Na ferramenta digital, cada grupo clica em "Sortear Persona" para receber aleatoriamente uma carta. Peça que leiam a história da persona em voz alta dentro do grupo e discutam: <em>"Que tipo de PI está envolvido? O que essa pessoa deveria ter feito? Qual é o risco se ela não proteger?"</em></p>
-      <p>Após 5 minutos de discussão interna, faça uma rodada rápida: cada grupo apresenta sua persona em no máximo 1 minuto (nome, dilema, e o que eles acham que deveria ser feito). Não corrija as respostas agora — apenas registre as hipóteses. As ferramentas seguintes vão validar ou corrigir essas primeiras impressões.</p>
+      <p>Na ferramenta digital, cada participante clica em "Sortear Persona" para receber aleatoriamente uma carta. Peça que leiam a história individualmente, registrem uma hipótese inicial e, em seguida, abram uma <strong>Pausa para Discussão</strong> de 2 a 3 minutos com quem estiver ao lado: <em>"Que tipo de PI está envolvido? O que essa pessoa deveria ter feito? Qual é o risco se ela não proteger?"</em></p>
+      <p>Depois da pausa, faça uma rodada rápida: convide alguns participantes a apresentar sua persona em no máximo 1 minuto (nome, dilema e o que acreditam que deveria ser feito). Não corrija as respostas agora — apenas registre as hipóteses. As ferramentas seguintes vão validar ou corrigir essas primeiras impressões.</p>
       <p>Instrua os grupos a guardar a persona: <em>"Essa persona vai acompanhar vocês pela oficina inteira. Todas as ferramentas que usarem, apliquem ao caso dela."</em> Esse fio condutor transforma a oficina numa narrativa contínua em vez de atividades soltas.</p>
 
       <div class="callout callout--warning">
@@ -1219,16 +1256,16 @@ select:focus-visible {
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
       <h3>🗺️ Mapa de Empatia</h3>
-      <span class="tool-block__meta">⏱ 15 min · Grupos · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/mapa-empatia.html" target="_blank">Abrir ferramenta</a></span>
+      <span class="tool-block__meta">⏱ 15 min · Individual · 💬 Pausa para Discussão (2–3 min) · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/mapa-empatia.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
       <p>Aprofunda o trabalho com a persona, forçando os participantes a "calçar os sapatos" do personagem. O canvas de 6 quadrantes (O que pensa e sente? O que vê? O que ouve? O que fala e faz? Dores? Ganhos?) ajuda a entender as motivações, medos e barreiras reais de quem precisa proteger uma criação intelectual.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Mantenha os mesmos grupos da atividade anterior. Projetando ou ditando a URL do Mapa de Empatia, peça que abram a ferramenta. Cada grupo deve preencher os 6 quadrantes pensando na persona que sortearam.</p>
+      <p>Após as Cartas Personas, peça que cada participante abra o Mapa de Empatia e preencha os 6 quadrantes pensando na persona que sorteou. Quando os primeiros mapas estiverem avançados, proponha uma <strong>Pausa para Discussão</strong> de 2 a 3 minutos para comparar dores, ganhos e percepções.</p>
       <p>Para guiar a reflexão, faça perguntas provocadoras em voz alta enquanto trabalham: <em>"O que essa persona sente quando descobre que alguém copiou sua criação?"</em>, <em>"Que tipo de conselho ela ouve dos colegas — protege ou não?"</em>, <em>"Quanto dinheiro ela tem para investir em proteção?"</em></p>
-      <p>Ao final, peça que 2 ou 3 grupos compartilhem os "Dores" e "Ganhos" de suas personas. Crie uma lista coletiva no quadro: geralmente aparecem medos como "não saber por onde começar", "custo alto" e "demora do processo". Essa lista será validada (ou desmistificada) nas fases seguintes.</p>
+      <p>Ao final, peça que 2 ou 3 participantes compartilhem os "Dores" e "Ganhos" de suas personas. Crie uma lista coletiva no quadro: geralmente aparecem medos como "não saber por onde começar", "custo alto" e "demora do processo". Essa lista será validada (ou desmistificada) nas fases seguintes.</p>
 
       <div class="callout callout--tip">
         <div class="callout__icon">💡</div>
@@ -1264,15 +1301,15 @@ select:focus-visible {
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
       <h3>📐 Canvas de Diagnóstico</h3>
-      <span class="tool-block__meta">⏱ 15 min · Grupos · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/canvas-diagnostico.html" target="_blank">Abrir ferramenta</a></span>
+      <span class="tool-block__meta">⏱ 15 min · Individual · 💬 Pausa para Discussão (2–3 min) · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/canvas-diagnostico.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
       <p>É um canvas de 8 campos que guia o grupo a descrever sistematicamente a criação da persona: o que é, quem criou, com que recursos, qual o grau de maturidade tecnológica (TRL), se já foi divulgada, etc. Funciona como um "raio-X da criação" que prepara o terreno para a decisão de proteção.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Cada grupo abre o Canvas de Diagnóstico e preenche os campos com base na persona. Circule pelas mesas (ou breakout rooms, se online) e ajude os grupos que tiverem dúvida no campo de TRL — esse conceito é novo para a maioria. Explique rapidamente: <em>"TRL 1 é quando você tem só a ideia. TRL 9 é quando o produto já está no mercado. Onde a criação da sua persona se encaixa?"</em></p>
-      <p>O campo mais importante é "Tipo de PI provável". Peça que os grupos arrisquem um palpite antes de ir para a Árvore de Decisão. Isso cria um efeito pedagógico poderoso: quando a Árvore confirmar ou corrigir o palpite, a aprendizagem se fixa melhor do que se a resposta viesse de graça.</p>
+      <p>Cada participante abre o Canvas de Diagnóstico e preenche os campos com base na própria persona. Circule pelas mesas e ajude quem tiver dúvida no campo de TRL — esse conceito é novo para a maioria. Explique rapidamente: <em>"TRL 1 é quando você tem só a ideia. TRL 9 é quando o produto já está no mercado. Onde a criação da sua persona se encaixa?"</em> Depois, promova uma <strong>Pausa para Discussão</strong> de 2 a 3 minutos para que comparem hipóteses antes de seguir.</p>
+      <p>O campo mais importante é "Tipo de PI provável". Peça que cada participante arrisque um palpite antes de ir para a Árvore de Decisão. Isso cria um efeito pedagógico poderoso: quando a Árvore confirmar ou corrigir o palpite, a aprendizagem se fixa melhor do que se a resposta viesse pronta.</p>
       <p>No Dashboard, a aba Análise mostrará a distribuição de TRL da turma. Se a maioria indicou TRL baixo (1-3), reforce na discussão que proteção precoce é possível e muitas vezes desejável, especialmente para patentes (onde a publicação prematura pode inviabilizar o pedido).</p>
     </div>
   </div>
@@ -1369,17 +1406,17 @@ select:focus-visible {
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
       <h3>📐 Canvas de Estratégia</h3>
-      <span class="tool-block__meta">⏱ 15 min · Grupos · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/canvas-estrategia.html" target="_blank">Abrir ferramenta</a></span>
+      <span class="tool-block__meta">⏱ 15 min · Individual · 💬 Pausa para Discussão (2–3 min) · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/canvas-estrategia.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
       <p>É o documento central da oficina: um canvas de 10 blocos onde o grupo formaliza a estratégia de proteção para a persona. Os blocos incluem: tipo de PI escolhido, justificativa legal, custos estimados (com tabela de taxas INPI 2025), prazos, responsáveis, riscos, estratégia de licenciamento, e próximos passos concretos. É onde a teoria vira plano de ação.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Se o grupo usou o Painel de Busca Guiada, instrua: <em>"Transformem os achados mais relevantes da busca em critérios para decidir a rota de proteção."</em> Se o percurso não incluir essa etapa, o grupo pode partir diretamente do resultado da Árvore de Decisão e do Canvas de Diagnóstico para preencher o Canvas.</p>
-      <p>O bloco de custos merece atenção especial. A ferramenta já traz as taxas atualizadas do INPI (2025), com desconto de 60% para ICTs e MEIs. Peça que calculem: <em>"Quanto custaria para a persona do grupo proteger essa criação? E se ela fosse MEI — qual seria o desconto?"</em></p>
+      <p>Se a pessoa usou o Painel de Busca Guiada, instrua: <em>"Transforme os achados mais relevantes da busca em critérios para decidir a rota de proteção."</em> Se o percurso não incluir essa etapa, cada participante pode partir diretamente do resultado da Árvore de Decisão e do Canvas de Diagnóstico para preencher o Canvas. Depois, promova uma <strong>Pausa para Discussão</strong> curta para comparar estratégias.</p>
+      <p>O bloco de custos merece atenção especial. A ferramenta já traz as taxas atualizadas do INPI (2025), com desconto de 60% para ICTs e MEIs. Peça que calculem: <em>"Quanto custaria para a sua persona proteger essa criação? E se ela fosse MEI — qual seria o desconto?"</em></p>
       <p>Enquanto os grupos trabalham, circule e faça perguntas desafiadoras: <em>"Vocês estão protegendo via patente, mas a persona publicou um artigo há 8 meses. Estão dentro do período de graça? Quanto tempo falta?"</em> Essas provocações forçam a aplicação prática dos conceitos.</p>
-      <p>Ao final, peça que 1 ou 2 grupos apresentem seu Canvas completo. Projete na tela e faça uma revisão coletiva: a turma toda pode sugerir melhorias ou identificar gaps no plano. Esse momento de revisão por pares é extremamente rico.</p>
+      <p>Ao final, peça que 1 ou 2 participantes apresentem seu Canvas completo. Projete na tela e faça uma revisão coletiva: a turma toda pode sugerir melhorias ou identificar gaps no plano. Esse momento de revisão por pares é extremamente rico.</p>
     </div>
   </div>
 
@@ -1388,16 +1425,16 @@ select:focus-visible {
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--recommended">Recomendada</span>
       <h3>🎬 Roteiro de Proteção</h3>
-      <span class="tool-block__meta">⏱ 15 min · Grupos · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/storyboard.html" target="_blank">Abrir ferramenta</a></span>
+      <span class="tool-block__meta">⏱ 15 min · Individual · 💬 Pausa para Discussão (2–3 min) · Percursos de 3h e 4h · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/storyboard.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
       <p>Transforma a estratégia do Canvas em uma narrativa visual de 6 cenas, como uma história em quadrinhos. Cada cena representa um momento do processo de proteção: da criação inicial até o resultado final (depósito aprovado, produto no mercado, licenciamento). Essa ferramenta consolida o aprendizado de forma criativa e ajuda participantes mais visuais a internalizarem o processo.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Explique a dinâmica: <em>"Imaginem que vocês estão filmando um mini-documentário da jornada da persona. Em 6 cenas, contem a história do início ao fim: como ela criou algo, como descobriu que precisava proteger, os obstáculos que enfrentou, o que fez, e qual foi o resultado."</em></p>
+      <p>Explique a dinâmica: <em>"Imagine que você está filmando um mini-documentário da jornada da persona. Em 6 cenas, conte a história do início ao fim: como ela criou algo, como descobriu que precisava proteger, os obstáculos que enfrentou, o que fez e qual foi o resultado."</em></p>
       <p>Cada cena tem um campo de texto e um espaço para esboço (pode ser um stick figure, um ícone ou apenas uma descrição visual). Incentive a criatividade, mas mantenha o foco: <em>"A cena 3 poderia ser: persona descobre no Google que alguém está vendendo um produto idêntico ao dela. Cena 4: persona vai ao NIT da universidade pedir ajuda com o depósito."</em></p>
-      <p>Se houver tempo, peça que os grupos troquem storyboards e deem feedback recíproco. Alternativamente, exponha os storyboards na parede (se impressos) ou projetados para votação do "melhor roteiro".</p>
+      <p>Se houver tempo, peça que os participantes troquem storyboards durante uma <strong>Pausa para Discussão</strong> e deem feedback recíproco. Alternativamente, exponha os storyboards na parede (se impressos) ou projetados para votação do "melhor roteiro".</p>
     </div>
   </div>
 
@@ -1445,17 +1482,17 @@ select:focus-visible {
     <div class="tool-block__header">
       <span class="tool-block__badge tool-block__badge--essential">Essencial</span>
       <h3>🃏 Baralho de Dilemas</h3>
-      <span class="tool-block__meta">⏱ 10–15 min · Grupos · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/baralho-dilemas.html" target="_blank">Abrir ferramenta</a></span>
+      <span class="tool-block__meta">⏱ 10–15 min · Individual · 💬 Pausa para Discussão (3–4 min) · <a href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/baralho-dilemas.html" target="_blank">Abrir ferramenta</a></span>
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
       <p>Apresenta 16 dilemas éticos reais sobre PI em 7 categorias (biopirataria, plágio acadêmico, medicamentos genéricos, software livre vs. proprietário, IA e autoria, conhecimento tradicional, patentes de sementes). Cada carta traz um cenário provocador com argumentos dos dois lados, forçando o participante a tomar posição e justificar.</p>
 
       <h4>Como conduzir — passo a passo</h4>
-      <p>Este é o momento mais dinâmico da oficina. Organize a atividade como um "debate relâmpago": cada grupo sorteia uma carta, lê o dilema, e tem 2 minutos para preparar argumentos. Depois, um representante apresenta a posição do grupo em 1 minuto. O facilitador (ou outro grupo) faz o papel de "advogado do diabo".</p>
+      <p>Este é o momento mais dinâmico da oficina. Organize a atividade como um "debate relâmpago": cada participante sorteia uma carta, registra seu posicionamento e tem 2 minutos para preparar argumentos. Depois, abra uma <strong>Pausa para Discussão</strong> de 3 a 4 minutos para que comparem posições em duplas ou trios próximos. Em seguida, convide alguns participantes a apresentar sua posição em 1 minuto. O facilitador faz o papel de "advogado do diabo".</p>
       <p>Exemplo de dilema: <em>"Uma empresa farmacêutica brasileira quer produzir a versão genérica de um medicamento patenteado por multinacional que trata doença negligenciada na Amazônia. A patente ainda tem 8 anos de vigência. Deve haver licenciamento compulsório?"</em></p>
       <p>Não busque consenso — o objetivo é que os participantes percebam que PI envolve tensões legítimas entre interesse público e direito do inventor, entre acesso ao conhecimento e incentivo à inovação. Essa nuance é essencial para uma compreensão madura do tema.</p>
-      <p>Se o tempo permitir, faça 2 ou 3 rodadas com dilemas de categorias diferentes. No Dashboard, observe se os participantes estão registrando suas respostas (o Tool Bridge envia os dados do debate automaticamente).</p>
+      <p>Se o tempo permitir, faça 2 ou 3 rodadas com dilemas de categorias diferentes. No Dashboard, observe se os participantes estão registrando suas respostas ao longo da atividade.</p>
 
       <div class="callout callout--tip">
         <div class="callout__icon">🎯</div>
@@ -1659,7 +1696,7 @@ select:focus-visible {
   <div class="checklist">
     <label class="checklist__item"><input type="checkbox"> Li este guia completo com pelo menos 48 horas de antecedência</label>
     <label class="checklist__item"><input type="checkbox"> Testei todas as ferramentas do percurso escolhido no meu navegador</label>
-    <label class="checklist__item"><input type="checkbox"> Criei a sessão no Dashboard e confirmei que o Firebase conecta corretamente</label>
+    <label class="checklist__item"><input type="checkbox"> Criei a sessão no Dashboard e confirmei que o acesso dos participantes está funcionando corretamente</label>
     <label class="checklist__item"><input type="checkbox"> Preparei o código da oficina e o QR Code de acesso ao Módulo do Aluno</label>
     <label class="checklist__item"><input type="checkbox"> Verifiquei a conexão Wi-Fi do espaço (mínimo 5 Mbps para a turma)</label>
     <label class="checklist__item"><input type="checkbox"> Tenho projetor/tela para compartilhar o Dashboard e ferramentas</label>
