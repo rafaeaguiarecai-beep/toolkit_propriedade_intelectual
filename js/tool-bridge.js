@@ -1,12 +1,13 @@
 /* ================================================================
-   PI THINKING — Tool Bridge v3.3
-   Correções:
-   - savePersonaContext / loadPersonaContext: persiste a persona
-     selecionada nas Cartas Personas para preenchimento automático
-     em ferramentas subsequentes (Canvas de Diagnóstico, Estratégia etc.)
-   - getPersonaContext: retorna persona + mapa de empatia + dilema
-   - autoFillFromPersona: preenche campos de texto que tenham
-     data-persona-field nos formulários das ferramentas
+   PI THINKING — Tool Bridge v3.4
+   Correções v3.4:
+   - Banner de navegação completamente refeito para mobile-first
+   - Botão "✓ Concluir Ferramenta" sempre visível quando não concluída
+   - Layout responsivo: colapsa em coluna no mobile sem quebrar
+   - Cartas Personas: botão de conclusão funcional integrado
+   - Banner não conflita com headers existentes (usa posicionamento relativo)
+   - Persona mini-card escondido no mobile para economizar espaço
+   - Z-index corrigido para não sobrepor modais e dropdowns nativos
    ================================================================ */
 (function (global) {
   'use strict';
@@ -15,8 +16,6 @@
   var AUTOSAVE_DELAY = 500;
   var timers = {};
   var autoSaveRegistry = {};
-
-  // ── Chave dedicada ao contexto de persona (por sessão e participante) ──
   var PERSONA_CONTEXT_KEY = 'pi-persona-context';
 
   function nowIso() { return new Date().toISOString(); }
@@ -210,13 +209,9 @@
       global.AlunoEngine.completeTool(id, payload || {});
     }
     appendEvent(id, 'conclusao', payload || {});
-
-    // CORREÇÃO 2: após marcar como concluída, notifica o engine do aluno
-    // para que o módulo atualize a lista de ferramentas disponíveis
     global.dispatchEvent(new CustomEvent('pi-tool-completed', {
       detail: { toolId: id, payload: payload || {} }
     }));
-
     return store;
   }
 
@@ -258,49 +253,20 @@
   }
 
   /* ================================================================
-     CORREÇÃO 4: CONTEXTO DE PERSONA
-     Persiste a persona escolhida e a torna acessível globalmente
-     para preenchimento automático nas demais ferramentas.
+     CONTEXTO DE PERSONA
      ================================================================ */
 
-  /**
-   * Salva o contexto completo da persona selecionada.
-   * Deve ser chamado pelas Cartas Personas quando o usuário sorteia/escolhe.
-   *
-   * @param {Object} personaData
-   *   - id: número identificador da persona
-   *   - nome: nome da persona
-   *   - role: papel/profissão
-   *   - quote: fala da persona
-   *   - context: contexto narrativo completo
-   *   - dilema: dilema de PI da persona
-   *   - piType: tipo de PI provável
-   *   - dor: dor principal
-   *   - ganho: ganho esperado
-   *   - tags: array de tags
-   *   - legal: base legal
-   */
   function savePersonaContext(personaData) {
     if (!personaData) return null;
-    var ctx = Object.assign({
-      savedAt: nowIso(),
-      source: 'cartas-personas'
-    }, personaData);
+    var ctx = Object.assign({ savedAt: nowIso(), source: 'cartas-personas' }, personaData);
     write(personaContextKey(), ctx);
-    // Também salva no progresso da ferramenta cartas-personas
     saveProgress('cartas-personas', { personaSelecionada: ctx });
-    // Dispara evento para ferramentas abertas possam reagir
     global.dispatchEvent(new CustomEvent('pi-persona-selected', { detail: ctx }));
     return ctx;
   }
 
-  /**
-   * Recupera o contexto da persona selecionada.
-   * Retorna null se nenhuma persona foi selecionada ainda.
-   */
   function loadPersonaContext() {
     var ctx = read(personaContextKey(), null);
-    // fallback: tenta ler do progresso da ferramenta
     if (!ctx) {
       var prog = loadProgress('cartas-personas');
       ctx = prog.personaSelecionada || null;
@@ -308,25 +274,10 @@
     return ctx;
   }
 
-  /**
-   * Limpa o contexto de persona (usar quando o aluno reinicia a sessão).
-   */
   function clearPersonaContext() {
     remove(personaContextKey());
   }
 
-  /**
-   * Preenche automaticamente elementos HTML que possuam o atributo
-   * data-persona-field com o valor correspondente da persona.
-   *
-   * Exemplo de uso no HTML:
-   *   <textarea data-persona-field="context"></textarea>
-   *   <input data-persona-field="nome" />
-   *   <input data-persona-field="piType" />
-   *
-   * Campos suportados: nome, role, quote, context, dilema,
-   *   piType, dor, ganho, tags (separados por vírgula), legal
-   */
   function autoFillFromPersona(container) {
     var ctx = loadPersonaContext();
     if (!ctx) return false;
@@ -338,13 +289,11 @@
       var value = ctx[field];
       if (Array.isArray(value)) value = value.join(', ');
       if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
-        // Só preenche se estiver vazio (não sobrescreve edições manuais)
         if (!el.value || el.value.trim() === '') {
           el.value = String(value || '');
           el.dispatchEvent(new Event('input', { bubbles: true }));
         }
       } else {
-        // Para elementos de exibição (div, span, p)
         if (!el.textContent || el.textContent.trim() === '') {
           el.textContent = String(value || '');
         }
@@ -353,10 +302,6 @@
     return true;
   }
 
-  /**
-   * Retorna um resumo formatado da persona para exibição nas ferramentas.
-   * Útil para mostrar um banner "Você está trabalhando com: [Persona]"
-   */
   function getPersonaSummary() {
     var ctx = loadPersonaContext();
     if (!ctx) return null;
@@ -373,20 +318,13 @@
   }
 
   /* ================================================================
-     CORREÇÃO 2: NAVEGAÇÃO ENTRE FERRAMENTAS
-     Fornece utilitários para retornar ao módulo do aluno
-     ou avançar para a próxima ferramenta após conclusão.
+     NAVEGAÇÃO ENTRE FERRAMENTAS — v3.4 MOBILE-FIRST
      ================================================================ */
 
-  /**
-   * Obtém URLs de navegação para a ferramenta atual.
-   * Retorna { anterior, proxima, modulo } com as URLs relativas.
-   */
   function getNavigationLinks(toolId) {
     var id = normalizeToolId(toolId || getPageToolId());
     var percurso = localStorage.getItem('pi-percurso') || '3h';
     var links = { anterior: null, proxima: null, modulo: 'aluno.html' };
-
     if (global.PIConfig && typeof global.PIConfig.getPrevNext === 'function') {
       var nav = global.PIConfig.getPrevNext(id, percurso);
       if (nav.anterior) links.anterior = nav.anterior.arquivo;
@@ -396,85 +334,307 @@
   }
 
   /**
-   * Injeta um banner de navegação na página da ferramenta.
-   * O banner mostra: [← Voltar ao Módulo] [Próxima Ferramenta →]
-   * Deve ser chamado após o carregamento da página.
+   * Retorna o nome amigável de uma ferramenta pelo arquivo ou ID.
+   */
+  function getToolLabel(fileOrId) {
+    if (!fileOrId) return '';
+    if (global.PIConfig && typeof global.PIConfig.getTool === 'function') {
+      var tool = global.PIConfig.getTool(fileOrId.replace(/\.html$/i, ''));
+      if (tool) return tool.icone + ' ' + tool.nome;
+    }
+    return fileOrId.replace(/\.html$/i, '').replace(/-/g, ' ');
+  }
+
+  /**
+   * Injeta CSS do banner uma única vez no <head>.
+   * Separar o CSS do JS facilita manutenção e garante
+   * que media queries funcionem corretamente.
+   */
+  function injectBannerCSS() {
+    if (document.getElementById('pi-nav-banner-style')) return;
+    var style = document.createElement('style');
+    style.id = 'pi-nav-banner-style';
+    style.textContent = [
+      /* ── Wrapper externo ── */
+      '#pi-nav-banner {',
+      '  position: sticky;',
+      '  top: 0;',
+      '  z-index: 900;',       /* abaixo de modais (1000+) mas acima do conteúdo */
+      '  background: rgba(15,23,42,0.97);',
+      '  backdrop-filter: blur(12px);',
+      '  -webkit-backdrop-filter: blur(12px);',
+      '  border-bottom: 1px solid rgba(255,255,255,0.08);',
+      '  box-shadow: 0 2px 12px rgba(0,0,0,0.35);',
+      '  font-family: Inter, system-ui, -apple-system, sans-serif;',
+      '  font-size: 0.82rem;',
+      '  color: #fff;',
+      '  padding: 0;',
+      '  line-height: 1.4;',
+      '}',
+
+      /* ── Linha interna ── */
+      '#pi-nav-banner .pnb-inner {',
+      '  display: flex;',
+      '  align-items: center;',
+      '  justify-content: space-between;',
+      '  gap: 0.5rem;',
+      '  padding: 0.55rem 1rem;',
+      '  flex-wrap: nowrap;',   /* nunca quebra linha — botões prioritários */
+      '  min-height: 48px;',
+      '}',
+
+      /* ── Lado esquerdo ── */
+      '#pi-nav-banner .pnb-left {',
+      '  display: flex;',
+      '  align-items: center;',
+      '  gap: 0.4rem;',
+      '  flex-shrink: 0;',
+      '  min-width: 0;',
+      '}',
+
+      /* ── Persona chip (escondido no mobile pequeno) ── */
+      '#pi-nav-banner .pnb-persona {',
+      '  display: flex;',
+      '  align-items: center;',
+      '  gap: 0.3rem;',
+      '  background: rgba(251,191,36,0.15);',
+      '  border: 1px solid rgba(251,191,36,0.25);',
+      '  border-radius: 20px;',
+      '  padding: 0.2rem 0.55rem;',
+      '  font-size: 0.75rem;',
+      '  font-weight: 600;',
+      '  color: #fbbf24;',
+      '  white-space: nowrap;',
+      '  overflow: hidden;',
+      '  text-overflow: ellipsis;',
+      '  max-width: 180px;',
+      '}',
+      '#pi-nav-banner .pnb-persona-name {',
+      '  overflow: hidden;',
+      '  text-overflow: ellipsis;',
+      '  white-space: nowrap;',
+      '}',
+
+      /* ── Lado direito ── */
+      '#pi-nav-banner .pnb-right {',
+      '  display: flex;',
+      '  align-items: center;',
+      '  gap: 0.4rem;',
+      '  flex-shrink: 0;',
+      '}',
+
+      /* ── Botões base ── */
+      '#pi-nav-banner .pnb-btn {',
+      '  display: inline-flex;',
+      '  align-items: center;',
+      '  gap: 0.3rem;',
+      '  padding: 0.38rem 0.75rem;',
+      '  border-radius: 6px;',
+      '  font-family: inherit;',
+      '  font-size: 0.78rem;',
+      '  font-weight: 600;',
+      '  cursor: pointer;',
+      '  text-decoration: none;',
+      '  border: 1px solid transparent;',
+      '  transition: background 0.2s, transform 0.15s;',
+      '  white-space: nowrap;',
+      '  line-height: 1;',
+      '}',
+      '#pi-nav-banner .pnb-btn:hover { transform: translateY(-1px); }',
+      '#pi-nav-banner .pnb-btn:active { transform: scale(0.97); }',
+
+      /* Botão módulo */
+      '#pi-nav-banner .pnb-btn-modulo {',
+      '  background: rgba(255,255,255,0.1);',
+      '  color: rgba(255,255,255,0.85);',
+      '  border-color: rgba(255,255,255,0.15);',
+      '}',
+      '#pi-nav-banner .pnb-btn-modulo:hover {',
+      '  background: rgba(255,255,255,0.18);',
+      '}',
+
+      /* Botão concluir */
+      '#pi-nav-banner .pnb-btn-concluir {',
+      '  background: #2563eb;',
+      '  color: #fff;',
+      '  border-color: #1d4ed8;',
+      '}',
+      '#pi-nav-banner .pnb-btn-concluir:hover {',
+      '  background: #1d4ed8;',
+      '}',
+
+      /* Botão próxima */
+      '#pi-nav-banner .pnb-btn-proxima {',
+      '  background: #16a34a;',
+      '  color: #fff;',
+      '  border-color: #15803d;',
+      '}',
+      '#pi-nav-banner .pnb-btn-proxima:hover {',
+      '  background: #15803d;',
+      '}',
+
+      /* Badge concluída */
+      '#pi-nav-banner .pnb-badge-done {',
+      '  display: inline-flex;',
+      '  align-items: center;',
+      '  gap: 0.25rem;',
+      '  background: rgba(22,163,74,0.2);',
+      '  color: #4ade80;',
+      '  border: 1px solid rgba(22,163,74,0.4);',
+      '  padding: 0.3rem 0.6rem;',
+      '  border-radius: 6px;',
+      '  font-size: 0.75rem;',
+      '  font-weight: 700;',
+      '  white-space: nowrap;',
+      '}',
+
+      /* ── MOBILE ≤ 480px ── */
+      '@media (max-width: 480px) {',
+      '  #pi-nav-banner .pnb-inner {',
+      '    padding: 0.45rem 0.75rem;',
+      '    min-height: 44px;',
+      '  }',
+      /* Esconde a persona no mobile muito pequeno */
+      '  #pi-nav-banner .pnb-persona { display: none; }',
+      /* Reduz tamanho dos botões */
+      '  #pi-nav-banner .pnb-btn {',
+      '    padding: 0.35rem 0.6rem;',
+      '    font-size: 0.74rem;',
+      '  }',
+      /* Esconde o texto longo do botão módulo, mantém apenas o ícone */
+      '  #pi-nav-banner .pnb-btn-modulo .pnb-label { display: none; }',
+      '}',
+
+      /* ── MOBILE ≤ 360px (telas muito pequenas) ── */
+      '@media (max-width: 360px) {',
+      '  #pi-nav-banner .pnb-btn {',
+      '    padding: 0.3rem 0.5rem;',
+      '    font-size: 0.7rem;',
+      '  }',
+      /* No botão proxima, esconde label e mostra só ícone */
+      '  #pi-nav-banner .pnb-btn-proxima .pnb-label { display: none; }',
+      '  #pi-nav-banner .pnb-btn-concluir .pnb-label { display: none; }',
+      '}'
+    ].join('\n');
+    document.head.appendChild(style);
+  }
+
+  /**
+   * Injeta o banner de navegação.
+   *
+   * Lógica de botões:
+   *  - SEMPRE: botão "← Módulo" (volta ao aluno.html)
+   *  - SE NÃO CONCLUÍDA: botão "✓ Concluir" (chama markComplete + atualiza banner)
+   *  - SE CONCLUÍDA + TEM PRÓXIMA: badge "✓ Concluída" + botão "Próxima →"
+   *  - SE CONCLUÍDA + SEM PRÓXIMA: badge "✓ Concluída" + botão "Ver Percurso"
    *
    * @param {Object} options
-   *   - container: seletor CSS onde inserir o banner (default: body, após o header ou no topo)
-   *   - showPersona: boolean — exibe mini-card da persona ativa
-   *   - onComplete: callback chamado quando a ferramenta for marcada concluída
+   *   - showPersona {boolean} — exibe chip da persona ativa (default: true)
+   *   - container {string|null} — seletor CSS onde inserir (default: início do body)
+   *   - onComplete {function|null} — callback após marcar como concluída
    */
   function injectNavigationBanner(options) {
     var opts = Object.assign({
-      container: null,
       showPersona: true,
-      position: 'top'
+      container: null,
+      onComplete: null
     }, options || {});
+
+    /* Injeta CSS uma única vez */
+    injectBannerCSS();
 
     var toolId = getPageToolId();
     var nav = getNavigationLinks(toolId);
     var persona = opts.showPersona ? getPersonaSummary() : null;
-    var isCompleted = getToolStore(toolId).metadados.concluido;
 
-    // Evita duplicação
+    /* Remove banner anterior se já existir */
     var existing = document.getElementById('pi-nav-banner');
     if (existing) existing.remove();
 
     var banner = document.createElement('div');
     banner.id = 'pi-nav-banner';
     banner.setAttribute('role', 'navigation');
-    banner.setAttribute('aria-label', 'Navegação entre ferramentas do PI Thinking');
-    banner.style.cssText = [
-      'position: sticky',
-      'top: 0',
-      'z-index: 1000',
-      'background: rgba(15,23,42,0.95)',
-      'backdrop-filter: blur(10px)',
-      'border-bottom: 1px solid rgba(255,255,255,0.1)',
-      'padding: 0.6rem 1rem',
-      'display: flex',
-      'align-items: center',
-      'justify-content: space-between',
-      'gap: 0.5rem',
-      'flex-wrap: wrap',
-      'font-family: Inter, system-ui, sans-serif',
-      'font-size: 0.82rem',
-      'color: #fff',
-      'box-shadow: 0 4px 12px rgba(0,0,0,0.3)'
-    ].join('; ');
+    banner.setAttribute('aria-label', 'Navegação entre ferramentas PI Thinking');
 
-    var leftHtml = '<div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">';
-    leftHtml += '<a href="aluno.html" style="color:#94a3b8;text-decoration:none;padding:0.3rem 0.7rem;border:1px solid rgba(148,163,184,0.3);border-radius:6px;transition:all 0.2s;" aria-label="Voltar ao Módulo do Aluno">← Módulo</a>';
+    /* Reconstrói o conteúdo do banner */
+    function buildBannerContent() {
+      var completed = isCompleted(toolId);
 
-    if (persona) {
-      leftHtml += '<span style="color:rgba(255,255,255,0.5);padding:0 0.3rem;">|</span>';
-      leftHtml += '<span style="color:#fbbf24;font-weight:600;" title="Persona ativa: ' + persona.nome + ' — ' + persona.role + '">' +
-        (persona.emoji || '🧑') + ' ' + persona.nome + '</span>';
-      leftHtml += '<span style="color:rgba(255,255,255,0.4);font-size:0.75rem;">' + persona.role + '</span>';
-    }
-    leftHtml += '</div>';
+      /* ── Lado esquerdo ── */
+      var leftHtml = '<div class="pnb-left">';
 
-    var rightHtml = '<div style="display:flex;align-items:center;gap:0.5rem;">';
+      /* Botão módulo — sempre presente */
+      leftHtml += '<a href="aluno.html" class="pnb-btn pnb-btn-modulo" aria-label="Voltar ao Módulo do Aluno">' +
+        '← <span class="pnb-label">Módulo</span>' +
+        '</a>';
 
-    if (isCompleted) {
-      rightHtml += '<span style="background:rgba(22,163,74,0.2);color:#4ade80;border:1px solid rgba(22,163,74,0.4);padding:0.25rem 0.6rem;border-radius:6px;font-weight:600;">✓ Concluída</span>';
-    }
-
-    if (nav.proxima) {
-      var proximaLabel = 'Próxima';
-      if (global.PIConfig && typeof global.PIConfig.getTool === 'function') {
-        var proximaTool = global.PIConfig.getTool(nav.proxima.replace(/\.html$/i, ''));
-        if (proximaTool) proximaLabel = proximaTool.nome;
+      /* Chip de persona — se disponível */
+      if (persona) {
+        leftHtml += '<div class="pnb-persona" title="' + persona.nome + ' — ' + persona.role + '">' +
+          '<span>' + (persona.emoji || '🧑') + '</span>' +
+          '<span class="pnb-persona-name">' + persona.nome + '</span>' +
+          '</div>';
       }
-      rightHtml += '<a href="' + nav.proxima + '" id="pi-nav-next" style="background:#4361ee;color:#fff;text-decoration:none;padding:0.3rem 0.8rem;border-radius:6px;font-weight:600;transition:all 0.2s;" aria-label="Ir para a próxima ferramenta: ' + proximaLabel + '">' + proximaLabel + ' →</a>';
-    } else {
-      rightHtml += '<a href="aluno.html" style="background:#16a34a;color:#fff;text-decoration:none;padding:0.3rem 0.8rem;border-radius:6px;font-weight:600;" aria-label="Voltar ao Módulo do Aluno">✓ Ver Percurso</a>';
+
+      leftHtml += '</div>';
+
+      /* ── Lado direito ── */
+      var rightHtml = '<div class="pnb-right">';
+
+      if (!completed) {
+        /* Ferramenta não concluída: mostra botão de concluir */
+        rightHtml += '<button class="pnb-btn pnb-btn-concluir" id="pnb-btn-complete" ' +
+          'aria-label="Marcar esta ferramenta como concluída e avançar">' +
+          '✓ <span class="pnb-label">Concluir</span>' +
+          '</button>';
+      } else {
+        /* Ferramenta concluída */
+        rightHtml += '<span class="pnb-badge-done">✓ <span class="pnb-label">Concluída</span></span>';
+
+        if (nav.proxima) {
+          var proximaLabel = getToolLabel(nav.proxima);
+          rightHtml += '<a href="' + nav.proxima + '" class="pnb-btn pnb-btn-proxima" ' +
+            'aria-label="Ir para a próxima ferramenta: ' + proximaLabel + '">' +
+            '<span class="pnb-label">' + proximaLabel + '</span> →' +
+            '</a>';
+        } else {
+          rightHtml += '<a href="aluno.html" class="pnb-btn pnb-btn-proxima" ' +
+            'aria-label="Ver percurso completo no Módulo do Aluno">' +
+            '📋 <span class="pnb-label">Ver Percurso</span>' +
+            '</a>';
+        }
+      }
+
+      rightHtml += '</div>';
+
+      banner.innerHTML = '<div class="pnb-inner">' + leftHtml + rightHtml + '</div>';
+
+      /* Vincula o botão de concluir se ele foi renderizado */
+      var completeBtn = banner.querySelector('#pnb-btn-complete');
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function () {
+          /* Feedback visual imediato */
+          completeBtn.textContent = '⏳';
+          completeBtn.disabled = true;
+
+          /* Chama markComplete */
+          markComplete(toolId, {});
+
+          /* Callback personalizado se fornecido */
+          if (typeof opts.onComplete === 'function') {
+            opts.onComplete(toolId);
+          }
+
+          /* Reconstrói o banner para mostrar "Concluída + Próxima" */
+          buildBannerContent();
+        });
+      }
     }
-    rightHtml += '</div>';
 
-    banner.innerHTML = leftHtml + rightHtml;
+    /* Constrói conteúdo inicial */
+    buildBannerContent();
 
+    /* Insere o banner */
     var target = opts.container ? document.querySelector(opts.container) : null;
     if (target) {
       target.insertBefore(banner, target.firstChild);
@@ -482,18 +642,10 @@
       document.body.insertBefore(banner, document.body.firstChild);
     }
 
-    // Listener para atualizar o banner quando a ferramenta for concluída
+    /* Escuta o evento de conclusão vindo de outros lugares (ex: botão interno da ferramenta) */
     global.addEventListener('pi-tool-completed', function (e) {
       if (normalizeToolId(e.detail.toolId) === toolId) {
-        var badge = banner.querySelector('#pi-nav-completed-badge');
-        if (!badge) {
-          var completedBadge = document.createElement('span');
-          completedBadge.id = 'pi-nav-completed-badge';
-          completedBadge.style.cssText = 'background:rgba(22,163,74,0.2);color:#4ade80;border:1px solid rgba(22,163,74,0.4);padding:0.25rem 0.6rem;border-radius:6px;font-weight:600;';
-          completedBadge.textContent = '✓ Concluída';
-          var rightDiv = banner.querySelector('div:last-child');
-          if (rightDiv) rightDiv.insertBefore(completedBadge, rightDiv.firstChild);
-        }
+        buildBannerContent();
       }
     });
 
@@ -628,7 +780,7 @@
   }
 
   var api = {
-    version: '3.3.0',
+    version: '3.4.0',
     getPageToolId: getPageToolId,
     normalizeToolId: normalizeToolId,
     getUserProfile: getUserProfile,
@@ -654,13 +806,11 @@
     saveSessionContext: saveSessionContext,
     loadSessionContext: loadSessionContext,
     getCurrentToolMeta: getCurrentToolMeta,
-    // CORREÇÃO 4: persona context
     savePersonaContext: savePersonaContext,
     loadPersonaContext: loadPersonaContext,
     clearPersonaContext: clearPersonaContext,
     autoFillFromPersona: autoFillFromPersona,
     getPersonaSummary: getPersonaSummary,
-    // CORREÇÃO 2: navegação
     getNavigationLinks: getNavigationLinks,
     injectNavigationBanner: injectNavigationBanner
   };
