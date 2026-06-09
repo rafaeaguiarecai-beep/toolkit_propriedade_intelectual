@@ -824,9 +824,13 @@ function renderStats(pList) {
     var avgD = diagScores.length ? (sum(diagScores)/diagScores.length).toFixed(1) : '—';
     var avgF = finalScores.length ? (sum(finalScores)/finalScores.length).toFixed(1) : '—';
 
-    var evos = pList.filter(function(p){ return p.diagnostico && p.final; })
-        .map(function(p){ return p.final.score - p.diagnostico.score; });
-    var avgE = evos.length ? (sum(evos)/evos.length).toFixed(1) : '—';
+    var evos = pList
+      .map(function(p) { return PISync.calculateEvolution(p); })
+      .filter(function(v) { return v !== null; });
+
+    var avgE = evos.length
+      ? (evos.reduce(function(a, b) { return a + b; }, 0) / evos.length).toFixed(1)
+      : '—';
 
     var toolCounts = pList.map(function(p){ return p.ferramentas ? Object.keys(p.ferramentas).length : 0; });
     var avgC = total ? Math.round(sum(toolCounts)/(total*ALL_TOOLS.length)*100) : 0;
@@ -837,7 +841,11 @@ function renderStats(pList) {
     document.getElementById('sFinal').textContent = avgF !== '—' ? 'F-'+avgF : '—';
 
     var evoEl = document.getElementById('sEvo');
-    evoEl.textContent = avgE !== '—' ? (parseFloat(avgE)>=0?'+':'')+avgE : '—';
+    if (avgE !== '—') {
+      evoEl.textContent = (parseFloat(avgE) >= 0 ? '+' : '') + avgE + 'pp';
+    } else {
+      evoEl.textContent = '—';
+    }
 
     document.getElementById('sConc').textContent = avgC+'%';
 }
@@ -932,7 +940,7 @@ function renderParticipants(pList) {
         var status = p.status || 'desconectado';
         var dScore = p.diagnostico ? p.diagnostico.score : null;
         var fScore = p.final ? p.final.score : null;
-        var evo = (dScore !== null && fScore !== null) ? fScore - dScore : null;
+        var evo = PISync.calculateEvolution(p);
 
         var ferramentas = p.ferramentas || {};
         var doneCount = Object.keys(ferramentas).length;
@@ -952,7 +960,8 @@ function renderParticipants(pList) {
         if (evo !== null) {
             var evoCls = evo > 0 ? 'up' : evo === 0 ? 'same' : 'down';
             var evoSign = evo > 0 ? '+' : '';
-            evoHtml = '<span class="ranking__evolution ranking__evolution--'+evoCls+'">'+evoSign+evo+'</span>';
+            evoHtml = '<span class="ranking__evolution ranking__evolution--'+evoCls+'">'
+              + evoSign + evo + 'pp</span>';
         }
 
         html += '<tr>';

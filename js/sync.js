@@ -548,8 +548,27 @@
 
   function calculateEvolution(p) {
     var q = (p && p.quiz) || {};
-    return (Number(q['quiz-final'] && q['quiz-final'].pontuacao) || 0) -
-           (Number(q['quiz-diagnostico'] && q['quiz-diagnostico'].pontuacao) || 0);
+
+    var diagEntry = q['quiz-diagnostico'];
+    var finalEntry = q['quiz-final'];
+
+    /* Sem os dois quizzes não há evolução calculável */
+    if (!diagEntry || !finalEntry) return null;
+
+    var diagScore = Number(diagEntry.pontuacao !== undefined ? diagEntry.pontuacao : diagEntry.score) || 0;
+    var diagTotal = Number(diagEntry.total) || 10;   /* Quiz Diagnóstico tem 10 questões */
+
+    var finalScore = Number(finalEntry.pontuacao !== undefined ? finalEntry.pontuacao : finalEntry.score) || 0;
+    var finalTotal = Number(finalEntry.total) || 20;  /* Quiz Final tem 20 questões */
+
+    /* Evita divisão por zero */
+    if (diagTotal === 0 || finalTotal === 0) return null;
+
+    var diagPct  = (diagScore  / diagTotal)  * 100;
+    var finalPct = (finalScore / finalTotal) * 100;
+
+    /* Retorna diferença percentual arredondada para 1 casa */
+    return Math.round((finalPct - diagPct) * 10) / 10;
   }
 
   function buildRanking(options) {
