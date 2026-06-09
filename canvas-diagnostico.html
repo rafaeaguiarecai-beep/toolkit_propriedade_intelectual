@@ -512,6 +512,82 @@
     initProtectionOptions();
     initAutoSave();
     loadSavedDiag();
+
+    /* ── CORREÇÃO 2 + CORREÇÃO 4: banner de navegação e preenchimento de persona ── */
+    (function initCanvasDiagnosticoExtras() {
+      // Banner de navegação
+      if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
+        PIThinking.injectNavigationBanner({ showPersona: true });
+      }
+
+      // Preencher campos com dados da persona selecionada
+      if (window.PIThinking && typeof PIThinking.loadPersonaContext === 'function') {
+        var persona = PIThinking.loadPersonaContext();
+        if (persona) {
+          // Bloco 1 — Descrição da Criação
+          var field1 = document.getElementById('diag-field-1');
+          if (field1 && !field1.value.trim()) {
+            field1.value = persona.context || '';
+            field1.dispatchEvent(new Event('input'));
+          }
+          // Bloco 2 — Problema que Resolve
+          var field2 = document.getElementById('diag-field-2');
+          if (field2 && !field2.value.trim()) {
+            field2.value = persona.dor || persona.dilema || '';
+            field2.dispatchEvent(new Event('input'));
+          }
+          // Bloco 7 — Tipo de Proteção sugerido
+          if (persona.piType) {
+            var map = {
+              'Patente de Invenção': 'patente-invencao',
+              'Modelo de Utilidade': 'modelo-utilidade',
+              'Marca': 'marca',
+              'Marca + Segredo Industrial': 'marca',
+              'Segredo Industrial': 'segredo-industrial',
+              'Registro de Software': 'software',
+              'Software': 'software',
+              'Cultivar': 'cultivar',
+              'Patrimônio Genético + CTA': 'patrimonio-genetico',
+              'Indicação Geográfica': 'indicacao-geografica',
+              'Direito Autoral': 'direito-autoral',
+              'Desenho Industrial': 'desenho-industrial'
+            };
+            var value = map[persona.piType] || '';
+            if (value) {
+              document.querySelectorAll('.d-protection__option').forEach(function(opt) {
+                if (opt.getAttribute('data-value') === value) {
+                  opt.classList.add('selected');
+                  opt.setAttribute('aria-pressed', 'true');
+                }
+              });
+            }
+          }
+
+          // Mostrar mini-card da persona ativa no topo do canvas
+          var intro = document.querySelector('.d-container');
+          if (intro && !document.getElementById('pi-persona-mini-card')) {
+            var card = document.createElement('div');
+            card.id = 'pi-persona-mini-card';
+            card.style.cssText = 'background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;padding:0.8rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;font-size:0.88rem;';
+            card.innerHTML = '<span style="font-size:1.5rem;">' + (persona.emoji || '🧑') + '</span>' +
+              '<div><strong style="color:#92400e;">' + persona.nome + '</strong> · <em>' + persona.role + '</em>' +
+              '<br><span style="color:#78716c;">"' + (persona.quote || '') + '"</span></div>';
+            intro.insertBefore(card, intro.firstChild);
+          }
+        }
+      }
+
+      // CORREÇÃO 3: garantir que o TRL seja salvo no formato esperado pelo Dashboard
+      var originalAutoSaveDiag = autoSaveDiag;
+      autoSaveDiag = function() {
+        originalAutoSaveDiag();
+        // Salvar TRL também em formato plano no toolState para o Dashboard
+        var trlVal = document.getElementById('trlSlider') ? parseInt(document.getElementById('trlSlider').value) : 1;
+        if (window.PIThinking && typeof PIThinking.saveFormData === 'function') {
+          PIThinking.saveFormData('canvas-diagnostico', { trl: trlVal });
+        }
+      };
+    })();
     </script>
 
 <!-- PI Thinking — Tool Bridge (modo oficina) -->
@@ -520,6 +596,23 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/tool-bridge.js"></script>
+
+<!-- ── PI Thinking: Banner de Navegação Universal ── -->
+<script>
+(function() {
+  // Injeta o banner apenas em páginas de ferramentas (não no aluno.html, dashboard.html, index.html)
+  var structuralPages = ['aluno', 'dashboard', 'index', 'guia-facilitador', 'pagina-estrutural'];
+  var toolId = window.PIThinking ? PIThinking.getPageToolId() : '';
+  if (structuralPages.indexOf(toolId) === -1 && toolId !== 'pagina-estrutural') {
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
+        PIThinking.injectNavigationBanner({ showPersona: true });
+      }
+    });
+  }
+})();
+</script>
+
 
 
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>

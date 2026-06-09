@@ -1,7 +1,11 @@
 /* ================================================================
-   PI THINKING — Sync Module v3.2
-   Correções: auto-restore, getSessionInfo alias, saveQuizResult robusto,
-   leaveSession limpa pi-session-participant-id
+   PI THINKING — Sync Module v3.3
+   Correções:
+   - saveQuizResult: dispara notifyParticipants() após gravar para
+     atualizar ranking em tempo real sem precisar recarregar página
+   - Adicionado método broadcastParticipantUpdate() para forçar
+     notificação a todos os watchers após qualquer escrita crítica
+   - touchParticipant usa setInterval para heartbeat de status ativo
    ================================================================ */
 (function (global) {
   'use strict';
@@ -15,18 +19,64 @@
   var participantId = '';
   var participantName = '';
   var participantPercurso = '';
-  var watchers = { controls: [], participants: [], ranking: [], connection: [] };
-  var firebaseSubscriptions = { controls: null, participants: null, connection: null };
+
+  var watchers = {
+    controls: [],
+    participants: [],
+    ranking: [],
+    connection: []
+  };
+
+  var firebaseSubscriptions = {
+    controls: null,
+    participants: null,
+    connection: null
+  };
+
+  // ── Heartbeat para manter status ativo ──
+  var _heartbeatInterval = null;
+
+  function startHeartbeat() {
+    stopHeartbeat();
+    _heartbeatInterval = setInterval(function () {
+      if (sessionId && participantId) {
+        var data = getSessionData();
+        var p = data && data.participants && data.participants[participantId];
+        if (p && p.status === 'ativo') {
+          if (firebaseReady && db) {
+            db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/ultimoAcessoEm')
+              .set(nowIso());
+          }
+        }
+      }
+    }, 30000);
+  }
+
+  function stopHeartbeat() {
+    if (_heartbeatInterval) {
+      clearInterval(_heartbeatInterval);
+      _heartbeatInterval = null;
+    }
+  }
 
   function localKey() {
     return [STORAGE_PREFIX].concat([].slice.call(arguments)).join(':');
   }
+
   function nowIso() { return new Date().toISOString(); }
+
   function readJson(key, fallback) {
-    try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
-    catch (e) { return fallback; }
+    try {
+      var r = localStorage.getItem(key);
+      return r ? JSON.parse(r) : fallback;
+    } catch (e) { return fallback; }
   }
-  function writeJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); return value; }
+
+  function writeJson(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+    return value;
+  }
+
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
 
   function safeMerge(target, source) {
@@ -36,7 +86,9 @@
       if (s && typeof s === 'object' && !Array.isArray(s) &&
           t && typeof t === 'object' && !Array.isArray(t)) {
         out[k] = safeMerge(t, s);
-      } else { out[k] = s; }
+      } else {
+        out[k] = s;
+      }
     });
     return out;
   }
@@ -44,12 +96,14 @@
   function sanitizeCode(code) {
     return String(code || '').trim().toUpperCase().replace(/[^A-Z0-9\-]/g, '');
   }
+
   function generateId(prefix) {
     return (prefix || 'pi') + '-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   }
+
   function countKeys(obj) { return Object.keys(obj || {}).length; }
 
-  /* ── helpers de normalização de dados ── */
+  /* ── helpers de normalização ── */
   function buildLegacyFerramentas(toolStates) {
     var src = toolStates || {}, out = {};
     Object.keys(src).forEach(function (id) {
@@ -59,8 +113,11 @@
       d = safeMerge(d, s.progresso || {});
       if (s.respostas && countKeys(s.respostas)) d.respostas = s.respostas;
       out[id] = {
-        dados: d, respostas: s.respostas || {}, progresso: s.progresso || {},
-        formulario: s.formulario || {}, concluido: true,
+        dados: d,
+        respostas: s.respostas || {},
+        progresso: s.progresso || {},
+        formulario: s.formulario || {},
+        concluido: true,
         atualizadoEm: m.atualizadoEm || nowIso(),
         concluidoEm: m.concluidoEm || m.atualizadoEm || nowIso()
       };
@@ -73,7 +130,8 @@
     var score = entry.pontuacao !== undefined ? entry.pontuacao : entry.score;
     score = Number(score || 0);
     return {
-      score: score, pontuacao: score,
+      score: score,
+      pontuacao: score,
       percentual: Number(entry.percentual || 0),
       codigo: entry.codigo || (prefix ? prefix + '-' + score : ''),
       respostas: entry.respostas || {},
@@ -91,14 +149,22 @@
   }
 
   function defaultControls() {
-    return { fases_liberadas: [1], ferramentas_liberadas: [], atualizadoEm: nowIso(), atualizadoPor: 'sistema' };
+    return {
+      fases_liberadas: [1],
+      ferramentas_liberadas: [],
+      atualizadoEm: nowIso(),
+      atualizadoPor: 'sistema'
+    };
   }
 
-  /* ── armazenamento local da sessão ── */
+  /* ── armazenamento local ── */
   function getSessionData() {
     if (!sessionId) return null;
     return readJson(localKey('session', sessionId), {
-      sessionId: sessionId, controls: defaultControls(), participants: {}, updatedAt: nowIso()
+      sessionId: sessionId,
+      controls: defaultControls(),
+      participants: {},
+      updatedAt: nowIso()
     });
   }
 
@@ -108,7 +174,9 @@
     data.sessionId = sessionId;
     data.updatedAt = nowIso();
     writeJson(localKey('session', sessionId), data);
-    global.dispatchEvent(new CustomEvent('pi-sync-local-updated', { detail: { sessionId: sessionId, data: data } }));
+    global.dispatchEvent(new CustomEvent('pi-sync-local-updated', {
+      detail: { sessionId: sessionId, data: data }
+    }));
     return data;
   }
 
@@ -120,7 +188,9 @@
   function setupConnectionWatch() {
     if (!firebaseReady || !db || firebaseSubscriptions.connection) return;
     firebaseSubscriptions.connection = db.ref('.info/connected');
-    firebaseSubscriptions.connection.on('value', function (s) { emitConnection(s.val() === true); });
+    firebaseSubscriptions.connection.on('value', function (s) {
+      emitConnection(s.val() === true);
+    });
   }
 
   function bindFirebaseListeners() {
@@ -141,6 +211,10 @@
       firebaseSubscriptions.participants.on('value', function (s) {
         saveSessionData({ participants: s.val() || {} });
         notifyParticipants();
+        // CORREÇÃO 1: disparar também o evento global para o dashboard
+        global.dispatchEvent(new CustomEvent('pi-participants-updated', {
+          detail: { participants: s.val() || {} }
+        }));
       });
     }
   }
@@ -168,10 +242,16 @@
       initialized = true;
       try {
         if (typeof global.firebase === 'undefined' || !config) {
-          firebaseReady = false; emitConnection(false); resolve(false); return;
+          firebaseReady = false;
+          emitConnection(false);
+          resolve(false);
+          return;
         }
-        if (!global.firebase.apps.length) { app = global.firebase.initializeApp(config); }
-        else { app = global.firebase.app(); }
+        if (!global.firebase.apps.length) {
+          app = global.firebase.initializeApp(config);
+        } else {
+          app = global.firebase.app();
+        }
         db = global.firebase.database(app);
         firebaseReady = true;
         setupConnectionWatch();
@@ -179,7 +259,9 @@
         resolve(true);
       } catch (e) {
         console.warn('[PISync] Fallback local ativo.', e);
-        firebaseReady = false; emitConnection(false); resolve(false);
+        firebaseReady = false;
+        emitConnection(false);
+        resolve(false);
       }
     });
   }
@@ -194,14 +276,15 @@
   function onConnectionChange(cb) {
     if (typeof cb === 'function') watchers.connection.push(cb);
     cb(isOnline());
-    return function () { watchers.connection = watchers.connection.filter(function (f) { return f !== cb; }); };
+    return function () {
+      watchers.connection = watchers.connection.filter(function (f) { return f !== cb; });
+    };
   }
 
   /* ── identidade ── */
   function setIdentity(name, percurso) {
     participantName = String(name || participantName || '').trim();
     participantPercurso = String(percurso || participantPercurso || '').trim();
-    // Gera novo ID por login — não reutiliza ID antigo do dispositivo
     participantId = generateId('participant');
     localStorage.setItem('pi-session-participant-id', participantId);
     localStorage.setItem('pi-participant-name', participantName);
@@ -213,8 +296,6 @@
     sessionId = sanitizeCode(code);
     if (!sessionId) throw new Error('Código da oficina inválido.');
 
-    /* ── FIX: reset de listeners do Firebase ao trocar de sessão/aluno ──
-       Sem isso, o segundo aluno reutiliza os listeners do primeiro */
     if (firebaseSubscriptions.participants) {
       firebaseSubscriptions.participants.off();
       firebaseSubscriptions.participants = null;
@@ -228,17 +309,33 @@
     localStorage.setItem('pi-session-id', sessionId);
 
     var payload = {
-      id: participantId, nome: participantName, percurso: participantPercurso,
-      status: 'ativo', entrouEm: nowIso(), ultimoAcessoEm: nowIso(),
-      progresso: 0, totalConcluidas: 0, ferramentaAtual: '',
-      quiz: {}, toolStates: {}, extras: extra || {}
+      id: participantId,
+      nome: participantName,
+      percurso: participantPercurso,
+      status: 'ativo',
+      entrouEm: nowIso(),
+      ultimoAcessoEm: nowIso(),
+      progresso: 0,
+      totalConcluidas: 0,
+      ferramentaAtual: '',
+      quiz: {},
+      toolStates: {},
+      extras: extra || {}
     };
+
     upsertParticipant(payload);
     ensureControls();
     if (firebaseReady && db) bindFirebaseListeners();
     notifyControls();
     notifyParticipants();
-    return { sessionId: sessionId, participantId: participantId, participantName: participantName, percurso: participantPercurso };
+    startHeartbeat();
+
+    return {
+      sessionId: sessionId,
+      participantId: participantId,
+      participantName: participantName,
+      percurso: participantPercurso
+    };
   }
 
   function restoreSession() {
@@ -248,11 +345,13 @@
     if (firebaseReady && db) bindFirebaseListeners();
     notifyControls();
     notifyParticipants();
+    startHeartbeat();
     return true;
   }
 
   function leaveSession() {
     if (!sessionId || !participantId) return false;
+    stopHeartbeat();
     upsertParticipant({ status: 'desconectado', saiuEm: nowIso(), ultimoAcessoEm: nowIso() });
     localStorage.removeItem('pi-session-id');
     localStorage.removeItem('pi-session-participant-id');
@@ -279,7 +378,7 @@
       online: isOnline()
     };
   }
-  var getSessionInfo = getSessionMeta; // alias explícito
+  var getSessionInfo = getSessionMeta;
 
   /* ── controles ── */
   function ensureControls() {
@@ -300,13 +399,15 @@
     next.atualizadoPor = participantId || 'facilitador';
     saveSessionData({ controls: next });
     notifyControls();
-    if (firebaseReady && db && sessionId) db.ref('oficinas/' + sessionId + '/controls').set(next);
+    if (firebaseReady && db && sessionId)
+      db.ref('oficinas/' + sessionId + '/controls').set(next);
     return next;
   }
 
   function setReleasedPhases(phases) {
     return setControls({ fases_liberadas: Array.isArray(phases) ? phases.slice() : [1] });
   }
+
   function setReleasedTools(toolIds) {
     return setControls({ ferramentas_liberadas: Array.isArray(toolIds) ? toolIds.slice() : [] });
   }
@@ -315,9 +416,29 @@
     var c = getControls();
     watchers.controls.forEach(function (cb) { cb(clone(c)); });
   }
+
   function notifyParticipants() {
     var p = getParticipants();
     watchers.participants.forEach(function (cb) { cb(clone(p)); });
+  }
+
+  /* CORREÇÃO 1: força releitura do Firebase e notificação de todos os watchers */
+  function broadcastParticipantUpdate() {
+    if (firebaseReady && db && sessionId) {
+      db.ref('oficinas/' + sessionId + '/participantes').once('value').then(function (s) {
+        var fresh = s.val() || {};
+        saveSessionData({ participants: fresh });
+        notifyParticipants();
+        global.dispatchEvent(new CustomEvent('pi-participants-updated', {
+          detail: { participants: fresh }
+        }));
+      }).catch(function (e) {
+        // fallback: notifica com dados em cache
+        notifyParticipants();
+      });
+    } else {
+      notifyParticipants();
+    }
   }
 
   function watchControls(cb) {
@@ -333,12 +454,17 @@
         global.dispatchEvent(new CustomEvent('pi-controls-updated', { detail: v }));
       });
     }
-    return function () { watchers.controls = watchers.controls.filter(function (f) { return f !== cb; }); };
+    return function () {
+      watchers.controls = watchers.controls.filter(function (f) { return f !== cb; });
+    };
   }
 
   function stopWatchingControls() {
     watchers.controls = [];
-    if (firebaseSubscriptions.controls) { firebaseSubscriptions.controls.off(); firebaseSubscriptions.controls = null; }
+    if (firebaseSubscriptions.controls) {
+      firebaseSubscriptions.controls.off();
+      firebaseSubscriptions.controls = null;
+    }
   }
 
   /* ── participantes ── */
@@ -346,9 +472,12 @@
     var data = getSessionData();
     return data && data.participants ? data.participants : {};
   }
+
   function listParticipants() {
     var p = getParticipants();
-    return Object.keys(p).map(function (id) { return safeMerge({ id: id }, p[id]); });
+    return Object.keys(p).map(function (id) {
+      return safeMerge({ id: id }, p[id]);
+    });
   }
 
   function upsertParticipant(patch) {
@@ -387,19 +516,28 @@
     if (firebaseReady && db && sessionId && !firebaseSubscriptions.participants) {
       firebaseSubscriptions.participants = db.ref('oficinas/' + sessionId + '/participantes');
       firebaseSubscriptions.participants.on('value', function (s) {
-        saveSessionData({ participants: s.val() || {} });
+        var fresh = s.val() || {};
+        saveSessionData({ participants: fresh });
         notifyParticipants();
+        global.dispatchEvent(new CustomEvent('pi-participants-updated', {
+          detail: { participants: fresh }
+        }));
       });
     }
-    return function () { watchers.participants = watchers.participants.filter(function (f) { return f !== cb; }); };
+    return function () {
+      watchers.participants = watchers.participants.filter(function (f) { return f !== cb; });
+    };
   }
 
   function stopWatchingParticipants() {
     watchers.participants = [];
-    if (firebaseSubscriptions.participants) { firebaseSubscriptions.participants.off(); firebaseSubscriptions.participants = null; }
+    if (firebaseSubscriptions.participants) {
+      firebaseSubscriptions.participants.off();
+      firebaseSubscriptions.participants = null;
+    }
   }
 
-  /* ── progresso e ferramentas ── */
+  /* ── progresso ── */
   function computeProgress(toolStates) {
     var keys = Object.keys(toolStates || {});
     if (!keys.length) return { totalConcluidas: 0, progresso: 0 };
@@ -418,7 +556,15 @@
     var toolStates = safeMerge(current.toolStates || {}, {});
     toolStates[id] = state;
     var p = computeProgress(toolStates);
-    return upsertParticipant({ ferramentaAtual: id, toolStates: toolStates, totalConcluidas: p.totalConcluidas, progresso: p.progresso });
+    var result = upsertParticipant({
+      ferramentaAtual: id,
+      toolStates: toolStates,
+      totalConcluidas: p.totalConcluidas,
+      progresso: p.progresso
+    });
+    // CORREÇÃO 1: broadcast após atualização de ferramenta
+    broadcastParticipantUpdate();
+    return result;
   }
 
   function sendToolReset(toolId) {
@@ -428,20 +574,26 @@
     var toolStates = safeMerge(current.toolStates || {}, {});
     delete toolStates[String(toolId || '').trim()];
     var p = computeProgress(toolStates);
-    return upsertParticipant({ toolStates: toolStates, totalConcluidas: p.totalConcluidas, progresso: p.progresso });
+    return upsertParticipant({
+      toolStates: toolStates,
+      totalConcluidas: p.totalConcluidas,
+      progresso: p.progresso
+    });
   }
 
   function updateParticipantProgress(payload) {
     if (!sessionId && !tryAutoRestore()) return null;
     if (!sessionId || !participantId) return null;
-    return upsertParticipant(payload || {});
+    var result = upsertParticipant(payload || {});
+    // CORREÇÃO 1: broadcast após atualização de progresso
+    broadcastParticipantUpdate();
+    return result;
   }
 
-  /* ── saveQuizResult — escrita direta e robusta no Firebase ── */
+  /* CORREÇÃO 1: saveQuizResult dispara broadcast completo para atualizar ranking */
   function saveQuizResult(quizId, result) {
     if (!sessionId) tryAutoRestore();
     var r = safeMerge({}, result || {}, { atualizadoEm: nowIso() });
-
     if (sessionId && participantId) {
       var current = getParticipants()[participantId] || {};
       var quiz = safeMerge(current.quiz || {}, {});
@@ -449,24 +601,39 @@
       var updated = upsertParticipant({ quiz: quiz });
 
       if (firebaseReady && db) {
-        // Escrita direta no path do quiz para garantir chegada ao dashboard
-        db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/quiz/' + quizId)
-          .set(r)
-          .catch(function (e) { console.warn('[PISync] Falha ao salvar quiz:', e); });
+        var writePromises = [];
 
-        // Aliases de nível superior (diagnostico / final)
-        var alias = quizId === 'quiz-diagnostico' ? 'diagnostico' : quizId === 'quiz-final' ? 'final' : null;
+        writePromises.push(
+          db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/quiz/' + quizId)
+            .set(r)
+        );
+
+        var alias = quizId === 'quiz-diagnostico' ? 'diagnostico'
+          : quizId === 'quiz-final' ? 'final' : null;
+
         if (alias) {
           var normalized = normalizeQuizSnap(r, alias === 'diagnostico' ? 'D' : 'F');
-          db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/' + alias)
-            .set(normalized)
-            .catch(function (e) { console.warn('[PISync] Falha ao salvar alias quiz:', e); });
+          writePromises.push(
+            db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/' + alias)
+              .set(normalized)
+          );
         }
+
+        // CORREÇÃO 1: após todas as escritas, força releitura para todos os watchers
+        Promise.all(writePromises)
+          .then(function () {
+            broadcastParticipantUpdate();
+          })
+          .catch(function (e) {
+            console.warn('[PISync] Erro ao salvar quiz, tentando broadcast local:', e);
+            broadcastParticipantUpdate();
+          });
+      } else {
+        // modo offline: notifica watchers locais imediatamente
+        broadcastParticipantUpdate();
       }
       return updated;
     }
-
-    // Sem sessão — guarda offline para sync posterior
     writeJson(localKey('offline-quiz', quizId), r);
     return null;
   }
@@ -482,12 +649,17 @@
     return listParticipants()
       .map(function (p) {
         var q = p.quiz || {};
-        var v = opts.evolution ? calculateEvolution(p) : Number(q[opts.quizId] && q[opts.quizId].pontuacao) || 0;
+        var v = opts.evolution ? calculateEvolution(p)
+          : Number(q[opts.quizId] && q[opts.quizId].pontuacao) || 0;
         return {
-          id: p.id, nome: p.nome || 'Participante', percurso: p.percurso || '',
-          status: p.status || 'ativo', pontuacao: v,
+          id: p.id,
+          nome: p.nome || 'Participante',
+          percurso: p.percurso || '',
+          status: p.status || 'ativo',
+          pontuacao: v,
           percentual: q[opts.quizId] && q[opts.quizId].percentual,
-          totalConcluidas: p.totalConcluidas || 0, evolucao: calculateEvolution(p)
+          totalConcluidas: p.totalConcluidas || 0,
+          evolucao: calculateEvolution(p)
         };
       })
       .sort(function (a, b) {
@@ -503,12 +675,13 @@
     watchers.ranking.push(job);
     cb(buildRanking(job.options));
     var stop = watchParticipants(function () { cb(buildRanking(job.options)); });
-    return function () { stop(); watchers.ranking = watchers.ranking.filter(function (e) { return e !== job; }); };
+    return function () {
+      stop();
+      watchers.ranking = watchers.ranking.filter(function (e) { return e !== job; });
+    };
   }
 
   function getLocalCompletions() {
-    /* ── FIX: usa a mesma chave com participant-id que o tool-bridge ──
-       Evita contaminar loadCompletions do aluno-engine com dados de outros alunos */
     var pid = localStorage.getItem('pi-session-participant-id') || 'anon';
     return readJson('pi-thinking:completed-index:' + pid, {});
   }
@@ -523,22 +696,35 @@
   })();
 
   global.PISync = {
-    version: '3.2.0',
-    init: init, initFromWindow: initFromWindow,
-    isOnline: isOnline, onConnectionChange: onConnectionChange,
-    joinSession: joinSession, restoreSession: restoreSession,
-    leaveSession: leaveSession, isInSession: isInSession,
-    getSessionMeta: getSessionMeta, getSessionInfo: getSessionInfo,
-    getControls: getControls, setControls: setControls,
-    setReleasedPhases: setReleasedPhases, setReleasedTools: setReleasedTools,
-    watchControls: watchControls, stopWatchingControls: stopWatchingControls,
-    getParticipants: getParticipants, listParticipants: listParticipants,
-    watchParticipants: watchParticipants, stopWatchingParticipants: stopWatchingParticipants,
+    version: '3.3.0',
+    init: init,
+    initFromWindow: initFromWindow,
+    isOnline: isOnline,
+    onConnectionChange: onConnectionChange,
+    joinSession: joinSession,
+    restoreSession: restoreSession,
+    leaveSession: leaveSession,
+    isInSession: isInSession,
+    getSessionMeta: getSessionMeta,
+    getSessionInfo: getSessionInfo,
+    getControls: getControls,
+    setControls: setControls,
+    setReleasedPhases: setReleasedPhases,
+    setReleasedTools: setReleasedTools,
+    watchControls: watchControls,
+    stopWatchingControls: stopWatchingControls,
+    getParticipants: getParticipants,
+    listParticipants: listParticipants,
+    watchParticipants: watchParticipants,
+    stopWatchingParticipants: stopWatchingParticipants,
     updateParticipantProgress: updateParticipantProgress,
-    sendToolState: sendToolState, sendToolReset: sendToolReset,
-    saveQuizResult: saveQuizResult, buildRanking: buildRanking,
-    watchRanking: watchRanking, getLocalCompletions: getLocalCompletions,
-    calculateEvolution: calculateEvolution
+    sendToolState: sendToolState,
+    sendToolReset: sendToolReset,
+    saveQuizResult: saveQuizResult,
+    buildRanking: buildRanking,
+    watchRanking: watchRanking,
+    getLocalCompletions: getLocalCompletions,
+    calculateEvolution: calculateEvolution,
+    broadcastParticipantUpdate: broadcastParticipantUpdate
   };
-
 })(window);

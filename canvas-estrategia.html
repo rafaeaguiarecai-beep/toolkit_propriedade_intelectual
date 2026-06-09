@@ -999,12 +999,79 @@
 })();
 </script>
 
+<script>
+/* ── CORREÇÃO 2 + CORREÇÃO 4: banner de navegação e preenchimento de persona ── */
+(function initCanvasEstrategiaExtras() {
+  if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
+    PIThinking.injectNavigationBanner({ showPersona: true });
+  }
+
+  if (window.PIThinking && typeof PIThinking.loadPersonaContext === 'function') {
+    var persona = PIThinking.loadPersonaContext();
+    if (persona) {
+      // Bloco 1 — A Criação
+      var creationField = document.getElementById('field-creation');
+      if (creationField && !creationField.value.trim()) {
+        creationField.value = persona.context || '';
+        creationField.dispatchEvent(new Event('input'));
+      }
+      // Bloco 8 — Stakeholders
+      var stakeholdersField = document.getElementById('field-stakeholders');
+      if (stakeholdersField && !stakeholdersField.value.trim()) {
+        stakeholdersField.value = 'Persona: ' + persona.nome + ' (' + persona.role + ')';
+        stakeholdersField.dispatchEvent(new Event('input'));
+      }
+      // Selecionar tipo de PI com base na persona
+      var map = {
+        'Patente de Invenção': 'patente-invencao',
+        'Modelo de Utilidade': 'modelo-utilidade',
+        'Marca': 'marca',
+        'Marca + Segredo Industrial': 'marca',
+        'Segredo Industrial': 'segredo-industrial',
+        'Registro de Software': 'software',
+        'Software': 'software',
+        'Cultivar': 'cultivar',
+        'Patrimônio Genético + CTA': 'patrimonio-genetico',
+        'Indicação Geográfica': 'indicacao-geografica',
+        'Direito Autoral': 'direito-autoral',
+        'Desenho Industrial': 'desenho-industrial'
+      };
+      var piValue = map[persona.piType || ''];
+      if (piValue) {
+        var sel = document.getElementById('field-type-main');
+        if (sel && !sel.value) {
+          sel.value = piValue;
+          updateCosts();
+        }
+      }
+    }
+  }
+})();
+</script>
+
 <!-- PI Thinking — Tool Bridge (modo oficina) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/tool-bridge.js"></script>
+
+<!-- ── PI Thinking: Banner de Navegação Universal ── -->
+<script>
+(function() {
+  // Injeta o banner apenas em páginas de ferramentas (não no aluno.html, dashboard.html, index.html)
+  var structuralPages = ['aluno', 'dashboard', 'index', 'guia-facilitador', 'pagina-estrutural'];
+  var toolId = window.PIThinking ? PIThinking.getPageToolId() : '';
+  if (structuralPages.indexOf(toolId) === -1 && toolId !== 'pagina-estrutural') {
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
+        PIThinking.injectNavigationBanner({ showPersona: true });
+      }
+    });
+  }
+})();
+</script>
+
 
 
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>

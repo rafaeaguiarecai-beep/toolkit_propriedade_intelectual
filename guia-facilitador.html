@@ -7,6 +7,8 @@
 <meta name="author" content="PROFNIT · UFRR · INOVARR">
 <title>Guia do Facilitador — PI Thinking</title>
 
+<!-- QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -791,6 +793,127 @@ select:focus-visible {
 
   @keyframes sectionAppear {
     to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   QR CODE SECTION
+   ══════════════════════════════════════════════════════════════ */
+.qrcode-section {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 3rem;
+}
+.qrcode-section__title {
+  font-family: var(--heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: .3rem;
+  color: var(--text);
+}
+.qrcode-section__subtitle {
+  font-size: .9rem;
+  color: var(--text-mid);
+  margin-bottom: 1.5rem;
+}
+.qrcode-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+.qrcode-controls label {
+  font-family: var(--heading);
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.qrcode-controls select {
+  font-family: var(--font);
+  font-size: .92rem;
+  padding: .6rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  min-width: 260px;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .8rem center;
+  padding-right: 2.2rem;
+}
+.qrcode-controls select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(67,97,238,.15);
+}
+.qrcode-controls select:hover {
+  border-color: var(--accent);
+}
+#qrcode-container {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  background: #FFFFFF;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  min-height: 200px;
+  min-width: 200px;
+  transition: border-color .3s;
+}
+#qrcode-container.active {
+  border-color: var(--accent);
+  border-style: solid;
+}
+.qrcode-url-display {
+  margin-top: 1rem;
+  font-size: .82rem;
+  color: var(--text-mid);
+  word-break: break-all;
+}
+.qrcode-url-display a {
+  color: var(--accent);
+  font-weight: 600;
+}
+.qrcode-empty {
+  color: var(--text-light);
+  font-size: .9rem;
+  font-style: italic;
+}
+@media (max-width: 600px) {
+  .qrcode-controls {
+    flex-direction: column;
+    gap: .6rem;
+  }
+  .qrcode-controls select {
+    width: 100%;
+    min-width: unset;
+  }
+  #qrcode-container {
+    min-height: 180px;
+    min-width: 180px;
+    padding: 1rem;
+  }
+}
+@media print {
+  .qrcode-section {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+  #qrcode-container {
+    border: 1px solid #ccc;
   }
 }
 
@@ -1685,6 +1808,285 @@ select:focus-visible {
     </div>
   </div>
 </section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     QR CODE — ACESSO RÁPIDO AO MÓDULO DO ALUNO
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="qr-code" class="section">
+
+  <!-- Cabeçalho da seção -->
+  <div class="section__badge">Acesso em Sala</div>
+  <h2 class="section__title">QR Code para os Alunos</h2>
+  <p style="text-align:center; color:var(--text-mid); max-width:540px; margin:0 auto 2rem; font-size:.97rem; line-height:1.7;">
+    Projete ou imprima este QR Code no início da oficina. Os participantes apontam a câmera do celular e são direcionados diretamente ao Módulo do Aluno.
+  </p>
+
+  <!-- Card principal do QR Code -->
+  <div style="
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  ">
+
+    <!-- Cabeçalho do card -->
+    <div style="
+      background: var(--accent);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+    ">
+      <span style="font-size:1.6rem;">🎓</span>
+      <div>
+        <div style="font-family:var(--heading); font-weight:700; font-size:1rem; color:#fff;">
+          Módulo do Aluno
+        </div>
+        <div style="font-size:.78rem; color:rgba(255,255,255,.8);">
+          PI Thinking — Toolkit de Propriedade Intelectual
+        </div>
+      </div>
+    </div>
+
+    <!-- Área do QR Code -->
+    <div style="
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      background: #fff;
+    ">
+
+      <!-- Container do QR gerado pela biblioteca -->
+      <div
+        id="qr-aluno-container"
+        style="
+          display: inline-flex;
+          padding: 1rem;
+          background: #ffffff;
+          border: 3px solid var(--accent);
+          border-radius: 12px;
+          box-shadow: 0 4px 16px rgba(67,97,238,.15);
+        "
+        aria-label="QR Code para acesso ao Módulo do Aluno"
+        role="img"
+      ></div>
+
+      <!-- URL exibida abaixo do QR -->
+      <div style="text-align:center;">
+        <div style="
+          font-family: var(--heading);
+          font-size: .72rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: var(--text-light);
+          margin-bottom: .3rem;
+        ">Aponte a câmera para o código</div>
+        <a
+          href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/aluno.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="
+            font-size: .8rem;
+            color: var(--accent);
+            word-break: break-all;
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+          "
+        >rafaeaguiarecai-beep.github.io/…/aluno.html</a>
+      </div>
+
+      <!-- Botões de ação -->
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center;">
+        <button
+          onclick="window.print()"
+          aria-label="Imprimir QR Code"
+          style="
+            font-family: var(--heading);
+            font-weight: 600;
+            font-size: .82rem;
+            padding: .5rem 1.1rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            transition: background .2s;
+          "
+          onmouseover="this.style.background='var(--accent-hover,#3451d1)'"
+          onmouseout="this.style.background='var(--accent)'"
+        >🖨️ Imprimir</button>
+
+        <button
+          onclick="downloadQR()"
+          aria-label="Baixar QR Code como imagem PNG"
+          style="
+            font-family: var(--heading);
+            font-weight: 600;
+            font-size: .82rem;
+            padding: .5rem 1.1rem;
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            transition: all .2s;
+          "
+          onmouseover="this.style.background='var(--accent-bg)'"
+          onmouseout="this.style.background='transparent'"
+        >⬇️ Baixar PNG</button>
+
+        <a
+          href="https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/aluno.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Abrir o Módulo do Aluno em nova aba"
+          style="
+            font-family: var(--heading);
+            font-weight: 600;
+            font-size: .82rem;
+            padding: .5rem 1.1rem;
+            background: transparent;
+            color: var(--text-mid);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            text-decoration: none;
+            transition: all .2s;
+          "
+          onmouseover="this.style.borderColor='var(--text-mid)';this.style.color='var(--text)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-mid)'"
+        >🔗 Abrir link</a>
+      </div>
+
+    </div><!-- /área QR -->
+
+    <!-- Rodapé do card com instrução rápida -->
+    <div style="
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: .9rem 1.5rem;
+      font-size: .82rem;
+      color: var(--text-mid);
+      line-height: 1.55;
+      text-align: center;
+    ">
+      💡 <strong>Instrução para os alunos:</strong> abra a câmera, aponte para o código e toque no link que aparecer. Digite o código da oficina e seu nome para entrar.
+    </div>
+
+  </div><!-- /card -->
+
+</section>
+
+
+<!-- Script de geração do QR Code -->
+<script>
+(function gerarQRAluno() {
+
+  var URL_ALUNO = 'https://rafaeaguiarecai-beep.github.io/toolkit_propriedade_intelectual/aluno.html';
+  var TAMANHO   = 200; // px — boa resolução para projetor e impressão
+
+  /* Aguarda o DOM e a biblioteca qrcodejs estarem prontos */
+  function tentarGerar() {
+    var container = document.getElementById('qr-aluno-container');
+    if (!container) return;
+
+    /* Verifica se a biblioteca QRCode está disponível */
+    if (typeof QRCode === 'undefined') {
+      /* Tenta carregar dinamicamente caso o defer ainda não tenha executado */
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+      script.onload = function() { gerarQR(container); };
+      script.onerror = function() { mostrarFallback(container); };
+      document.head.appendChild(script);
+      return;
+    }
+
+    gerarQR(container);
+  }
+
+  function gerarQR(container) {
+    /* Limpa qualquer conteúdo anterior */
+    container.innerHTML = '';
+
+    try {
+      new QRCode(container, {
+        text:           URL_ALUNO,
+        width:          TAMANHO,
+        height:         TAMANHO,
+        colorDark:      '#1E293B', /* --text do design system */
+        colorLight:     '#FFFFFF',
+        correctLevel:   QRCode.CorrectLevel.H /* máxima correção de erros */
+      });
+    } catch (e) {
+      mostrarFallback(container);
+    }
+  }
+
+  function mostrarFallback(container) {
+    /* Caso a biblioteca falhe, exibe link clicável como alternativa */
+    container.innerHTML =
+      '<div style="width:' + TAMANHO + 'px;height:' + TAMANHO + 'px;' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'background:#f8fafc;border-radius:8px;gap:.5rem;padding:1rem;box-sizing:border-box;">' +
+        '<span style="font-size:2.5rem;">📱</span>' +
+        '<span style="font-size:.72rem;color:#64748b;text-align:center;word-break:break-all;">' +
+          URL_ALUNO +
+        '</span>' +
+      '</div>';
+  }
+
+  /* Função global para download da imagem do QR */
+  window.downloadQR = function() {
+    var container = document.getElementById('qr-aluno-container');
+    if (!container) return;
+
+    /* qrcodejs gera um <canvas> ou uma <img> dependendo do navegador */
+    var canvas = container.querySelector('canvas');
+    var img    = container.querySelector('img');
+
+    if (canvas) {
+      var link    = document.createElement('a');
+      link.href   = canvas.toDataURL('image/png');
+      link.download = 'qrcode-modulo-aluno-pi-thinking.png';
+      link.click();
+      return;
+    }
+
+    if (img) {
+      var link2    = document.createElement('a');
+      link2.href   = img.src;
+      link2.download = 'qrcode-modulo-aluno-pi-thinking.png';
+      link2.click();
+      return;
+    }
+
+    alert('QR Code ainda não gerado. Aguarde o carregamento da página e tente novamente.');
+  };
+
+  /* Executa após o carregamento completo do DOM */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tentarGerar);
+  } else {
+    tentarGerar();
+  }
+
+})();
+</script>
 
 <!-- ═══════════════════════════════════════════════════════════════
      CHECKLIST PRÉ-OFICINA

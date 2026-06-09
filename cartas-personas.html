@@ -833,7 +833,7 @@
         grid.className = list.length === 1 ? 'p-grid p-grid--single' : 'p-grid';
         grid.innerHTML = list.map(p => `
             <div class="p-card-wrapper" id="cardWrapper-${p.id}">
-                <div class="p-card p-card--${p.color}" id="card-${p.id}" role="button" tabindex="0" aria-label="Carta persona: ${p.name} — ${p.role}. Clique ou pressione Enter para virar." onclick="toggleCard(this)" onkeydown="handleCardKey(event, this)">
+                <div class="p-card p-card--${p.color}" id="card-${p.id}" role="button" tabindex="0" aria-label="Carta persona: ${p.name} — ${p.role}. Clique ou pressione Enter para virar." onclick="toggleCard(this); if(!this.classList.contains('flipped-before')){ this.classList.add('flipped-before'); selectPersonaContext(${p.id}); }" onkeydown="handleCardKey(event, this)">
                     <!-- FRONT -->
                     <div class="p-card__face p-card__front">
                         <div class="p-card__banner">
@@ -891,6 +891,26 @@
         cardEl.classList.toggle('flipped');
     }
 
+    function selectPersonaContext(personaId) {
+        var p = personas.find(function(x) { return x.id === personaId; });
+        if (!p || typeof PIThinking === 'undefined') return;
+        PIThinking.savePersonaContext({
+            id: p.id,
+            emoji: p.emoji,
+            nome: p.name,
+            role: p.role,
+            quote: p.quote,
+            context: p.context,
+            dilema: p.dilema,
+            piType: p.piType,
+            piColor: p.piColor,
+            dor: p.dor,
+            ganho: p.ganho,
+            legal: p.legal,
+            tags: p.tags
+        });
+    }
+
     function handleCardKey(event, cardEl) {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -925,6 +945,23 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/tool-bridge.js"></script>
+
+<!-- ── PI Thinking: Banner de Navegação Universal ── -->
+<script>
+(function() {
+  // Injeta o banner apenas em páginas de ferramentas (não no aluno.html, dashboard.html, index.html)
+  var structuralPages = ['aluno', 'dashboard', 'index', 'guia-facilitador', 'pagina-estrutural'];
+  var toolId = window.PIThinking ? PIThinking.getPageToolId() : '';
+  if (structuralPages.indexOf(toolId) === -1 && toolId !== 'pagina-estrutural') {
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
+        PIThinking.injectNavigationBanner({ showPersona: true });
+      }
+    });
+  }
+})();
+</script>
+
 
 
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
