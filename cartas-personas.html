@@ -617,6 +617,20 @@
                 </div>
             </div>
 
+            <!-- ── Aviso de persona ativa (aparece após sortear) ── -->
+            <div id="persona-active-banner" style="display:none;
+              background:#fffbeb; border:1px solid #fbbf24;
+              border-radius:10px; padding:0.9rem 1.2rem;
+              margin-bottom:1.5rem; font-family:Inter,sans-serif;
+              font-size:0.88rem; line-height:1.5;">
+              <strong style="color:#92400e;">🎴 Persona ativa:</strong>
+              <span id="persona-active-text" style="color:#78716c;"></span>
+              <span style="display:block; margin-top:0.3rem; font-size:0.8rem; color:#a16207;">
+                As próximas ferramentas (Mapa de Empatia, Canvas de Diagnóstico, Canvas de Estratégia)
+                lerão automaticamente os dados desta persona.
+              </span>
+            </div>
+
             <!-- ====== CONTROLS ====== -->
             <div class="p-controls p-print-hide">
                 <span class="p-controls__label">10 Personas</span>
@@ -833,7 +847,7 @@
         grid.className = list.length === 1 ? 'p-grid p-grid--single' : 'p-grid';
         grid.innerHTML = list.map(p => `
             <div class="p-card-wrapper" id="cardWrapper-${p.id}">
-                <div class="p-card p-card--${p.color}" id="card-${p.id}" role="button" tabindex="0" aria-label="Carta persona: ${p.name} — ${p.role}. Clique ou pressione Enter para virar." onclick="toggleCard(this); if(!this.classList.contains('flipped-before')){ this.classList.add('flipped-before'); selectPersonaContext(${p.id}); }" onkeydown="handleCardKey(event, this)">
+                <div class="p-card p-card--${p.color}" id="card-${p.id}" role="button" tabindex="0" aria-label="Carta persona: ${p.name} — ${p.role}. Clique ou pressione Enter para virar." onclick="toggleCard(this); handlePersonaSelect(${p.id});" onkeydown="handleCardKey(event, this)">
                     <!-- FRONT -->
                     <div class="p-card__face p-card__front">
                         <div class="p-card__banner">
@@ -934,6 +948,80 @@
             card.classList.toggle('flipped');
         });
     }
+
+    /* ── Conexão com ferramentas subsequentes ──
+       Salva a persona no contexto global assim que o aluno a vira pela
+       primeira vez. A partir daí, Canvas de Diagnóstico, Mapa de Empatia,
+       Canvas de Estratégia e Simulador de Depósito lêem automaticamente
+       os dados desta persona para pré-preencher seus campos. */
+    function handlePersonaSelect(personaId) {
+      /* Só salva na primeira vez que vira a carta — evita re-salvar */
+      var card = document.getElementById('card-' + personaId);
+      if (!card || card.dataset.personaSaved) return;
+      card.dataset.personaSaved = '1';
+
+      var p = personas.find(function(x) { return x.id === personaId; });
+      if (!p) return;
+
+      if (typeof PIThinking !== 'undefined' && PIThinking.savePersonaContext) {
+        PIThinking.savePersonaContext({
+          id:      p.id,
+          emoji:   p.emoji,
+          nome:    p.name,
+          role:    p.role,
+          quote:   p.quote,
+          context: p.context,
+          dilema:  p.dilema,
+          piType:  p.piType,
+          piColor: p.piColor,
+          dor:     p.dor,
+          ganho:   p.ganho,
+          legal:   p.legal,
+          tags:    p.tags
+        });
+        showPersonaConfirmation(p);
+      }
+    }
+
+    /* Mostra um toast confirmando qual persona foi salva */
+    function showPersonaConfirmation(p) {
+      var existing = document.getElementById('pi-persona-toast');
+      if (existing) existing.remove();
+
+      var toast = document.createElement('div');
+      toast.id = 'pi-persona-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      toast.style.cssText = [
+        'position:fixed', 'bottom:5rem', 'left:50%',
+        'transform:translateX(-50%)',
+        'background:#1e293b', 'color:#fff',
+        'padding:0.6rem 1.2rem', 'border-radius:8px',
+        'font-family:Inter,sans-serif', 'font-size:0.85rem',
+        'font-weight:600', 'box-shadow:0 4px 16px rgba(0,0,0,0.3)',
+        'z-index:9999', 'white-space:nowrap',
+        'border-left:4px solid #fbbf24'
+      ].join(';');
+      toast.innerHTML = p.emoji + ' <strong>' + p.name + '</strong> salva — ' +
+        'as próximas ferramentas usarão esta persona automaticamente.';
+      document.body.appendChild(toast);
+      setTimeout(function() {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 4000);
+    }
+
+    /* Mostra o banner de persona ativa se já houver uma salva */
+    (function checkExistingPersona() {
+      if (typeof PIThinking === 'undefined' || !PIThinking.loadPersonaContext) return;
+      var ctx = PIThinking.loadPersonaContext();
+      if (!ctx) return;
+      var banner = document.getElementById('persona-active-banner');
+      var text   = document.getElementById('persona-active-text');
+      if (banner && text) {
+        text.textContent = (ctx.emoji || '🧑') + ' ' + ctx.nome + ' (' + ctx.role + ')';
+        banner.style.display = 'block';
+      }
+    })();
 
     // Init
     renderCards(personas);

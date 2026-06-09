@@ -1103,7 +1103,7 @@ select:focus-visible {
     <div class="feature">
       <div class="feature__icon">🏆</div>
       <h5>Ranking</h5>
-      <p>Exibe a classificação dos participantes com três visões alternáveis: pelo <strong>Quiz Diagnóstico</strong> (nota D-X, de 0 a 10), pelo <strong>Quiz Final</strong> (nota F-X, de 0 a 20) e pela <strong>Evolução</strong> (diferença F-X menos D-X). Os três primeiros colocados recebem medalhas visuais (ouro, prata, bronze). Use o ranking projetado na tela para estimular uma competição saudável entre os participantes, especialmente após o Quiz Final.</p>
+      <p>Exibe a classificação dos participantes com três visões alternáveis: pelo <strong>Quiz Diagnóstico</strong> (nota D-X, de 0 a 10), pelo <strong>Quiz Final</strong> (nota F-X, de 0 a 20) e pela <strong>Evolução</strong> (ganho em pontos percentuais: percentual de acerto no Quiz Final menos percentual de acerto no Quiz Diagnóstico — por exemplo, D-4 = 40% e F-14 = 70% resultam em <strong>+30pp</strong> de evolução). Os três primeiros colocados recebem medalhas visuais (ouro, prata, bronze). Use o ranking projetado na tela para estimular uma competição saudável entre os participantes, especialmente após o Quiz Final.</p>
     </div>
     <div class="feature">
       <div class="feature__icon">👥</div>
@@ -1540,6 +1540,13 @@ select:focus-visible {
       <p>O bloco de custos merece atenção especial. A ferramenta já traz as taxas atualizadas do INPI (2025), com desconto de 60% para ICTs e MEIs. Peça que calculem: <em>"Quanto custaria para a sua persona proteger essa criação? E se ela fosse MEI — qual seria o desconto?"</em></p>
       <p>Enquanto os grupos trabalham, circule e faça perguntas desafiadoras: <em>"Vocês estão protegendo via patente, mas a persona publicou um artigo há 8 meses. Estão dentro do período de graça? Quanto tempo falta?"</em> Essas provocações forçam a aplicação prática dos conceitos.</p>
       <p>Ao final, peça que 1 ou 2 participantes apresentem seu Canvas completo. Projete na tela e faça uma revisão coletiva: a turma toda pode sugerir melhorias ou identificar gaps no plano. Esse momento de revisão por pares é extremamente rico.</p>
+
+      <div class="callout callout--tip">
+        <div class="callout__icon">🔗</div>
+        <div class="callout__body">
+          <strong>Encadeamento com o Canvas de Diagnóstico:</strong> Antes de abrir o Canvas de Estratégia, peça que cada participante releia o campo 7 (Tipo de Proteção Sugerido) e o campo 8 (Próximos Passos) do Canvas de Diagnóstico. O Canvas de Estratégia é a continuação direta desses campos — o Bloco 1 deve ser copiado do campo 1 do Diagnóstico, o Bloco 2 deve refletir o campo 7, e o Bloco 10 deve expandir o campo 8. <em>Não é um novo exercício — é o aprofundamento do que já foi mapeado.</em>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1689,17 +1696,24 @@ select:focus-visible {
     </div>
     <div class="tool-block__body">
       <h4>Para que serve</h4>
-      <p>São 20 questões que cobrem todo o conteúdo trabalhado, incluindo questões aplicadas (cenários de decisão, cálculo de prazo, identificação de tipo de PI). Gera o código <strong>F-X</strong> (de 0 a 20) que será comparado com o <strong>D-X</strong> do início. A evolução é calculada em <strong>pontos percentuais (pp)</strong>: percentual de acerto no Quiz Final menos percentual de acerto no Quiz Diagnóstico. Por exemplo, D-4 representa 40% de acerto (4 de 10) e F-14 representa 70% de acerto (14 de 20), resultando em uma evolução de <strong>+30pp</strong> — independente do número diferente de questões em cada quiz.</p>
+      <p>São 20 questões que cobrem todo o conteúdo trabalhado, incluindo questões aplicadas (cenários de decisão, cálculo de prazo, identificação de tipo de PI). Gera o código <strong>F-X</strong> (de 0 a 20) que será comparado com o <strong>D-X</strong> do início. A evolução é calculada em <strong>pontos percentuais (pp)</strong>: percentual de acerto no Quiz Final menos percentual de acerto no Quiz Diagnóstico. Como os dois quizzes têm números diferentes de questões (10 e 20), a comparação direta de acertos seria incorreta — por isso usa-se percentual. Exemplo: D-4 = 40%, F-14 = 70%, evolução = <strong>+30pp</strong>.</p>
 
       <h4>Como conduzir — passo a passo</h4>
       <p>Crie um momento solene: <em>"Agora é a hora da verdade. Lembram do Quiz Diagnóstico lá no início? A média da turma foi D-4,3. Vamos ver quanto vocês evoluíram. Respondam individualmente, sem consultar. Vocês têm 15 minutos."</em></p>
       <p>Enquanto os alunos respondem, acompanhe no Dashboard (aba Ranking, filtro "Quiz Final") os resultados chegando em tempo real. Quando a maioria terminar, mude o filtro para "Evolução" e projete o ranking na tela.</p>
-      <p>Esse é o grande momento da oficina. Leia os resultados em voz alta: <em>"João: D-3 (30%) → F-14 (70%), evolução +40pp. Maria: D-5 (50%) → F-18 (90%), evolução +40pp!"</em> A turma geralmente reage com surpresa e orgulho ao ver a própria evolução. A média de evolução da turma aparece no card do Dashboard em pontos percentuais — compartilhe: <em>"A média percentual subiu de 43% para 76% — uma evolução média de +33pp!"</em></p>
+      <p>Esse é o grande momento da oficina. Leia os resultados em voz alta: <em>"João: D-3 (30%) → F-14 (70%), evolução <strong>+40pp</strong>. Maria: D-5 (50%) → F-18 (90%), evolução <strong>+40pp</strong>!"</em> A turma geralmente reage com surpresa e orgulho ao ver a própria evolução. A média de evolução da turma aparece no card do Dashboard em pontos percentuais — compartilhe: <em>"A média percentual subiu de 43% para 76% — uma <strong>evolução média de +33pp</strong> de conhecimento em PI!"</em></p>
 
       <div class="callout callout--tip">
         <div class="callout__icon">🏆</div>
         <div class="callout__body">
           <strong>Premiação simbólica:</strong> Reconheça os 3 primeiros no ranking de evolução (não de nota final — para valorizar o crescimento, não o ponto de partida). Pode ser um certificado especial, um badge digital, ou simplesmente aplausos da turma.
+        </div>
+      </div>
+
+      <div class="callout callout--info">
+        <div class="callout__icon">📐</div>
+        <div class="callout__body">
+          <strong>Como interpretar a evolução:</strong> O Dashboard exibe a evolução em pontos percentuais (pp). Uma evolução de <strong>+30pp ou mais</strong> indica domínio conceitual sólido e início de raciocínio estratégico. Entre <strong>+15pp e +29pp</strong> indica bom aproveitamento dos conceitos fundamentais. Abaixo de <strong>+15pp</strong> pode indicar dificuldade com as questões aplicadas do Quiz Final — observe na aba Análise quais questões da segunda metade tiveram mais erros e retome esses temas no encerramento.
         </div>
       </div>
     </div>
@@ -1804,7 +1818,14 @@ select:focus-visible {
   <div class="callout callout--tip">
     <div class="callout__icon">💡</div>
     <div class="callout__body">
-      <strong>Frase de fechamento sugerida:</strong> <em>"Vocês entraram aqui com 40% de acerto e saem com 75%. Isso é uma evolução de +35 pontos percentuais de conhecimento em PI — em uma única tarde. Mas o mais importante não é o número: é que agora vocês sabem que toda criação pode ser protegida, que existem caminhos acessíveis para isso, e que o NIT da universidade está aí para ajudar. PI não é burocracia — é estratégia."</em>
+      <strong>Frase de fechamento sugerida:</strong> <em>"Vocês entraram aqui com 40% de acerto e saem com 75% — uma evolução de +35 pontos percentuais de conhecimento em PI, em uma única tarde. Mas o mais importante não é o número: é que agora vocês sabem que toda criação pode ser protegida, que existem caminhos acessíveis para isso, e que o NIT da universidade está aí para ajudar. PI não é burocracia — é estratégia."</em>
+    </div>
+  </div>
+
+  <div class="callout callout--tip">
+    <div class="callout__icon">📋</div>
+    <div class="callout__body">
+      <strong>O que fazer com o Canvas de Estratégia após a oficina:</strong> Oriente cada participante a imprimir ou exportar o Canvas de Estratégia como PDF diretamente da ferramenta (botão "Imprimir / Salvar PDF"). Esse documento pode ser levado ao NIT da sua instituição como briefing inicial para uma consulta de pré-análise de PI — a maioria dos NITs aceita esse material como ponto de partida para orientação especializada.
     </div>
   </div>
 </section>

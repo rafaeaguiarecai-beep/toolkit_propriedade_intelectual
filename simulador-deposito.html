@@ -742,31 +742,66 @@
 <script>
 /* ── CORREÇÃO 2 + CORREÇÃO 4 para simulador-deposito.html ── */
 (function initSimuladorExtras() {
+  /* Injeta o banner de navegação */
   if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
     PIThinking.injectNavigationBanner({ showPersona: true });
   }
-  if (window.PIThinking && typeof PIThinking.loadPersonaContext === 'function') {
-    var persona = PIThinking.loadPersonaContext();
-    if (persona && persona.piType) {
-      var map = {
-        'Patente de Invenção': 'patente_invencao',
-        'Modelo de Utilidade': 'modelo_utilidade',
-        'Marca': 'marca',
-        'Marca + Segredo Industrial': 'marca',
-        'Registro de Software': 'software',
-        'Software': 'software',
-        'Cultivar': 'cultivar',
-        'Indicação Geográfica': 'indicacao_geografica',
-        'Direito Autoral': 'direito_autoral',
-        'Segredo Industrial': 'segredo_industrial'
-      };
-      var val = map[persona.piType];
-      if (val) {
-        var sel = document.getElementById('tipoProtecao');
-        if (sel && !sel.value) { sel.value = val; simular(); }
-      }
+
+  /* ── Lê a persona e pré-seleciona o tipo de PI ── */
+  function preencherComPersona() {
+    if (!window.PIThinking || typeof PIThinking.loadPersonaContext !== 'function') return;
+    var ctx = PIThinking.loadPersonaContext();
+    if (!ctx || !ctx.piType) return;
+
+    var piMap = {
+      'Patente de Invenção':         'patente_invencao',
+      'Modelo de Utilidade':         'modelo_utilidade',
+      'Marca':                        'marca',
+      'Marca + Segredo Industrial':   'marca',
+      'Segredo Industrial':           'segredo_industrial',
+      'Registro de Software':         'software',
+      'Software':                     'software',
+      'Cultivar':                     'cultivar',
+      'Patrimônio Genético + CTA':    'indicacao_geografica',
+      'Indicação Geográfica':         'indicacao_geografica',
+      'Direito Autoral':              'direito_autoral',
+      'Desenho Industrial':           'desenho_industrial'
+    };
+    var piVal = piMap[ctx.piType] || '';
+    var sel = document.getElementById('tipoProtecao');
+    if (sel && piVal && !sel.value) {
+      sel.value = piVal;
+      simular();
     }
+
+    /* Mini-card da persona */
+    exibirMiniCard(ctx);
   }
+
+  function exibirMiniCard(ctx) {
+    if (document.getElementById('pi-persona-mini-card-sd')) return;
+    var container = document.querySelector('.sd-container');
+    if (!container) return;
+    var card = document.createElement('div');
+    card.id = 'pi-persona-mini-card-sd';
+    card.style.cssText = [
+      'background:#fffbeb', 'border:1px solid #fbbf24',
+      'border-radius:10px', 'padding:0.8rem 1rem',
+      'margin-bottom:1rem', 'display:flex',
+      'align-items:center', 'gap:0.8rem',
+      'font-family:Inter,sans-serif', 'font-size:0.88rem'
+    ].join(';');
+    card.innerHTML =
+      '<span style="font-size:1.5rem;">' + (ctx.emoji || '🧑') + '</span>' +
+      '<div>' +
+        '<strong style="color:#92400e;">' + ctx.nome + '</strong>' +
+        ' · <em style="color:#78716c;">' + ctx.role + '</em>' +
+        (ctx.piType ? '<br><span style="color:#a16207;font-size:0.8rem;">Simulando: <strong>' + ctx.piType + '</strong></span>' : '') +
+      '</div>';
+    container.insertBefore(card, container.firstChild);
+  }
+
+  setTimeout(preencherComPersona, 150);
 })();
 </script>
 

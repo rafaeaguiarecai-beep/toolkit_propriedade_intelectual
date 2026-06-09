@@ -1002,50 +1002,91 @@
 <script>
 /* ── CORREÇÃO 2 + CORREÇÃO 4: banner de navegação e preenchimento de persona ── */
 (function initCanvasEstrategiaExtras() {
+  /* Injeta o banner de navegação */
   if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
     PIThinking.injectNavigationBanner({ showPersona: true });
   }
 
-  if (window.PIThinking && typeof PIThinking.loadPersonaContext === 'function') {
-    var persona = PIThinking.loadPersonaContext();
-    if (persona) {
-      // Bloco 1 — A Criação
-      var creationField = document.getElementById('field-creation');
-      if (creationField && !creationField.value.trim()) {
-        creationField.value = persona.context || '';
-        creationField.dispatchEvent(new Event('input'));
-      }
-      // Bloco 8 — Stakeholders
-      var stakeholdersField = document.getElementById('field-stakeholders');
-      if (stakeholdersField && !stakeholdersField.value.trim()) {
-        stakeholdersField.value = 'Persona: ' + persona.nome + ' (' + persona.role + ')';
-        stakeholdersField.dispatchEvent(new Event('input'));
-      }
-      // Selecionar tipo de PI com base na persona
-      var map = {
-        'Patente de Invenção': 'patente-invencao',
-        'Modelo de Utilidade': 'modelo-utilidade',
-        'Marca': 'marca',
-        'Marca + Segredo Industrial': 'marca',
-        'Segredo Industrial': 'segredo-industrial',
-        'Registro de Software': 'software',
-        'Software': 'software',
-        'Cultivar': 'cultivar',
-        'Patrimônio Genético + CTA': 'patrimonio-genetico',
-        'Indicação Geográfica': 'indicacao-geografica',
-        'Direito Autoral': 'direito-autoral',
-        'Desenho Industrial': 'desenho-industrial'
+  /* ── Lê a persona do contexto global e pré-preenche os campos ── */
+  function preencherComPersona() {
+    if (!window.PIThinking || typeof PIThinking.loadPersonaContext !== 'function') return;
+    var ctx = PIThinking.loadPersonaContext();
+    if (!ctx) return;
+
+    /* Bloco 1 — A Criação */
+    var f1 = document.getElementById('field-creation');
+    if (f1 && !f1.value.trim()) {
+      f1.value = ctx.context || '';
+      f1.dispatchEvent(new Event('input'));
+    }
+
+    /* Bloco 8 — Partes Envolvidas */
+    var f8 = document.getElementById('field-stakeholders');
+    if (f8 && !f8.value.trim() && ctx.nome) {
+      f8.value = 'Criador principal: ' + ctx.nome + ' (' + ctx.role + ')';
+      f8.dispatchEvent(new Event('input'));
+    }
+
+    /* Bloco 9 — Riscos e Barreiras: preenchimento com a dor da persona */
+    var f9 = document.getElementById('field-risks');
+    if (f9 && !f9.value.trim() && ctx.dor) {
+      f9.value = 'Principal barreira identificada: ' + ctx.dor;
+      f9.dispatchEvent(new Event('input'));
+    }
+
+    /* Bloco 2 — Tipo de PI: seleciona automaticamente se disponível */
+    if (ctx.piType) {
+      var piMap = {
+        'Patente de Invenção':         'patente-invencao',
+        'Modelo de Utilidade':         'modelo-utilidade',
+        'Marca':                        'marca',
+        'Marca + Segredo Industrial':   'marca',
+        'Segredo Industrial':           'segredo-industrial',
+        'Registro de Software':         'software',
+        'Software':                     'software',
+        'Cultivar':                     'cultivar',
+        'Patrimônio Genético + CTA':    'patrimonio-genetico',
+        'Indicação Geográfica':         'indicacao-geografica',
+        'Direito Autoral':              'direito-autoral',
+        'Desenho Industrial':           'desenho-industrial'
       };
-      var piValue = map[persona.piType || ''];
-      if (piValue) {
-        var sel = document.getElementById('field-type-main');
-        if (sel && !sel.value) {
-          sel.value = piValue;
-          updateCosts();
-        }
+      var piVal = piMap[ctx.piType] || '';
+      var sel = document.getElementById('field-type-main');
+      if (sel && !sel.value && piVal) {
+        sel.value = piVal;
+        updateCosts();
       }
     }
+
+    /* Exibe mini-card da persona acima do canvas */
+    exibirMiniCard(ctx);
   }
+
+  function exibirMiniCard(ctx) {
+    if (document.getElementById('pi-persona-mini-card-ce')) return;
+    var intro = document.querySelector('.ce-intro');
+    if (!intro) return;
+    var card = document.createElement('div');
+    card.id = 'pi-persona-mini-card-ce';
+    card.style.cssText = [
+      'background:#fffbeb', 'border:1px solid #fbbf24',
+      'border-radius:10px', 'padding:0.8rem 1rem',
+      'margin-bottom:1rem', 'display:flex',
+      'align-items:center', 'gap:0.8rem',
+      'font-family:Inter,sans-serif', 'font-size:0.88rem'
+    ].join(';');
+    card.innerHTML =
+      '<span style="font-size:1.5rem;">' + (ctx.emoji || '🧑') + '</span>' +
+      '<div>' +
+        '<strong style="color:#92400e;">Persona: ' + ctx.nome + '</strong>' +
+        ' · <em style="color:#78716c;">' + ctx.role + '</em>' +
+        (ctx.piType ? '<br><span style="color:#a16207;font-size:0.8rem;">Tipo de PI indicado: <strong>' + ctx.piType + '</strong></span>' : '') +
+      '</div>';
+    intro.insertAdjacentElement('afterend', card);
+  }
+
+  /* Executa após os dados salvos serem restaurados */
+  setTimeout(preencherComPersona, 150);
 })();
 </script>
 

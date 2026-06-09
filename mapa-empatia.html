@@ -1006,33 +1006,68 @@
             document.getElementById('personaSelect').value = data.persona;
             selectPersona();
         }
+
+        /* Se não há persona salva localmente, tenta ler do contexto global
+           (salvo pelas Cartas Personas) e pré-seleciona */
+        if (!data || !data.persona) {
+            if (typeof PIThinking !== 'undefined' && PIThinking.loadPersonaContext) {
+                var ctx = PIThinking.loadPersonaContext();
+                if (ctx && ctx.id !== undefined) {
+                    var sel = document.getElementById('personaSelect');
+                    var idx = String(ctx.id);
+                    /* Verifica se o id corresponde a alguma opção */
+                    if (sel && sel.querySelector('option[value="' + idx + '"]')) {
+                        sel.value = idx;
+                        selectPersona();
+                    }
+                }
+            }
+        }
     }
 
     // ---- Persona selection ----
     function selectPersona() {
-        const val = document.getElementById('personaSelect').value;
-        const preview = document.getElementById('personaPreview');
+      var val = document.getElementById('personaSelect').value;
+      var preview = document.getElementById('personaPreview');
 
-        if (val === '' || val === 'custom') {
-            preview.classList.remove('visible');
-            if (val === 'custom') {
-                document.getElementById('goalWho').value = '';
-                document.getElementById('goalWhat').value = '';
-                document.getElementById('goalWho').focus();
-            }
-            autoSave();
-            return;
+      if (val === '' || val === 'custom') {
+        preview.classList.remove('visible');
+        if (val === 'custom') {
+          document.getElementById('goalWho').value = '';
+          document.getElementById('goalWhat').value = '';
+          document.getElementById('goalWho').focus();
         }
-
-        const p = personasData[parseInt(val)];
-        document.getElementById('previewEmoji').textContent = p.emoji;
-        document.getElementById('previewName').textContent = p.name;
-        document.getElementById('previewRole').textContent = p.role;
-        document.getElementById('previewQuote').textContent = '"' + p.quote + '"';
-        document.getElementById('goalWho').value = p.name + ' — ' + p.role;
-        document.getElementById('goalWhat').value = p.goal;
-        preview.classList.add('visible');
         autoSave();
+        return;
+      }
+
+      var p = personasData[parseInt(val)];
+      document.getElementById('previewEmoji').textContent = p.emoji;
+      document.getElementById('previewName').textContent  = p.name;
+      document.getElementById('previewRole').textContent  = p.role;
+      document.getElementById('previewQuote').textContent = '"' + p.quote + '"';
+      document.getElementById('goalWho').value  = p.name + ' — ' + p.role;
+      document.getElementById('goalWhat').value = p.goal;
+      preview.classList.add('visible');
+
+      /* Salva no contexto global para que ferramentas subsequentes leiam */
+      if (typeof PIThinking !== 'undefined' && PIThinking.savePersonaContext) {
+        PIThinking.savePersonaContext({
+          id:      parseInt(val),
+          emoji:   p.emoji,
+          nome:    p.name,
+          role:    p.role,
+          quote:   p.quote,
+          context: p.goal,
+          dilema:  p.goal,
+          piType:  '',
+          dor:     '',
+          ganho:   '',
+          tags:    [],
+          legal:   ''
+        });
+      }
+      autoSave();
     }
 
     // ---- Notes management ----

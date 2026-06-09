@@ -515,48 +515,105 @@
 
     /* ── CORREÇÃO 2 + CORREÇÃO 4: banner de navegação e preenchimento de persona ── */
     (function initCanvasDiagnosticoExtras() {
+      /* Injeta o banner de navegação */
       if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
         PIThinking.injectNavigationBanner({ showPersona: true });
       }
 
-      if (window.PIThinking && typeof PIThinking.loadPersonaContext === 'function') {
-        var persona = PIThinking.loadPersonaContext();
-        if (persona) {
-          var f1 = document.getElementById('diag-field-1');
-          if (f1 && !f1.value.trim()) { f1.value = persona.context || ''; f1.dispatchEvent(new Event('input')); }
-          var f2 = document.getElementById('diag-field-2');
-          if (f2 && !f2.value.trim()) { f2.value = persona.dor || persona.dilema || ''; f2.dispatchEvent(new Event('input')); }
-          if (persona.piType) {
-            var piMap = {
-              'Patente de Invenção':'patente-invencao','Modelo de Utilidade':'modelo-utilidade',
-              'Marca':'marca','Marca + Segredo Industrial':'marca','Segredo Industrial':'segredo-industrial',
-              'Registro de Software':'software','Software':'software','Cultivar':'cultivar',
-              'Patrimônio Genético + CTA':'patrimonio-genetico','Indicação Geográfica':'indicacao-geografica',
-              'Direito Autoral':'direito-autoral','Desenho Industrial':'desenho-industrial'
-            };
-            var piVal = piMap[persona.piType] || '';
-            if (piVal) {
-              document.querySelectorAll('.d-protection__option').forEach(function(opt) {
-                if (opt.getAttribute('data-value') === piVal) {
-                  opt.classList.add('selected');
-                  opt.setAttribute('aria-pressed', 'true');
-                }
-              });
-            }
+      /* ── Lê a persona do contexto global e pré-preenche os campos ── */
+      function preencherComPersona() {
+        if (!window.PIThinking || typeof PIThinking.loadPersonaContext !== 'function') return;
+        var ctx = PIThinking.loadPersonaContext();
+        if (!ctx) return;
+
+        /* Bloco 1 — Descrição da Criação */
+        var f1 = document.getElementById('diag-field-1');
+        if (f1 && !f1.value.trim()) {
+          f1.value = ctx.context || '';
+          f1.dispatchEvent(new Event('input'));
+        }
+
+        /* Bloco 2 — Problema que Resolve */
+        var f2 = document.getElementById('diag-field-2');
+        if (f2 && !f2.value.trim()) {
+          f2.value = ctx.dor || ctx.dilema || '';
+          f2.dispatchEvent(new Event('input'));
+        }
+
+        /* Bloco 4 — Quem participou */
+        var f4 = document.getElementById('diag-field-4');
+        if (f4 && !f4.value.trim() && ctx.nome) {
+          f4.value = 'Criador principal: ' + ctx.nome + ' (' + ctx.role + ')';
+          f4.dispatchEvent(new Event('input'));
+        }
+
+        /* Bloco 7 — Tipo de Proteção (seleciona automaticamente se piType foi definido) */
+        if (ctx.piType) {
+          var piMap = {
+            'Patente de Invenção':         'patente-invencao',
+            'Modelo de Utilidade':         'modelo-utilidade',
+            'Marca':                        'marca',
+            'Marca + Segredo Industrial':   'marca',
+            'Segredo Industrial':           'segredo-industrial',
+            'Registro de Software':         'software',
+            'Software':                     'software',
+            'Cultivar':                     'cultivar',
+            'Patrimônio Genético + CTA':    'patrimonio-genetico',
+            'Indicação Geográfica':         'indicacao-geografica',
+            'Direito Autoral':              'direito-autoral',
+            'Desenho Industrial':           'desenho-industrial'
+          };
+          var piVal = piMap[ctx.piType] || '';
+          if (piVal) {
+            document.querySelectorAll('.d-protection__option').forEach(function(opt) {
+              if (opt.getAttribute('data-value') === piVal &&
+                  !opt.classList.contains('selected')) {
+                opt.classList.add('selected');
+                opt.setAttribute('aria-pressed', 'true');
+              }
+            });
           }
         }
+
+        /* Exibe mini-card da persona no topo do canvas */
+        exibirMiniCard(ctx);
       }
 
-      /* FIX análise: override do autoSaveDiag para salvar TRL em formato plano */
-      var _origAutoSaveDiag = autoSaveDiag;
+      function exibirMiniCard(ctx) {
+        if (document.getElementById('pi-persona-mini-card')) return;
+        var container = document.querySelector('.d-container');
+        if (!container) return;
+        var card = document.createElement('div');
+        card.id = 'pi-persona-mini-card';
+        card.style.cssText = [
+          'background:#fffbeb', 'border:1px solid #fbbf24',
+          'border-radius:10px', 'padding:0.8rem 1rem',
+          'margin-bottom:1rem', 'display:flex',
+          'align-items:center', 'gap:0.8rem',
+          'font-family:Inter,sans-serif', 'font-size:0.88rem'
+        ].join(';');
+        card.innerHTML =
+          '<span style="font-size:1.5rem;">' + (ctx.emoji || '🧑') + '</span>' +
+          '<div>' +
+            '<strong style="color:#92400e;">' + ctx.nome + '</strong>' +
+            ' · <em style="color:#78716c;">' + ctx.role + '</em>' +
+            '<br><span style="color:#a16207;font-size:0.8rem;">' +
+              '🎯 Dilema: ' + (ctx.dilema || ctx.context || '') +
+            '</span>' +
+          '</div>';
+        container.insertBefore(card, container.firstChild);
+      }
+
+      /* Executa após o carregamento dos dados salvos */
+      setTimeout(preencherComPersona, 100);
+
+      /* ── FIX análise: garante que TRL seja salvo em formato plano ── */
+      var _origAutoSaveDiag = typeof autoSaveDiag === 'function' ? autoSaveDiag : null;
       autoSaveDiag = function() {
-        _origAutoSaveDiag();
-        /* Salva TRL diretamente no campo progresso (sem aninhamento extra) */
-        var trlVal = parseInt((document.getElementById('trlSlider') || {}).value || '1');
-        if (window.PIThinking) {
-          /* saveProgress chama internamente saveToolStore que chama syncToolState.
-             O sync.js v3.4 agora recebe dados achatados via flattenStoreForSync */
-          PIThinking.saveProgress('canvas-diagnostico', { trl: trlVal });
+        if (_origAutoSaveDiag) _origAutoSaveDiag();
+        var trlEl = document.getElementById('trlSlider');
+        if (trlEl && window.PIThinking && typeof PIThinking.saveProgress === 'function') {
+          PIThinking.saveProgress('canvas-diagnostico', { trl: parseInt(trlEl.value) });
         }
       };
     })();

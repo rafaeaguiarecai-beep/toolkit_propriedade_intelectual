@@ -471,6 +471,56 @@
 
         renderStep('start');
     })();
+
+    /* ── Integração com contexto de persona ── */
+    (function initArvorePersona() {
+      if (!window.PIThinking || typeof PIThinking.loadPersonaContext !== 'function') return;
+      var ctx = PIThinking.loadPersonaContext();
+      if (!ctx) return;
+
+      /* Exibe lembrete da persona acima da árvore */
+      var container = document.querySelector('.decision-tree') ||
+                      document.querySelector('.container');
+      if (container && !document.getElementById('pi-persona-mini-card-arv')) {
+        var card = document.createElement('div');
+        card.id = 'pi-persona-mini-card-arv';
+        card.style.cssText = [
+          'background:#fffbeb', 'border:1px solid #fbbf24',
+          'border-radius:10px', 'padding:0.75rem 1rem',
+          'margin-bottom:1rem', 'display:flex', 'align-items:center',
+          'gap:0.8rem', 'font-family:Inter,sans-serif', 'font-size:0.85rem'
+        ].join(';');
+        card.innerHTML =
+          '<span style="font-size:1.4rem;">' + (ctx.emoji || '🧑') + '</span>' +
+          '<div><strong style="color:#92400e;">' + ctx.nome + '</strong>' +
+            ' · <em style="color:#78716c;">' + ctx.role + '</em>' +
+            '<br><span style="color:#a16207;font-size:0.78rem;">' +
+              'Responda as perguntas pensando na criação desta persona.' +
+            '</span></div>';
+        container.insertBefore(card, container.firstChild);
+      }
+
+      /* Quando chega ao resultado, atualiza o piType da persona no contexto */
+      var _origRenderResult = renderResult;
+      renderResult = function(resultId) {
+        _origRenderResult(resultId);
+        var results = {
+          patente: 'Patente de Invenção', modelo: 'Modelo de Utilidade',
+          marca: 'Marca', di: 'Desenho Industrial',
+          autoral: 'Direito Autoral', software: 'Registro de Software',
+          cultivar: 'Cultivar', ig: 'Indicação Geográfica',
+          ci: 'Topografia de Circuito Integrado'
+        };
+        if (results[resultId] && window.PIThinking &&
+            typeof PIThinking.loadPersonaContext === 'function') {
+          var current = PIThinking.loadPersonaContext();
+          if (current) {
+            current.piType = results[resultId];
+            PIThinking.savePersonaContext(current);
+          }
+        }
+      };
+    })();
     </script>
 <!-- PI Thinking — Tool Bridge (modo oficina) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

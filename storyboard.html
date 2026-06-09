@@ -548,6 +548,55 @@
   } else {
     setTimeout(loadStoryboardState, 0);
   }
+
+  /* ── Pré-preenche cena 1 com contexto da persona ── */
+  function preencherCena1ComPersona() {
+    if (!window.PIThinking || typeof PIThinking.loadPersonaContext !== 'function') return;
+    var ctx = PIThinking.loadPersonaContext();
+    if (!ctx) return;
+
+    /* Só preenche se a cena 1 estiver vazia */
+    var actionField = document.getElementById('action-1');
+    if (actionField && !actionField.value.trim()) {
+      actionField.value = ctx.nome + ' (' + ctx.role + ') criou: ' +
+        (ctx.context || ctx.dilema || '');
+      actionField.dispatchEvent(new Event('input'));
+    }
+    var narrationField = document.getElementById('narration-1');
+    if (narrationField && !narrationField.value.trim() && ctx.quote) {
+      narrationField.value = '"' + ctx.quote + '"';
+      narrationField.dispatchEvent(new Event('input'));
+    }
+
+    /* Mini-card acima do strip */
+    exibirMiniCard(ctx);
+  }
+
+  function exibirMiniCard(ctx) {
+    if (document.getElementById('pi-persona-mini-card-sb')) return;
+    var container = document.querySelector('.sb-container');
+    if (!container) return;
+    var card = document.createElement('div');
+    card.id = 'pi-persona-mini-card-sb';
+    card.style.cssText = [
+      'background:#fffbeb', 'border:1px solid #fbbf24',
+      'border-radius:10px', 'padding:0.8rem 1rem',
+      'margin-bottom:1rem', 'display:flex',
+      'align-items:center', 'gap:0.8rem',
+      'font-family:Inter,sans-serif', 'font-size:0.88rem'
+    ].join(';');
+    card.innerHTML =
+      '<span style="font-size:1.5rem;">' + (ctx.emoji || '🧑') + '</span>' +
+      '<div><strong style="color:#92400e;">' + ctx.nome + '</strong>' +
+        ' · <em style="color:#78716c;">' + ctx.role + '</em>' +
+        '<br><span style="color:#a16207;font-size:0.8rem;">' +
+          'Construa o roteiro desta persona' +
+        '</span></div>';
+    var intro = container.querySelector('.sb-intro') || container.firstChild;
+    container.insertBefore(card, intro ? intro.nextSibling : container.firstChild);
+  }
+
+  setTimeout(preencherCena1ComPersona, 200);
 })();
 </script>
 
