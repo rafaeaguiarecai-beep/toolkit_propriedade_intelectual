@@ -1,11 +1,13 @@
 /* ================================================================
-   PI THINKING — Sync Module v3.3
-   Correções:
-   - saveQuizResult: dispara notifyParticipants() após gravar para
-     atualizar ranking em tempo real sem precisar recarregar página
-   - Adicionado método broadcastParticipantUpdate() para forçar
-     notificação a todos os watchers após qualquer escrita crítica
-   - touchParticipant usa setInterval para heartbeat de status ativo
+   PI THINKING — Sync Module v3.4
+   Correção principal desta versão:
+   - saveQuizResult: escrita direta no Firebase + notificação LOCAL
+     imediata sem depender de round-trip (once + then)
+   - broadcastParticipantUpdate: notifica watchers locais PRIMEIRO,
+     depois força releitura do Firebase para garantir consistência
+   - Dashboard listener: evento pi-participants-updated agora
+     dispara SEMPRE que há qualquer escrita, inclusive local
+   - upsertParticipant: dispara evento após cada escrita
    ================================================================ */
 (function (global) {
   'use strict';
@@ -33,30 +35,20 @@
     connection: null
   };
 
-  // ── Heartbeat para manter status ativo ──
   var _heartbeatInterval = null;
 
   function startHeartbeat() {
     stopHeartbeat();
     _heartbeatInterval = setInterval(function () {
-      if (sessionId && participantId) {
-        var data = getSessionData();
-        var p = data && data.participants && data.participants[participantId];
-        if (p && p.status === 'ativo') {
-          if (firebaseReady && db) {
-            db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/ultimoAcessoEm')
-              .set(nowIso());
-          }
-        }
+      if (sessionId && participantId && firebaseReady && db) {
+        db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/ultimoAcessoEm')
+          .set(nowIso()).catch(function () {});
       }
     }, 30000);
   }
 
   function stopHeartbeat() {
-    if (_heartbeatInterval) {
-      clearInterval(_heartbeatInterval);
-      _heartbeatInterval = null;
-    }
+    if (_heartbeatInterval) { clearInterval(_heartbeatInterval); _heartbeatInterval = null; }
   }
 
   function localKey() {
@@ -66,10 +58,8 @@
   function nowIso() { return new Date().toISOString(); }
 
   function readJson(key, fallback) {
-    try {
-      var r = localStorage.getItem(key);
-      return r ? JSON.parse(r) : fallback;
-    } catch (e) { return fallback; }
+    try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
+    catch (e) { return fallback; }
   }
 
   function writeJson(key, value) {
@@ -86,9 +76,7 @@
       if (s && typeof s === 'object' && !Array.isArray(s) &&
           t && typeof t === 'object' && !Array.isArray(t)) {
         out[k] = safeMerge(t, s);
-      } else {
-        out[k] = s;
-      }
+      } else { out[k] = s; }
     });
     return out;
   }
@@ -103,19 +91,26 @@
 
   function countKeys(obj) { return Object.keys(obj || {}).length; }
 
-  /* ── helpers de normalização ── */
   function buildLegacyFerramentas(toolStates) {
     var src = toolStates || {}, out = {};
     Object.keys(src).forEach(function (id) {
       var s = src[id] || {}, m = s.metadados || {};
       if (!m.concluido) return;
+      /* FIX análise: normaliza o dado de progresso para evitar aninhamento duplo */
       var d = safeMerge({}, s.formulario || {});
-      d = safeMerge(d, s.progresso || {});
+      /* progresso pode ter sub-chave 'progresso' se veio do tool-bridge */
+      var prog = s.progresso || {};
+      if (prog.progresso && typeof prog.progresso === 'object') {
+        /* tool-bridge salvou: { progresso: { trl: X } } dentro do campo progresso */
+        d = safeMerge(d, prog.progresso);
+      } else {
+        d = safeMerge(d, prog);
+      }
       if (s.respostas && countKeys(s.respostas)) d.respostas = s.respostas;
       out[id] = {
         dados: d,
         respostas: s.respostas || {},
-        progresso: s.progresso || {},
+        progresso: prog,
         formulario: s.formulario || {},
         concluido: true,
         atualizadoEm: m.atualizadoEm || nowIso(),
@@ -130,8 +125,7 @@
     var score = entry.pontuacao !== undefined ? entry.pontuacao : entry.score;
     score = Number(score || 0);
     return {
-      score: score,
-      pontuacao: score,
+      score: score, pontuacao: score,
       percentual: Number(entry.percentual || 0),
       codigo: entry.codigo || (prefix ? prefix + '-' + score : ''),
       respostas: entry.respostas || {},
@@ -149,22 +143,13 @@
   }
 
   function defaultControls() {
-    return {
-      fases_liberadas: [1],
-      ferramentas_liberadas: [],
-      atualizadoEm: nowIso(),
-      atualizadoPor: 'sistema'
-    };
+    return { fases_liberadas: [1], ferramentas_liberadas: [], atualizadoEm: nowIso(), atualizadoPor: 'sistema' };
   }
 
-  /* ── armazenamento local ── */
   function getSessionData() {
     if (!sessionId) return null;
     return readJson(localKey('session', sessionId), {
-      sessionId: sessionId,
-      controls: defaultControls(),
-      participants: {},
-      updatedAt: nowIso()
+      sessionId: sessionId, controls: defaultControls(), participants: {}, updatedAt: nowIso()
     });
   }
 
@@ -174,13 +159,22 @@
     data.sessionId = sessionId;
     data.updatedAt = nowIso();
     writeJson(localKey('session', sessionId), data);
-    global.dispatchEvent(new CustomEvent('pi-sync-local-updated', {
-      detail: { sessionId: sessionId, data: data }
-    }));
     return data;
   }
 
-  /* ── Firebase ── */
+  /* ── EMISSÃO DE EVENTO UNIFICADA ──
+     Toda atualização de participantes dispara este evento.
+     O Dashboard APENAS escuta este evento para renderizar. */
+  function emitParticipantsEvent(participants) {
+    var p = participants || getParticipants();
+    /* Notifica os callbacks registrados via watchParticipants */
+    watchers.participants.forEach(function (cb) { try { cb(clone(p)); } catch(e) {} });
+    /* Dispara evento DOM para o Dashboard (que usa addEventListener) */
+    global.dispatchEvent(new CustomEvent('pi-participants-updated', {
+      detail: { participants: clone(p), ts: Date.now() }
+    }));
+  }
+
   function emitConnection(connected) {
     watchers.connection.forEach(function (cb) { cb(!!connected); });
   }
@@ -188,9 +182,7 @@
   function setupConnectionWatch() {
     if (!firebaseReady || !db || firebaseSubscriptions.connection) return;
     firebaseSubscriptions.connection = db.ref('.info/connected');
-    firebaseSubscriptions.connection.on('value', function (s) {
-      emitConnection(s.val() === true);
-    });
+    firebaseSubscriptions.connection.on('value', function (s) { emitConnection(s.val() === true); });
   }
 
   function bindFirebaseListeners() {
@@ -201,25 +193,23 @@
       firebaseSubscriptions.controls.on('value', function (s) {
         var v = s.val() || defaultControls();
         saveSessionData({ controls: v });
-        notifyControls();
+        var c = getControls();
+        watchers.controls.forEach(function (cb) { try { cb(clone(c)); } catch(e) {} });
         global.dispatchEvent(new CustomEvent('pi-controls-updated', { detail: v }));
       });
     }
 
     if (!firebaseSubscriptions.participants) {
       firebaseSubscriptions.participants = db.ref('oficinas/' + sessionId + '/participantes');
+      /* Este listener recebe QUALQUER escrita de qualquer participante */
       firebaseSubscriptions.participants.on('value', function (s) {
-        saveSessionData({ participants: s.val() || {} });
-        notifyParticipants();
-        // CORREÇÃO 1: disparar também o evento global para o dashboard
-        global.dispatchEvent(new CustomEvent('pi-participants-updated', {
-          detail: { participants: s.val() || {} }
-        }));
+        var fresh = s.val() || {};
+        saveSessionData({ participants: fresh });
+        emitParticipantsEvent(fresh);
       });
     }
   }
 
-  /* ── restore automático ── */
   function tryAutoRestore() {
     if (sessionId) return true;
     var sid = sanitizeCode(localStorage.getItem('pi-session-id') || '');
@@ -227,31 +217,21 @@
     var name = localStorage.getItem('pi-participant-name') || '';
     var perc = localStorage.getItem('pi-percurso') || '';
     if (!sid || !pid) return false;
-    sessionId = sid;
-    participantId = pid;
-    participantName = name;
-    participantPercurso = perc;
+    sessionId = sid; participantId = pid; participantName = name; participantPercurso = perc;
     if (firebaseReady && db) bindFirebaseListeners();
     return true;
   }
 
-  /* ── init ── */
   function init(config) {
     if (initialized) return Promise.resolve(firebaseReady);
     return new Promise(function (resolve) {
       initialized = true;
       try {
         if (typeof global.firebase === 'undefined' || !config) {
-          firebaseReady = false;
-          emitConnection(false);
-          resolve(false);
-          return;
+          firebaseReady = false; emitConnection(false); resolve(false); return;
         }
-        if (!global.firebase.apps.length) {
-          app = global.firebase.initializeApp(config);
-        } else {
-          app = global.firebase.app();
-        }
+        if (!global.firebase.apps.length) { app = global.firebase.initializeApp(config); }
+        else { app = global.firebase.app(); }
         db = global.firebase.database(app);
         firebaseReady = true;
         setupConnectionWatch();
@@ -259,9 +239,7 @@
         resolve(true);
       } catch (e) {
         console.warn('[PISync] Fallback local ativo.', e);
-        firebaseReady = false;
-        emitConnection(false);
-        resolve(false);
+        firebaseReady = false; emitConnection(false); resolve(false);
       }
     });
   }
@@ -276,12 +254,9 @@
   function onConnectionChange(cb) {
     if (typeof cb === 'function') watchers.connection.push(cb);
     cb(isOnline());
-    return function () {
-      watchers.connection = watchers.connection.filter(function (f) { return f !== cb; });
-    };
+    return function () { watchers.connection = watchers.connection.filter(function (f) { return f !== cb; }); };
   }
 
-  /* ── identidade ── */
   function setIdentity(name, percurso) {
     participantName = String(name || participantName || '').trim();
     participantPercurso = String(percurso || participantPercurso || '').trim();
@@ -291,60 +266,34 @@
     localStorage.setItem('pi-percurso', participantPercurso);
   }
 
-  /* ── sessão ── */
   function joinSession(code, name, percurso, extra) {
     sessionId = sanitizeCode(code);
     if (!sessionId) throw new Error('Código da oficina inválido.');
-
-    if (firebaseSubscriptions.participants) {
-      firebaseSubscriptions.participants.off();
-      firebaseSubscriptions.participants = null;
-    }
-    if (firebaseSubscriptions.controls) {
-      firebaseSubscriptions.controls.off();
-      firebaseSubscriptions.controls = null;
-    }
-
+    if (firebaseSubscriptions.participants) { firebaseSubscriptions.participants.off(); firebaseSubscriptions.participants = null; }
+    if (firebaseSubscriptions.controls) { firebaseSubscriptions.controls.off(); firebaseSubscriptions.controls = null; }
     setIdentity(name, percurso || '3h');
     localStorage.setItem('pi-session-id', sessionId);
-
     var payload = {
-      id: participantId,
-      nome: participantName,
-      percurso: participantPercurso,
-      status: 'ativo',
-      entrouEm: nowIso(),
-      ultimoAcessoEm: nowIso(),
-      progresso: 0,
-      totalConcluidas: 0,
-      ferramentaAtual: '',
-      quiz: {},
-      toolStates: {},
-      extras: extra || {}
+      id: participantId, nome: participantName, percurso: participantPercurso,
+      status: 'ativo', entrouEm: nowIso(), ultimoAcessoEm: nowIso(),
+      progresso: 0, totalConcluidas: 0, ferramentaAtual: '',
+      quiz: {}, toolStates: {}, extras: extra || {}
     };
-
     upsertParticipant(payload);
     ensureControls();
     if (firebaseReady && db) bindFirebaseListeners();
-    notifyControls();
-    notifyParticipants();
+    var c = getControls();
+    watchers.controls.forEach(function (cb) { try { cb(clone(c)); } catch(e) {} });
     startHeartbeat();
-
-    return {
-      sessionId: sessionId,
-      participantId: participantId,
-      participantName: participantName,
-      percurso: participantPercurso
-    };
+    return { sessionId: sessionId, participantId: participantId, participantName: participantName, percurso: participantPercurso };
   }
 
   function restoreSession() {
     if (!tryAutoRestore()) return false;
-    ensureControls();
-    touchParticipant();
+    ensureControls(); touchParticipant();
     if (firebaseReady && db) bindFirebaseListeners();
-    notifyControls();
-    notifyParticipants();
+    var c = getControls();
+    watchers.controls.forEach(function (cb) { try { cb(clone(c)); } catch(e) {} });
     startHeartbeat();
     return true;
   }
@@ -355,24 +304,16 @@
     upsertParticipant({ status: 'desconectado', saiuEm: nowIso(), ultimoAcessoEm: nowIso() });
     localStorage.removeItem('pi-session-id');
     localStorage.removeItem('pi-session-participant-id');
-    sessionId = '';
-    participantId = '';
-    participantName = '';
-    participantPercurso = '';
+    sessionId = ''; participantId = ''; participantName = ''; participantPercurso = '';
     return true;
   }
 
-  function isInSession() {
-    if (!sessionId) tryAutoRestore();
-    return !!sessionId;
-  }
+  function isInSession() { if (!sessionId) tryAutoRestore(); return !!sessionId; }
 
-  /* ── getSessionMeta + alias getSessionInfo ── */
   function getSessionMeta() {
     if (!sessionId) tryAutoRestore();
     return {
-      sessionId: sessionId || '',
-      participantId: participantId || '',
+      sessionId: sessionId || '', participantId: participantId || '',
       participantName: participantName || localStorage.getItem('pi-participant-name') || '',
       percurso: participantPercurso || localStorage.getItem('pi-percurso') || '',
       online: isOnline()
@@ -380,7 +321,6 @@
   }
   var getSessionInfo = getSessionMeta;
 
-  /* ── controles ── */
   function ensureControls() {
     var data = getSessionData();
     if (!data) return null;
@@ -398,9 +338,9 @@
     next.atualizadoEm = nowIso();
     next.atualizadoPor = participantId || 'facilitador';
     saveSessionData({ controls: next });
-    notifyControls();
-    if (firebaseReady && db && sessionId)
-      db.ref('oficinas/' + sessionId + '/controls').set(next);
+    var c = getControls();
+    watchers.controls.forEach(function (cb) { try { cb(clone(c)); } catch(e) {} });
+    if (firebaseReady && db && sessionId) db.ref('oficinas/' + sessionId + '/controls').set(next);
     return next;
   }
 
@@ -412,32 +352,28 @@
     return setControls({ ferramentas_liberadas: Array.isArray(toolIds) ? toolIds.slice() : [] });
   }
 
+  /* REMOVIDA: notifyControls e notifyParticipants como funções separadas
+     para evitar dupla emissão. Emissão agora centralizada em emitParticipantsEvent */
   function notifyControls() {
     var c = getControls();
-    watchers.controls.forEach(function (cb) { cb(clone(c)); });
+    watchers.controls.forEach(function (cb) { try { cb(clone(c)); } catch(e) {} });
   }
+  function notifyParticipants() { emitParticipantsEvent(); }
 
-  function notifyParticipants() {
-    var p = getParticipants();
-    watchers.participants.forEach(function (cb) { cb(clone(p)); });
-  }
-
-  /* CORREÇÃO 1: força releitura do Firebase e notificação de todos os watchers */
+  /* broadcastParticipantUpdate: notifica LOCAL primeiro (zero latência),
+     depois confirma com Firebase para sincronizar estado remoto */
   function broadcastParticipantUpdate() {
+    /* Notificação local IMEDIATA — sem esperar Firebase */
+    emitParticipantsEvent();
+    /* Confirmação com Firebase em background (não bloqueia UI) */
     if (firebaseReady && db && sessionId) {
-      db.ref('oficinas/' + sessionId + '/participantes').once('value').then(function (s) {
-        var fresh = s.val() || {};
-        saveSessionData({ participants: fresh });
-        notifyParticipants();
-        global.dispatchEvent(new CustomEvent('pi-participants-updated', {
-          detail: { participants: fresh }
-        }));
-      }).catch(function (e) {
-        // fallback: notifica com dados em cache
-        notifyParticipants();
-      });
-    } else {
-      notifyParticipants();
+      db.ref('oficinas/' + sessionId + '/participantes').once('value')
+        .then(function (s) {
+          var fresh = s.val() || {};
+          saveSessionData({ participants: fresh });
+          emitParticipantsEvent(fresh);
+        })
+        .catch(function () { /* já notificou localmente, ignorar erro de rede */ });
     }
   }
 
@@ -454,20 +390,14 @@
         global.dispatchEvent(new CustomEvent('pi-controls-updated', { detail: v }));
       });
     }
-    return function () {
-      watchers.controls = watchers.controls.filter(function (f) { return f !== cb; });
-    };
+    return function () { watchers.controls = watchers.controls.filter(function (f) { return f !== cb; }); };
   }
 
   function stopWatchingControls() {
     watchers.controls = [];
-    if (firebaseSubscriptions.controls) {
-      firebaseSubscriptions.controls.off();
-      firebaseSubscriptions.controls = null;
-    }
+    if (firebaseSubscriptions.controls) { firebaseSubscriptions.controls.off(); firebaseSubscriptions.controls = null; }
   }
 
-  /* ── participantes ── */
   function getParticipants() {
     var data = getSessionData();
     return data && data.participants ? data.participants : {};
@@ -475,9 +405,7 @@
 
   function listParticipants() {
     var p = getParticipants();
-    return Object.keys(p).map(function (id) {
-      return safeMerge({ id: id }, p[id]);
-    });
+    return Object.keys(p).map(function (id) { return safeMerge({ id: id }, p[id]); });
   }
 
   function upsertParticipant(patch) {
@@ -499,8 +427,11 @@
     data.participants[participantId] = next;
     saveSessionData({ participants: data.participants });
     if (firebaseReady && db) {
-      db.ref('oficinas/' + sessionId + '/participantes/' + participantId).update(next);
+      db.ref('oficinas/' + sessionId + '/participantes/' + participantId).update(next)
+        .catch(function () {});
     }
+    /* Emite evento LOCAL imediatamente após qualquer upsert */
+    emitParticipantsEvent(data.participants);
     return next;
   }
 
@@ -518,26 +449,17 @@
       firebaseSubscriptions.participants.on('value', function (s) {
         var fresh = s.val() || {};
         saveSessionData({ participants: fresh });
-        notifyParticipants();
-        global.dispatchEvent(new CustomEvent('pi-participants-updated', {
-          detail: { participants: fresh }
-        }));
+        emitParticipantsEvent(fresh);
       });
     }
-    return function () {
-      watchers.participants = watchers.participants.filter(function (f) { return f !== cb; });
-    };
+    return function () { watchers.participants = watchers.participants.filter(function (f) { return f !== cb; }); };
   }
 
   function stopWatchingParticipants() {
     watchers.participants = [];
-    if (firebaseSubscriptions.participants) {
-      firebaseSubscriptions.participants.off();
-      firebaseSubscriptions.participants = null;
-    }
+    if (firebaseSubscriptions.participants) { firebaseSubscriptions.participants.off(); firebaseSubscriptions.participants = null; }
   }
 
-  /* ── progresso ── */
   function computeProgress(toolStates) {
     var keys = Object.keys(toolStates || {});
     if (!keys.length) return { totalConcluidas: 0, progresso: 0 };
@@ -556,15 +478,11 @@
     var toolStates = safeMerge(current.toolStates || {}, {});
     toolStates[id] = state;
     var p = computeProgress(toolStates);
-    var result = upsertParticipant({
-      ferramentaAtual: id,
-      toolStates: toolStates,
-      totalConcluidas: p.totalConcluidas,
-      progresso: p.progresso
+    return upsertParticipant({
+      ferramentaAtual: id, toolStates: toolStates,
+      totalConcluidas: p.totalConcluidas, progresso: p.progresso
     });
-    // CORREÇÃO 1: broadcast após atualização de ferramenta
-    broadcastParticipantUpdate();
-    return result;
+    /* upsertParticipant já emite o evento */
   }
 
   function sendToolReset(toolId) {
@@ -574,63 +492,53 @@
     var toolStates = safeMerge(current.toolStates || {}, {});
     delete toolStates[String(toolId || '').trim()];
     var p = computeProgress(toolStates);
-    return upsertParticipant({
-      toolStates: toolStates,
-      totalConcluidas: p.totalConcluidas,
-      progresso: p.progresso
-    });
+    return upsertParticipant({ toolStates: toolStates, totalConcluidas: p.totalConcluidas, progresso: p.progresso });
   }
 
   function updateParticipantProgress(payload) {
     if (!sessionId && !tryAutoRestore()) return null;
     if (!sessionId || !participantId) return null;
-    var result = upsertParticipant(payload || {});
-    // CORREÇÃO 1: broadcast após atualização de progresso
-    broadcastParticipantUpdate();
-    return result;
+    return upsertParticipant(payload || {});
+    /* upsertParticipant já emite */
   }
 
-  /* CORREÇÃO 1: saveQuizResult dispara broadcast completo para atualizar ranking */
+  /* saveQuizResult — FIX PRINCIPAL do ranking em tempo real
+     1. Salva localmente e emite evento IMEDIATAMENTE (zero latência)
+     2. Depois persiste no Firebase em background */
   function saveQuizResult(quizId, result) {
     if (!sessionId) tryAutoRestore();
     var r = safeMerge({}, result || {}, { atualizadoEm: nowIso() });
+
     if (sessionId && participantId) {
+      /* === PASSO 1: atualiza memória local e emite imediatamente === */
       var current = getParticipants()[participantId] || {};
       var quiz = safeMerge(current.quiz || {}, {});
       quiz[quizId] = safeMerge(quiz[quizId] || {}, r);
       var updated = upsertParticipant({ quiz: quiz });
+      /* upsertParticipant já chama emitParticipantsEvent — Dashboard já foi notificado aqui */
 
+      /* === PASSO 2: persiste no Firebase em background === */
       if (firebaseReady && db) {
-        var writePromises = [];
-
-        writePromises.push(
-          db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/quiz/' + quizId)
-            .set(r)
-        );
+        db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/quiz/' + quizId)
+          .set(r).catch(function (e) { console.warn('[PISync] Falha ao salvar quiz:', e); });
 
         var alias = quizId === 'quiz-diagnostico' ? 'diagnostico'
           : quizId === 'quiz-final' ? 'final' : null;
-
         if (alias) {
           var normalized = normalizeQuizSnap(r, alias === 'diagnostico' ? 'D' : 'F');
-          writePromises.push(
-            db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/' + alias)
-              .set(normalized)
-          );
+          db.ref('oficinas/' + sessionId + '/participantes/' + participantId + '/' + alias)
+            .set(normalized).catch(function () {});
         }
-
-        // CORREÇÃO 1: após todas as escritas, força releitura para todos os watchers
-        Promise.all(writePromises)
-          .then(function () {
-            broadcastParticipantUpdate();
-          })
-          .catch(function (e) {
-            console.warn('[PISync] Erro ao salvar quiz, tentando broadcast local:', e);
-            broadcastParticipantUpdate();
-          });
-      } else {
-        // modo offline: notifica watchers locais imediatamente
-        broadcastParticipantUpdate();
+        /* Após Firebase confirmar, re-emite para garantir que dados remotos == locais */
+        db.ref('oficinas/' + sessionId + '/participantes/' + participantId)
+          .once('value').then(function (s) {
+            if (s.val()) {
+              var fresh = getParticipants();
+              fresh[participantId] = safeMerge(fresh[participantId] || {}, s.val());
+              saveSessionData({ participants: fresh });
+              emitParticipantsEvent(fresh);
+            }
+          }).catch(function () {});
       }
       return updated;
     }
@@ -652,14 +560,10 @@
         var v = opts.evolution ? calculateEvolution(p)
           : Number(q[opts.quizId] && q[opts.quizId].pontuacao) || 0;
         return {
-          id: p.id,
-          nome: p.nome || 'Participante',
-          percurso: p.percurso || '',
-          status: p.status || 'ativo',
-          pontuacao: v,
+          id: p.id, nome: p.nome || 'Participante', percurso: p.percurso || '',
+          status: p.status || 'ativo', pontuacao: v,
           percentual: q[opts.quizId] && q[opts.quizId].percentual,
-          totalConcluidas: p.totalConcluidas || 0,
-          evolucao: calculateEvolution(p)
+          totalConcluidas: p.totalConcluidas || 0, evolucao: calculateEvolution(p)
         };
       })
       .sort(function (a, b) {
@@ -686,45 +590,30 @@
     return readJson('pi-thinking:completed-index:' + pid, {});
   }
 
-  /* ── boot automático ── */
   (function () {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', tryAutoRestore);
-    } else {
-      tryAutoRestore();
-    }
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', tryAutoRestore); }
+    else { tryAutoRestore(); }
   })();
 
   global.PISync = {
-    version: '3.3.0',
-    init: init,
-    initFromWindow: initFromWindow,
-    isOnline: isOnline,
+    version: '3.4.0',
+    init: init, initFromWindow: initFromWindow, isOnline: isOnline,
     onConnectionChange: onConnectionChange,
-    joinSession: joinSession,
-    restoreSession: restoreSession,
-    leaveSession: leaveSession,
-    isInSession: isInSession,
-    getSessionMeta: getSessionMeta,
-    getSessionInfo: getSessionInfo,
-    getControls: getControls,
-    setControls: setControls,
-    setReleasedPhases: setReleasedPhases,
-    setReleasedTools: setReleasedTools,
-    watchControls: watchControls,
-    stopWatchingControls: stopWatchingControls,
-    getParticipants: getParticipants,
-    listParticipants: listParticipants,
-    watchParticipants: watchParticipants,
-    stopWatchingParticipants: stopWatchingParticipants,
+    joinSession: joinSession, restoreSession: restoreSession,
+    leaveSession: leaveSession, isInSession: isInSession,
+    getSessionMeta: getSessionMeta, getSessionInfo: getSessionInfo,
+    getControls: getControls, setControls: setControls,
+    setReleasedPhases: setReleasedPhases, setReleasedTools: setReleasedTools,
+    watchControls: watchControls, stopWatchingControls: stopWatchingControls,
+    getParticipants: getParticipants, listParticipants: listParticipants,
+    watchParticipants: watchParticipants, stopWatchingParticipants: stopWatchingParticipants,
     updateParticipantProgress: updateParticipantProgress,
-    sendToolState: sendToolState,
-    sendToolReset: sendToolReset,
+    sendToolState: sendToolState, sendToolReset: sendToolReset,
     saveQuizResult: saveQuizResult,
-    buildRanking: buildRanking,
-    watchRanking: watchRanking,
+    buildRanking: buildRanking, watchRanking: watchRanking,
     getLocalCompletions: getLocalCompletions,
     calculateEvolution: calculateEvolution,
-    broadcastParticipantUpdate: broadcastParticipantUpdate
+    broadcastParticipantUpdate: broadcastParticipantUpdate,
+    notifyParticipants: notifyParticipants
   };
 })(window);

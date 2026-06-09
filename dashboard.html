@@ -710,26 +710,39 @@ function exitDash() {
    ══════════════════════════════════════ */
 
 function startListening() {
-    // Correção de API: Passa apenas o callback
-    PISync.watchParticipants(function(data) {
-        participants = data || {};
-        renderAll();
-    });
 
-    // Correção de API: Para acompanhar os controles da oficina (fases liberadas)
-    PISync.watchControls(function(controls) {
-        if(controls && controls.fases_liberadas) {
-            releasedPhases = controls.fases_liberadas;
-            renderPhaseControls();
-        }
-    });
+  /* watchParticipants registra o listener do Firebase E chama o callback
+     imediatamente com os dados em cache */
+  PISync.watchParticipants(function(data) {
+    participants = data || {};
+    renderAll();
+  });
 
-    PISync.onConnectionChange(function(online) {
-        var badge = document.getElementById('dashConnectionBadge');
-        badge.textContent = online ? '● Online' : '● Offline';
-        badge.className = 'dash-top__badge ' + (online ? 'dash-top__badge--online' : '');
-        badge.style.cssText = online ? '' : 'background:var(--orange-bg);color:var(--orange)';
-    });
+  /* CORREÇÃO PRINCIPAL: escuta o evento DOM disparado pelo sync.js
+     em TODA atualização (local ou remota). Isso garante que o ranking
+     atualize imediatamente quando o quiz termina, sem esperar o Firebase. */
+  window.removeEventListener('pi-participants-updated', _dashParticipantsHandler);
+  window._dashParticipantsHandler = function(e) {
+    if (e.detail && e.detail.participants) {
+      participants = e.detail.participants;
+      renderAll();
+    }
+  };
+  window.addEventListener('pi-participants-updated', window._dashParticipantsHandler);
+
+  PISync.watchControls(function(controls) {
+    if (controls && controls.fases_liberadas) {
+      releasedPhases = controls.fases_liberadas;
+      renderPhaseControls();
+    }
+  });
+
+  PISync.onConnectionChange(function(online) {
+    var badge = document.getElementById('dashConnectionBadge');
+    badge.textContent = online ? '● Online' : '● Offline';
+    badge.className = 'dash-top__badge ' + (online ? 'dash-top__badge--online' : '');
+    badge.style.cssText = online ? '' : 'background:var(--orange-bg);color:var(--orange)';
+  });
 }
 
 function refreshData() { showToast('Dados atualizados em tempo real'); }
@@ -1278,16 +1291,6 @@ function showToast(msg) {
    ══════════════════════════════════════ */
 
 function sum(arr) { return arr.reduce(function(a,b){ return a+b; }, 0); }
-
-/* CORREÇÃO 1: Dashboard escuta evento pi-participants-updated para atualização em tempo real */
-(function bindDashboardRealtimeEvents() {
-  window.addEventListener('pi-participants-updated', function(e) {
-    if (e.detail && e.detail.participants) {
-      participants = e.detail.participants;
-      renderAll();
-    }
-  });
-})();
 
 /* ══════════════════════════════════════
    BOOT

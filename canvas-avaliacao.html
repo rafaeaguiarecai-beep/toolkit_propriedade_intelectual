@@ -664,27 +664,23 @@
     }
 
     // ── Persistence ──
-    // CORREÇÃO 3: salvar ratings também no formato que o Dashboard espera
     function autoSave() {
-      if (typeof PIThinking !== 'undefined' && PIThinking.saveProgress) {
-        var ratingsSnapshot = {};
-        // Converte IDs de fase para nomes
-        var faseNames = { 'descobrir': 'descobrir', 'diagnosticar': 'diagnosticar',
-          'estrategar': 'estrategar', 'testar': 'testar', 'evoluir': 'evoluir' };
-        Object.keys(ratings).forEach(function(k) {
-          ratingsSnapshot[faseNames[k] || k] = ratings[k];
-        });
+      if (typeof PIThinking === 'undefined' || !PIThinking.saveProgress) return;
 
-        PIThinking.saveProgress('canvas-avaliacao', {
-          ratings: ratingsSnapshot, // formato para Dashboard
-          estrelas: ratingsSnapshot, // alias
-          comments: comments,
-          genStrengths: document.getElementById('genStrengths').value,
-          genImprovements: document.getElementById('genImprovements').value,
-          genLearning: document.getElementById('genLearning').value,
-          genNextSteps: document.getElementById('genNextSteps').value
-        });
-      }
+      /* Constrói snapshot normalizado com estrutura plana */
+      var ratingsFlat = {};
+      Object.keys(ratings).forEach(function(k) { ratingsFlat[k] = ratings[k]; });
+
+      /* saveProgress com dados PLANOS — sem aninhamento — para o Dashboard ler */
+      PIThinking.saveProgress('canvas-avaliacao', {
+        ratings: ratingsFlat,
+        estrelas: ratingsFlat,          /* alias para compatibilidade */
+        comments: comments,
+        genStrengths: (document.getElementById('genStrengths') || {}).value || '',
+        genImprovements: (document.getElementById('genImprovements') || {}).value || '',
+        genLearning: (document.getElementById('genLearning') || {}).value || '',
+        genNextSteps: (document.getElementById('genNextSteps') || {}).value || ''
+      });
     }
 
     function loadSaved() {
