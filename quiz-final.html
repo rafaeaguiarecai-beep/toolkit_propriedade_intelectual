@@ -431,6 +431,23 @@
     <!-- Review -->
     <div class="qf-review" id="reviewSection"></div>
 
+<div id="pi-bridge-info" style="display:none;
+  background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px;
+  padding:1.2rem 1.5rem; margin:1.5rem auto; max-width:700px;
+  font-family:Inter,sans-serif; font-size:0.88rem; line-height:1.6;">
+  <strong style="color:#15803d;">✅ Você completou a jornada PI Thinking!</strong>
+  <p style="margin:.4rem 0;">Sua evolução percentual (diferença entre Quiz Final e Quiz Diagnóstico em pontos percentuais) já está visível no ranking. Compare com onde você estava no início e reflita sobre o quanto avançou na compreensão da Propriedade Intelectual.</p>
+  <strong style="color:#1d4ed8;">➡️ Última etapa:</strong>
+  <p style="margin:.4rem 0 0;">No <strong>Canvas de Avaliação</strong>, você vai registrar sua percepção sobre cada fase da oficina. Essa avaliação alimenta diretamente o painel do facilitador e ajuda a aprimorar as próximas edições.</p>
+</div>
+<script>
+  document.addEventListener('pi-tool-completed', function(e){
+    if(e.detail && e.detail.toolId === 'quiz-final'){
+      var b = document.getElementById('pi-bridge-info');
+      if(b) b.style.display = 'block';
+    }
+  });
+</script>
   </main>
 
   <!-- Footer -->

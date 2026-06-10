@@ -871,14 +871,19 @@ function renderRanking(pList) {
 
         if (rankingType === 'diagnostico' && p.diagnostico) {
             entry.score = p.diagnostico.score;
-            entry.extra = p.diagnostico.codigo || '';
+            entry.extra = p.diagnostico.codigo || ('D-' + p.diagnostico.score);
         } else if (rankingType === 'final' && p.final) {
             entry.score = p.final.score;
-            entry.extra = p.final.codigo || '';
-        } else if (rankingType === 'evolucao' && p.diagnostico && p.final) {
-            entry.score = p.final.score - p.diagnostico.score;
-            entry.extra = 'D-'+p.diagnostico.score+' → F-'+p.final.score;
+            entry.extra = p.final.codigo || ('F-' + p.final.score);
+        } else if (rankingType === 'evolucao') {
+        var evo = PISync.calculateEvolution(p);
+        if (evo !== null) {
+            entry.score = evo;
+            var dPct = p.diagnostico ? Math.round((p.diagnostico.score / 10) * 100) : '?';
+            var fPct = p.final ? Math.round((p.final.score / 20) * 100) : '?';
+            entry.extra = dPct + '% → ' + fPct + '%';
         }
+    }
 
         if (entry.score !== null) entries.push(entry);
     });
@@ -908,7 +913,9 @@ function renderRanking(pList) {
             scoreCls = e.score > 0 ? 'good' : e.score === 0 ? 'ok' : 'low';
         }
 
-        var display = rankingType === 'evolucao' ? (e.score>=0?'+':'')+e.score : e.score;
+        var display = rankingType === 'evolucao'
+          ? (e.score >= 0 ? '+' : '') + e.score + 'pp'
+          : e.score;
 
         html += '<div class="ranking__item'+itemClass+'">';
         html += '<div class="ranking__pos ranking__pos--'+posClass+'">'+pos+'</div>';
@@ -985,205 +992,229 @@ function renderParticipants(pList) {
 
 /* CORREÇÃO 3: Funções de análise corrigidas para ler dados no formato real */
 
+/* ══════════════════════════════════════
+   ANÁLISE — renderização dos 4 gráficos
+   ══════════════════════════════════════ */
+
 function renderAnalysis(pList) {
+  if (currentTab !== 'analise') return; /* só renderiza quando a aba está ativa */
   renderToolChart(pList);
   renderErrorChart(pList);
   renderTRLChart(pList);
   renderStarsChart(pList);
 }
 
+/* Gráfico 1 — Conclusão por ferramenta */
 function renderToolChart(pList) {
-  var container = document.getElementById('chartTools');
-  if (!pList.length) {
-    container.innerHTML = '<div class="empty"><div class="empty__text">Sem dados</div></div>';
-    return;
-  }
-  var total = pList.length;
-  var faseColors = {1:'f1',2:'f2',3:'f3',4:'f4',5:'f5'};
-  var html = '';
+  var el = document.getElementById('chartTools');
+  if (!el) return;
+  if (!pList.length) { el.innerHTML = '<p style="color:var(--text-light);font-size:.82rem;">Sem dados ainda.</p>'; return; }
 
-  ALL_TOOLS.forEach(function(t) {
-    // CORREÇÃO 3a: verifica tanto em ferramentas legado quanto em toolStates direto
-    var count = pList.filter(function(p) {
-      // Formato novo: p.ferramentas[id] (buildLegacyFerramentas)
-      if (p.ferramentas && p.ferramentas[t.id]) return true;
-      // Formato toolStates direto
-      if (p.toolStates && p.toolStates[t.id] &&
-          p.toolStates[t.id].metadados &&
-          p.toolStates[t.id].metadados.concluido) return true;
-      return false;
-    }).length;
-    var pct = Math.round((count/total)*100);
-    html += '<div class="bar-row">';
-    html += '<div class="bar-label">' + t.nome + '</div>';
-    html += '<div class="bar-track"><div class="bar-fill bar-fill--' + faseColors[t.fase] + '" style="width:' + pct + '%">' + (pct>12 ? pct+'%' : '') + '</div></div>';
-    html += '<div class="bar-value">' + count + '/' + total + '</div>';
-    html += '</div>';
-  });
-  container.innerHTML = html || '<div class="empty"><div class="empty__text">Nenhuma ferramenta concluída ainda</div></div>';
-}
-
-function renderErrorChart(pList) {
-  var container = document.getElementById('chartErrors');
-  var questionStats = {};
+  var counts = {};
+  ALL_TOOLS.forEach(function(t) { counts[t.id] = 0; });
 
   pList.forEach(function(p) {
-    // CORREÇÃO 3b: suporta múltiplos formatos de respostas
-    var resps = null;
-
-    // Formato 1: p.diagnostico.respostas (normalizado pelo sync)
-    if (p.diagnostico && p.diagnostico.respostas && Object.keys(p.diagnostico.respostas).length) {
-      resps = p.diagnostico.respostas;
-    }
-    // Formato 2: p.quiz['quiz-diagnostico'].respostas
-    else if (p.quiz && p.quiz['quiz-diagnostico'] && p.quiz['quiz-diagnostico'].respostas) {
-      resps = p.quiz['quiz-diagnostico'].respostas;
-    }
-    // Formato 3: p.toolStates['quiz-diagnostico'].respostas
-    else if (p.toolStates && p.toolStates['quiz-diagnostico'] && p.toolStates['quiz-diagnostico'].respostas) {
-      resps = p.toolStates['quiz-diagnostico'].respostas;
-    }
-    // Formato 4: p.ferramentas['quiz-diagnostico'].respostas
-    else if (p.ferramentas && p.ferramentas['quiz-diagnostico'] && p.ferramentas['quiz-diagnostico'].respostas) {
-      resps = p.ferramentas['quiz-diagnostico'].respostas;
-    }
-
-    if (!resps) return;
-
-    Object.keys(resps).forEach(function(key) {
-      var r = resps[key];
-      // Suporta formato {questao, acertou} e {selecionada, correta}
-      var qNum = r.questao !== undefined ? r.questao : (parseInt(key) + 1);
-      var acertou = r.acertou !== undefined ? r.acertou
-        : (r.selecionada !== undefined ? r.selecionada === r.correta : false);
-
-      if (!questionStats[qNum]) questionStats[qNum] = { total: 0, erros: 0 };
-      questionStats[qNum].total++;
-      if (!acertou) questionStats[qNum].erros++;
-    });
-  });
-
-  var keys = Object.keys(questionStats).sort(function(a, b) { return parseInt(a) - parseInt(b); });
-  if (!keys.length) {
-    container.innerHTML = '<div class="empty"><div class="empty__text">Sem dados de respostas do Quiz Diagnóstico ainda</div></div>';
-    return;
-  }
-
-  var html = '';
-  keys.forEach(function(q) {
-    var s = questionStats[q];
-    var errPct = Math.round((s.erros/s.total)*100);
-    var cls = errPct <= 30 ? 'green' : errPct <= 60 ? 'orange' : 'red';
-    html += '<div class="bar-row">';
-    html += '<div class="bar-label">Q' + q + '</div>';
-    html += '<div class="bar-track"><div class="bar-fill bar-fill--' + cls + '" style="width:' + errPct + '%">' + (errPct>12 ? errPct+'%' : '') + '</div></div>';
-    html += '<div class="bar-value">' + s.erros + '/' + s.total + '</div>';
-    html += '</div>';
-  });
-  container.innerHTML = html;
-}
-
-function renderTRLChart(pList) {
-  var container = document.getElementById('chartTRL');
-  var trlCounts = {};
-
-  pList.forEach(function(p) {
-    var trl = null;
-
-    // CORREÇÃO 3c: suporta múltiplos formatos de armazenamento do TRL
-    // Formato 1: ferramentas['canvas-diagnostico'].dados.trl
-    if (p.ferramentas && p.ferramentas['canvas-diagnostico']) {
-      var dados = p.ferramentas['canvas-diagnostico'].dados;
-      if (dados && dados.trl !== undefined) trl = dados.trl;
-      // Formato 1b: dados aninhados no progresso
-      if (!trl && dados && dados['field-trl'] !== undefined) trl = dados['field-trl'];
-    }
-
-    // Formato 2: toolStates['canvas-diagnostico'].progresso.trl
-    if (!trl && p.toolStates && p.toolStates['canvas-diagnostico']) {
-      var ts = p.toolStates['canvas-diagnostico'];
-      if (ts.progresso && ts.progresso.trl !== undefined) trl = ts.progresso.trl;
-      if (!trl && ts.formulario && ts.formulario.trl !== undefined) trl = ts.formulario.trl;
-    }
-
-    if (!trl) return;
-    trl = String(trl);
-    trlCounts[trl] = (trlCounts[trl] || 0) + 1;
-  });
-
-  var keys = Object.keys(trlCounts).sort(function(a, b) { return parseInt(a) - parseInt(b); });
-  if (!keys.length) {
-    container.innerHTML = '<div class="empty"><div class="empty__text">Sem dados de TRL ainda.<br><small>Dados aparecem após os alunos completarem o Canvas de Diagnóstico.</small></div></div>';
-    return;
-  }
-
-  var maxCount = Math.max.apply(null, keys.map(function(k) { return trlCounts[k]; }));
-  var html = '';
-  keys.forEach(function(trl) {
-    var count = trlCounts[trl];
-    var pct = Math.round((count/maxCount)*100);
-    html += '<div class="bar-row">';
-    html += '<div class="bar-label">TRL ' + trl + '</div>';
-    html += '<div class="bar-track"><div class="bar-fill bar-fill--accent" style="width:' + pct + '%">' + count + '</div></div>';
-    html += '<div class="bar-value">' + count + '</div>';
-    html += '</div>';
-  });
-  container.innerHTML = html;
-}
-
-function renderStarsChart(pList) {
-  var container = document.getElementById('chartStars');
-  var faseStars = {};
-  var faseCounts = {};
-
-  pList.forEach(function(p) {
-    var ratings = null;
-
-    // CORREÇÃO 3d: suporta múltiplos formatos do Canvas de Avaliação
-    // Formato 1: ferramentas['canvas-avaliacao'].dados.ratings
-    if (p.ferramentas && p.ferramentas['canvas-avaliacao']) {
-      var dados = p.ferramentas['canvas-avaliacao'].dados;
-      if (dados && dados.ratings) ratings = dados.ratings;
-      if (!ratings && dados && dados.estrelas) ratings = dados.estrelas;
-    }
-    // Formato 2: toolStates['canvas-avaliacao'].progresso.ratings
-    if (!ratings && p.toolStates && p.toolStates['canvas-avaliacao']) {
-      var ts = p.toolStates['canvas-avaliacao'];
-      if (ts.progresso && ts.progresso.ratings) ratings = ts.progresso.ratings;
-      if (!ratings && ts.progresso && ts.progresso.estrelas) ratings = ts.progresso.estrelas;
-    }
-
-    if (!ratings || typeof ratings !== 'object') return;
-
-    Object.keys(ratings).forEach(function(fase) {
-      var val = Number(ratings[fase]);
-      if (val > 0) {
-        faseStars[fase] = (faseStars[fase] || 0) + val;
-        faseCounts[fase] = (faseCounts[fase] || 0) + 1;
+    var ferr = p.ferramentas || buildFerramentasView(p.toolStates || {});
+    Object.keys(ferr).forEach(function(id) { if (counts[id] !== undefined) counts[id]++; });
+    /* também verifica toolStates diretamente */
+    var ts = p.toolStates || {};
+    Object.keys(ts).forEach(function(id) {
+      if (counts[id] !== undefined && ts[id] && ts[id].metadados && ts[id].metadados.concluido) {
+        counts[id] = Math.max(counts[id], 1); /* evita dupla contagem */
       }
     });
   });
 
-  var keys = Object.keys(faseStars);
+  var total = pList.length || 1;
+  var html = '';
+  ALL_TOOLS.forEach(function(t) {
+    var n = counts[t.id] || 0;
+    var pct = Math.round((n / total) * 100);
+    var colorClass = pct >= 70 ? 'green' : pct >= 40 ? 'orange' : 'accent';
+    var faseCor = ['','f1','f2','f3','f4','f5'][t.fase] || 'accent';
+    html += '<div class="bar-row">';
+    html += '<div class="bar-label" style="min-width:72px;text-align:left;font-size:.7rem;">' + t.nome + '</div>';
+    html += '<div class="bar-track"><div class="bar-fill bar-fill--' + faseCor + '" style="width:' + pct + '%">' + (pct > 15 ? pct + '%' : '') + '</div></div>';
+    html += '<div class="bar-value">' + n + '/' + total + '</div>';
+    html += '</div>';
+  });
+  el.innerHTML = html || '<p style="color:var(--text-light);font-size:.82rem;">Nenhuma ferramenta concluída ainda.</p>';
+}
+
+/* Gráfico 2 — Taxa de erro por questão (Quiz Diagnóstico) */
+function renderErrorChart(pList) {
+  var el = document.getElementById('chartErrors');
+  if (!el) return;
+
+  /* Coleta respostas de todos os participantes */
+  var errosPorQuestao = {}; /* { 'q1': { erros: N, total: N } } */
+
+  pList.forEach(function(p) {
+    /* Tenta ler de toolStates['quiz-diagnostico'].respostas */
+    var respostas = null;
+    if (p.toolStates && p.toolStates['quiz-diagnostico']) {
+      respostas = p.toolStates['quiz-diagnostico'].respostas || null;
+    }
+    /* Fallback: quiz.['quiz-diagnostico'].respostas */
+    if (!respostas && p.quiz && p.quiz['quiz-diagnostico']) {
+      respostas = p.quiz['quiz-diagnostico'].respostas || null;
+    }
+    /* Fallback: ferramentas['quiz-diagnostico'].respostas */
+    if (!respostas && p.ferramentas && p.ferramentas['quiz-diagnostico']) {
+      respostas = p.ferramentas['quiz-diagnostico'].respostas || null;
+    }
+    if (!respostas) return;
+
+    Object.keys(respostas).forEach(function(qKey) {
+      var r = respostas[qKey];
+      if (!errosPorQuestao[qKey]) errosPorQuestao[qKey] = { erros: 0, total: 0 };
+      errosPorQuestao[qKey].total++;
+      /* Suporta tanto { acertou: bool } quanto { correta: bool } e { correto: bool } */
+      var acertou = r.acertou !== undefined ? r.acertou : (r.correta !== undefined ? r.correta : r.correto);
+      if (acertou === false || acertou === 0) errosPorQuestao[qKey].erros++;
+    });
+  });
+
+  var keys = Object.keys(errosPorQuestao).sort();
   if (!keys.length) {
-    container.innerHTML = '<div class="empty"><div class="empty__text">Sem avaliações ainda.<br><small>Dados aparecem após os alunos completarem o Canvas de Avaliação.</small></div></div>';
+    el.innerHTML = '<p style="color:var(--text-light);font-size:.82rem;">Aguardando participantes completarem o Quiz Diagnóstico.</p>';
     return;
   }
 
   var html = '';
-  keys.forEach(function(fase) {
-    var avg = (faseStars[fase] / faseCounts[fase]).toFixed(1);
-    var pct = Math.round((parseFloat(avg)/5)*100);
-    var cls = parseFloat(avg) >= 4 ? 'green' : parseFloat(avg) >= 3 ? 'orange' : 'red';
-    var faseLabel = fase.replace('descobrir','Descobrir').replace('diagnosticar','Diagnosticar')
-      .replace('estrategar','Estrategar').replace('testar','Testar').replace('evoluir','Evoluir');
+  keys.forEach(function(k) {
+    var d = errosPorQuestao[k];
+    var pct = d.total ? Math.round((d.erros / d.total) * 100) : 0;
+    var colorClass = pct >= 60 ? 'red' : pct >= 30 ? 'orange' : 'green';
     html += '<div class="bar-row">';
-    html += '<div class="bar-label" style="min-width:80px">' + faseLabel + '</div>';
-    html += '<div class="bar-track"><div class="bar-fill bar-fill--' + cls + '" style="width:' + pct + '%">' + avg + '/5</div></div>';
-    html += '<div class="bar-value">' + avg + '</div>';
+    html += '<div class="bar-label">' + k.replace('q','Q') + '</div>';
+    html += '<div class="bar-track"><div class="bar-fill bar-fill--' + colorClass + '" style="width:' + pct + '%">' + (pct > 15 ? pct + '%' : '') + '</div></div>';
+    html += '<div class="bar-value">' + pct + '%</div>';
     html += '</div>';
   });
-  container.innerHTML = html;
+  el.innerHTML = html;
+}
+
+/* Gráfico 3 — Distribuição de TRL */
+function renderTRLChart(pList) {
+  var el = document.getElementById('chartTRL');
+  if (!el) return;
+
+  var dist = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
+
+  pList.forEach(function(p) {
+    var trl = null;
+
+    /* Lê de toolStates['canvas-diagnostico'] — vários caminhos possíveis */
+    var cd = (p.toolStates && p.toolStates['canvas-diagnostico']) || null;
+    if (cd) {
+      trl = (cd.progresso && cd.progresso.trl) ||
+            (cd.dados && cd.dados.trl) ||
+            (cd.formulario && cd.formulario.trl) || null;
+    }
+    /* Fallback em ferramentas legadas */
+    if (trl === null && p.ferramentas && p.ferramentas['canvas-diagnostico']) {
+      var fd = p.ferramentas['canvas-diagnostico'];
+      trl = (fd.dados && fd.dados.trl) || (fd.progresso && fd.progresso.trl) || null;
+    }
+
+    if (trl !== null) {
+      var n = parseInt(trl, 10);
+      if (n >= 1 && n <= 9) dist[n]++;
+    }
+  });
+
+  var max = Math.max.apply(null, Object.values(dist)) || 1;
+  var hasData = Object.values(dist).some(function(v){ return v > 0; });
+
+  if (!hasData) {
+    el.innerHTML = '<p style="color:var(--text-light);font-size:.82rem;">Aguardando participantes preencherem o Canvas de Diagnóstico.</p>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 1; i <= 9; i++) {
+    var n = dist[i];
+    var pct = Math.round((n / max) * 100);
+    html += '<div class="bar-row">';
+    html += '<div class="bar-label">TRL ' + i + '</div>';
+    html += '<div class="bar-track"><div class="bar-fill bar-fill--accent" style="width:' + pct + '%">' + (pct > 20 ? n + ' part.' : '') + '</div></div>';
+    html += '<div class="bar-value">' + n + '</div>';
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+/* Gráfico 4 — Avaliação por fase (Canvas de Avaliação) */
+function renderStarsChart(pList) {
+  var el = document.getElementById('chartStars');
+  if (!el) return;
+
+  /* Soma de avaliações por fase */
+  var soma   = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+  var contagem = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+
+  pList.forEach(function(p) {
+    var ratings = null;
+
+    /* Caminhos possíveis para ratings */
+    var ca = (p.toolStates && p.toolStates['canvas-avaliacao']) || null;
+    if (ca) {
+      ratings = (ca.progresso && ca.progresso.ratings) ||
+                (ca.dados && ca.dados.ratings) ||
+                (ca.formulario && ca.formulario.ratings) ||
+                (ca.progresso && ca.progresso.estrelas) ||
+                (ca.dados && ca.dados.estrelas) || null;
+    }
+    if (!ratings && p.ferramentas && p.ferramentas['canvas-avaliacao']) {
+      var fd = p.ferramentas['canvas-avaliacao'];
+      ratings = (fd.dados && fd.dados.ratings) ||
+                (fd.dados && fd.dados.estrelas) ||
+                (fd.progresso && fd.progresso.ratings) || null;
+    }
+    if (!ratings) return;
+
+    /* ratings pode ser array [r1,r2,r3,r4,r5] ou objeto {fase1:r, fase2:r, ...} */
+    if (Array.isArray(ratings)) {
+      ratings.forEach(function(val, idx) {
+        var fase = idx + 1;
+        if (fase >= 1 && fase <= 5 && val) {
+          soma[fase] += Number(val) || 0;
+          contagem[fase]++;
+        }
+      });
+    } else if (typeof ratings === 'object') {
+      [1,2,3,4,5].forEach(function(fase) {
+        var val = ratings['fase' + fase] || ratings[fase] || ratings['f' + fase] || null;
+        if (val !== null && val !== undefined) {
+          soma[fase] += Number(val) || 0;
+          contagem[fase]++;
+        }
+      });
+    }
+  });
+
+  var faseNomes = ['','Descobrir','Diagnosticar','Estrategar','Testar','Evoluir'];
+  var hasData = [1,2,3,4,5].some(function(f){ return contagem[f] > 0; });
+
+  if (!hasData) {
+    el.innerHTML = '<p style="color:var(--text-light);font-size:.82rem;">Aguardando participantes preencherem o Canvas de Avaliação.</p>';
+    return;
+  }
+
+  var html = '';
+  [1,2,3,4,5].forEach(function(f) {
+    var media = contagem[f] ? (soma[f] / contagem[f]).toFixed(1) : null;
+    var pct   = media ? Math.round((parseFloat(media) / 5) * 100) : 0;
+    var faseCor = ['','f1','f2','f3','f4','f5'][f];
+    var stars = media ? '★'.repeat(Math.round(parseFloat(media))) + '☆'.repeat(5 - Math.round(parseFloat(media))) : '☆☆☆☆☆';
+    html += '<div class="bar-row">';
+    html += '<div class="bar-label" style="min-width:80px;text-align:left;font-size:.7rem;">' + faseNomes[f] + '</div>';
+    html += '<div class="bar-track"><div class="bar-fill bar-fill--' + faseCor + '" style="width:' + pct + '%">' + (pct > 20 ? stars : '') + '</div></div>';
+    html += '<div class="bar-value">' + (media ? media + '/5' : '—') + '</div>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
 }
 
 /* ══════════════════════════════════════
@@ -1245,6 +1276,12 @@ function switchTab(tabId, element) {
     document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
     element.classList.add('active');
     document.getElementById('panel-'+tabId).classList.add('active');
+    /* Atualiza análise ao abrir a aba */
+    if (tabId === 'analise') {
+        var pList = Object.values(participants).map(normalizeParticipantData)
+            .filter(function(p){ return !(p.extras && p.extras.role === 'facilitador'); });
+        renderAnalysis(pList);
+    }
 }
 
 /* ══════════════════════════════════════

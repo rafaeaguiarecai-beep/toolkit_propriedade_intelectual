@@ -486,7 +486,7 @@
           <span class="ce-cell__icon" aria-hidden="true">💰</span>
           <span class="ce-cell__title">Custos INPI 2025 (Portaria GM/MDIC nº 110/2025)</span>
         </div>
-        <div class="ce-cell__hint">Valores atualizados conforme a tabela vigente. Desconto de 50% para: ICTs, MEIs, ME/EPPs, cooperativas, instituições de ensino e pesquisa, entidades sem fins lucrativos e pessoas físicas (art. 2º, Portaria INPI/PR nº 10/2025).</div>
+        <div class="ce-cell__hint">Valores atualizados conforme a tabela vigente. Desconto de 50% para: ICTs, MEIs, ME/EPPs, cooperativas, instituições de ensino e pesquisa, entidades sem fins lucrativos, pessoas físicas, pessoas físicas sem participação societária no ramo, empresas simples de inovação e órgãos públicos (arts. 2º e 3º, Portaria INPI/PR nº 10/2025). <strong>100% de desconto</strong>: pessoas hipossuficientes com cadastro no CadÚnico ou pessoas com deficiência com registro federal (art. 7º).</div>
         <div id="field-costs">
           <table class="ce-cost-table">
             <thead>
@@ -670,6 +670,23 @@
       </div>
     </section>
 
+<div id="pi-bridge-info" style="display:none;
+  background:#f5f3ff; border:1px solid #ddd6fe; border-radius:10px;
+  padding:1.2rem 1.5rem; margin:1.5rem auto; max-width:700px;
+  font-family:Inter,sans-serif; font-size:0.88rem; line-height:1.6;">
+  <strong style="color:#6d28d9;">✅ O que você acabou de construir:</strong>
+  <p style="margin:.4rem 0;">Você elaborou um plano concreto de proteção: modalidade de PI, custos reais com os descontos aplicáveis, prazo de proteção e próximos passos. Este Canvas pode ser levado ao NIT como briefing inicial de um depósito real.</p>
+  <strong style="color:#1d4ed8;">➡️ Para que serve a próxima etapa:</strong>
+  <p style="margin:.4rem 0 0;">No <strong>Simulador de Depósito</strong>, você vai experimentar o processo burocrático de registro no INPI, preenchendo um formulário simplificado baseado na sua estratégia definida aqui.</p>
+</div>
+<script>
+  document.addEventListener('pi-tool-completed', function(e){
+    if(e.detail && e.detail.toolId === 'canvas-estrategia'){
+      var b = document.getElementById('pi-bridge-info');
+      if(b) b.style.display = 'block';
+    }
+  });
+</script>
   </main>
 
   <footer class="ce-footer">

@@ -366,6 +366,23 @@
                 <a href="index.html" class="d-ctrl-btn">← Voltar ao Toolkit</a>
             </div>
         </div>
+<div id="pi-bridge-info" style="display:none;
+  background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px;
+  padding:1.2rem 1.5rem; margin:1.5rem auto; max-width:700px;
+  font-family:Inter,sans-serif; font-size:0.88rem; line-height:1.6;">
+  <strong style="color:#1e40af;">✅ O que você acabou de mapear:</strong>
+  <p style="margin:.4rem 0;">Você identificou o tipo de PI mais adequado para proteger a criação da sua persona, avaliou o TRL atual e mapeou os atores envolvidos. Essas informações são a base de toda a estratégia de proteção.</p>
+  <strong style="color:#1d4ed8;">➡️ Para que serve a próxima etapa:</strong>
+  <p style="margin:.4rem 0 0;">Na <strong>Árvore de Decisão</strong>, você vai confirmar e detalhar qual modalidade de PI se aplica, com base nas respostas que acabou de registrar no Canvas.</p>
+</div>
+<script>
+  document.addEventListener('pi-tool-completed', function(e){
+    if(e.detail && e.detail.toolId === 'canvas-diagnostico'){
+      var b = document.getElementById('pi-bridge-info');
+      if(b) b.style.display = 'block';
+    }
+  });
+</script>
     </main>
 
     <footer class="footer"><div class="container"><div class="footer__bottom" style="border:none;padding:0;"><p>© 2025 PI Thinking — PROFNIT / UFRR. Licenciado sob <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.</p></div></div></footer>

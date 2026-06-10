@@ -908,6 +908,23 @@
             </div>
 
         </div>
+<div id="pi-bridge-info" style="display:none;
+  background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px;
+  padding:1.2rem 1.5rem; margin:1.5rem auto; max-width:700px;
+  font-family:Inter,sans-serif; font-size:0.88rem; line-height:1.6;">
+  <strong style="color:#15803d;">✅ O que você acabou de aprender:</strong>
+  <p style="margin:.4rem 0;">Você mapeou seu conhecimento atual sobre PI. Esses resultados ficam registrados e serão comparados com o Quiz Final para medir sua evolução ao longo da oficina.</p>
+  <strong style="color:#1d4ed8;">➡️ Para que serve a próxima etapa:</strong>
+  <p style="margin:.4rem 0 0;">Na ferramenta seguinte — <strong>Cartas Personas</strong> — você vai se colocar no lugar de um inventor real e identificar os desafios de proteção da propriedade intelectual a partir de um caso concreto.</p>
+</div>
+<script>
+  document.addEventListener('pi-tool-completed', function(e){
+    if(e.detail && e.detail.toolId === 'quiz-diagnostico'){
+      var b = document.getElementById('pi-bridge-info');
+      if(b) b.style.display = 'block';
+    }
+  });
+</script>
     </main>
 
     <footer class="footer">

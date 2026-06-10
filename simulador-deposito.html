@@ -322,7 +322,7 @@
     <!-- Intro -->
     <section class="sd-section">
       <h2>🎯 Como funciona</h2>
-      <p>Selecione o <strong>tipo de proteção</strong> desejada e, se aplicável, marque o <strong>desconto de 50%</strong> (disponível para MEI, microempresas, ICTs, entidades sem fins lucrativos e pessoas físicas — conforme Portaria GM/MDIC nº 110/2025). O simulador exibirá o fluxo completo de etapas, custos estimados e os prazos típicos de tramitação.</p>
+      <p>Selecione o <strong>tipo de proteção</strong> desejada e, se aplicável, marque o <strong>desconto de 50%</strong> (disponível para MEI, microempresas, ICTs, entidades sem fins lucrativos, pessoas físicas, pessoas físicas sem participação societária no ramo, empresas simples de inovação e órgãos públicos — conforme Portaria INPI/PR nº 10/2025). O simulador exibirá o fluxo completo de etapas, custos estimados e os prazos típicos de tramitação.</p>
       <div class="sd-alert sd-alert--info">
         ℹ️ Este simulador é uma <strong>ferramenta educacional</strong>. Os valores e prazos são estimativas baseadas na legislação e tabelas vigentes. Consulte sempre o <a href="https://www.gov.br/inpi/pt-br" target="_blank" rel="noopener noreferrer">site oficial do INPI</a> para informações atualizadas.
       </div>
@@ -350,7 +350,7 @@
         <label for="desconto">Desconto (50%)</label>
         <select id="desconto" onchange="simular()" aria-label="Selecione se há desconto de 50% nas taxas do INPI">
           <option value="normal">Sem desconto (valores normais)</option>
-          <option value="desconto">Com desconto 50% (MEI, ME, ICT, PF, entidades sem fins lucrativos)</option>
+          <option value="desconto">Com desconto 50% (MEI, ME, ICT, PF, entidades sem fins lucrativos, empresas simples de inovação, órgãos públicos)</option>
         </select>
       </div>
     </section>
@@ -627,7 +627,7 @@
       html += `<p><strong>Órgão competente:</strong> <a href="${data.orgaoUrl}" target="_blank" rel="noopener noreferrer">${data.orgao}</a></p>`;
       html += `<p><strong>Vigência:</strong> ${data.vigencia}</p>`;
       if (isDesconto) {
-        html += `<div class="sd-alert sd-alert--success">✅ Desconto de 50% aplicado (MEI, ME, ICT, PF, entidades sem fins lucrativos — Portaria GM/MDIC nº 110/2025).</div>`;
+        html += `<div class="sd-alert sd-alert--success">✅ Desconto de 50% aplicado (MEI, ME, ICT, PF, entidades sem fins lucrativos, empresas simples de inovação, órgãos públicos — Portaria INPI/PR nº 10/2025).</div>`;
       }
 
       // Steps
