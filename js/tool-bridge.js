@@ -318,12 +318,10 @@
   }
 
   function loadPersonaContext() {
-    var ctx = read(personaContextKey(), null);
-    if (!ctx) {
-      var prog = loadProgress('cartas-personas');
-      ctx = prog.personaSelecionada || null;
-    }
-    return ctx;
+    /* Lê apenas pela chave que inclui sessionId + participantId.
+       O fallback via loadProgress foi removido porque ele ignora
+       o sessionId e carregava personas de sessões anteriores. */
+    return read(personaContextKey(), null);
   }
 
   function clearPersonaContext() { remove(personaContextKey()); }
@@ -457,11 +455,13 @@
         'white-space:nowrap;' +
       '}' +
       /* Mobile ≤ 520px: esconde persona chip e texto dos botões */
+
       '@media(max-width:520px){' +
         '#pi-nav-banner .pnb-chip{display:none;}' +
-        '#pi-nav-banner .pnb-lbl{display:none;}' +
+        '#pi-nav-banner .pnb-back .pnb-lbl{display:none;}' +
         '#pi-nav-banner .pnb-btn{padding:6px 8px;font-size:0.72rem;}' +
       '}' +
+      
       /* Mobile ≤ 380px: ainda menor */
       '@media(max-width:380px){' +
         '#pi-nav-banner .pnb-row{padding:6px 8px;min-height:40px;}' +
