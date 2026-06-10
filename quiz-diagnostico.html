@@ -936,6 +936,16 @@
     </footer>
 
     <script src="script.js"></script>
+
+    <!-- ↓ MOVER PARA CÁ — antes do script da ferramenta -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/config-ferramentas.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/tool-bridge.js"></script>
+    <!-- ↑ fim da movimentação -->
+
     <script>
     /* =============================================
        QUIZ DIAGNÓSTICO — ENGINE
@@ -1499,41 +1509,13 @@
     setTimeout(restoreSavedDiagnostic, 0);
   }
 })();
-</script>
-
-<!-- PI Thinking — Tool Bridge (modo oficina) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="js/firebase-config.js"></script>
-<script src="js/sync.js"></script>
-<script src="js/tool-bridge.js"></script>
-
-<!-- ── PI Thinking: Banner de Navegação Universal ── -->
-<script>
-(function() {
-  // Injeta o banner apenas em páginas de ferramentas (não no aluno.html, dashboard.html, index.html)
-  var structuralPages = ['aluno', 'dashboard', 'index', 'guia-facilitador', 'pagina-estrutural'];
-  var toolId = window.PIThinking ? PIThinking.getPageToolId() : '';
-  if (structuralPages.indexOf(toolId) === -1 && toolId !== 'pagina-estrutural') {
-    document.addEventListener('DOMContentLoaded', function() {
-      if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
-        PIThinking.injectNavigationBanner({ showPersona: true });
-      }
-    });
-  }
-})();
 
 document.addEventListener('DOMContentLoaded', function () {
   if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
     PIThinking.injectNavigationBanner({ showPersona: true });
   }
 });
-
-
 </script>
-
-
-
 
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
