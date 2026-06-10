@@ -978,11 +978,27 @@
         banner.style.display = 'block';
       }
 
-      /* Marca a ferramenta como concluída ao selecionar a persona */
+            /* Marca a ferramenta como concluída ao selecionar a persona */
       PIThinking.markComplete('cartas-personas', {
         personaId: p.id, personaNome: p.name, piType: p.piType
       });
-    }
+
+      // ── REDIRECIONAMENTO APÓS CONCLUSÃO ──
+      var _redirected = false;
+      function _doRedirect() {
+        if (_redirected) return;
+        _redirected = true;
+        window.location.href = 'aluno.html?returned=cartas-personas';
+      }
+      window.addEventListener('pi-tool-synced', function _syncHandler(e) {
+        if (e.detail && e.detail.toolId === 'cartas-personas') {
+          window.removeEventListener('pi-tool-synced', _syncHandler);
+          _doRedirect();
+        }
+      });
+      setTimeout(_doRedirect, 3000);
+    }   // ← fecha handlePersonaSelect
+
 
     /* ── INICIALIZAÇÃO DO BRIDGE DE NAVEGAÇÃO ── */
     document.addEventListener('DOMContentLoaded', function () {
