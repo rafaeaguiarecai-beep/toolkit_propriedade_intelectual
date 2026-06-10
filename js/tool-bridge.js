@@ -541,19 +541,14 @@
         rightHtml += '<button class="pnb-btn pnb-done" id="pnb-complete-btn" ' +
           'type="button" aria-label="Marcar como concluída e avançar">' +
           '✓ <span class="pnb-lbl">Concluir</span></button>';
+
       } else {
         rightHtml += '<span class="pnb-badge">✓ <span class="pnb-lbl">Concluída</span></span>';
-        if (nav.proxima) {
-          var label = getToolLabel(nav.proxima);
-          rightHtml += '<a href="' + nav.proxima + '" class="pnb-btn pnb-next" ' +
-            'aria-label="Próxima: ' + label + '">' +
-            '<span class="pnb-lbl">' + label + '</span> →</a>';
-        } else {
-          rightHtml += '<a href="aluno.html" class="pnb-btn pnb-next" ' +
-            'aria-label="Ver percurso no Módulo">' +
-            '📋 <span class="pnb-lbl">Percurso</span></a>';
-        }
+        rightHtml += '<button class="pnb-btn pnb-next" id="pnb-continue-btn" ' +
+          'type="button" aria-label="Continuar para o módulo do aluno">' +
+          '▶ <span class="pnb-lbl">Continuar</span></button>';
       }
+      
       rightHtml += '</div>';
 
       banner.innerHTML = '<div class="pnb-row">' + leftHtml + rightHtml + '</div>';
@@ -562,38 +557,26 @@
       var btn = banner.querySelector('#pnb-complete-btn');
       if (btn) {
         btn.addEventListener('click', function () {
-          /* Desabilita imediatamente para evitar duplo clique */
           btn.disabled = true;
           btn.innerHTML = '⏳ Salvando...';
           btn.style.opacity = '0.7';
 
-          /* Chama markComplete — a sincronização é assíncrona */
           markComplete(toolId, {});
 
           if (typeof opts.onComplete === 'function') opts.onComplete(toolId);
 
-          /* Aguarda confirmação do Firebase (evento pi-tool-synced) OU 3s de timeout,
-             então redireciona para o módulo do aluno com parâmetro de retorno */
-          var redirected = false;
+          /* Não redireciona aqui — aguarda o usuário clicar em Continuar */
+        });
+      }
 
-          function doRedirect() {
-            if (redirected) return;
-            redirected = true;
-            /* Parâmetro "returned=toolId" sinaliza ao aluno.html que é um retorno
-               direto de ferramenta concluída — não exibe resumePanel */
-            window.location.href = 'aluno.html?returned=' + toolId;
-          }
-
-          /* Escuta confirmação do Firebase */
-          global.addEventListener('pi-tool-synced', function handler(e) {
-            if (e.detail && normalizeToolId(e.detail.toolId) === toolId) {
-              global.removeEventListener('pi-tool-synced', handler);
-              doRedirect();
-            }
-          });
-
-          /* Timeout de segurança: 3s independente do Firebase */
-          setTimeout(doRedirect, 3000);
+      /* Vincula botão Continuar (aparece após conclusão) */
+      var btnContinue = banner.querySelector('#pnb-continue-btn');
+      if (btnContinue) {
+        btnContinue.addEventListener('click', function () {
+          btnContinue.disabled = true;
+          btnContinue.innerHTML = '⏳ <span class="pnb-lbl">Aguarde...</span>';
+          btnContinue.style.opacity = '0.7';
+          window.location.href = 'aluno.html?returned=' + toolId;
         });
       }
     }

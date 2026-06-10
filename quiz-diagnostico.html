@@ -1476,7 +1476,7 @@
         atualizadoEm: new Date().toISOString()
       });
     }
-        if (window.PIThinking && typeof window.PIThinking.markComplete === 'function') {
+    if (window.PIThinking && typeof window.PIThinking.markComplete === 'function') {
       window.PIThinking.markComplete('quiz-diagnostico', {
         pontuacao: score,
         percentual: percentual,
@@ -1485,23 +1485,7 @@
       });
     }
     persistDiagnostic(true);
-
-    // ── REDIRECIONAMENTO APÓS CONCLUSÃO ──
-    // Aguarda confirmação do Firebase (pi-tool-synced) ou 3s de timeout,
-    // depois retorna ao módulo sinalizando a ferramenta concluída.
-    var _redirected = false;
-    function _doRedirect() {
-      if (_redirected) return;
-      _redirected = true;
-      window.location.href = 'aluno.html?returned=quiz-diagnostico';
-    }
-    window.addEventListener('pi-tool-synced', function _syncHandler(e) {
-      if (e.detail && e.detail.toolId === 'quiz-diagnostico') {
-        window.removeEventListener('pi-tool-synced', _syncHandler);
-        _doRedirect();
-      }
-    });
-    setTimeout(_doRedirect, 3000);
+    /* ── Redirecionamento removido — usuário clica Continuar no banner ── */
   };
 
 
