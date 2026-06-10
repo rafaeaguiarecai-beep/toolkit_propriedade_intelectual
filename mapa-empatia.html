@@ -1155,6 +1155,13 @@
     });
   }
 })();
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
+    PIThinking.injectNavigationBanner({ showPersona: true });
+  }
+});
+
 </script>
 
 

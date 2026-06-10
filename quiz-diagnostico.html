@@ -1262,13 +1262,23 @@
         document.getElementById('scoreMessage').textContent = msg;
         document.getElementById('scoreCode').textContent = 'D-' + score;
 
-        // Save to localStorage
-        if (typeof window.PIThinking !== 'undefined' && window.PIThinking.saveProgress) {
-            window.PIThinking.saveProgress('quiz-diagnostico', {
-                score: score,
-                code: 'D-' + score,
-                date: new Date().toISOString()
-            });
+        // Registra resultado e conclusão
+        var quizResult = {
+          pontuacao: score,
+          score: score,
+          total: questions.length,
+          percentual: Math.round((score / questions.length) * 100),
+          codigo: 'D-' + score,
+          respostas: buildDetailedAnswers(),
+          atualizadoEm: new Date().toISOString()
+        };
+
+        if (window.PISync && typeof PISync.saveQuizResult === 'function') {
+          PISync.saveQuizResult('quiz-diagnostico', quizResult);
+        }
+
+        if (window.PIThinking && typeof PIThinking.markComplete === 'function') {
+          PIThinking.markComplete('quiz-diagnostico', quizResult);
         }
 
         // Breakdown
@@ -1512,6 +1522,14 @@
     });
   }
 })();
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.PIThinking && typeof PIThinking.injectNavigationBanner === 'function') {
+    PIThinking.injectNavigationBanner({ showPersona: true });
+  }
+});
+
+
 </script>
 
 
