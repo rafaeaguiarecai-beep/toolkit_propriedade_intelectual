@@ -1007,23 +1007,23 @@
             selectPersona();
         }
 
-        /* Se não há persona salva localmente, tenta ler do contexto global
-           (salvo pelas Cartas Personas) e pré-seleciona */
-        if (!data || !data.persona) {
-            if (typeof PIThinking !== 'undefined' && PIThinking.loadPersonaContext) {
-                var ctx = PIThinking.loadPersonaContext();
-                if (ctx && ctx.id !== undefined) {
-                    var sel = document.getElementById('personaSelect');
-                    var idx = String(ctx.id);
-                    /* Verifica se o id corresponde a alguma opção */
-                    if (sel && sel.querySelector('option[value="' + idx + '"]')) {
-                        sel.value = idx;
-                        selectPersona();
-                    }
+    /* Se não há persona salva localmente, tenta ler do contexto global
+        (salvo pelas Cartas Personas) e pré-seleciona */
+    
+        if (typeof PIThinking !== 'undefined' && PIThinking.loadPersonaContext) {
+            var ctx = PIThinking.loadPersonaContext();
+            if (ctx && ctx.id !== undefined) {
+                var sel = document.getElementById('personaSelect');
+                var idx = String(ctx.id);
+                /* Verifica se o id corresponde a alguma opção */
+                if (sel && sel.querySelector('option[value="' + idx + '"]')) {
+                    sel.value = idx;
+                    selectPersona();
                 }
             }
         }
     }
+
 
     // ---- Persona selection ----
     function selectPersona() {
