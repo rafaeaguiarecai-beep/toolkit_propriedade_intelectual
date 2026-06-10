@@ -1,13 +1,10 @@
 /* ================================================================
-   PI THINKING — Tool Bridge v3.5
-   Correções v3.5:
-   - Banner: inserido APÓS headers existentes, não antes
-   - Banner: z-index aumentado para 9500 (acima de headers fixos)
-   - Banner: CSS media queries robustas para 320px+
-   - Cartas Personas: botão Concluir sempre visível e funcional
-   - saveToolState: normaliza dados antes de enviar ao Firebase
-     para que o Dashboard leia corretamente TRL e ratings
-   - Análise: toolStates salvo com estrutura plana acessível
+   PI THINKING — Tool Bridge v3.5.1
+   Correções v3.5.1:
+   - markComplete: sincroniza com Firebase e aguarda confirmação
+     antes de liberar navegação (evento pi-tool-synced)
+   - Botão Concluir do banner: redireciona para aluno.html?returned=toolId
+     após confirmação do Firebase ou timeout de 3s
    ================================================================ */
 (function (global) {
   'use strict';
@@ -201,16 +198,80 @@
 
   function markComplete(toolId, payload, options) {
     var id = normalizeToolId(toolId || getPageToolId());
+
+    /* 1. Salva localmente de imediato */
     var store = saveToolStore(id, {
       metadados: { concluido: true, concluidoEm: nowIso() },
       progresso: merge(loadProgress(id), payload || {})
     }, options);
+
+    /* 2. Atualiza índice de conclusões local */
     updateCompletionIndex(id, store);
+
+    /* 3. Notifica AlunoEngine em memória */
     if (global.AlunoEngine && typeof global.AlunoEngine.completeTool === 'function') {
       global.AlunoEngine.completeTool(id, payload || {});
     }
+
+    /* 4. Registra evento local */
     appendEvent(id, 'conclusao', payload || {});
-    global.dispatchEvent(new CustomEvent('pi-tool-completed', { detail: { toolId: id, payload: payload || {} } }));
+
+    /* 5. Dispara evento DOM (banner e análise reagem aqui) */
+    global.dispatchEvent(new CustomEvent('pi-tool-completed', {
+      detail: { toolId: id, payload: payload || {} }
+    }));
+
+    /* 6. Sincroniza com Firebase — aguarda confirmação antes de liberar navegação */
+    if (global.PISync && typeof global.PISync.sendToolState === 'function' &&
+        global.PISync.isInSession && global.PISync.isInSession()) {
+
+      try {
+        /* sendToolState retorna o resultado de upsertParticipant */
+        global.PISync.sendToolState(id, flattenStoreForSync(store));
+      } catch(e) {
+        /* falha silenciosa — não bloqueia navegação */
+      }
+
+      /* Aguarda Firebase confirmar escrita (máx 3s) antes de sinalizar pronto */
+      var db = global.firebase && global.firebase.apps && global.firebase.apps.length
+        ? global.firebase.database()
+        : null;
+
+      if (db) {
+        var sid = localStorage.getItem('pi-session-id');
+        var pid = localStorage.getItem('pi-session-participant-id');
+        if (sid && pid) {
+          /* Escrita direta do flag de conclusão no nó do participante */
+          var ref = db.ref(
+            'oficinas/' + sid +
+            '/participantes/' + pid +
+            '/toolStates/' + id + '/metadados/concluido'
+          );
+          ref.set(true).then(function() {
+            /* Firebase confirmou — dispara evento de "pronto para navegar" */
+            global.dispatchEvent(new CustomEvent('pi-tool-synced', {
+              detail: { toolId: id }
+            }));
+          }).catch(function() {
+            /* Mesmo em falha de rede, libera navegação */
+            global.dispatchEvent(new CustomEvent('pi-tool-synced', {
+              detail: { toolId: id }
+            }));
+          });
+        } else {
+          /* Sem sessão ativa, libera imediatamente */
+          global.dispatchEvent(new CustomEvent('pi-tool-synced', { detail: { toolId: id } }));
+        }
+      } else {
+        /* Sem Firebase, libera imediatamente */
+        global.dispatchEvent(new CustomEvent('pi-tool-synced', { detail: { toolId: id } }));
+      }
+
+    } else {
+      /* Fora de sessão, libera imediatamente */
+      global.dispatchEvent(new CustomEvent('pi-tool-synced', { detail: { toolId: id } }));
+    }
+
     return store;
   }
 
@@ -501,12 +562,38 @@
       var btn = banner.querySelector('#pnb-complete-btn');
       if (btn) {
         btn.addEventListener('click', function () {
+          /* Desabilita imediatamente para evitar duplo clique */
           btn.disabled = true;
-          btn.innerHTML = '⏳';
+          btn.innerHTML = '⏳ Salvando...';
+          btn.style.opacity = '0.7';
+
+          /* Chama markComplete — a sincronização é assíncrona */
           markComplete(toolId, {});
+
           if (typeof opts.onComplete === 'function') opts.onComplete(toolId);
-          /* rebuild imediato */
-          setTimeout(build, 50);
+
+          /* Aguarda confirmação do Firebase (evento pi-tool-synced) OU 3s de timeout,
+             então redireciona para o módulo do aluno com parâmetro de retorno */
+          var redirected = false;
+
+          function doRedirect() {
+            if (redirected) return;
+            redirected = true;
+            /* Parâmetro "returned=toolId" sinaliza ao aluno.html que é um retorno
+               direto de ferramenta concluída — não exibe resumePanel */
+            window.location.href = 'aluno.html?returned=' + toolId;
+          }
+
+          /* Escuta confirmação do Firebase */
+          global.addEventListener('pi-tool-synced', function handler(e) {
+            if (e.detail && normalizeToolId(e.detail.toolId) === toolId) {
+              global.removeEventListener('pi-tool-synced', handler);
+              doRedirect();
+            }
+          });
+
+          /* Timeout de segurança: 3s independente do Firebase */
+          setTimeout(doRedirect, 3000);
         });
       }
     }
@@ -646,7 +733,7 @@
   }
 
   var api = {
-    version: '3.5.0',
+    version: '3.5.1',
     getPageToolId: getPageToolId, normalizeToolId: normalizeToolId, getUserProfile: getUserProfile,
     saveProgress: saveProgress, loadProgress: loadProgress,
     saveAnswers: saveAnswers, loadAnswers: loadAnswers,

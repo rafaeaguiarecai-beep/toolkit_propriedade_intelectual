@@ -1136,28 +1136,6 @@ function handleExit() {
 
 
 /* ══════════════════════════════════════
-   RETORNO DE FERRAMENTA
-   ══════════════════════════════════════ */
-
-function checkReturnFromTool() {
-    var params = new URLSearchParams(window.location.search);
-    var completedTool = params.get('completed');
-
-    if (completedTool) {
-        // Marcar como concluída no engine local
-        AlunoEngine.completeTool(completedTool);
-
-        // Limpar URL (remover parâmetro)
-        var cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-
-        return true;
-    }
-
-    return false;
-}
-
-/* ══════════════════════════════════════
    STATUS DE CONEXÃO
    ══════════════════════════════════════ */
 
@@ -1177,48 +1155,82 @@ function updateConnectionStatus(online) {
 }
 
 /* ══════════════════════════════════════
-   MIGRAÇÃO DE SESSÃO LEGACY
-   ══════════════════════════════════════ */
-
-(function migrateLegacySessionKey() {
-    // Migra a chave antiga (pi-participant-id) para a nova (pi-session-participant-id)
-    // apenas se ainda não foi migrada e existe uma sessão ativa
-    var oldId = localStorage.getItem('pi-participant-id');
-    var newId = localStorage.getItem('pi-session-participant-id');
-    var sessionId = localStorage.getItem('pi-session-id');
-
-    if (oldId && !newId && sessionId) {
-        // Existe sessão antiga válida — migra o ID
-        localStorage.setItem('pi-session-participant-id', oldId);
-        // Remove a chave antiga para não interferir no futuro
-        localStorage.removeItem('pi-participant-id');
-    } else if (oldId && !sessionId) {
-        // Existe ID antigo mas sem sessão — limpa resíduo
-        localStorage.removeItem('pi-participant-id');
-    }
-})();
-
-/* ══════════════════════════════════════
    INICIALIZAÇÃO
    ══════════════════════════════════════ */
 
 (function boot() {
-  /* ── Migração de chaves legadas ──
-     Remove o pi-participant-id permanente que causava colisão entre alunos.
-     A nova chave pi-session-participant-id é gerada por login e apagada no logout. */
+
+  /* ── Migração de chaves legadas ── */
   (function migrateLegacyKeys() {
     var oldId = localStorage.getItem('pi-participant-id');
     var newId = localStorage.getItem('pi-session-participant-id');
     var sid   = localStorage.getItem('pi-session-id');
-
     if (oldId && !newId && sid) {
-      // Sessão ativa com chave antiga — migra para nova chave
       localStorage.setItem('pi-session-participant-id', oldId);
     }
-    // Remove sempre a chave permanente antiga
     localStorage.removeItem('pi-participant-id');
   })();
 
+  /* ── Detecta retorno direto de ferramenta concluída ──
+     Quando tool-bridge.js redireciona com ?returned=toolId,
+     não mostra o resumePanel — vai direto ao app. */
+  var urlParams  = new URLSearchParams(window.location.search);
+  var returnedTool = urlParams.get('returned');
+
+  if (returnedTool) {
+    /* Limpa o parâmetro da URL sem recarregar a página */
+    var cleanUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+
+    /* Inicializa o Firebase e restaura a sessão diretamente */
+    PISync.init(FIREBASE_CONFIG).then(function(online) {
+      updateConnectionStatus(online);
+
+      var savedCode = localStorage.getItem('pi-session-id');
+      var savedName = localStorage.getItem('pi-participant-name');
+
+      /* Se não há sessão válida, exibe formulário de login normalmente */
+      if (!savedCode || !savedName) {
+        document.getElementById('resumePanel').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        PISync.onConnectionChange(updateConnectionStatus);
+        return;
+      }
+
+      var restored = PISync.restoreSession();
+      var percurso = localStorage.getItem('pi-percurso') || '3h';
+
+      if (window.AlunoEngine) {
+        AlunoEngine.reset();
+        AlunoEngine.init(percurso);
+        if (returnedTool) AlunoEngine.completeTool(returnedTool);
+      }
+
+      showApp();
+
+    }).catch(function() {
+      updateConnectionStatus(false);
+
+      var savedCode = localStorage.getItem('pi-session-id');
+      if (!savedCode) {
+        document.getElementById('resumePanel').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        return;
+      }
+
+      var percurso = localStorage.getItem('pi-percurso') || '3h';
+      if (window.AlunoEngine) {
+        AlunoEngine.reset();
+        AlunoEngine.init(percurso);
+        if (returnedTool) AlunoEngine.completeTool(returnedTool);
+      }
+      showApp();
+    });
+
+    return; /* Encerra boot aqui — não executa o fluxo normal abaixo */
+  }
+
+  /* ── Fluxo normal de inicialização ── */
   var savedCode = localStorage.getItem('pi-session-id');
   var savedName = localStorage.getItem('pi-participant-name');
 
@@ -1234,13 +1246,14 @@ function updateConnectionStatus(online) {
     document.getElementById('loginForm').style.display = 'block';
   }
 
-  PISync.init(FIREBASE_CONFIG).then(function (online) {
+  PISync.init(FIREBASE_CONFIG).then(function(online) {
     updateConnectionStatus(online);
-  }).catch(function () {
+  }).catch(function() {
     updateConnectionStatus(false);
   });
 
   PISync.onConnectionChange(updateConnectionStatus);
+
 })();
 
 </script>

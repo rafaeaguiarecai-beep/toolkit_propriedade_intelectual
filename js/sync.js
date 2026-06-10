@@ -427,8 +427,15 @@
     data.participants[participantId] = next;
     saveSessionData({ participants: data.participants });
     if (firebaseReady && db) {
-      db.ref('oficinas/' + sessionId + '/participantes/' + participantId).update(next)
-        .catch(function () {});
+      /* CORREÇÃO: usa set() em vez de update() para garantir consistência do snapshot */
+      db.ref('oficinas/' + sessionId + '/participantes/' + participantId)
+        .set(next)
+        .catch(function () {
+          /* fallback: tenta update se set falhar */
+          db.ref('oficinas/' + sessionId + '/participantes/' + participantId)
+            .update(next)
+            .catch(function () {});
+        });
     }
     /* Emite evento LOCAL imediatamente após qualquer upsert */
     emitParticipantsEvent(data.participants);
